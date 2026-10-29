@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Compa V2 · Insignias</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFF6E5;color:#1E1B2E;font-family:Nunito,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#1E1B2E;text-decoration:none}a:hover{color:#C2412A}
+.d{font-family:Fredoka,Nunito,system-ui,sans-serif;font-weight:700}
+.muted{color:#6F6A7E}
+.ib{display:flex;align-items:center;justify-content:center;width:44px;height:44px;box-sizing:border-box;border-radius:14px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;color:#1E1B2E;cursor:pointer;padding:0;flex-shrink:0}
+.seg{height:40px;border:0;border-radius:11px;font:700 15px/1 Fredoka,Nunito,sans-serif;cursor:pointer}
+.cell{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;border-radius:18px;box-sizing:border-box;text-align:center;min-width:0}
+svg{flex-shrink:0}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;box-sizing:border-box;padding:48px 18px 0;display:flex;flex-direction:column;gap:14px;background-color:#FFF6E5;background-image:radial-gradient(rgba(30,27,46,0.07) 1.2px,transparent 1.3px);background-size:22px 22px">
+
+  <!-- Encabezado -->
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <a href="V2MiPerfil.dc.html" aria-label="Regresar" class="ib"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
+    <h1 class="d" style="margin:0;font-size:20px">Insignias</h1>
+    <span style="width:44px"></span>
+  </div>
+
+  <!-- Avance -->
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><span class="d" style="font-size:17px;font-weight:600">5 de 20 ganadas</span><span class="muted" style="font-size:12px;font-weight:800">4 a punto · 4 secretas</span></div>
+    <span role="progressbar" aria-label="Insignias ganadas" aria-valuemin="0" aria-valuemax="20" aria-valuenow="5" style="display:block;height:14px;box-sizing:border-box;border-radius:7px;background:#FFFFFF;border:2.5px solid #1E1B2E;overflow:hidden"><span style="display:block;width:25%;height:100%;box-sizing:border-box;background:#6BE4A3;border-right:2.5px solid #1E1B2E"></span></span>
+  </div>
+
+  <!-- Filtro -->
+  <div role="group" aria-label="Filtrar insignias" style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:4px;padding:4px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;border-radius:16px">
+    <sc-for list="{{ filtros }}" as="f" hint-placeholder-count="3">
+      <button class="seg" aria-pressed="{{ f.pressed }}" onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</button>
+    </sc-for>
+  </div>
+
+  <!-- Vitrina (scroll) -->
+  <div style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr));gap:12px;flex:1;overflow:auto;padding:4px 4px 30px;margin:-4px -4px 0">
+    <sc-for list="{{ items }}" as="b" hint-placeholder-count="12">
+      <div class="cell">
+        <dc-import name="Insignia" id="{{ b.id }}" size="64" estado="{{ b.estado }}" girada="true" hint-size="64px,69px"></dc-import>
+        <span style="font-size:12px;font-weight:800;line-height:1.2">{{ b.name }}</span>
+        <span class="muted" style="font-size:11px;font-weight:800;line-height:1.2">{{ b.sub }}</span>
+        <sc-if value="{{ b.hasBar }}" hint-placeholder-val="{{ false }}">
+          <span style="display:block;width:100%;height:10px;box-sizing:border-box;border-radius:5px;border:2px solid #1E1B2E;background:#FFFFFF;overflow:hidden"><span style="{{ b.barStyle }}"></span></span>
+        </sc-if>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filtro: 'todas' };
+  }
+  renderVals() {
+    const f = this.state.filtro;
+    const data = [
+      { id: 'apreton', name: 'Primer apretón', cat: 'persona', won: 'Tu primera conexión' },
+      { id: 'tresdetres', name: 'Tres de tres', cat: 'pareja', won: 'Con Valeria' },
+      { id: 'ff2026', name: 'Founders Fest 2026', cat: 'evento', won: '28 oct 2026' },
+      { id: 'madrugador', name: 'Madrugador', cat: 'persona', won: 'Hoy, 17:04' },
+      { id: 'og', name: 'OG', cat: 'evento', won: 'De los primeros 100' },
+      { id: 'iman', name: 'Imán', cat: 'persona', pct: 70, next: '7 / 10 te escanearon' },
+      { id: 'maraton', name: 'Maratón', cat: 'persona', pct: 60, next: '9 / 15 en una noche' },
+      { id: 'puente', name: 'Puente', cat: 'pareja', pct: 66, next: '2 / 3 presentaciones' },
+      { id: 'cuatro', name: 'Cuatro trimestres', cat: 'racha', pct: 75, next: '3 / 4 eventos seguidos' },
+      { id: 'cierre', name: 'Cierre', cat: 'persona', pct: 0, next: 'Conecta al final del evento' },
+      { id: 'duo', name: 'Dúo dinámico', cat: 'pareja', pct: 33, next: '1 / 3 eventos con alguien' },
+      { id: 'conector100', name: 'Conector 100', cat: 'progreso', pct: 42, next: '42 / 100 conexiones' },
+      { id: 'trotamundos', name: 'Trotamundos', cat: 'progreso', pct: 50, next: '2 / 4 ciudades' },
+      { id: 'curioso', name: 'Curioso', cat: 'progreso', pct: 20, next: '2 / 10 temas distintos' },
+      { id: 'memoria', name: 'Memoria de elefante', cat: 'progreso', pct: 30, next: '6 / 20 notas de voz' },
+      { id: 'quinientos', name: '500 en la noche', cat: 'comunidad', pct: 44, next: '218 / 500 del evento' },
+      { id: 'rey', name: 'Rey del reencuentro', cat: 'secreta', secret: true },
+      { id: 'speaker', name: 'Con el speaker', cat: 'secreta', secret: true },
+      { id: 'noctambulo', name: 'Noctámbulo', cat: 'secreta', secret: true },
+      { id: 'cazatalentos', name: 'Cazatalentos', cat: 'secreta', secret: true }
+    ];
+
+    const items = data
+      .filter((b) => f === 'todas' || (f === 'ganadas' ? !!b.won : !b.won))
+      .map((b) => {
+        const won = !!b.won;
+        return {
+          id: b.id,
+          name: b.name,
+          sub: won ? b.won : (b.secret ? 'Secreta: descúbrela' : b.next),
+          estado: won ? 'ganada' : 'bloqueada',
+          hasBar: !won && !b.secret,
+          barStyle: 'display:block;height:100%;box-sizing:border-box;background:#6BE4A3;border-right:2px solid #1E1B2E;width:' + (b.pct || 0) + '%'
+        };
+      });
+    const defs = [
+      { key: 'todas', label: 'Todas' },
+      { key: 'ganadas', label: 'Ganadas' },
+      { key: 'progreso', label: 'Por ganar' }
+    ];
+    const filtros = defs.map((d) => ({
+      label: d.label,
+      pressed: f === d.key ? 'true' : 'false',
+      style: f === d.key ? 'background:#1E1B2E;color:#FFF6E5' : 'background:transparent;color:#1E1B2E',
+      pick: () => this.setState({ filtro: d.key })
+    }));
+    return { items, filtros };
+  }
+}
+</script>
+</body>
+</html>

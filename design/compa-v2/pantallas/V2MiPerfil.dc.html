@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Compa V2 · Mi perfil</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFF6E5;color:#1E1B2E;font-family:Nunito,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#1E1B2E;text-decoration:none}a:hover{color:#C2412A}
+.d{font-family:Fredoka,Nunito,system-ui,sans-serif;font-weight:700}
+.muted{color:#6F6A7E}
+.card{background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:4px 4px 0 #1E1B2E;border-radius:22px;box-sizing:border-box}
+.av{display:flex;align-items:center;justify-content:center;border-radius:50%;font:700 12px/1 Fredoka,Nunito,sans-serif;color:#1E1B2E;flex-shrink:0;border:2.5px solid #1E1B2E;box-sizing:border-box}
+.ib{display:flex;align-items:center;justify-content:center;width:44px;height:44px;box-sizing:border-box;border-radius:14px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;color:#1E1B2E;cursor:pointer;padding:0;flex-shrink:0}
+.md{position:absolute;width:48px;height:48px}
+.md>span:first-child{position:absolute;inset:0;box-sizing:border-box;border-radius:50%;border:2.5px solid #1E1B2E;box-shadow:2px 2px 0 #1E1B2E}
+.md>span:last-child{position:absolute;inset:6px;box-sizing:border-box;border-radius:50%;border:1.5px dashed #1E1B2E;display:flex;align-items:center;justify-content:center}
+.st{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px}
+.lk{display:flex;align-items:center;gap:12px;height:48px;padding:0 16px;font-size:15px;font-weight:800}
+.rd{display:flex;align-items:center;justify-content:center;height:44px;padding:0;box-sizing:border-box;border-radius:12px;border:2.5px solid #1E1B2E;font:800 12px/1 Nunito,sans-serif;color:#1E1B2E;cursor:pointer;min-width:0}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:800;color:#6F6A7E}
+svg{flex-shrink:0}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;box-sizing:border-box;padding:48px 18px 0;display:flex;flex-direction:column;gap:14px;background-color:#FFF6E5;background-image:radial-gradient(rgba(30,27,46,0.07) 1.2px,transparent 1.3px);background-size:22px 22px">
+
+  <!-- Encabezado -->
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <a href="V2Conectar.dc.html" aria-label="Mi QR" class="ib"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM18 18h3v3h-3zM18 14h3M14 18v3"/></svg></a>
+    <a href="V2Perfil.dc.html" aria-label="Editar perfil" class="ib"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l4-1L19 8a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 6l3 3"/></svg></a>
+  </div>
+
+  <!-- Monito -->
+  <a href="V2Monito.dc.html" aria-label="Tu monito, cámbialo" style="display:flex;align-items:center;gap:16px;margin-top:-4px">
+    <span style="display:flex;align-items:flex-end;justify-content:center;width:132px;height:140px;box-sizing:border-box;border-radius:22px;background:#DDF1FF;border:2.5px solid #1E1B2E;box-shadow:4px 4px 0 #1E1B2E;padding-bottom:6px;flex-shrink:0"><dc-import name="Avatar" who="DR" px="6" hint-size="96px,120px"></dc-import></span>
+    <span style="display:flex;flex-direction:column;gap:8px;flex:1;min-width:0">
+      <span class="d" style="font-size:26px;line-height:1.05">Diego Ramírez</span>
+      <span class="muted" style="font-size:14px;font-weight:700;line-height:1.3">Cofounder · Kuali<br>Guadalajara</span>
+      <span style="display:inline-flex;align-self:flex-start;align-items:center;gap:6px;height:34px;padding:0 12px;box-sizing:border-box;border-radius:11px;background:#FFD93D;border:2.5px solid #1E1B2E;box-shadow:2px 2px 0 #1E1B2E;font:700 14px/1 Fredoka,sans-serif;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="#1E1B2E" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>1,265 pts · #6</span>
+    </span>
+  </a>
+
+  <!-- Repisa de insignias -->
+  <a href="V2Insignias.dc.html" class="card" style="display:flex;flex-direction:column;gap:6px;padding:12px 14px 10px">
+    <span style="display:flex;align-items:baseline;justify-content:space-between"><span style="font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#6F6A7E">Insignias</span><span class="muted" style="font-size:12px;font-weight:800">5 de 20 · ver todas</span></span>
+    <span style="display:flex;align-items:flex-end;justify-content:space-between;padding:4px 2px 0;border-bottom:2.5px dashed rgba(30,27,46,0.3)">
+      <span style="display:block;transform:rotate(-6deg)"><dc-import name="Insignia" id="apreton" size="54" hint-size="54px,59px"></dc-import></span>
+      <span style="display:block;transform:rotate(5deg)"><dc-import name="Insignia" id="tresdetres" size="54" hint-size="54px,59px"></dc-import></span>
+      <span style="display:block;transform:rotate(-4deg)"><dc-import name="Insignia" id="ff2026" size="54" hint-size="54px,59px"></dc-import></span>
+      <span style="display:block;transform:rotate(6deg)"><dc-import name="Insignia" id="madrugador" size="54" hint-size="54px,59px"></dc-import></span>
+      <span style="display:block;transform:rotate(-5deg)"><dc-import name="Insignia" id="og" size="54" hint-size="54px,59px"></dc-import></span>
+    </span>
+  </a>
+
+  <!-- Números -->
+  <div class="card" style="display:grid;grid-template-columns:repeat(3, minmax(0, 1fr))">
+    <div class="st"><span class="d" style="font-size:24px;line-height:1.1">42</span><span class="muted" style="font-size:12px;font-weight:700">nuevas</span></div>
+    <div class="st" style="border-left:1.5px dashed rgba(30,27,46,0.3);border-right:1.5px dashed rgba(30,27,46,0.3)"><span class="d" style="font-size:24px;line-height:1.1">16</span><span class="muted" style="font-size:12px;font-weight:700">reencuentros</span></div>
+    <div class="st"><span class="d" style="font-size:24px;line-height:1.1">7</span><span class="muted" style="font-size:12px;font-weight:700">eventos</span></div>
+  </div>
+
+  <!-- Redes que compartes con tus conexiones -->
+  <div class="card" style="display:flex;flex-direction:column;gap:10px;padding:10px 14px">
+    <span style="font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#6F6A7E;white-space:nowrap">Redes que compartes</span>
+    <div role="group" aria-label="Redes que compartes con tus conexiones" style="display:grid;grid-template-columns:repeat(4, minmax(0, 1fr));gap:8px">
+      <sc-for list="{{ redes }}" as="r" hint-placeholder-count="4">
+        <button class="rd" aria-pressed="{{ r.pressed }}" aria-label="{{ r.nombre }}" title="{{ r.handle }}" onClick="{{ r.toggle }}" style="{{ r.style }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E1B2E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{ r.path }}"/></svg></button>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- Accesos -->
+  <div class="card" style="display:flex;flex-direction:column;overflow:hidden">
+    <a href="V2Ranking.dc.html" class="lk"><span style="flex:1">Ranking</span><span class="muted" style="font-size:13px">#6</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E1B2E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+    <a href="V2Monito.dc.html" class="lk" style="border-top:1.5px dashed rgba(30,27,46,0.3)"><span style="flex:1">Mi monito</span><span class="muted" style="font-size:13px">Cambiar</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E1B2E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+  </div>
+
+  <!-- Tab bar -->
+  <div style="position:absolute;left:50%;bottom:20px;transform:translateX(-50%)"><dc-import name="DockV2" activa="perfil" hint-size="327px,66px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { on: { linkedin: true, instagram: true, whatsapp: false, x: false } };
+  }
+  renderVals() {
+    const on = this.state.on;
+    const defs = [
+      { key: 'linkedin', nombre: 'LinkedIn', handle: 'diegoramirez', color: '#DDF1FF', path: 'M3 9h4v12H3zM5 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM11 21v-7a3 3 0 0 1 6 0v7M11 9v12' },
+      { key: 'instagram', nombre: 'Instagram', handle: '@diego.rmz', color: '#FFE3EA', path: 'M8 3h8a5 5 0 0 1 5 5v8a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5V8a5 5 0 0 1 5-5zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM17.5 6.5h.01' },
+      { key: 'whatsapp', nombre: 'WhatsApp', handle: '33 1234 5678', color: '#DDF8EA', path: 'M21 12a9 9 0 0 1-13.3 7.9L3 21l1.1-4.7A9 9 0 1 1 21 12z' },
+      { key: 'x', nombre: 'X', handle: '@diegormz', color: '#FFF3BF', path: 'M4 4l16 16M20 4L4 20' }
+    ];
+    const redes = defs.map((d) => {
+      const a = !!on[d.key];
+      return {
+        nombre: d.nombre, handle: a ? d.handle : 'oculto', path: d.path,
+        pressed: a ? 'true' : 'false',
+        style: a ? 'background:' + d.color + ';box-shadow:2px 2px 0 #1E1B2E' : 'background:#FFFFFF;opacity:.55;box-shadow:none',
+        toggle: () => this.setState({ on: Object.assign({}, on, { [d.key]: !a }) })
+      };
+    });
+    return { redes };
+  }
+}
+</script>
+</body>
+</html>

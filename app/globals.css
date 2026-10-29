@@ -1,1 +1,134 @@
 @import "tailwindcss";
+
+/* Visual system from design/compa-v2/README.md ("Sistema visual"). */
+@theme {
+  --color-paper: #fff6e5;
+  --color-ink: #1e1b2e;
+  --color-muted: #6f6a7e;
+  --color-mint: #6be4a3;
+  --color-sky: #6cc4ff;
+  --color-gum: #ff8fab;
+  --color-sun: #ffd93d;
+  --color-coral: #ff6b4a;
+  --color-mint-soft: #ddf8ea;
+  --color-sky-soft: #ddf1ff;
+  --color-gum-soft: #ffe3ea;
+  --color-sun-soft: #fff3bf;
+  --color-coral-soft: #ffe1d9;
+  --color-linkedin: #0a66c2;
+  --color-silver: #d5dce6;
+  --color-bronze: #f2a766;
+
+  --font-display: var(--font-fredoka), var(--font-nunito), system-ui, sans-serif;
+  --font-body: var(--font-nunito), system-ui, sans-serif;
+
+  --shadow-hard-4: 4px 4px 0 #1e1b2e;
+  --shadow-hard-3: 3px 3px 0 #1e1b2e;
+  --shadow-hard-2: 2px 2px 0 #1e1b2e;
+  --shadow-ring: 0 0 0 3px #ffffff, 0 0 0 5px #1e1b2e;
+
+  --radius-card: 22px;
+  --radius-button: 16px;
+  --radius-chip: 11px;
+  --radius-phone: 44px;
+
+  --animate-rise: rise 0.45s ease-out both;
+  --animate-pop: pop 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.3) both;
+  --animate-pair: pair 7.5s ease-in-out infinite;
+  --animate-beat: beat 1.2s ease-in-out infinite;
+  --animate-spark: spark 0.9s ease-in-out infinite;
+  --animate-confetti: confetti 3.2s ease-in-out infinite;
+  --animate-podium: podium 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  --animate-bounce-bar: bounce-bar 1s ease-in-out infinite;
+  --animate-wiggle: wiggle 1.6s ease-in-out infinite;
+  --animate-blink: blink 1.1s ease-in-out infinite;
+
+  @keyframes rise {
+    from { transform: translateY(14px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.4) rotate(-4deg); opacity: 0; }
+    60% { transform: scale(1.12) rotate(-4deg); opacity: 1; }
+    100% { transform: scale(1) rotate(-4deg); opacity: 1; }
+  }
+  @keyframes pair {
+    0% { opacity: 0; transform: translateY(26px) scale(0.85); }
+    10% { opacity: 1; transform: translateY(0) scale(1); }
+    70% { opacity: 1; transform: translateY(-22px) scale(1); }
+    85%, 100% { opacity: 0; transform: translateY(-40px) scale(0.9); }
+  }
+  @keyframes beat {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.35); }
+  }
+  @keyframes spark {
+    0%, 100% { transform: rotate(0) scale(1); }
+    50% { transform: rotate(20deg) scale(1.25); }
+  }
+  @keyframes confetti {
+    0%, 100% { transform: translateY(0) rotate(var(--r)); }
+    50% { transform: translateY(10px) rotate(calc(var(--r) + 25deg)); }
+  }
+  @keyframes podium {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes bounce-bar {
+    0%, 100% { transform: scaleY(0.35); }
+    50% { transform: scaleY(1); }
+  }
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(-9deg) translateY(-3px); }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.25; }
+  }
+}
+
+@layer base {
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-weight: 700;
+    -webkit-font-smoothing: antialiased;
+  }
+  svg {
+    flex-shrink: 0;
+  }
+}
+
+@utility paper-dots {
+  background-color: var(--color-paper);
+  background-image: radial-gradient(rgba(30, 27, 46, 0.07) 1.2px, transparent 1.3px);
+  background-size: 22px 22px;
+}
+
+/* Section labels: 11 px, 800, uppercase, tracking 1.6 (README). */
+@utility label-caps {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+@utility border-ink {
+  border: 2.5px solid var(--color-ink);
+}
+
+@utility dashed-ink {
+  border-top: 1.5px dashed rgba(30, 27, 46, 0.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

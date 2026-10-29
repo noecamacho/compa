@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Compa V2 · Conexiones</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFF6E5;color:#1E1B2E;font-family:Nunito,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#1E1B2E;text-decoration:none}a:hover{color:#C2412A}
+.d{font-family:Fredoka,Nunito,system-ui,sans-serif;font-weight:700}
+.muted{color:#6F6A7E}
+.av{display:flex;align-items:center;justify-content:center;border-radius:50%;font:700 13px/1 Fredoka,Nunito,sans-serif;color:#1E1B2E;flex-shrink:0;border:2.5px solid #1E1B2E;box-sizing:border-box}
+.ib{display:flex;align-items:center;justify-content:center;width:44px;height:44px;box-sizing:border-box;border-radius:14px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;color:#1E1B2E;cursor:pointer;padding:0;flex-shrink:0}
+.chip{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 10px;box-sizing:border-box;border-radius:12px;border:2.5px solid #1E1B2E;box-shadow:2px 2px 0 #1E1B2E;font:800 12px/1 Nunito,sans-serif;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;border-radius:18px;box-sizing:border-box}
+.tp{width:32px;height:32px;box-sizing:border-box;border-radius:50%;border:2px solid #1E1B2E;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;font-weight:800;color:#6F6A7E}
+svg{flex-shrink:0}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;box-sizing:border-box;padding:48px 18px 0;display:flex;flex-direction:column;gap:14px;background-color:#FFF6E5;background-image:radial-gradient(rgba(30,27,46,0.07) 1.2px,transparent 1.3px);background-size:22px 22px">
+
+  <!-- Encabezado -->
+  <div style="display:flex;align-items:center;justify-content:space-between">
+    <h1 class="d" style="margin:0;font-size:28px;line-height:1.1">Conexiones</h1>
+    <button aria-label="Buscar en mis conexiones" class="ib"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></button>
+  </div>
+
+  <!-- Evento -->
+  <button class="chip" style="align-self:flex-start;background:#FFFFFF;color:#1E1B2E;font-size:13px;padding:0 12px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>Founders Fest GDL<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+
+  <!-- Tipo -->
+  <div role="group" aria-label="Filtrar por tipo" style="display:flex;gap:8px">
+    <sc-for list="{{ filtros }}" as="f" hint-placeholder-count="4">
+      <button class="chip" aria-pressed="{{ f.pressed }}" onClick="{{ f.pick }}" style="{{ f.style }}">{{ f.label }}</button>
+    </sc-for>
+  </div>
+
+  <!-- Lista -->
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <sc-for list="{{ gente }}" as="p" hint-placeholder-count="5">
+      <a href="V2PerfilOtro.dc.html" class="row">
+        <dc-import name="Avatar" who="{{ p.ini }}" size="46" hint-size="46px,46px"></dc-import>
+        <span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0">
+          <span class="one" style="font-size:15px;font-weight:800">{{ p.nombre }}</span>
+          <span class="muted one" style="font-size:12px;font-weight:700">{{ p.temas }}</span>
+        </span>
+        <span class="tp" title="{{ p.tipoNombre }}" style="{{ p.tpStyle }}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="{{ p.tpFill }}" stroke="#1E1B2E" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{ p.tipoNombre }}"><path d="{{ p.tpPath }}"/></svg>
+        </span>
+      </a>
+    </sc-for>
+  </div>
+
+  <!-- Tab bar -->
+  <div style="position:absolute;left:50%;bottom:20px;transform:translateX(-50%)"><dc-import name="DockV2" activa="conexiones" hint-size="327px,66px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { filtro: 'todas' };
+  }
+  renderVals() {
+    const f = this.state.filtro;
+    const tipos = {
+      nueva: { nombre: 'Nueva', color: '#6BE4A3', fill: 'none', path: 'M10 4a4 4 0 1 0 0 8a4 4 0 1 0 0-8zM3 20c0-3.6 3-6.5 7-6.5 1.4 0 2.6.3 3.7.9M18 14v6M15 17h6' },
+      reencuentro: { nombre: 'Reencuentro', color: '#6CC4FF', fill: 'none', path: 'M4 11a8 8 0 0 1 13.7-5.3L20 8M20 4v4h-4M20 13a8 8 0 0 1-13.7 5.3L4 16M4 20v-4h4' },
+      amigo: { nombre: 'Amigo', color: '#FF8FAB', fill: '#1E1B2E', path: 'M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z' }
+    };
+    const todos = [
+      { ini: 'VO', nombre: 'Valeria Ochoa', temas: 'Levantar capital · Proptech', tipo: 'reencuentro', av: '#6CC4FF' },
+      { ini: 'RP', nombre: 'Rodrigo Peña', temas: 'Fintech · Ventas B2B', tipo: 'nueva', av: '#FFD93D' },
+      { ini: 'ST', nombre: 'Sofía Treviño', temas: 'Producto · IA', tipo: 'nueva', av: '#6BE4A3' },
+      { ini: 'XS', nombre: 'Ximena Salcedo', temas: 'Marketing · Go to market', tipo: 'amigo', av: '#FF8FAB' },
+      { ini: 'CI', nombre: 'Carlos Ibarra', temas: 'Levantar capital · Hardware', tipo: 'reencuentro', av: '#6CC4FF' }
+    ];
+    const gente = todos
+      .filter((p) => f === 'todas' || p.tipo === f)
+      .map((p) => {
+        const t = tipos[p.tipo];
+        return {
+          ini: p.ini, nombre: p.nombre, temas: p.temas,
+          avStyle: 'width:46px;height:46px;background:' + p.av,
+          tipoNombre: t.nombre, tpPath: t.path, tpFill: t.fill,
+          tpStyle: 'background:' + t.color
+        };
+      });
+    const defs = [
+      { key: 'todas', label: 'Todas', color: '#1E1B2E', text: '#FFF6E5' },
+      { key: 'nueva', label: 'Nuevas', color: '#6BE4A3', text: '#1E1B2E' },
+      { key: 'reencuentro', label: 'Reencuentros', color: '#6CC4FF', text: '#1E1B2E' },
+      { key: 'amigo', label: 'Amigos', color: '#FF8FAB', text: '#1E1B2E' }
+    ];
+    const filtros = defs.map((d) => ({
+      label: d.label,
+      pressed: f === d.key ? 'true' : 'false',
+      style: f === d.key ? 'background:' + d.color + ';color:' + d.text : 'background:#FFFFFF;color:#1E1B2E',
+      pick: () => this.setState({ filtro: d.key })
+    }));
+    return { gente, filtros };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Insignia</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="display:block;width:{{ w }}px;height:{{ h }}px;font-family:Fredoka,Nunito,system-ui,sans-serif;color:#1E1B2E">
+  <svg viewBox="0 0 120 {{ vh }}" width="{{ w }}" height="{{ h }}" role="img" aria-label="{{ aria }}" style="display:block;overflow:visible">
+    <g transform="{{ tilt }}">
+      <path d="{{ forma }}" transform="translate(4,4)" fill="{{ sombra }}"/>
+      <path d="{{ forma }}" fill="{{ relleno }}" stroke="{{ borde }}" stroke-width="4" stroke-dasharray="{{ dash }}" stroke-linejoin="round"/>
+      <path d="{{ forma }}" transform="translate(60,62) scale(0.84) translate(-60,-62)" fill="none" stroke="{{ borde }}" stroke-width="2" stroke-dasharray="5 4" stroke-linejoin="round" opacity="0.7"/>
+      <g transform="translate(32,34)" fill="none" stroke="{{ tinta }}" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity="{{ opIcono }}">
+        <path d="{{ ic.a }}" fill="{{ ic.fa }}"/>
+        <path d="{{ ic.b }}" fill="{{ ic.fb }}"/>
+        <path d="{{ ic.c }}" fill="{{ ic.fc }}"/>
+        <path d="{{ ic.d }}" fill="{{ ic.fd }}" stroke="none"/>
+        <text x="{{ ic.tx }}" y="{{ ic.ty }}" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="{{ ic.ts }}" fill="{{ ic.tf }}" stroke="none">{{ ic.t }}</text>
+      </g>
+      <sc-if value="{{ bloqueada }}" hint-placeholder-val="{{ false }}">
+        <g transform="translate(82,84)"><rect x="-13" y="-2" width="26" height="22" rx="6" fill="#FFFFFF" stroke="#1E1B2E" stroke-width="3"/><path d="M-7 -2 V-8 a7 7 0 0 1 14 0 V-2" fill="none" stroke="#1E1B2E" stroke-width="3"/></g>
+      </sc-if>
+      <sc-if value="{{ brillo }}" hint-placeholder-val="{{ true }}">
+        <path d="M94 18 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z" fill="#FFFFFF" stroke="#1E1B2E" stroke-width="2" stroke-linejoin="round"/>
+      </sc-if>
+      <sc-if value="{{ conNombre }}" hint-placeholder-val="{{ false }}">
+        <g transform="translate(0,116)">
+          <path d="M14 8 l-9 16 13 -1 5 12 11 -19z" fill="#FF6B4A" stroke="#1E1B2E" stroke-width="3" stroke-linejoin="round"/>
+          <path d="M106 8 l9 16 -13 -1 -5 12 -11 -19z" fill="#FF6B4A" stroke="#1E1B2E" stroke-width="3" stroke-linejoin="round"/>
+          <rect x="16" y="0" width="88" height="26" rx="7" fill="{{ liston }}" stroke="#1E1B2E" stroke-width="3"/>
+          <text x="60" y="18" text-anchor="middle" font-family="Fredoka, sans-serif" font-weight="700" font-size="{{ fs }}" fill="#1E1B2E" letter-spacing="0.5">{{ nombreCorto }}</text>
+        </g>
+      </sc-if>
+    </g>
+  </svg>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"id":{"editor":"select","default":"apreton","options":["apreton","madrugador","cierre","iman","maraton","tresdetres","puente","duo","ff2026","og","rey","speaker","noctambulo","cazatalentos","conector100","trotamundos","curioso","memoria","quinientos","cuatro"]},"size":{"editor":"int","default":120,"min":24,"max":320},"estado":{"editor":"select","default":"ganada","options":["ganada","bloqueada"]},"conNombre":{"editor":"bool","default":false},"girada":{"editor":"bool","default":false},"$preview":{"width":120,"height":130}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const FORMAS = {
+      escudo: 'M60 8 L104 24 V66 C104 96 84 116 60 124 C36 116 16 96 16 66 V24 Z',
+      anillos: 'M44 22 A40 40 0 1 0 44 102 A40 40 0 1 0 44 22 Z M76 22 A40 40 0 1 0 76 102 A40 40 0 1 0 76 22 Z',
+      boleto: 'M22 18 H98 A10 10 0 0 1 108 28 V52 A10 10 0 0 0 108 72 V96 A10 10 0 0 1 98 106 H22 A10 10 0 0 1 12 96 V72 A10 10 0 0 0 12 52 V28 A10 10 0 0 1 22 18 Z',
+      estrella: 'M60 6 L71 36 L100 24 L86 50 L114 62 L86 74 L100 100 L71 88 L60 118 L49 88 L20 100 L34 74 L6 62 L34 50 L20 24 L49 36 Z',
+      hexagono: 'M60 8 L106 34 V90 L60 116 L14 90 V34 Z',
+      circulo: 'M60 8 A54 54 0 1 1 59.9 8 Z'
+    };
+    const CAT = {
+      persona: ['escudo', '#6BE4A3', '#FFD93D'],
+      pareja: ['anillos', '#FF8FAB', '#6CC4FF'],
+      evento: ['boleto', '#6CC4FF', '#FFD93D'],
+      secreta: ['estrella', '#FFD93D', '#FF6B4A'],
+      progreso: ['hexagono', '#D5DCE6', '#FFD93D'],
+      comunidad: ['circulo', '#FF6B4A', '#FFD93D'],
+      racha: ['circulo', '#FF6B4A', '#FFD93D']
+    };
+    const S = '#F5C9A3', W = '#FFFFFF', SOL = '#FFD93D', COR = '#FF6B4A', CIE = '#6CC4FF', MEN = '#6BE4A3', CHI = '#FF8FAB', INK = '#1E1B2E';
+    const I = {
+      apreton: { cat: 'persona', n: 'Primer apretón', c: 'PRIMER APRETÓN', a: 'M6 30 L17 19 L29 23 L39 17 L50 30', fa: S, b: 'M6 30 L17 41 L27 47 L37 45 L50 30', fb: S, c: 'M29 23 L22 32 L28 37 L35 31' },
+      madrugador: { cat: 'persona', n: 'Madrugador', c: 'MADRUGADOR', a: 'M4 42 H52', b: 'M14 42 A14 14 0 0 1 42 42 Z', fb: SOL, c: 'M28 14 V6 M12 22 L6 16 M44 22 L50 16' },
+      cierre: { cat: 'persona', n: 'Cierre', c: 'CIERRE', a: 'M30 6 A20 20 0 1 0 50 36 A16 16 0 0 1 30 6 Z', fa: SOL, d: 'M43 8 l2.5 6 6 2.5 -6 2.5 -2.5 6 -2.5 -6 -6 -2.5 6 -2.5z', fd: W },
+      iman: { cat: 'persona', n: 'Imán', c: 'IMÁN', a: 'M14 10 V30 A14 14 0 0 0 42 30 V10', fa: 'none', b: 'M9 6 H19 V18 H9 Z M37 6 H47 V18 H37 Z', fb: W, c: 'M22 46 V52 M34 46 V52 M28 48 V54' },
+      maraton: { cat: 'persona', n: 'Maratón', c: 'MARATÓN', a: 'M32 4 L12 32 H28 L24 52 L44 22 H30 Z', fa: SOL },
+      tresdetres: { cat: 'pareja', n: 'Tres de tres', c: 'TRES DE TRES', a: 'M20 24 A12 12 0 1 0 20.1 24 Z', fa: 'none', b: 'M36 24 A12 12 0 1 0 36.1 24 Z', fb: 'none', d: 'M16 44 h6 v6 h-6z M25 44 h6 v6 h-6z M34 44 h6 v6 h-6z', fd: INK },
+      puente: { cat: 'pareja', n: 'Puente', c: 'PUENTE', a: 'M6 42 A22 22 0 0 1 50 42', b: 'M2 42 H54 M8 42 V52 M48 42 V52 M28 42 V52', d: 'M10 36 a5 5 0 1 0 0.1 0z M46 36 a5 5 0 1 0 0.1 0z', fd: S },
+      duo: { cat: 'pareja', n: 'Dúo dinámico', c: 'DÚO DINÁMICO', a: 'M10 8 L18 46 L4 46 Z', fa: COR, b: 'M46 8 L52 46 L38 46 Z', fb: CIE, c: 'M18 14 H38' },
+      ff2026: { cat: 'evento', n: 'Founders Fest 2026', c: 'FOUNDERS FEST', a: 'M8 14 H48 V46 H8 Z', fa: W, b: 'M8 24 H48 M18 10 V18 M38 10 V18', t: '2026', tx: 28, ty: 41, ts: 15, tf: INK },
+      og: { cat: 'evento', n: 'OG', c: 'OG · EL PRIMERO', a: 'M14 10 C4 22 6 40 18 50', b: 'M42 10 C52 22 50 40 38 50', c: 'M10 22 l6 -2 M8 32 l6 0 M12 42 l6 2 M46 22 l-6 -2 M48 32 l-6 0 M44 42 l-6 2', t: '1', tx: 28, ty: 42, ts: 34, tf: INK },
+      rey: { cat: 'secreta', n: 'Rey del reencuentro', c: 'REY REENCUENTRO', a: 'M8 38 V14 L20 24 L28 8 L36 24 L48 14 V38 Z', fa: SOL, b: 'M8 38 H48 V44 H8 Z', fb: COR, c: 'M14 52 H26 M22 48 L26 52 L22 56 M42 52 H30 M34 48 L30 52 L34 56' },
+      speaker: { cat: 'secreta', n: 'Con el speaker', c: 'CON EL SPEAKER', a: 'M20 4 H36 V28 A8 8 0 0 1 20 28 Z', fa: COR, b: 'M12 24 A16 16 0 0 0 44 24', c: 'M28 40 V50 M18 50 H38' },
+      noctambulo: { cat: 'secreta', n: 'Noctámbulo', c: 'NOCTÁMBULO', a: 'M28 10 A18 20 0 1 0 28.1 10 Z', fa: '#3A3F6B', b: 'M12 10 L18 20 M44 10 L38 20', c: 'M28 30 L24 36 L32 36 Z', fc: SOL, d: 'M15 22 a6 6 0 1 0 0.1 0z M29 22 a6 6 0 1 0 0.1 0z', fd: W },
+      cazatalentos: { cat: 'secreta', n: 'Cazatalentos', c: 'CAZATALENTOS', a: 'M8 22 A16 16 0 1 0 8.1 22 Z', fa: W, b: 'M36 34 L50 48', c: 'M24 12 l3 7 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1z', fc: SOL },
+      conector100: { cat: 'progreso', n: 'Conector 100', c: 'CONECTOR 100', a: 'M8 44 H48', t: '100', tx: 28, ty: 36, ts: 24, tf: INK },
+      trotamundos: { cat: 'progreso', n: 'Trotamundos', c: 'TROTAMUNDOS', a: 'M28 52 C28 52 10 32 10 22 A18 18 0 0 1 46 22 C46 32 28 52 28 52 Z', fa: COR, d: 'M22 22 a6 6 0 1 0 0.1 0z', fd: W },
+      curioso: { cat: 'progreso', n: 'Curioso', c: 'CURIOSO', a: 'M6 28 A22 22 0 1 0 6.1 28 Z', fa: W, b: 'M28 8 L34 28 L28 48 L22 28 Z', fb: COR, d: 'M25 28 a3 3 0 1 0 0.1 0z', fd: INK },
+      memoria: { cat: 'progreso', n: 'Memoria de elefante', c: 'MEMORIA', a: 'M30 10 A16 16 0 1 0 30.1 10 Z', fa: '#B9C7E6', b: 'M14 16 A10 10 0 1 0 14.1 16 Z', fb: '#D5DCE6', c: 'M42 30 C52 34 50 48 42 52', d: 'M32 20 a3 3 0 1 0 0.1 0z', fd: INK },
+      quinientos: { cat: 'comunidad', n: '500 en la noche', c: '500 EN LA NOCHE', a: 'M28 6 V16 M44 10 L38 18 M50 26 H40 M44 42 L38 34 M12 10 L18 18 M6 26 H16 M12 42 L18 34', b: 'M28 36 V46', t: '500', tx: 28, ty: 32, ts: 17, tf: INK },
+      cuatro: { cat: 'racha', n: 'Cuatro trimestres', c: '4 TRIMESTRES', a: 'M28 2 C20 16 8 22 10 36 A18 18 0 0 0 46 36 C48 22 36 16 28 2 Z', fa: COR, b: 'M28 22 C24 30 18 32 19 40 A9 9 0 0 0 37 40 C38 32 32 30 28 22 Z', fb: SOL, t: '4', tx: 28, ty: 46, ts: 14, tf: INK }
+    };
+    const it = I[this.props.id] || I.apreton;
+    const cat = CAT[it.cat];
+    const size = this.props.size || 120;
+    const bloq = this.props.estado === 'bloqueada';
+    const conNombre = !!this.props.conNombre;
+    const vh = conNombre ? 156 : 130;
+    const ic = {
+      a: it.a || '', fa: it.fa || 'none', b: it.b || '', fb: it.fb || 'none', c: it.c || '', fc: it.fc || 'none', d: it.d || '', fd: it.fd || 'none',
+      t: it.t || '', tx: it.tx || 28, ty: it.ty || 32, ts: it.ts || 16, tf: bloq ? '#6F6A7E' : (it.tf || '#1E1B2E')
+    };
+    if (bloq) { ic.fa = ic.fa === 'none' ? 'none' : '#F4EEE2'; ic.fb = ic.fb === 'none' ? 'none' : '#F4EEE2'; ic.fc = ic.fc === 'none' ? 'none' : '#F4EEE2'; ic.fd = ic.fd === 'none' ? 'none' : '#B9B1A2'; }
+    const nombreCorto = it.c;
+    const fs = nombreCorto.length > 13 ? 10 : nombreCorto.length > 10 ? 11.5 : 13;
+    return {
+      forma: FORMAS[cat[0]],
+      relleno: bloq ? '#EDE6D6' : cat[1],
+      liston: cat[2],
+      borde: bloq ? '#6F6A7E' : '#1E1B2E',
+      sombra: bloq ? 'none' : '#1E1B2E',
+      dash: bloq ? '9 7' : 'none',
+      tinta: bloq ? '#6F6A7E' : '#1E1B2E',
+      opIcono: bloq ? 0.75 : 1,
+      bloqueada: bloq,
+      brillo: !bloq && size >= 64,
+      conNombre, nombreCorto, fs,
+      tilt: this.props.girada ? 'rotate(-5 60 65)' : '',
+      ic,
+      w: size, h: Math.round(size * vh / 120), vh,
+      aria: it.n + (bloq ? ', por ganar' : '')
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -72,3 +72,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Do we keep preview deployments?
 
 - Captain decision: no previews and only one deployment. The Vercel workflow runs only on pushes to `main` and deletes every other deployment after a successful deploy; existing previews and old deployments were deleted by hand.
+
+## [2026-10-29] ingest | Compa V2 design handoff
+
+- Added `design/compa-v2/` (README, 16 screen mocks, 4 components) as the visual source of truth for the attendee screens, and ported its four components to React/SVG (`lib/monito`, `lib/badges`, `components/`). The handoff's points table (50 new / 20 reconnection / +5 topics / +15 voice note / +100 and +50 per invited friend) differs from data model M3 and M18; the migration is tracked in a follow-up PR and the "+20 for accepting" line is logged in [open-questions](open-questions.md) #28.

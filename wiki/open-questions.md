@@ -33,3 +33,4 @@ Contradictions, gaps and ambiguities found while ingesting the build plan. Nothi
 | 27 | **Private Realtime channels.** Request and acceptance messages use private `user:<id>` channels with Realtime Authorization; this is unverified for the project's Supabase setup. Fallback is polling every 3 s. | API spec §8 |
 
 Related: [risks](risks.md), [data-model](data-model.md), [points-rules](points-rules.md).
+| 28 | **Points for accepting.** The V2 design README lists "accept a request: +20 for each" next to "new connection +50" and "reconnection +20", while the mocks (V2Confirmacion, V2Solicitud) show only the kind points plus the note. Treating both as separate awards would double count; the app awards the kind points to both people on acceptance and nothing extra. Captain to confirm. | `design/compa-v2/README.md` "Reglas de negocio" |
