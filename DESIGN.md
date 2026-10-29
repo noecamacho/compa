@@ -185,7 +185,7 @@ Approved decisions (A5, A6, M13, M16). The handoff has no big-screen mock.
 - **Updates:** the public Realtime channel `event:<slug>:live` (`connection.accepted`, `attendee.checked_in`, `summary.approved`), with snapshot polling as a fallback (the snapshot is cached for 1 s).
 - **Everyone checked in appears.** There is no anonymous mode, and check-in records the consent (M13).
 - **Size:** 1920×1080, readable from 10 m (`AGENTS.md` §4).
-- **Figma file:** `https://www.figma.com/design/<TBD>`. The coordinator fills in the link.
+- **Figma file:** `https://www.figma.com/design/UEnpABAPbq7WJUfhfoYi46`. The coordinator fills in the link.
 
 ## Decided vs open
 
