@@ -154,6 +154,9 @@ export const connections = {
   filters: { all: "Todas", new: "Nuevas", reconnection: "Reencuentros", friend: "Amigos" },
   types: { new: "Nueva", reconnection: "Reencuentro", friend: "Amigo" },
   empty: "Todavía no tienes conexiones. Escanea a la primera persona que conozcas.",
+  searchPlaceholder: "Busca por nombre",
+  onlyThisEvent: "Solo las de este evento",
+  noMatch: "Ninguna conexión coincide.",
 };
 
 export const person = {

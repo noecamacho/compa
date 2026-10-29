@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Chip } from "@/components/ui/Chip";
+import { IconButton } from "@/components/ui/IconButton";
 import { Muted } from "@/components/ui/Text";
 import type { PersonHistoryT } from "@/lib/api/schemas";
 import { connections as copy } from "@/lib/copy/es";
+import { slugify } from "@/lib/slug";
 
 type PersonType = "new" | "reconnection" | "friend";
 type Filter = "all" | PersonType;
@@ -28,13 +30,54 @@ const FILTERS: { key: Filter; color: string; text: string }[] = [
 // Type falls back to the last meeting's kind when the API does not send it yet.
 const typeOf = (entry: PersonHistoryT): PersonType => entry.type ?? (entry.meetings[0]?.kind === "reconnection" ? "reconnection" : "new");
 
-type Props = { people: PersonHistoryT[] };
+const metAt = (entry: PersonHistoryT, slug: string) => entry.meetings.some((meeting) => meeting.event.slug === slug && meeting.status === "accepted");
 
-export function ConnectionList({ people }: Props) {
+type Props = { people: PersonHistoryT[]; event: { slug: string; name: string } | null };
+
+// 07 Conexiones: search by name, the current-event chip narrows to tonight, the type chips filter, each row opens the person.
+export function ConnectionList({ people, event }: Props) {
   const [filter, setFilter] = useState<Filter>("all");
-  const shown = people.filter((entry) => filter === "all" || typeOf(entry) === filter);
+  const [searching, setSearching] = useState(false);
+  const [query, setQuery] = useState("");
+  const [onlyEvent, setOnlyEvent] = useState(false);
+  const searchId = useId();
+  const needle = slugify(query);
+  const shown = people
+    .filter((entry) => filter === "all" || typeOf(entry) === filter)
+    .filter((entry) => !needle || slugify(entry.person.name).includes(needle))
+    .filter((entry) => !onlyEvent || !event || metAt(entry, event.slug));
   return (
     <>
+      <div className="flex items-center justify-between">
+        <h1 className="m-0 font-display text-[28px] leading-[1.1] font-bold">{copy.title}</h1>
+        <IconButton label={copy.search} aria-expanded={searching} aria-controls={searchId} onClick={() => setSearching(!searching)}>
+          <Icon name="search" size={20} />
+        </IconButton>
+      </div>
+      {searching && (
+        <div className="animate-fade-in relative">
+          <label htmlFor={searchId} className="sr-only">
+            {copy.search}
+          </label>
+          <Icon name="search" size={20} className="absolute top-[14px] left-[14px] text-muted" />
+          <input
+            id={searchId}
+            type="search"
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={copy.searchPlaceholder}
+            className="box-border block h-12 w-full rounded-[14px] bg-white pr-[14px] pl-11 font-body text-[15px] font-bold text-ink outline-none placeholder:text-muted border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
+          />
+        </div>
+      )}
+      {event && (
+        <Chip pressed={onlyEvent} onClick={() => setOnlyEvent(!onlyEvent)} className="self-start px-3 text-[13px]" title={copy.onlyThisEvent}>
+          <Icon name="calendar" size={15} />
+          {event.name}
+          <Icon name="chevronDown" size={14} strokeWidth={3} style={{ transform: onlyEvent ? "rotate(180deg)" : undefined, transition: "transform .2s ease" }} />
+        </Chip>
+      )}
       <div role="group" aria-label={copy.filterLabel} className="flex gap-2">
         {FILTERS.map(({ key, color, text }) => (
           <Chip key={key} pressed={filter === key} pressedBackground={color} pressedColor={text} onClick={() => setFilter(key)} className="px-[10px] text-[12px]">
@@ -43,8 +86,10 @@ export function ConnectionList({ people }: Props) {
         ))}
       </div>
       {/* Keyed by filter so the rows rise again, staggered, every time the list changes. */}
-      <div key={filter} className="flex flex-col gap-[10px]">
-        {shown.length === 0 && <Muted className="animate-fade-in text-center text-[13px] font-bold">{copy.empty}</Muted>}
+      <div key={`${filter}-${onlyEvent}`} className="flex flex-col gap-[10px]" aria-live="polite">
+        {shown.length === 0 && (
+          <Muted className="animate-fade-in text-center text-[13px] font-bold">{people.length === 0 ? copy.empty : copy.noMatch}</Muted>
+        )}
         {shown.map((entry, index) => {
           const type = typeOf(entry);
           return (
