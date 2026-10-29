@@ -5,9 +5,10 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Muted } from "@/components/ui/Text";
-import { ApiClientError, apiCall, errorText } from "@/lib/api/client";
+import { ApiClientError, apiCall } from "@/lib/api/client";
 import { UserProfile, type CardT } from "@/lib/api/schemas";
-import { connect as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
+import { errorText } from "@/lib/api/error-text";
 import { slugify } from "@/lib/slug";
 import { HIT_AREA } from "@/components/ui/hit-area";
 
@@ -115,6 +116,8 @@ const CORNER = "absolute h-[34px] w-[34px] border-mint";
 
 // Camera viewfinder with mint corners; a detected person appears in the row at the bottom (V2Conectar "Escanear").
 export function ScanPanel() {
+  const all = useCopy();
+  const copy = all.connect;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [found, setFound] = useState<CardT | null>(null);
   const [query, setQuery] = useState("");
@@ -129,7 +132,7 @@ export function ScanPanel() {
       setLookupError(null);
     } catch (caught) {
       const missing = caught instanceof ApiClientError && caught.status === 404;
-      setLookupError(missing ? copy.notFound : errorText(caught));
+      setLookupError(missing ? copy.notFound : errorText(all, caught));
       // A network failure may pass: let the same QR be read again in a moment.
       if (!missing) setTimeout(() => (lastHandle.current = null), RETRY_LOOKUP_MS);
     }

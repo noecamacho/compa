@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { Icon, type IconName } from "@/components/icons";
-import { dock as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 
 export const DOCK_TABS = ["home", "connect", "connections", "me"] as const;
 export type DockTab = (typeof DOCK_TABS)[number];
@@ -54,6 +54,7 @@ type Props = { active?: DockTab; className?: string };
 
 // Phones and tablets: the 327×66 pill at the bottom; the color drop travels to the active tab (DockV2).
 export function Dock({ active, className }: Props) {
+  const copy = useCopy().dock;
   const { current, choose } = useActiveTab(active);
   const activeIndex = DOCK_TABS.indexOf(current);
   return (
@@ -110,6 +111,7 @@ const RAIL_GAP = 6;
 // Desktop (1024+): the same four tabs as a card pinned to the top left (Figma "Dock layout=rail").
 // It stays on every attendee screen so the way back is always one click away; super admins also get the console link.
 export function DockRail({ admin = false }: { admin?: boolean }) {
+  const copy = useCopy().dock;
   const { current, choose } = useActiveTab();
   const activeIndex = DOCK_TABS.indexOf(current);
   return (

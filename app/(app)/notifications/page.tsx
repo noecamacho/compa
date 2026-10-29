@@ -18,12 +18,13 @@ function NotificationIcon({ item }: { item: NotificationT }) {
   return <Avatar person={{ name: item.person.name, look: item.person.avatar }} size={42} />;
 }
 
-function NotificationCard({ item, locale, copy }: { item: NotificationT; locale: Locale; copy: ReturnType<typeof copyFor>["notifications"] }) {
+function NotificationCard({ item, locale, all }: { item: NotificationT; locale: Locale; all: ReturnType<typeof copyFor> }) {
+  const copy = all.notifications;
   return (
     <Card href={notificationHref(item)} tone={item.unseen ? "gum-soft" : "white"} size="sm" className="flex items-center gap-3 px-[14px] py-3">
       <NotificationIcon item={item} />
       <span className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="font-display text-[15px] leading-tight font-bold">{notificationText(item, copy)}</span>
+        <span className="font-display text-[15px] leading-tight font-bold">{notificationText(item, copy, all.badgeNames)}</span>
         <Muted className="text-[12px] font-bold">{formatTime(locale, item.createdAt)}</Muted>
       </span>
       {item.unseen && <span aria-label={copy.newLabel} className="h-3 w-3 shrink-0 rounded-full border-ink bg-coral" />}
@@ -36,7 +37,8 @@ export default async function NotificationsPage() {
   if (result.notifications[0]) {
     await apiPostQuietly("/api/notifications/seen", { seenThrough: result.notifications[0].createdAt });
   }
-  const copy = copyFor(locale).notifications;
+  const all = copyFor(locale);
+  const copy = all.notifications;
   return (
     <Screen dock>
       <div className="flex items-center gap-3">
@@ -54,7 +56,7 @@ export default async function NotificationsPage() {
         </Card>
       ) : (
         <div className="flex flex-col gap-[10px]">
-          {result.notifications.map((item) => <NotificationCard key={item.id} item={item} locale={locale} copy={copy} />)}
+          {result.notifications.map((item) => <NotificationCard key={item.id} item={item} locale={locale} all={all} />)}
         </div>
       )}
     </Screen>

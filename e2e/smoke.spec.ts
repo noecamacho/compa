@@ -2,7 +2,6 @@
 // the real-mode one needs TEST_AUTOMATION_SECRET and the seeded test project (docs/testing/real-mode.md).
 import { me } from "../lib/api/examples";
 import { copyFor } from "../lib/copy";
-import { request } from "../lib/copy/es";
 import { firstName } from "../lib/format";
 import { localeFromAcceptLanguage } from "../lib/i18n";
 import { expect, test } from "./fixtures";
@@ -23,7 +22,8 @@ test.describe("smoke", () => {
     await expect(page.getByText(firstName(me.name), { exact: false }).first()).toBeVisible();
   });
 
-  test("accepting an already answered request shows the error @mock", async ({ page, mock }) => {
+  test("accepting an already answered request shows the error @mock", async ({ page, mock }, testInfo) => {
+    const { request } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale));
     await page.goto(`/requests/${REQUEST_ID}`);
     await mock.mockError("not_pending", "**/api/connections/*/accept");
     const statuses: number[] = [];

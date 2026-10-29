@@ -1,10 +1,13 @@
 // T-031: incoming requests reach the addressee (docs/flows/backlog.md). Needs a server started with API_MODE=mock.
 import { andrea, connectionList, ids, paola } from "../../lib/api/examples";
-import { apiErrors, request, tour } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { firstName } from "../../lib/format";
 import { expect, test } from "../fixtures";
 
 const NEW_REQUEST_ID = "7a6b5c4d-3e2f-4a1b-9c8d-7e6f5a4b3c2d";
+
+const copyOf = (testInfo: { project: { use: { locale?: string } } }) => copyFor(localeFromAcceptLanguage(testInfo.project.use.locale));
 
 test.describe("incoming requests @mock", () => {
   test("the bell opens the notifications list", async ({ page }) => {
@@ -15,7 +18,8 @@ test.describe("incoming requests @mock", () => {
     await expect(page).toHaveURL(/\/notifications$/);
   });
 
-  test("/connections lists incoming requests on top", async ({ page }) => {
+  test("/connections lists incoming requests on top", async ({ page }, testInfo) => {
+    const { tour } = copyOf(testInfo);
     await page.goto("/connections");
     const card = page.locator(`a[href="/requests/${ids.connection3}"]`);
     await expect(card).toContainText(tour.incoming.title(firstName(paola.name)));
@@ -34,7 +38,8 @@ test.describe("incoming requests @mock", () => {
     await expect(page.locator(`a[href="/requests/${NEW_REQUEST_ID}"]`)).toContainText(firstName(andrea.name));
   });
 
-  test("accepting after the event ended shows the expired copy", async ({ page, mock }) => {
+  test("accepting after the event ended shows the expired copy", async ({ page, mock }, testInfo) => {
+    const { apiErrors, request } = copyOf(testInfo);
     await page.goto(`/requests/${ids.connection3}`);
     await mock.mockError("event_ended", "**/api/connections/*/accept");
     // On a cold dev server a click can land before hydration: click until the message shows.

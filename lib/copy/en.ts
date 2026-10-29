@@ -267,3 +267,486 @@ export const notifications: typeof es.notifications = {
   pushInstall: "On iPhone: tap Share → Add to Home Screen, then open COMPA from there to turn on alerts.",
   pushFailed: "We couldn't change your alerts. Try again.",
 };
+
+export const meta: typeof es.meta = {
+  description: "Meet people at the event. Remember them after.",
+};
+
+export const common: typeof es.common = {
+  back: "Back",
+  close: "Close",
+  done: "Done",
+  notNow: "Not now",
+  points: "pts",
+  live: "LIVE",
+  liveShort: "Live",
+  seeAll: "see all",
+  of: "of",
+  you: "You",
+  rateLimited: "You're going too fast. Wait a moment and try again.",
+  limitReached: "You've reached the limit here. No more attempts are allowed.",
+};
+
+export const dock: typeof es.dock = {
+  label: "Main navigation",
+  home: "Compa, go to home",
+  tabs: { home: "Home", connect: "Connect", connections: "Connections", me: "Profile" },
+  admin: "Admin",
+  adminHint: "Console",
+};
+
+export const screenState: typeof es.screenState = {
+  loading: "Loading…",
+  errorTitle: "Something went wrong",
+  errorBody: "We couldn't load this screen. Check your connection and try again.",
+  retry: "Try again",
+  goHome: "Go home",
+};
+
+// What a failed request says on screen (errorText, lib/api/error-text.ts); server messages are English and never shown.
+export const apiErrors: typeof es.apiErrors = {
+  generic: "We couldn't complete that. Please try again.",
+  server: "Something went wrong on our side. Try again in a moment.",
+  signedOut: "You were signed out. Sign in again to continue.",
+  codes: {
+    offline: "You're offline. Connect and try again.",
+    timeout: "The network is too slow and didn't respond. Try again.",
+    network_error: "We couldn't reach Compa. Check your internet and try again.",
+    auth_unavailable: "We couldn't check your sign-in right now. Try again in a moment.",
+    invalid_input: "Check the details and try again.",
+    handle_taken: "Someone already uses that username. Try another.",
+    not_pending: "This request was already answered.",
+    event_ended: "The event ended, so the request expired.",
+    event_not_running: "The event isn't active right now.",
+    self_connection: "You can't connect with yourself.",
+    not_at_event: "That person isn't at an event right now.",
+    connection_not_accepted: "The other person hasn't accepted the connection yet.",
+    not_substantive: "Tell Compa a bit more about what you talked about.",
+    already_approved: "This connection already has a saved note.",
+    summary_failed: "We couldn't summarize the note. Try again.",
+    transcription_failed: "We couldn't make out the audio. Try again or type the note.",
+    connection_not_found: "We couldn't find that connection.",
+    user_not_found: "We couldn't find that person.",
+  },
+};
+
+export const profile: typeof es.profile = {
+  title: "Your profile",
+  subtitle: "Your name comes from LinkedIn. Add the rest and choose who sees what.",
+  fromLinkedIn: "LinkedIn name",
+  name: "Name",
+  role: "Role",
+  company: "Company",
+  city: "City",
+  alwaysVisible: "Your name, photo or monito and city are visible to anyone.",
+  linksLabel: "Your socials",
+  linksHint: "Type your username or number, or paste the link. Empty = not shared.",
+  linkPlaceholder: {
+    linkedin: "your-username or link",
+    whatsapp: "+1 555 123 4567",
+    instagram: "@username",
+    x: "@username",
+    github: "@username",
+    web: "yoursite.com",
+  },
+  linkError: {
+    linkedin: "Use your LinkedIn username or the link to your profile.",
+    whatsapp: "Enter your number with the country code, for example +1 555 123 4567.",
+    instagram: "Use your Instagram username (letters, numbers, periods and underscores).",
+    x: "Use your X username (up to 15 letters, numbers or underscores).",
+    github: "Use your GitHub username.",
+    web: "Enter a web address, for example yoursite.com.",
+  },
+  remove: "Remove",
+  removeLabel: (network) => `Remove ${network}`,
+  removed: (network) => `${network} will be removed when you save.`,
+  undo: "Undo",
+  fixErrors: "Check the highlighted fields.",
+  next: "Next: your monito",
+  step: "Step 1 of 2",
+  save: "Save",
+  saving: "Saving…",
+};
+
+// Who sees each field and link (data model §4.5): public, connections or hidden.
+export const visibility: typeof es.visibility = {
+  title: "Who sees what",
+  levels: { public: "Everyone", connections: "Connections", hidden: "Only me" },
+  legend: {
+    public: "Everyone: anyone who opens your profile or scans your QR.",
+    connections: "Connections: only after the connection between you is accepted.",
+    hidden: "Only me: shown to no one.",
+  },
+  pickerLabel: (item) => `Who sees: ${item}`,
+  previewTitle: "How you look",
+  previewLabel: "Preview of your profile",
+  before: "Before connecting",
+  after: "Once connected",
+  unlocks: (items) => `Once you connect they'll also see: ${items}.`,
+  nothingLocked: "They see the same before and after connecting.",
+  noLinks: "No visible socials.",
+};
+
+export const monito: typeof es.monito = {
+  title: "Your monito",
+  random: "Surprise me",
+  hint: "This is how people see you at the event. Few options on purpose: you earn the rest by connecting.",
+  hintPhoto: "People see your photo. Build your monito anyway: switch to it whenever you like, and it earns outfits as you connect.",
+  body: "I'm",
+  bodyNames: { man: "Man", woman: "Woman", other: "Other" },
+  skin: "Skin",
+  hair: "Hair",
+  hairColor: "Color",
+  shirt: "Shirt",
+  extras: "Extras",
+  skinNames: { "very-light": "Very light", light: "Light", medium: "Medium", brown: "Brown", dark: "Dark" },
+  hairNames: { short: "Short", long: "Long", bun: "Bun", curly: "Curly" },
+  hairColorNames: { black: "Black", brown: "Brown", red: "Red", blond: "Blond" },
+  shirtNames: { mint: "Mint", sky: "Sky", gum: "Bubblegum", sun: "Sun", coral: "Coral", ink: "Ink" },
+  extraNames: { cap: "Cap", glasses: "Glasses", beard: "Beard" },
+  done: "Done, go in",
+  step: "Step 2 of 2 · you can change it from your profile",
+  labelOwn: "Your monito",
+  choiceLabel: "How people see you",
+  usePhoto: "Use my LinkedIn photo",
+  usePhotoHint: "Your photo, in a circle, all over Compa",
+  noPhoto: "LinkedIn didn't give us a photo",
+  createMonito: "Create my monito",
+  createMonitoHint: "Your pixel-art character; it earns outfits as you connect",
+  photoLabel: "Your photo",
+};
+
+export const home: typeof es.home = {
+  hello: (name) => `Hi, ${name}`,
+  until: (name, hour) => `${name} · until ${hour}`,
+  connectionsTonight: "connections tonight",
+  pairsNow: "Connections happening right now",
+  pair: (a, b) => `${a} and ${b}`,
+  rank: (rank, points) => ["You're ", `#${rank}`, ` with ${points} pts`],
+  firstConnection: "Your first connection puts you on the leaderboard",
+  connect: "Connect",
+  connectHint: "Show your QR or scan",
+  connectHintEmpty: "Scan the first person you meet",
+  startHere: "Start here",
+  inviteTitle: "Invite 3 and earn the golden cap",
+  invitePoints: "+100 pts for every friend who joins",
+  inviteProgress: (done, total) => `${done} of ${total} friends invited`,
+  inviteLeft: (left) => `${left} to go`,
+  goldenCapLabel: "Your monito wearing the golden cap",
+  noEventTitle: "You're not at an event right now",
+  noEventHint: "Scan your event's QR to go in and see who's connecting.",
+};
+
+export const connect: typeof es.connect = {
+  title: "Connect",
+  invite: "Invite",
+  modeLabel: "Mode",
+  myQr: "My QR",
+  scan: "Scan",
+  qrLabel: (name) => `${name}'s QR code`,
+  showIt: "Show it so people can scan you.",
+  connectButton: "Connect",
+  searchLabel: "Search by name",
+  searchPlaceholder: "QR not working? Search by name",
+  // Viewfinder banner per camera state (ScanPanel). Without a camera, the phone's own camera app reads any personal QR.
+  camera: {
+    starting: "Opening the camera…",
+    scanning: "Aim at their QR",
+    denied: "Camera permission is off. Turn it on in your browser settings, or open their QR with your camera app.",
+    no_camera: "No camera here. Ask them to scan you or search by name.",
+    unsupported: "This browser can't open the camera. Use your phone's camera app on their QR, or search by name.",
+    no_decoder: "We can't read QR codes here. Use your phone's camera app on their QR, or search by name.",
+    failed: "We couldn't open the camera (is another app using it?). Use the camera app or search by name.",
+  },
+  notFound: "We couldn't find anyone with that name.",
+};
+
+export const register: typeof es.register = {
+  title: "Register",
+  alreadyKnew: "You already knew each other",
+  typeLabel: "Connection type",
+  newType: "New",
+  reconnectionType: "Reconnection",
+  topicsLabel: "What did you talk about?",
+  topics: ["Raising capital", "AI", "Proptech", "Hiring", "B2B sales", "Fintech"],
+  noteTitle: "Or tell Compa",
+  noteHint: "Voice note, optional · +15 pts",
+  recording: (time) => `Recording · ${time}`,
+  tapToStop: "Tap to stop",
+  noteSaved: (time) => `Note saved · ${time}`,
+  noteSavedHint: "Compa adds any missing topics",
+  rerecord: "Record again",
+  confirm: (points) => `Confirm · +${points} pts`,
+  sending: "Sending…",
+  screenNotice: "When you confirm, your name and photo appear on the event screen.",
+  retryUpload: "Retry sending",
+  micUnavailable: "We couldn't use the microphone; you can go on without a note.",
+};
+
+export const confirmation: typeof es.confirmation = {
+  points: (points) => `+${points} pts`,
+  titleNew: (name) => `You connected with ${name}`,
+  titleReconnection: (name) => `Reconnected with ${name}`,
+  titlePending: (name) => `Request sent to ${name}`,
+  breakdownKind: (kind, points) => `+${points} ${kind === "new" ? "new" : "reconnection"}`,
+  breakdownTopics: (points) => `+${points} topics`,
+  breakdownNote: (points) => `+${points} for the note`,
+  talkedAbout: "What you talked about",
+  fromNote: (time) => `From your note · ${time}`,
+  connectWith: (name) => `Connect with ${name}`,
+  keepTalking: "To keep the conversation going",
+  linkLabel: (network, name) => `${name}'s ${network}`,
+  pendingNote: "When they accept, you'll see their socials here.",
+};
+
+export const request: typeof es.request = {
+  badge: "New request",
+  title: (name) => `${name} wants to connect with you`,
+  scannedAgo: (ago, topics) => `Scanned you ${ago} · ${topics}`,
+  mutual: "mutual",
+  connections: "connections",
+  events: "events",
+  mutualLabel: "Mutual",
+  interestsLabel: "Wants to talk about",
+  bothWin: "When you accept, you both earn +20 pts and show up in each other's connections.",
+  accept: "Accept",
+  accepting: "Accepting…",
+  names: (names) => (names.length <= 1 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`),
+};
+
+export const connections: typeof es.connections = {
+  title: "Connections",
+  search: "Search my connections",
+  filterLabel: "Filter by type",
+  filters: { all: "All", new: "New", reconnection: "Reconnections", friend: "Friends" },
+  types: { new: "New", reconnection: "Reconnection", friend: "Friend" },
+  empty: "You don't have connections yet. Scan the first person you meet.",
+  emptyTitle: "Your people will live here",
+  emptyCta: "Go to Connect",
+  emptyFiltered: "Nobody in this filter yet.",
+};
+
+export const person: typeof es.person = {
+  connected: "Connected",
+  pending: "Pending",
+  notConnected: "Not connected",
+  badges: "Their badges",
+  badgesCount: (earned, total) => `${earned} of ${total} · see all`,
+  reconnections: "reconnections",
+  eventsTogether: "events together",
+  mutual: "mutual",
+  lastTime: "Last time",
+  today: "Today",
+  mutualConnections: "Mutual connections",
+  links: "Their socials",
+  linkLabel: (network, name) => `${name}'s ${network}`,
+  linksLocked: "You'll see more of their profile once the connection is accepted.",
+  pointsRank: (points, rank) => (rank ? `${points} pts · #${rank}` : `${points} pts`),
+};
+
+export const note: typeof es.note = {
+  title: "Tell Compa",
+  reconnectionAgo: (kind, ago) => `${kind} · ${ago}`,
+  recording: (time) => `Recording · ${time}`,
+  question: "What did you talk about?",
+  hint: "Say it like you'd tell a friend. Compa summarizes it for you.",
+  stop: "Stop recording",
+  tapToStop: "Tap to stop",
+  understood: "What Compa understood",
+  pendingLabel: "Follow-up detected",
+  remind: "Remind me",
+  pointsNote: "+15 pts for saving the note",
+  save: "Save to the connection",
+  saving: "Saving…",
+  rerecord: "Record again",
+  edit: "Edit",
+  transcribing: "Compa is listening…",
+  failed: "We couldn't summarize the note. Type what you talked about:",
+  notePlaceholder: "Type what you talked about",
+  draftButton: "Summarize",
+  retryUpload: "Retry sending the note",
+};
+
+export const me: typeof es.me = {
+  myQr: "My QR",
+  edit: "Edit profile",
+  changeMonito: "Your monito, change it",
+  badges: "Badges",
+  badgesCount: (earned, total) => `${earned} of ${total} · see all`,
+  newConnections: "new",
+  reconnections: "reconnections",
+  events: "events",
+  linksLabel: "Your socials and who sees them",
+  linksEmpty: "You haven't added socials yet. Add them so your connections can find you.",
+  linksAdd: "Add socials",
+  linksEdit: "Edit socials and preview",
+  ranking: "Leaderboard",
+  myMonito: "My monito",
+  change: "Change",
+  signOut: "Sign out",
+  signOutWarning: "You can sign back in with LinkedIn from compa.lol.",
+  signOutCancel: "Cancel",
+  signOutConfirm: "Yes, sign out",
+  pointsRank: (points, rank) => (rank ? `${points} pts · #${rank}` : `${points} pts`),
+  admin: "Admin",
+  adminHint: "Events, people and tests",
+  testUser: "Test user",
+};
+
+export const badges: typeof es.badges = {
+  title: "Badges",
+  earned: (earned, total) => `${earned} of ${total} earned`,
+  summary: (close, secret) => `${close} almost there · ${secret} secret`,
+  filterLabel: "Filter badges",
+  filters: { all: "All", earned: "Earned", pending: "To earn" },
+  secret: "Secret: discover it",
+  progress: (current, total, label) => `${current} / ${total} ${label}`,
+  barLabel: "Badges earned",
+  toEarn: "not earned yet",
+};
+
+// Badge names per locale; the Spanish ones live in lib/badges/catalog.ts and are the API's canonical names.
+export const badgeNames: typeof es.badgeNames = {
+  apreton: { name: "First Handshake", short: "FIRST HANDSHAKE" },
+  madrugador: { name: "Early Bird", short: "EARLY BIRD" },
+  cierre: { name: "Closing Time", short: "CLOSING TIME" },
+  iman: { name: "Magnet", short: "MAGNET" },
+  maraton: { name: "Marathon", short: "MARATHON" },
+  tresdetres: { name: "Three for Three", short: "THREE FOR THREE" },
+  puente: { name: "Bridge", short: "BRIDGE" },
+  duo: { name: "Dynamic Duo", short: "DYNAMIC DUO" },
+  ff2026: { name: "Founders Fest 2026", short: "FOUNDERS FEST" },
+  og: { name: "OG", short: "OG · THE FIRST" },
+  rey: { name: "Reunion King", short: "REUNION KING" },
+  speaker: { name: "With the Speaker", short: "WITH THE SPEAKER" },
+  noctambulo: { name: "Night Owl", short: "NIGHT OWL" },
+  cazatalentos: { name: "Talent Scout", short: "TALENT SCOUT" },
+  conector100: { name: "Connector 100", short: "CONNECTOR 100" },
+  trotamundos: { name: "Globetrotter", short: "GLOBETROTTER" },
+  curioso: { name: "Curious", short: "CURIOUS" },
+  memoria: { name: "Elephant Memory", short: "MEMORY" },
+  quinientos: { name: "500 in a Night", short: "500 IN A NIGHT" },
+  cuatro: { name: "Four Quarters", short: "4 QUARTERS" },
+};
+
+export const ranking: typeof es.ranking = {
+  title: "Event leaderboard",
+  scopeLabel: "Leaderboard scope",
+  tonight: "Tonight",
+  allYear: "All year",
+  youRank: (rank) => (rank ? `You · #${rank}` : "You · unranked"),
+  youSub: (points, extra) => `${points} pts · ${extra}`,
+  toPass: (name) => `To pass ${name}`,
+  pointsShort: (points) => `${points} pts`,
+  connectNow: "Connect now",
+  noRank: "Make your first connection to join the leaderboard.",
+  first: "You're in first place.",
+  inEvents: (count) => `in ${count} events`,
+  tonightSub: "tonight",
+};
+
+export const invite: typeof es.invite = {
+  title: "Invite friends",
+  prize: "Invite 3 and earn the golden cap",
+  prizeDetail: ["Every friend who joins gives you ", "+100 pts", " and gives them ", "+50", " to start."],
+  invitees: "Your invitees",
+  progress: (done, total) => `${done} of ${total}`,
+  friendSlot: (n) => `Friend ${n}`,
+  cap: "Cap",
+  link: "Your link",
+  copy: "Copy",
+  copied: "Copied",
+  whatsapp: "WhatsApp",
+  instagram: "Instagram",
+  more: "More",
+  footer: ["Your friend signs in with LinkedIn, just like you.", "When they make their first connection, you get the +100."],
+  showQr: "Show my invite QR",
+  shareText: (url) => `Come join me on Compa: we connect at the event and keep each other's socials: ${url}`,
+  pointsEach: "+100 pts",
+};
+
+export const networks: typeof es.networks = {
+  linkedin: "LinkedIn",
+  whatsapp: "WhatsApp",
+  instagram: "Instagram",
+  x: "X (Twitter)",
+  github: "GitHub",
+  web: "Website",
+};
+
+export const time: typeof es.time = {
+  minutesAgo: (minutes) => (minutes < 1 ? "just now" : minutes === 1 ? "1 min ago" : `${minutes} min ago`),
+  hoursAgo: (hours) => (hours === 1 ? "1 h ago" : `${hours} h ago`),
+  today: "Today",
+  clock: (seconds) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`,
+};
+
+export const badgeProgress: typeof es.badgeProgress = {
+  labels: {
+    apreton: "your first connection",
+    madrugador: "connect in the first hour",
+    cierre: "connect at the end of the event",
+    iman: "people scanned you",
+    maraton: "in one night",
+    tresdetres: "reconnections with the same person",
+    puente: "introductions",
+    duo: "events with someone",
+    ff2026: "attend Founders Fest",
+    og: "of the first 100",
+    conector100: "connections",
+    trotamundos: "cities",
+    curioso: "different topics",
+    memoria: "voice notes",
+    quinientos: "of the event",
+    cuatro: "quarters in a row",
+  },
+  earnedOn: (date) => new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Mexico_City" }).format(date),
+};
+
+export const rankingTips: typeof es.rankingTips = {
+  first: "You're in first place.",
+  gap: (gap) => (gap <= 50 ? "One new connection (+50) and you pass them." : `You're ${gap} pts away: ${Math.ceil(gap / 50)} new connections.`),
+};
+
+export const tour: typeof es.tour = {
+  step: (n, total) => `${n} of ${total}`,
+  skip: "Skip",
+  back: "Back",
+  next: "Next",
+  done: "Got it!",
+  replay: "Quick guide",
+  home: [
+    { target: "live", title: "This is what's happening at the event", body: "How many connections tonight, who just connected and where you stand. Tap the row below to see the full leaderboard." },
+    { target: "connect", title: "Connect with people here", body: "It's the main button. Show your QR to be scanned, or scan the other person's. Every new connection is worth +50 pts; a reconnection, +20." },
+    { target: "invite", title: "Invite your friends", body: "Share your link. Every friend who joins and makes a first connection gives you +100 pts, and with three you earn the golden cap for your monito." },
+    { target: "dock", title: "Your bar, always there", body: "Home, Connect (your QR), your Connections with what you talked about, and your Profile with points, badges and the socials you share." },
+  ],
+  connect: [
+    { target: "mode", title: "Two ways to connect", body: "\"My QR\" is what you show to be scanned. \"Scan\" opens the camera to read the other person's QR; if it won't scan, search for them by name." },
+    { target: "qr", title: "Your personal QR", body: "Any camera can read it and opens your card on Compa. The other person registers the connection and you get the request to accept it." },
+  ],
+  register: [
+    { target: "kind", title: "New or reconnection?", body: "New if it's the first time you connect (+50). Reconnection if you already knew each other (+20). If they're already in your connections, we mark it for you." },
+    { target: "topics", title: "What did you talk about?", body: "Pick up to three topics. They're saved with the person and add +5 pts." },
+    { target: "note", title: "Tell Compa", body: "Record a voice note of up to two minutes. Compa summarizes it into a title, three points and a follow-up. Worth +15 pts when you save it." },
+    { target: "confirm", title: "Send the request", body: "The other person accepts it from their phone and, until then, nobody sees the other's socials. Once accepted, you both earn the points." },
+  ],
+  me: [
+    { target: "avatar", title: "Your monito", body: "This is how people see you at the event. Tap it to change it; over time you earn outfits and accessories by connecting." },
+    { target: "links", title: "Your socials and who sees them", body: "For each one, choose: Everyone, Connections (only after the connection is accepted) or Only me." },
+    { target: "badges", title: "Your badges", body: "You earn them by connecting: the first one, early bird, marathon… Four are secret and we won't tell you how to earn them." },
+  ],
+  ranking: [
+    { target: "scope", title: "Tonight or all year", body: "Tonight's leaderboard counts only the current event; the yearly one adds up every event you've been to." },
+    { target: "you", title: "You on the leaderboard", body: "Your rank, your points and how many you need to pass the person above you. One new connection is usually enough." },
+  ],
+  incoming: {
+    title: (name) => `${name} wants to connect with you`,
+    hint: "Tap to see who it is and accept.",
+    view: "View",
+  },
+  outsideEvent: {
+    title: "You're not at an event right now",
+    body: "When you get to one, scan the QR at the entrance to check in and start connecting.",
+  },
+};

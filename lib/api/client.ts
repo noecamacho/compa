@@ -1,5 +1,4 @@
 import type { z } from "zod";
-import { apiErrors, common } from "../copy/es";
 
 // Typed same-origin fetch for Client Components. The session cookie travels on its own.
 export class ApiClientError extends Error {
@@ -67,21 +66,4 @@ export async function apiCall<T extends z.ZodType>(method: Method, path: string,
   if (!response.ok) throw await toError(response);
   if (response.status === 204) return schema.parse(undefined);
   return schema.parse(await response.json());
-}
-
-const FRIENDLY_CODES: Record<string, string | undefined> = { ...apiErrors.codes, rate_limited: common.rateLimited, limit_reached: common.limitReached };
-
-// Any typed request failure: ApiClientError here, or the recorder's upload ApiError (lib/audio/recorder.ts).
-const isFailure = (error: unknown): error is { status: number; code: string } =>
-  error instanceof Error && "status" in error && typeof error.status === "number" && "code" in error && typeof error.code === "string";
-
-// What the attendee reads: Spanish, actionable, never a raw server or browser message.
-export function errorText(error: unknown): string {
-  if (!isFailure(error)) return apiErrors.generic;
-  const known = FRIENDLY_CODES[error.code];
-  if (known) return known;
-  if (error.status === 401) return apiErrors.signedOut;
-  if (error.status === 429) return common.rateLimited;
-  if (error.status >= 500) return apiErrors.server;
-  return apiErrors.generic;
 }

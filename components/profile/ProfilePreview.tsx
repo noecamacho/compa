@@ -5,7 +5,8 @@ import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Segmented } from "@/components/ui/Segmented";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import type { MeT } from "@/lib/api/schemas";
-import { networks, profile, visibility as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
+import type { Dictionary } from "@/lib/copy";
 import { NETWORK_ORDER } from "@/components/brand/NetworkIcon";
 import type { Links, VisibilitySettings } from "@/lib/profile-fields";
 import { toCard, type Relation } from "@/lib/visibility";
@@ -15,13 +16,13 @@ type Draft = { name: string; headline: string; company: string; city: string; li
 type Props = { me: MeT; draft: Draft };
 type View = Exclude<Relation, "self">;
 
-const VIEWS = [
+const viewOptions = (copy: Dictionary["visibility"]): { value: View; label: string }[] => [
   { value: "public", label: copy.before },
   { value: "connected", label: copy.after },
-] as const satisfies readonly { value: View; label: string }[];
+];
 
 // What becomes visible only after connecting, named for the "Al conectar también verán" line.
-function unlockedItems(before: ReturnType<typeof toCard>, after: ReturnType<typeof toCard>): string[] {
+function unlockedItems(before: ReturnType<typeof toCard>, after: ReturnType<typeof toCard>, { profile, networks }: Dictionary): string[] {
   const fields = [
     !before.headline && after.headline ? profile.role : null,
     !before.company && after.company ? profile.company : null,
@@ -33,6 +34,8 @@ function unlockedItems(before: ReturnType<typeof toCard>, after: ReturnType<type
 // Live preview of the profile as someone else sees it, before and after the connection is accepted.
 // It runs the same toCard filter as the server, so what it shows is what others get.
 export function ProfilePreview({ me, draft }: Props) {
+  const all = useCopy();
+  const copy = all.visibility;
   const [view, setView] = useState<View>("public");
   const source = {
     ...me,
@@ -46,11 +49,11 @@ export function ProfilePreview({ me, draft }: Props) {
   const before = toCard(source, "public");
   const after = toCard(source, "connected");
   const card = view === "public" ? before : after;
-  const unlocked = unlockedItems(before, after);
+  const unlocked = unlockedItems(before, after, all);
   return (
     <section aria-label={copy.previewLabel} className="flex flex-col gap-[10px] rounded-button bg-paper px-[14px] py-3 border-ink" id="preview">
       <SectionLabel>{copy.previewTitle}</SectionLabel>
-      <Segmented options={VIEWS} value={view} onChange={setView} label={copy.previewLabel} height={32} />
+      <Segmented options={viewOptions(copy)} value={view} onChange={setView} label={copy.previewLabel} height={32} />
       <div className="flex flex-col gap-[10px] rounded-[14px] bg-white p-3 border-ink" data-testid={`preview-${view}`}>
         <span className="flex items-center gap-3">
           <Avatar person={avatarOf(card)} size={48} />

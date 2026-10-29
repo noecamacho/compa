@@ -1,3 +1,5 @@
+import type { BadgeId } from "../badges/catalog";
+
 // Every string the attendee sees, in Spanish (product decision, wiki/open-questions.md #6). Copy comes from design/compa-v2.
 // The sections the landing and event entry use also exist in English (lib/copy/en.ts); lib/copy/index.ts picks one per locale.
 
@@ -59,6 +61,10 @@ export const apiErrors = {
     connection_not_found: "No encontramos esa conexión.",
     user_not_found: "No encontramos a esa persona.",
   },
+};
+
+export const meta = {
+  description: "Conecta en el evento. Recuérdalo después.",
 };
 
 export const profile = {
@@ -153,7 +159,7 @@ export const home = {
   connectionsTonight: "conexiones esta noche",
   pairsNow: "Conexiones que están pasando ahora",
   pair: (a: string, b: string) => `${a} y ${b}`,
-  rank: (rank: number, points: string) => ["Vas en el ", `#${rank}`, ` con ${points} pts`] as const,
+  rank: (rank: number, points: string): readonly [string, string, string] => ["Vas en el ", `#${rank}`, ` con ${points} pts`],
   firstConnection: "Tu primera conexión te mete al ranking",
   connect: "Conectar",
   connectHint: "Muestra tu QR o escanea",
@@ -356,6 +362,31 @@ export const badges = {
   secret: "Secreta: descúbrela",
   progress: (current: number, total: number, label: string) => `${current} / ${total} ${label}`,
   barLabel: "Insignias ganadas",
+  toEarn: "por ganar",
+};
+
+// Badge names per locale; these Spanish ones match lib/badges/catalog.ts (the API's canonical names).
+export const badgeNames: Record<BadgeId, { name: string; short: string }> = {
+  apreton: { name: "Primer apretón", short: "PRIMER APRETÓN" },
+  madrugador: { name: "Madrugador", short: "MADRUGADOR" },
+  cierre: { name: "Cierre", short: "CIERRE" },
+  iman: { name: "Imán", short: "IMÁN" },
+  maraton: { name: "Maratón", short: "MARATÓN" },
+  tresdetres: { name: "Tres de tres", short: "TRES DE TRES" },
+  puente: { name: "Puente", short: "PUENTE" },
+  duo: { name: "Dúo dinámico", short: "DÚO DINÁMICO" },
+  ff2026: { name: "Founders Fest 2026", short: "FOUNDERS FEST" },
+  og: { name: "OG", short: "OG · EL PRIMERO" },
+  rey: { name: "Rey del reencuentro", short: "REY REENCUENTRO" },
+  speaker: { name: "Con el speaker", short: "CON EL SPEAKER" },
+  noctambulo: { name: "Noctámbulo", short: "NOCTÁMBULO" },
+  cazatalentos: { name: "Cazatalentos", short: "CAZATALENTOS" },
+  conector100: { name: "Conector 100", short: "CONECTOR 100" },
+  trotamundos: { name: "Trotamundos", short: "TROTAMUNDOS" },
+  curioso: { name: "Curioso", short: "CURIOSO" },
+  memoria: { name: "Memoria de elefante", short: "MEMORIA" },
+  quinientos: { name: "500 en la noche", short: "500 EN LA NOCHE" },
+  cuatro: { name: "Cuatro trimestres", short: "4 TRIMESTRES" },
 };
 
 export const ranking = {

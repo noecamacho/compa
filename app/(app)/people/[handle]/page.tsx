@@ -12,7 +12,7 @@ import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { UserProfile } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
-import { person as copy } from "@/lib/copy/es";
+import { requestCopy } from "@/lib/server/locale";
 import { formatPoints } from "@/lib/format";
 import { BADGE_IDS } from "@/lib/badges/catalog";
 
@@ -20,6 +20,8 @@ type Props = { params: Promise<{ handle: string }> };
 
 // 08 PerfilOtro: someone I already connected with.
 export default async function PersonPage({ params }: Props) {
+  const { locale, copy: all } = await requestCopy();
+  const copy = all.person;
   const { handle } = await params;
   const profile = await apiGetOrNull(`/api/users/${handle}`, UserProfile);
   if (!profile) notFound();
@@ -56,7 +58,7 @@ export default async function PersonPage({ params }: Props) {
                 <Link href="/ranking" className={`${HIT_AREA} self-start tappable`}>
                   <Pill tone="sun" height={34} className="rounded-chip px-3 text-[14px]">
                     <Icon name="bolt" size={14} />
-                    {copy.pointsRank(formatPoints(scores.event.points), scores.event.rank)}
+                    {copy.pointsRank(formatPoints(locale, scores.event.points), scores.event.rank)}
                   </Pill>
                 </Link>
               )}

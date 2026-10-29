@@ -1,9 +1,11 @@
+"use client";
+
 import { Icon } from "@/components/icons";
 import { Monito } from "@/components/monito/Monito";
 import { Card } from "@/components/ui/Card";
 import { Muted } from "@/components/ui/Text";
 import type { InvitesT } from "@/lib/api/schemas";
-import { home } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { GOLDEN_CAP, withDefaults } from "@/lib/monito/look";
 
 const GOLDEN_LOOK = withDefaults({ ...GOLDEN_CAP, outfit: "compa", shirt: "#FFFFFF" });
@@ -12,6 +14,7 @@ type Props = { invites: InvitesT };
 
 // "Invita 3 y gana la gorra dorada" with three progress circles (V2Inicio).
 export function InviteCard({ invites }: Props) {
+  const { home } = useCopy();
   const done = invites.invitees.filter((invitee) => invitee.firstConnectionAt).length;
   const left = Math.max(0, invites.target - done);
   return (

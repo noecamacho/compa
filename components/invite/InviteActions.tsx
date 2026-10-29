@@ -2,19 +2,20 @@
 
 import { useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
-import { invite as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { HIT_AREA } from "@/components/ui/hit-area";
 
 type Props = { url: string };
 
-const VIA: { key: "whatsapp" | "instagram" | "more"; color: string; icon: IconName; label: string }[] = [
-  { key: "whatsapp", color: "#DDF8EA", icon: "whatsapp", label: copy.whatsapp },
-  { key: "instagram", color: "#FFE3EA", icon: "instagram", label: copy.instagram },
-  { key: "more", color: "#DDF1FF", icon: "share", label: copy.more },
+const VIA: { key: "whatsapp" | "instagram" | "more"; color: string; icon: IconName }[] = [
+  { key: "whatsapp", color: "#DDF8EA", icon: "whatsapp" },
+  { key: "instagram", color: "#FFE3EA", icon: "instagram" },
+  { key: "more", color: "#DDF1FF", icon: "share" },
 ];
 
 // Copy the link or share it; Instagram has no share URL, so it copies and opens the app's share sheet.
 export function InviteActions({ url }: Props) {
+  const copy = useCopy().invite;
   const [copied, setCopied] = useState(false);
 
   async function copyLink() {
@@ -53,7 +54,7 @@ export function InviteActions({ url }: Props) {
             style={{ background: via.color }}
           >
             <Icon name={via.icon} size={18} />
-            {via.label}
+            {copy[via.key]}
           </button>
         ))}
       </div>

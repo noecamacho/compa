@@ -5,12 +5,13 @@ import { Muted, ProgressBar } from "@/components/ui/Text";
 import { BadgeList } from "@/lib/api/schemas";
 import { apiGetSafe } from "@/lib/api/server-fetch";
 import { BADGE_IDS, isSecret } from "@/lib/badges/catalog";
-import { badges as copy } from "@/lib/copy/es";
+import { requestCopy } from "@/lib/server/locale";
 
 type Props = { searchParams: Promise<{ of?: string }> };
 
 // 10 Insignias. `?of=<handle>` comes from another person's shelf and only changes the back link for now.
 export default async function BadgesPage({ searchParams }: Props) {
+  const copy = (await requestCopy()).copy.badges;
   const { of } = await searchParams;
   const list = (await apiGetSafe("/api/badges", BadgeList)) ?? { badges: [], earned: 0, total: BADGE_IDS.length };
   const close = list.badges.filter((status) => !status.earnedAt && status.progress && status.progress.current / status.progress.total >= 0.6).length;

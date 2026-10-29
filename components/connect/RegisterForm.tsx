@@ -13,17 +13,18 @@ import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { Tour } from "@/components/tour/Tour";
-import { apiCall, errorText } from "@/lib/api/client";
+import { apiCall } from "@/lib/api/client";
+import { errorText } from "@/lib/api/error-text";
 import { ConnectionRequest, type UserProfileT } from "@/lib/api/schemas";
-import { register as copy, tour } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { CONNECTION_POINTS, SUMMARY_POINTS, TOPICS_POINTS } from "@/lib/points";
 import { rememberNote } from "@/lib/note-draft";
 
 type Kind = "new" | "reconnection";
 
-const KIND: Record<Kind, { label: string; points: number; color: string; icon: IconName }> = {
-  new: { label: copy.newType, points: CONNECTION_POINTS.new, color: "#6BE4A3", icon: "userPlus" },
-  reconnection: { label: copy.reconnectionType, points: CONNECTION_POINTS.reconnection, color: "#6CC4FF", icon: "refresh" },
+const KIND: Record<Kind, { points: number; color: string; icon: IconName }> = {
+  new: { points: CONNECTION_POINTS.new, color: "#6BE4A3", icon: "userPlus" },
+  reconnection: { points: CONNECTION_POINTS.reconnection, color: "#6CC4FF", icon: "refresh" },
 };
 
 const MAX_TOPICS = 3;
@@ -32,6 +33,8 @@ type Props = { profile: UserProfileT };
 
 // 05 Registrar: kind, topics (+5), optional voice note (+15), then the request is sent (two-step connection).
 export function RegisterForm({ profile }: Props) {
+  const all = useCopy();
+  const { register: copy, tour } = all;
   const router = useRouter();
   const person = profile.card;
   const knew = profile.connection?.status === "accepted" || profile.connection?.kind === "reconnection";
@@ -61,7 +64,7 @@ export function RegisterForm({ profile }: Props) {
       if (note.status === "ready") rememberNote(result.connectionId, note);
       router.push(`/connections/${result.connectionId}/done`);
     } catch (caught) {
-      setError(errorText(caught));
+      setError(errorText(all, caught));
       setSending(false);
     }
   }
@@ -105,7 +108,7 @@ export function RegisterForm({ profile }: Props) {
                   <Icon name={KIND[option].icon} size={14} strokeWidth={2.8} />
                 </span>
                 <span className="flex flex-col">
-                  <span className="text-[13px] font-extrabold">{KIND[option].label}</span>
+                  <span className="text-[13px] font-extrabold">{option === "new" ? copy.newType : copy.reconnectionType}</span>
                   <span className="text-[12px] font-bold">+{KIND[option].points} pts</span>
                 </span>
               </button>

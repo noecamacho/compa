@@ -1,12 +1,13 @@
 import { Screen } from "@/components/ui/Screen";
-import { screenState as copy } from "@/lib/copy/es";
+import { requestCopy } from "@/lib/server/locale";
 
 // A block of the skeleton: the card shape with its ink border at low contrast, pulsing (still when reduced motion is on).
 const Block = ({ className }: { className: string }) => <span aria-hidden="true" className={`block animate-pulse rounded-card border-[2.5px] border-ink/10 bg-ink/5 ${className}`} />;
 
 // Shown while any attendee screen loads: the shape of a screen (top bar, a big card, two smaller ones), so the
 // layout does not jump when the data arrives. Same columns as the real screens from 834.
-export default function AppLoading() {
+export default async function AppLoading() {
+  const copy = (await requestCopy()).copy.screenState;
   return (
     <Screen dock>
       <div role="status" className="flex items-center gap-3">

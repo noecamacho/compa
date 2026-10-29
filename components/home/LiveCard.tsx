@@ -1,10 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import { Icon, type IconName } from "@/components/icons";
 import { Avatar } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import type { LiveSnapshotT, MeT } from "@/lib/api/schemas";
-import { common, home, tour } from "@/lib/copy/es";
+import { useCopy, useLocale } from "@/components/LocaleProvider";
 import { formatHour, formatPoints } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
 
@@ -33,6 +35,7 @@ const first = (name: string) => name.split(" ")[0] ?? name;
 
 // Shown instead of the live card when the person is not checked in anywhere (gap analysis U7).
 export function OutsideEventCard() {
+  const { tour } = useCopy();
   return (
     <Card tone="sky-soft" className="flex items-center gap-[14px] px-4 py-[14px]">
       <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-button bg-white border-ink shadow-hard-2" style={{ transform: "rotate(-5deg)" }}>
@@ -49,6 +52,8 @@ export function OutsideEventCard() {
 type Props = { snapshot: LiveSnapshotT; me: MeT; endsAt: string; looks: Map<string, MonitoLook | undefined>; empty: boolean };
 
 export function LiveCard({ snapshot, me, endsAt, looks, empty }: Props) {
+  const { common, home } = useCopy();
+  const locale = useLocale();
   const pairs = pairsFrom(snapshot, looks);
   const rank = me.scores?.event.rank ?? null;
   const points = me.scores?.event.points ?? 0;
@@ -59,7 +64,7 @@ export function LiveCard({ snapshot, me, endsAt, looks, empty }: Props) {
           <span className="animate-beat h-2 w-2 rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
           {common.live}
         </Pill>
-        <span className="text-[13px] font-extrabold">{home.until(snapshot.event.name, formatHour(endsAt))}</span>
+        <span className="text-[13px] font-extrabold">{home.until(snapshot.event.name, formatHour(locale, endsAt))}</span>
       </div>
       <div className="flex items-baseline gap-2">
         <span className="font-display text-[44px] leading-none font-bold">{snapshot.counters.connections}</span>
@@ -94,9 +99,9 @@ export function LiveCard({ snapshot, me, endsAt, looks, empty }: Props) {
             home.firstConnection
           ) : (
             <>
-              {home.rank(rank, formatPoints(points))[0]}
-              <span className="font-display text-[18px] font-bold">{home.rank(rank, formatPoints(points))[1]}</span>
-              {home.rank(rank, formatPoints(points))[2]}
+              {home.rank(rank, formatPoints(locale, points))[0]}
+              <span className="font-display text-[18px] font-bold">{home.rank(rank, formatPoints(locale, points))[1]}</span>
+              {home.rank(rank, formatPoints(locale, points))[2]}
             </>
           )}
         </span>

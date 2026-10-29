@@ -11,14 +11,15 @@ import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { ConnectionDetail, Me } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
-import { common, confirmation as copy } from "@/lib/copy/es";
+import type { Dictionary } from "@/lib/copy";
+import { requestCopy } from "@/lib/server/locale";
 import { formatClock } from "@/lib/format";
 
 type Props = { params: Promise<{ id: string }> };
 
 const first = (name: string) => name.split(" ")[0] ?? name;
 
-function breakdown(detail: NonNullable<Awaited<ReturnType<typeof load>>>): string {
+function breakdown(detail: NonNullable<Awaited<ReturnType<typeof load>>>, copy: Dictionary["confirmation"]): string {
   const parts = [];
   if (detail.kind && detail.points.kind) parts.push(copy.breakdownKind(detail.kind, detail.points.kind));
   if (detail.points.topics) parts.push(copy.breakdownTopics(detail.points.topics));
@@ -31,7 +32,8 @@ const load = (id: string) => apiGetOrNull(`/api/connections/${id}`, ConnectionDe
 // 06 Confirmación: both monitos, the points, what they talked about and the other person's networks.
 export default async function ConfirmationPage({ params }: Props) {
   const { id } = await params;
-  const [me, detail] = await Promise.all([apiGet("/api/me", Me), load(id)]);
+  const [me, detail, { locale, copy: all }] = await Promise.all([apiGet("/api/me", Me), load(id), requestCopy()]);
+  const { common, confirmation: copy } = all;
   if (!detail) notFound();
   const other = detail.other;
   const pending = detail.status !== "accepted";
@@ -58,7 +60,7 @@ export default async function ConfirmationPage({ params }: Props) {
         </span>
         <div className="animate-rise flex flex-col items-center gap-[2px]" style={{ animationDelay: ".25s" }}>
           <h1 className="m-0 font-display text-[24px] leading-[1.15] font-bold">{title}</h1>
-          <Muted className="text-[13px] font-bold">{breakdown(detail)}</Muted>
+          <Muted className="text-[13px] font-bold">{breakdown(detail, copy)}</Muted>
         </div>
       </div>
 
@@ -66,7 +68,7 @@ export default async function ConfirmationPage({ params }: Props) {
         <Card href={`/connections/${detail.connectionId}/note`} className="animate-rise flex flex-col gap-[10px] px-4 py-[14px]" style={{ animationDelay: ".4s" }}>
           <span className="flex items-center justify-between">
             <SectionLabel>{copy.talkedAbout}</SectionLabel>
-            {detail.interaction.durationSec !== null && <Muted className="text-[11px] font-extrabold">{copy.fromNote(formatClock(detail.interaction.durationSec))}</Muted>}
+            {detail.interaction.durationSec !== null && <Muted className="text-[11px] font-extrabold">{copy.fromNote(formatClock(locale, detail.interaction.durationSec))}</Muted>}
           </span>
           <span className="flex flex-wrap gap-2">
             {detail.interaction.topics.map((topic, index) => (

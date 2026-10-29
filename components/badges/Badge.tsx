@@ -1,3 +1,6 @@
+"use client";
+
+import { useCopy } from "@/components/LocaleProvider";
 import { BADGES, CATEGORY_STYLE, SHAPES, type BadgeId } from "@/lib/badges/catalog";
 
 // "pending": still to earn but its art is shown (faded, with the lock); "locked": grey mystery, for secret badges.
@@ -25,6 +28,7 @@ const lockedFill = (fill: string | undefined, locked: boolean, dark = false): st
 
 // Ported from design/compa-v2/componentes/Insignia.dc.html: hard shadow, dashed inner outline, icon, lock, sparkle, ribbon.
 export function Badge({ id, size = 120, state = "earned", withName = false, tilted = false, className }: Props) {
+  const copy = useCopy();
   const badge = BADGES[id];
   const style = CATEGORY_STYLE[badge.category];
   const locked = state === "locked";
@@ -34,7 +38,8 @@ export function Badge({ id, size = 120, state = "earned", withName = false, tilt
   const stroke = locked ? LOCKED.stroke : "#1E1B2E";
   const icon = badge.icon;
   const textFill = locked ? "#6F6A7E" : "#1E1B2E";
-  const label = `${badge.name}${earned ? "" : ", por ganar"}`;
+  const names = copy.badgeNames[id];
+  const label = `${names.name}${earned ? "" : `, ${copy.badges.toEarn}`}`;
   return (
     <svg
       viewBox={`0 0 120 ${viewHeight}`}
@@ -119,11 +124,11 @@ export function Badge({ id, size = 120, state = "earned", withName = false, tilt
               y={18}
               textAnchor="middle"
               fontWeight={700}
-              fontSize={ribbonFontSize(badge.shortName)}
+              fontSize={ribbonFontSize(names.short)}
               fill="#1E1B2E"
               letterSpacing={0.5}
             >
-              {badge.shortName}
+              {names.short}
             </text>
           </g>
         )}

@@ -9,7 +9,7 @@ import { Segmented } from "@/components/ui/Segmented";
 import { Muted, ProgressBar } from "@/components/ui/Text";
 import { Tour } from "@/components/tour/Tour";
 import type { LeaderboardScopeT, LeaderboardT, MeT } from "@/lib/api/schemas";
-import { ranking as copy, tour } from "@/lib/copy/es";
+import { useCopy, useLocale } from "@/components/LocaleProvider";
 import { firstName, formatPoints } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
 
@@ -33,6 +33,7 @@ const BLOCKS: Record<1 | 2 | 3, { height: number; color: string; number: number;
 };
 
 function Column({ row, place, look, handle, delay }: { row: Row | undefined; place: 1 | 2 | 3; look?: MonitoLook; handle?: string; delay: number }) {
+  const locale = useLocale();
   const block = BLOCKS[place];
   if (!row) return <span />;
   return (
@@ -55,7 +56,7 @@ function Column({ row, place, look, handle, delay }: { row: Row | undefined; pla
           {place}
         </span>
         <span className="font-display font-semibold" style={{ fontSize: place === 1 ? 15 : 14 }}>
-          {formatPoints(row.points)}
+          {formatPoints(locale, row.points)}
         </span>
       </div>
     </Link>
@@ -64,6 +65,8 @@ function Column({ row, place, look, handle, delay }: { row: Row | undefined; pla
 
 // 11 Ranking: podium with confetti, tonight / all year, my card with the gap to the next person.
 export function RankingView({ me, boards, looks, handles }: Props) {
+  const { ranking: copy, rankingTips, tour } = useCopy();
+  const locale = useLocale();
   const [scope, setScope] = useState<LeaderboardScopeT>("event");
   const board = boards[scope];
   const [first, second, third] = board.rows;
@@ -109,7 +112,7 @@ export function RankingView({ me, boards, looks, handles }: Props) {
             <Avatar person={avatarOf(me)} size={50} />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="font-display text-[24px] leading-none font-bold">{copy.youRank(mine?.rank ?? null)}</span>
-              <Muted className="text-[13px] font-extrabold">{copy.youSub(formatPoints(mine?.points ?? 0), sub)}</Muted>
+              <Muted className="text-[13px] font-extrabold">{copy.youSub(formatPoints(locale, mine?.points ?? 0), sub)}</Muted>
             </span>
           </div>
           {mine?.above ? (
@@ -119,7 +122,8 @@ export function RankingView({ me, boards, looks, handles }: Props) {
                 <span>{copy.pointsShort(mine.gap)}</span>
               </span>
               <ProgressBar value={pct} color="#FFD93D" label={copy.toPass(firstName(mine.above.name))} />
-              {mine.tip && <Muted className="text-[12px] font-extrabold">{mine.tip}</Muted>}
+              {/* The API tip is Spanish; the tip is derived from the gap here so it follows the locale. */}
+              <Muted className="text-[12px] font-extrabold">{rankingTips.gap(mine.gap)}</Muted>
             </div>
           ) : (
             <Muted className="text-[12px] font-extrabold">{mine?.rank === 1 ? copy.first : copy.noRank}</Muted>
@@ -131,7 +135,7 @@ export function RankingView({ me, boards, looks, handles }: Props) {
             <span className="w-[30px] font-display text-[15px] font-bold text-muted">#{mine.above.rank}</span>
             <Avatar person={{ name: mine.above.name, look: looks[mine.above.userId] }} size={30} />
             <span className="flex-1 truncate text-[14px] font-extrabold">{mine.above.name}</span>
-            <Muted className="text-[13px] font-extrabold">{formatPoints(mine.above.points)}</Muted>
+            <Muted className="text-[13px] font-extrabold">{formatPoints(locale, mine.above.points)}</Muted>
           </Link>
         )}
 

@@ -9,7 +9,7 @@ import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { Invites } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
-import { home, invite as copy } from "@/lib/copy/es";
+import { requestCopy } from "@/lib/server/locale";
 import { firstName } from "@/lib/format";
 import { GOLDEN_CAP, withDefaults } from "@/lib/monito/look";
 
@@ -17,6 +17,7 @@ const GOLDEN_LOOK = withDefaults({ ...GOLDEN_CAP, outfit: "compa", shirt: "#FFFF
 
 // 12 Invitar: the golden cap, four slots, my link and the share buttons.
 export default async function InvitePage() {
+  const { home, invite: copy } = (await requestCopy()).copy;
   const invites = await apiGet("/api/invites/me", Invites);
   const done = invites.invitees.filter((invitee) => invitee.firstConnectionAt);
   const slots = Array.from({ length: invites.target }, (_, index) => done[index] ?? null);

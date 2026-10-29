@@ -1,6 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import { apiErrors, common } from "../copy/es";
-import { ApiClientError, errorText } from "./client";
 import { ApiError, errorResponse } from "./errors";
 import { LIMITS, counterKey, windowSlot } from "./rate-limits";
 
@@ -32,11 +30,4 @@ test("an error with headers keeps them in its response (Retry-After)", () => {
   const response = errorResponse(error);
   expect(response.status).toBe(429);
   expect(response.headers.get("Retry-After")).toBe("12");
-});
-
-test("errorText maps rate_limited and limit_reached to their copy, never the English server message", () => {
-  expect(errorText(new ApiClientError(429, "rate_limited", "Too many requests."))).toBe(common.rateLimited);
-  expect(errorText(new ApiClientError(429, "limit_reached", "Limit reached."))).toBe(common.limitReached);
-  expect(errorText(new ApiClientError(409, "not_pending", "Already answered."))).toBe(apiErrors.codes.not_pending);
-  expect(errorText("boom")).toBe(apiErrors.generic);
 });

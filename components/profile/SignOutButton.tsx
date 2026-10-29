@@ -5,11 +5,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { apiCall } from "@/lib/api/client";
 import { NoBody } from "@/lib/api/route-spec";
-import { me as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { disablePush } from "@/lib/push/client";
 
 // Two taps on purpose: getting back in needs the event QR, so signing out by accident is costly.
 export function SignOutButton() {
+  const copy = useCopy().me;
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);

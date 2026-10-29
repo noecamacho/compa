@@ -1,6 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { Icon } from "@/components/icons";
-import { common } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { IconLink } from "./IconButton";
 import { StickyBar } from "./StickyBar";
 
@@ -14,6 +16,7 @@ type Props = {
 
 // Top row: back or close button on the left, optional centred title, optional element on the right.
 export function Header({ back, close, title, titleSize = 20, right }: Props) {
+  const { common } = useCopy();
   const left = back ? (
     <IconLink href={back} label={common.back}>
       <Icon name="back" />

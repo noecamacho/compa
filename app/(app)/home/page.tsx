@@ -11,7 +11,7 @@ import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, Notifications, type ConnectionListT, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
-import { home, tour } from "@/lib/copy/es";
+import { copyFor, type Dictionary } from "@/lib/copy";
 import { firstName } from "@/lib/format";
 import { requestLocale } from "@/lib/server/locale";
 import type { MonitoLook } from "@/lib/monito/look";
@@ -30,7 +30,7 @@ async function loadLive(code: string | undefined): Promise<Live | null> {
   return { snapshot, event };
 }
 
-function NoEventCard() {
+function NoEventCard({ home }: { home: Dictionary["home"] }) {
   return (
     <Card tone="sky-soft" className="flex flex-col gap-1 px-4 py-[14px]">
       <span className="font-display text-[20px] leading-[1.1] font-bold">{home.noEventTitle}</span>
@@ -51,6 +51,7 @@ export default async function HomePage({ searchParams }: Props) {
     apiGetSafe("/api/notifications", Notifications),
     requestLocale(),
   ]);
+  const { home, tour } = copyFor(locale);
   const list = listOrNull ?? NO_CONNECTIONS;
   const empty = demo === "empty" || list.totals.connections === 0;
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
@@ -71,7 +72,7 @@ export default async function HomePage({ searchParams }: Props) {
       {/* Phone: one column. From 834: the live card on the left, Conectar (grown into a tall tile) and the invite on the right. */}
       <div className="flex flex-col gap-[14px] md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-stretch lg:gap-5">
         <div data-tour="live">
-          {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard />}
+          {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard home={home} />}
         </div>
 
         <div className="flex flex-col gap-[14px] lg:gap-5">
