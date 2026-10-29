@@ -59,3 +59,4 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 - [docs/git-workflow.md](../docs/git-workflow.md) — commits, branches, versioning, hooks.
 - [docs/agent-tooling.md](../docs/agent-tooling.md) — caveman, ponytail, Serena, repomix.
 - [docs/jira/compa-bootstrap-ticket.md](../docs/jira/compa-bootstrap-ticket.md) — the Epic draft, ready to paste.
+- [docs/contracts/ai-summaries-api.md](../docs/contracts/ai-summaries-api.md) — transcribe, draft and approve routes, recorder usage and UI mocks.

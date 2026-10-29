@@ -31,3 +31,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | AI core for transcription and summaries
 
 - `lib/ai/*` implements `ai-jobs`: Spanish transcription, Structured Outputs summary, verbatim fallback (p. 12). `lib/topics.ts` ships a 41-topic placeholder list until `open-questions` #4 is settled.
+
+## [2026-10-29] query | AI summaries API contract
+
+- `docs/contracts/ai-summaries-api.md` documents routes 14–16 of the MVP API plan for the summary screen, with camelCase `nextSteps`, the extra `fallback` flag and proposed error codes; `lib/audio/recorder.ts` records audio client-side with the 2-minute limit.
