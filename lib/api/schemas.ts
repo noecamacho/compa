@@ -178,6 +178,8 @@ export const CreatedEvent = z.object({ event: Event.extend({ id: uuid }).extend(
 
 export const RotatedCode = EventAccess.extend({ slug: eventSlug }).meta({ id: "RotatedCode" });
 
+const EventPhase = z.enum(["upcoming", "running", "ended"]).meta({ description: "Where now falls in the event window." });
+
 // The event door (/e/<code>): no slug, nothing beyond what the projected screen already shows.
 export const EventDoor = z
   .object({
@@ -187,7 +189,7 @@ export const EventDoor = z
     endsAt: isoDate,
     timezone: z.string().meta({ description: "IANA time zone the event's times are shown in, e.g. `America/Mexico_City`." }),
     isRunning: z.boolean(),
-    phase: z.enum(["upcoming", "running", "ended"]).meta({ description: "Where now falls in the event window." }),
+    phase: EventPhase,
     counters: z.object({ checkedIn: z.int(), connections: z.int() }),
   })
   .meta({ id: "EventDoor" });
@@ -343,9 +345,9 @@ const LiveConnection = z.object({ id: uuid, a: uuid, b: uuid, kind: ConnectionKi
 
 export const LiveSnapshot = z
   .object({
-    event: z.object({ code: accessCode, name: z.string(), isRunning: z.boolean() }),
+    event: z.object({ code: accessCode, name: z.string(), isRunning: z.boolean(), phase: EventPhase, startsAt: isoDate, endsAt: isoDate }),
     people: z.array(LivePerson),
-    connections: z.array(LiveConnection),
+    connections: z.array(LiveConnection).meta({ description: "Accepted connections, oldest first; at most the newest 1,000 (the counters count all)." }),
     counters: z.object({
       checkedIn: z.int(),
       connections: z.int(),
