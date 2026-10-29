@@ -1,16 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { z } from "zod";
 import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 import { Header } from "@/components/ui/Header";
 import { IconButton } from "@/components/ui/IconButton";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
-import { apiCall } from "@/lib/api/client";
-import { Me, type AvatarModeT, type MeT } from "@/lib/api/schemas";
+import { useHydrated } from "@/components/ui/useHydrated";
+import { apiCall, errorMessage } from "@/lib/api/client";
+import { AvatarMode, Me, type AvatarModeT, type MeT } from "@/lib/api/schemas";
 import { monito as copy } from "@/lib/copy/es";
+import { forgetDraft, recallDraft, rememberDraft } from "@/lib/draft-store";
 import {
   EXTRA_OPTIONS,
   HAIR_COLOR_OPTIONS,
@@ -93,15 +96,40 @@ function Choice({ title, hint, on, disabled = false, onPick }: ChoiceProps) {
 // Preselect the LinkedIn photo when there is one (captain decision); the API already reports `monito` without a photo.
 const initialMode = (me: MeT): AvatarModeT => (me.photoUrl ? (me.avatarMode ?? "photo") : "monito");
 
-// 02b Monito: few options on purpose (README "Monito"); the rest is earned by connecting.
-export function MonitoBuilder({ me, next, back, onboarding }: Props) {
+const DRAFT = "monito";
+
+const Draft = z.object({
+  state: z.object({
+    skin: z.string(),
+    hair: z.enum(HAIR_OPTIONS),
+    hairColor: z.string(),
+    shirt: z.string(),
+    extras: z.object({ cap: z.boolean(), glasses: z.boolean(), beard: z.boolean() }),
+  }),
+  mode: AvatarMode,
+});
+type DraftT = z.infer<typeof Draft>;
+
+// 02b Monito: few options on purpose (README "Monito"); the rest is earned by connecting. Choices survive a reload or
+// going back (sessionStorage draft): the builder mounts from the server data, then again in the browser from the draft.
+export function MonitoBuilder(props: Props) {
+  const hydrated = useHydrated();
+  const draft = useMemo(() => (hydrated ? recallDraft(DRAFT, props.me.id, Draft) : null), [hydrated, props.me.id]);
+  return <Builder key={hydrated ? "browser" : "server"} {...props} draft={draft} restored={hydrated} />;
+}
+
+function Builder({ me, next, back, onboarding, draft, restored }: Props & { draft: DraftT | null; restored: boolean }) {
   const router = useRouter();
   const base = me.avatar;
-  const [state, setState] = useState<BuilderState>(() => (base ? builderFromLook(base) : randomBuilder()));
-  const [mode, setMode] = useState<AvatarModeT>(() => initialMode(me));
+  const [state, setState] = useState<BuilderState>(() => draft?.state ?? (base ? builderFromLook(base) : randomBuilder()));
+  const [mode, setMode] = useState<AvatarModeT>(() => draft?.mode ?? initialMode(me));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const look = lookFromBuilder(state, base);
+
+  useEffect(() => {
+    if (restored) rememberDraft(DRAFT, me.id, { state, mode });
+  }, [restored, me.id, state, mode]);
   const usePhoto = mode === "photo" && Boolean(me.photoUrl);
   const toggleExtra = (key: (typeof EXTRA_OPTIONS)[number]) => setState({ ...state, extras: { ...state.extras, [key]: !state.extras[key] } });
 
@@ -110,15 +138,16 @@ export function MonitoBuilder({ me, next, back, onboarding }: Props) {
     setError(null);
     try {
       await apiCall("PATCH", "/api/me", Me, usePhoto ? { avatarMode: "photo" } : { avatar: look, avatarMode: "monito" });
+      forgetDraft(DRAFT, me.id);
       router.push(next);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(errorMessage(caught));
       setSaving(false);
     }
   }
 
   return (
-    <Screen>
+    <Screen data-restored={restored ? "1" : undefined}>
       <Header
         back={back}
         title={copy.title}
@@ -183,7 +212,11 @@ export function MonitoBuilder({ me, next, back, onboarding }: Props) {
         </div>
       )}
       <div className="mt-auto flex flex-col gap-[10px]">
-        {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
+        {error && (
+          <span role="alert" className="text-center text-[12px] font-extrabold text-coral">
+            {error}
+          </span>
+        )}
         <Button variant="primary" onClick={save} disabled={saving}>
           {copy.done}
         </Button>
