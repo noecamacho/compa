@@ -5,6 +5,8 @@ import type { LinkKey, Links, Visibility } from "../profile-fields";
 import { slugify } from "../slug";
 import { TOPICS } from "../topics";
 
+const MOCK_BODIES = ["man", "woman", "other"] as const;
+
 export const TEST_PRESETS = ["random", "founder", "engineer", "designer", "investor"] as const;
 export type TestPreset = (typeof TEST_PRESETS)[number];
 type Flavor = Exclude<TestPreset, "random">;
@@ -94,7 +96,8 @@ export function generateProfile(preset: TestPreset, random: Random): GeneratedPr
     interests: pickSome(topics.filter((topic) => KNOWN_TOPICS.has(topic)), 2 + Math.floor(random() * 2), random),
     links: { linkedin: `https://www.linkedin.com/in/${handle}`, github: `https://github.com/${handle}`, web: `https://${handle}.example.com` },
     visibility: { headline: "public", company: "public", interests: "public", links: PUBLIC_LINKS },
-    avatar: lookFromBuilder(randomBuilder(random)),
+    // Monitos now require a body (Hombre, Mujer, Otro); pick one with the same seeded random so profiles stay reproducible.
+    avatar: lookFromBuilder(randomBuilder(pick(MOCK_BODIES, random), random)),
     avatarMode: "monito",
   };
 }
