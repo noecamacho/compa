@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { connections, eventAttendees, events, interactions, userBadges, users, type EventRow, type UserRow } from "../../db/schema";
 import type { InputOf, ResultOf } from "../api/route-spec";
@@ -71,8 +71,10 @@ async function attendance(userId: string, db: Executor) {
   return { eventsAttended: rows.length, attendedFoundersFest2026: rows.some((row) => row.slug === FOUNDERS_FEST_2026) };
 }
 
+// `lt`, not a raw template: a Date inside sql`` reaches Postgres as an untyped parameter and the query fails,
+// which used to abort every badge award.
 async function signupIndex(user: UserRow, db: Executor): Promise<number> {
-  const [row] = await db.select({ before: sql<number>`count(*)`.mapWith(Number) }).from(users).where(sql`${users.createdAt} < ${user.createdAt}`);
+  const [row] = await db.select({ before: sql<number>`count(*)`.mapWith(Number) }).from(users).where(lt(users.createdAt, user.createdAt));
   return (row?.before ?? 0) + 1;
 }
 
