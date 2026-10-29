@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CONNECTION_POINTS, decideKind, INVITE_POINTS, pointsFor, SUMMARY_POINTS, TOPICS_POINTS, topicsPointsFor } from "./points";
+import { CONNECTION_POINTS, decideKind, GOLDEN_CAP_INVITES, INVITE_POINTS, pointsFor, referralPointsFor, SUMMARY_POINTS, TOPICS_POINTS, topicsPointsFor, unlocksGoldenCap } from "./points";
 
 const none = { metAtEarlierEvent: false, requesterKnew: null, addresseeKnew: null };
 
@@ -34,4 +34,19 @@ test("topics score once, whatever their number", () => {
   expect(topicsPointsFor([])).toBe(0);
   expect(topicsPointsFor(["IA"])).toBe(5);
   expect(topicsPointsFor(["IA", "Proptech", "Fintech"])).toBe(5);
+});
+
+describe("referral code", () => {
+  test("pays +100 on the inviter's current event and nothing outside one", () => {
+    expect(referralPointsFor({ id: "event" })).toBe(INVITE_POINTS.inviter);
+    expect(referralPointsFor(null)).toBe(0);
+    expect(referralPointsFor(undefined)).toBe(0);
+  });
+
+  test("the golden cap unlocks at three friends, once", () => {
+    expect(unlocksGoldenCap(null, GOLDEN_CAP_INVITES - 1)).toBe(false);
+    expect(unlocksGoldenCap(null, GOLDEN_CAP_INVITES)).toBe(true);
+    expect(unlocksGoldenCap(null, GOLDEN_CAP_INVITES + 2)).toBe(true);
+    expect(unlocksGoldenCap(new Date(), GOLDEN_CAP_INVITES + 1)).toBe(false);
+  });
 });

@@ -35,6 +35,7 @@ async function buildMe(user: UserRow): Promise<MeT> {
     isAdmin: isSuperAdmin(user),
     role: user.role,
     isTest: user.isTest,
+    showAccessories: user.showAccessories,
     currentEvent: current ? { code: current.accessCode, name: current.name } : null,
     stats,
     scores,
@@ -58,6 +59,7 @@ export function profileChanges(user: UserRow, body: PatchMe): Partial<typeof use
   if (body.city !== undefined) changes.city = body.city || null;
   if (body.avatar !== undefined) changes.avatar = body.avatar;
   if (body.avatarMode !== undefined) changes.avatarMode = body.avatarMode;
+  if (body.showAccessories !== undefined) changes.showAccessories = body.showAccessories;
   if (body.links) changes.links = mergeLinks(user.links, body.links);
   return changes;
 }

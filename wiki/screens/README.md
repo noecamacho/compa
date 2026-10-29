@@ -25,7 +25,7 @@ The plan defined seven screens (p. 4). The V2 design handoff (`design/compa-v2/R
 | 11 | V2Ranking | `/ranking` | `/people/[handle]`, `/connect` |
 | 12 | V2Invitar | `/invite` | → `/connect` |
 
-The personal QR encodes `/u/[handle]`, which redirects to `/connect/[handle]` (API spec A8, ADR-004); an invite link is `/i/[code]`, which redirects to the door of the event the invite was made for (`/e/<event code>?invite=<code>`); the invite button on 03 and 04 and the link on 12 exist only while the person is checked in to an event (outside one, 12 explains why). The dock (Inicio, Conectar, Conexiones, Perfil) is on 03, 04, 07 and 09. Screens under `app/(app)/` need a session; mock mode (`API_MODE=mock`) has none and shows the example person. Copy is Spanish in `lib/copy/es.ts` ([open-questions](../open-questions.md) #6).
+The personal QR encodes `/u/[handle]`, which redirects to `/connect/[handle]` (API spec A8, ADR-004); a referral link is `/i/[handle]`, which redirects to the door of the inviter's current event (`/e/<event code>?invite=<code>`) or, outside an event, through sign-in to onboarding; the invite button on 03 and 04 and the link on 12 are always there, and 12 says before sharing whether a friend joining now pays +100 at the current event or nothing ([points-rules](../points-rules.md)). The dock (Inicio, Conectar, Conexiones, Perfil) is on 03, 04, 07 and 09. Screens under `app/(app)/` need a session; mock mode (`API_MODE=mock`) has none and shows the example person. Copy is Spanish in `lib/copy/es.ts` ([open-questions](../open-questions.md) #6).
 
 ## The plan's seven screens (superseded, kept for the acceptance criteria)
 

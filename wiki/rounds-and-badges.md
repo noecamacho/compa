@@ -7,4 +7,12 @@ All items here are P2 and the first thing cut if time runs out (p. 3). Owner: pe
 - Tribe versus tribe scoreboard (p. 7). Tribe values in the SQL comment: Frontend, Backend, AI, Design, Other (p. 9).
 - "Ask your event" organizer analyst with the Codex SDK (p. 3, p. 8 diagram, dashed "P2" box).
 
+## Accessories (built, 2026-10-29)
+
+Badges can give accessories the person wears. The golden cap is the first: earned after three friends joined through the referral code ([points-rules](points-rules.md#referral-codes-captain-decision-2026-10-29)), with progress 1/3, 2/3 on `/invite` and the home card.
+
+- One registry, `lib/monito/accessories.ts`: the accessory id (`golden_cap`), what it changes on the monito (`ACCESSORY_LOOK`) and where it sits over a round photo as fractions of the photo's size (`ACCESSORY_PLACEMENT`). A new accessory adds one entry to each.
+- The API carries `accessories` on every picture: `Card`, `Me`, leaderboard rows, the `/live` snapshot people and the home live-card pairs. `Avatar` (`components/monito/Avatar.tsx`) puts it on the monito and draws it over the photo (`AccessoryOverlay`, the same pixels as the monito's hat), at every size from a 30 px ranking row to the big screen. The stored photo and monito never change.
+- The person can wear or hide it: the switch on `/invite` (`PATCH /api/me {showAccessories}`, `users.show_accessories`, default on). Hidden, it disappears from every view; it stays earned.
+
 Related: [points-rules](points-rules.md), [mvp-scope](mvp-scope.md).

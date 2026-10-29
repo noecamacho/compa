@@ -2,6 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, isNotNull, or, sql } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { bonusPoints, connections, eventAttendees, eventScores, events, interactions, lifetimeScores, users, type EventRow } from "../../db/schema";
+import { accessoriesOf, type Accessory } from "../monito/accessories";
 import { realPeopleOnly } from "./events";
 
 export type Standing = { rank: number | null; points: number };
@@ -10,7 +11,15 @@ export type Scores = { event: Standing; lifetime: Standing };
 const points = sql<number>`coalesce(${eventScores.points}, 0)`.mapWith(Number);
 const connectionCount = sql<number>`coalesce(${eventScores.connections}, 0)`.mapWith(Number);
 
-export type Ranked = { userId: string; handle: string; name: string; photoUrl: string | null; points: number; connections: number };
+export type Ranked = { userId: string; handle: string; name: string; photoUrl: string | null; accessories?: Accessory[]; points: number; connections: number };
+
+// The picture columns every board reads; the accessories travel with the photo to the big screen and the ranking.
+const pictured = { userId: users.id, handle: users.handle, name: users.name, photoUrl: users.photoUrl, goldenCapAt: users.goldenCapAt, showAccessories: users.showAccessories };
+
+const toRanked = ({ goldenCapAt, showAccessories, ...row }: Omit<Ranked, "accessories"> & { goldenCapAt: Date | null; showAccessories: boolean }): Ranked => {
+  const accessories = accessoriesOf({ goldenCapAt, showAccessories });
+  return accessories.length ? { ...row, accessories } : row;
+};
 
 // Rankings read every score of an event (or of everyone), so many phones asking at once share one result per
 // instance for a few seconds instead of each scanning all connections (conference-scale finding 2).
@@ -35,13 +44,13 @@ export function rankedAtEvent(event: EventRow): Promise<Ranked[]> {
 
 async function loadRankedAtEvent(event: EventRow): Promise<Ranked[]> {
   const rows = await getDb()
-    .select({ userId: users.id, handle: users.handle, name: users.name, photoUrl: users.photoUrl, points, connections: connectionCount })
+    .select({ ...pictured, points, connections: connectionCount })
     .from(eventAttendees)
     .innerJoin(users, eq(users.id, eventAttendees.userId))
     .leftJoin(eventScores, and(eq(eventScores.eventId, eventAttendees.eventId), eq(eventScores.userId, eventAttendees.userId)))
     .where(and(eq(eventAttendees.eventId, event.id), realPeopleOnly(event)))
     .orderBy(desc(points), desc(connectionCount), asc(eventAttendees.checkedInAt));
-  return rows;
+  return rows.map(toRanked);
 }
 
 const lifetimePoints = sql<number>`coalesce(${lifetimeScores.points}, 0)`.mapWith(Number);
@@ -54,12 +63,13 @@ export function rankedLifetime({ includeTest }: { includeTest: boolean }): Promi
 
 // async: a drizzle query re-runs on every `then`, a shared result must be a settled Promise.
 async function loadRankedLifetime(includeTest: boolean): Promise<Ranked[]> {
-  return getDb()
-    .select({ userId: users.id, handle: users.handle, name: users.name, photoUrl: users.photoUrl, points: lifetimePoints, connections: lifetimeConnections })
+  const rows = await getDb()
+    .select({ ...pictured, points: lifetimePoints, connections: lifetimeConnections })
     .from(lifetimeScores)
     .innerJoin(users, eq(users.id, lifetimeScores.userId))
     .where(includeTest ? undefined : eq(users.isTest, false))
     .orderBy(desc(lifetimePoints), desc(lifetimeConnections), asc(users.createdAt));
+  return rows.map(toRanked);
 }
 
 // A checked-in person with 0 points has no rank (standingOf), so the board and its podium list only people with points.

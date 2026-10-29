@@ -59,6 +59,8 @@ export const users = pgTable(
     // Which picture the person shows: the LinkedIn photo (default) or the monito (captain decision, 2026-10-29).
     avatarMode: text("avatar_mode", { enum: AVATAR_MODES }).$type<AvatarMode>().notNull().default("photo"),
     goldenCapAt: timestamp("golden_cap_at", { withTimezone: true }),
+    // Whether earned accessories (the golden cap) are worn on the monito and over the photo (lib/monito/accessories.ts).
+    showAccessories: boolean("show_accessories").notNull().default(true),
     links: jsonb("links").$type<Links>().notNull().default({}),
     visibility: jsonb("visibility").$type<VisibilitySettings>().notNull().default(DEFAULT_VISIBILITY),
     notificationsSeenAt: timestamp("notifications_seen_at", { withTimezone: true }),
@@ -326,13 +328,17 @@ export const invites = pgTable(
     inviterId: uuid("inviter_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    code: text("code").notNull().unique(),
-    // An invite always belongs to the event its inviter was checked in to; null only on rows made before invites were
-    // event-scoped, which cannot be claimed or paid (migration 0012 backfills what it can).
+    // Set only on links made before referral codes (#73 and earlier); a referral (one row per friend who joined through
+    // the inviter's handle) has none, since many friends share one code.
+    code: text("code").unique(),
+    // Referral: the event the inviter was checked in to when the friend joined, which the +100 was paid on; null means
+    // no points. Links from before referral codes: the event the link was made for.
     eventId: uuid("event_id").references(() => events.id, { onDelete: "set null" }),
     inviteeId: uuid("invitee_id")
       .unique()
       .references(() => users.id, { onDelete: "set null" }),
+    // What the inviter earned for this friend: 100 or 0.
+    inviterPoints: smallint("inviter_points").notNull().default(0),
     firstConnectionAt: timestamp("first_connection_at", { withTimezone: true }),
     createdAt: createdAt(),
   },

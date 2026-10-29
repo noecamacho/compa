@@ -69,7 +69,7 @@ export function feed(snapshot: LiveSnapshotT, limit: number): FeedItem[] {
   return items;
 }
 
-export type BoardRow = { rank: number; id: string; name: string; photoUrl: string | null; points: number; connections: number };
+export type BoardRow = LiveSnapshotT["people"][number] & { rank: number };
 
 // People arrive ranked (points, connections, check-in). Equal points and connections share a place (1, 1, 3):
 // check-in order still breaks the tie for the order on screen, but nobody is shown as "behind" an equal.

@@ -799,16 +799,16 @@ export const myInvites = route({
   id: "myInvites",
   method: "get",
   path: "/api/invites/me",
-  summary: "My invite link and invitees",
-  description: "The link is tied to the event the person is checked in to; outside an event `link` is null and no invite is created.",
+  summary: "My referral code and invitees",
+  description: "Everyone always has a referral code (their handle). `link.event` is the event they are checked in to: a friend joining now pays +100 there; when it is null a friend still counts toward the golden cap but pays no points.",
   tags: ["profile"],
   auth: "user",
   success: {
     status: 200,
-    description: "Event-scoped link (or null) and progress to the golden cap.",
+    description: "The referral link, the event a friend joining now would pay on (or null), and progress to the golden cap.",
     schema: S.Invites,
     example: X.invites,
-    examples: { noEvent: { summary: "Not checked in to an event: no link", value: { ...X.invites, link: null } } },
+    examples: { noEvent: { summary: "Not checked in to an event: the code works but pays no points", value: { ...X.invites, link: { ...X.invites.link, event: null } } } },
   },
   errors: WITH_USER,
 });
@@ -817,13 +817,13 @@ export const claimInvite = route({
   id: "claimInvite",
   method: "post",
   path: "/api/invites/{code}/claim",
-  summary: "Join through a friend's invite",
-  description: "Called once after sign-in. The invite belongs to one event: the inviter earns +100 and you +50 when your first connection at that event is accepted. An invite without an event, or for an event that is over, is refused.",
+  summary: "Join through a friend's referral code",
+  description: "Called once after sign-in by someone new to COMPA. The inviter earns +100 on the event they are checked in to at that moment (none outside an event) and the friend counts toward their golden cap; you earn +50 at your first accepted connection. A second claim changes nothing. `event` is the inviter's current event, or null.",
   tags: ["profile"],
   auth: "user",
   params: S.CodeParams,
   success: { status: 200, description: "Linked to the inviter.", schema: S.ClaimedInvite, example: { code: "diego-r", inviter: X.diego, event: X.foundersDoor } },
-  errors: [E.unauthorized, E.authUnavailable, E.notFound, E.inviteNeedsEvent, E.eventNotRunning],
+  errors: [E.unauthorized, E.authUnavailable, E.notFound, E.referralNotNew],
 });
 
 export const ROUTES: readonly AnyRouteSpec[] = [

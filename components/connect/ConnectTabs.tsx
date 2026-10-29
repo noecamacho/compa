@@ -40,15 +40,13 @@ export function ConnectTabs({ me, qrSvg }: Props) {
     <Screen dock width="focus">
       <div className="flex h-11 items-center justify-between">
         <h1 className="m-0 font-display text-[28px] leading-[1.1] font-bold">{copy.title}</h1>
-        {me.currentEvent && (
-          <Link
-            href="/invite"
-            className={`${HIT_AREA} inline-flex h-[34px] items-center gap-[6px] rounded-chip bg-sun-soft px-3 text-[13px] font-extrabold whitespace-nowrap border-ink shadow-hard-2 pressable`}
-          >
-            <Icon name="plus" size={14} strokeWidth={3} />
-            {copy.invite}
-          </Link>
-        )}
+        <Link
+          href="/invite"
+          className={`${HIT_AREA} inline-flex h-[34px] items-center gap-[6px] rounded-chip bg-sun-soft px-3 text-[13px] font-extrabold whitespace-nowrap border-ink shadow-hard-2 pressable`}
+        >
+          <Icon name="plus" size={14} strokeWidth={3} />
+          {copy.invite}
+        </Link>
       </div>
       <div data-tour="mode">
         <Segmented

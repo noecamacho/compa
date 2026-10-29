@@ -35,7 +35,7 @@ export function LeaderboardPanel({ rows, locale, onSelect, from = 0, limit = 10 
               style={{ background: PODIUM[row.rank - 1] ?? "#FFF6E5" }}
             >
               <span className="w-7 shrink-0 text-center font-display text-[20px] font-bold tabular-nums lg:text-[clamp(18px,1.5vw,34px)]">{row.rank}</span>
-              <Avatar person={{ name: row.name, photoUrl: row.photoUrl }} size={36} />
+              <Avatar person={{ name: row.name, photoUrl: row.photoUrl, accessories: row.accessories }} size={36} />
               <span className="min-w-0 flex-1 truncate font-display text-[17px] font-bold lg:text-[clamp(16px,1.35vw,32px)]">{row.name}</span>
               <span className="shrink-0 text-[14px] font-extrabold tabular-nums lg:text-[clamp(14px,1.15vw,26px)]">
                 {formatNumber(locale, row.points)} {copy.points}
