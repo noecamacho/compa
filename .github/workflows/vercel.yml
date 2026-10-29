@@ -39,9 +39,11 @@ jobs:
         id: deploy
         run: echo "url=$(vercel deploy --prebuilt $PROD_FLAG --token="${{ secrets.VERCEL_TOKEN }}")" >> "$GITHUB_OUTPUT"
       - name: Summary
-        run: echo "Deployed ($TARGET): ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          echo "Deployed ($TARGET): ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
       - name: Comment preview URL
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh pr comment "${{ github.event.pull_request.number }}" --edit-last --create-if-none --body "Preview: ${{ steps.deploy.outputs.url }} (docs at /api/docs)"
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" --edit-last --create-if-none --body "Preview: ${{ steps.deploy.outputs.url }} (docs at /api/docs)"
