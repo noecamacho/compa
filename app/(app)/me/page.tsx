@@ -4,7 +4,7 @@ import { Tour } from "@/components/tour/Tour";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
 import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
-import { MyLinkToggles } from "@/components/profile/MyLinkToggles";
+import { MyLinks } from "@/components/profile/MyLinks";
 import { SignOutButton } from "@/components/profile/SignOutButton";
 import { Card } from "@/components/ui/Card";
 import { IconLink } from "@/components/ui/IconButton";
@@ -73,7 +73,7 @@ export default async function MePage() {
 
           <Card className="order-4 flex flex-col gap-[10px] px-[14px] py-[10px] md:order-none" data-tour="links">
             <SectionLabel className="whitespace-nowrap">{copy.linksLabel}</SectionLabel>
-            <MyLinkToggles visibility={me.visibility} links={me.links ?? {}} />
+            <MyLinks visibility={me.visibility} links={me.links ?? {}} />
           </Card>
         </div>
         <div className="contents md:flex md:flex-col md:gap-[14px] lg:gap-5">

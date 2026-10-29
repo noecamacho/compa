@@ -7,7 +7,7 @@ import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import type { MeT } from "../api/schemas";
 import { hasEnded, statusForViewer } from "../connection-status";
-import { mergeLinks } from "../links";
+import { invalidLinks, mergeLinks } from "../links";
 import { isSuperAdmin } from "../roles";
 import { toCard, withDefaultVisibility } from "../visibility";
 import { earnedBadgeIds } from "./badges";
@@ -48,10 +48,11 @@ export async function getMe({ user }: InputOf<typeof R.getMe>): ResultOf<typeof 
 
 type PatchMe = InputOf<typeof R.patchMe>["body"];
 
-function profileChanges(user: UserRow, body: PatchMe): Partial<typeof users.$inferInsert> {
+export function profileChanges(user: UserRow, body: PatchMe): Partial<typeof users.$inferInsert> {
   const changes: Partial<typeof users.$inferInsert> = {};
-  if (body.name !== undefined) Object.assign(changes, { name: body.name, nameEdited: true });
-  if (body.photoUrl !== undefined) Object.assign(changes, { photoUrl: body.photoUrl, photoEdited: true });
+  // Saving the form unchanged must not mark a field edited, or LinkedIn could never refresh it again (M14).
+  if (body.name !== undefined && body.name !== user.name) Object.assign(changes, { name: body.name, nameEdited: true });
+  if (body.photoUrl !== undefined && body.photoUrl !== user.photoUrl) Object.assign(changes, { photoUrl: body.photoUrl, photoEdited: true });
   if (body.headline !== undefined) changes.headline = body.headline || null;
   if (body.company !== undefined) changes.company = body.company || null;
   if (body.city !== undefined) changes.city = body.city || null;
@@ -69,6 +70,8 @@ async function existingInterestIds(ids: number[]): Promise<number[]> {
 }
 
 export async function patchMe({ user, body }: InputOf<typeof R.patchMe>): ResultOf<typeof R.patchMe> {
+  const invalid = body.links ? invalidLinks(body.links) : [];
+  if (invalid.length) fail(E.invalidInput, `Invalid link: ${invalid.join(", ")}.`);
   const interestIds = body.interestIds ? await existingInterestIds(body.interestIds) : undefined;
   const changes = profileChanges(user, body);
   const updated = await getDb().transaction(async (tx) => {

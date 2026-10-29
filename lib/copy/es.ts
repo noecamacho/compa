@@ -36,19 +36,59 @@ export const screenState = {
 
 export const profile = {
   title: "Tu perfil",
-  subtitle: "Tu nombre viene de LinkedIn. Agrega tu puesto, empresa y ciudad.",
+  subtitle: "Tu nombre viene de LinkedIn. Agrega lo demás y decide quién ve cada cosa.",
   fromLinkedIn: "Nombre de LinkedIn",
   name: "Nombre",
   role: "Puesto",
   company: "Empresa",
   city: "Ciudad",
-  linksLabel: "Redes que compartes",
-  linksOnlyConnections: "Solo las ven tus conexiones",
-  linksHint: "Las apagadas no se muestran a nadie. Lo cambias cuando quieras desde tu perfil.",
+  alwaysVisible: "Tu nombre, tu foto o monito y tu ciudad los ve cualquiera.",
+  linksLabel: "Tus redes",
+  linksHint: "Escribe tu usuario, tu número o pega el enlace. Vacío = no se comparte.",
+  linkPlaceholder: {
+    linkedin: "tu-usuario o enlace",
+    whatsapp: "+52 33 1234 5678",
+    instagram: "@usuario",
+    x: "@usuario",
+    github: "@usuario",
+    web: "tusitio.com",
+  },
+  linkError: {
+    linkedin: "Usa tu usuario de LinkedIn o el enlace a tu perfil.",
+    whatsapp: "Escribe tu número con lada de país, por ejemplo +52 33 1234 5678.",
+    instagram: "Usa tu usuario de Instagram (letras, números, punto y guion bajo).",
+    x: "Usa tu usuario de X (hasta 15 letras, números o guion bajo).",
+    github: "Usa tu usuario de GitHub.",
+    web: "Escribe una dirección web, por ejemplo tusitio.com.",
+  },
+  remove: "Quitar",
+  removeLabel: (network: string) => `Quitar ${network}`,
+  removed: (network: string) => `${network} se quitará al guardar.`,
+  undo: "Deshacer",
+  fixErrors: "Revisa los campos marcados.",
   next: "Siguiente: tu monito",
   step: "Paso 1 de 2",
   save: "Guardar",
   saving: "Guardando…",
+};
+
+// Who sees each field and link (data model §4.5): public, connections or hidden.
+export const visibility = {
+  title: "Quién ve qué",
+  levels: { public: "Todos", connections: "Conexiones", hidden: "Solo yo" },
+  legend: {
+    public: "Todos: cualquiera que abra tu perfil o escanee tu QR.",
+    connections: "Conexiones: solo después de que se acepta la conexión entre ustedes.",
+    hidden: "Solo yo: no se muestra a nadie.",
+  },
+  pickerLabel: (item: string) => `Quién ve: ${item}`,
+  previewTitle: "Así te ven",
+  previewLabel: "Vista previa de tu perfil",
+  before: "Antes de conectar",
+  after: "Ya conectados",
+  unlocks: (items: string) => `Al conectar también verán: ${items}.`,
+  nothingLocked: "Ves lo mismo antes y después de conectar.",
+  noLinks: "Sin redes visibles.",
 };
 
 export const monito = {
@@ -206,6 +246,9 @@ export const person = {
   lastTime: "La última vez",
   today: "Hoy",
   mutualConnections: "Conexiones en común",
+  links: "Sus redes",
+  linkLabel: (network: string, name: string) => `${network} de ${name}`,
+  linksLocked: "Verás más de su perfil cuando se acepte la conexión.",
   pointsRank: (points: string, rank: number | null) => (rank ? `${points} pts · #${rank}` : `${points} pts`),
 };
 
@@ -240,8 +283,10 @@ export const me = {
   newConnections: "nuevas",
   reconnections: "reencuentros",
   events: "eventos",
-  linksLabel: "Redes que compartes",
-  hidden: "oculto",
+  linksLabel: "Tus redes y quién las ve",
+  linksEmpty: "Aún no agregas redes. Agrégalas para que tus conexiones te encuentren.",
+  linksAdd: "Agregar redes",
+  linksEdit: "Editar redes y vista previa",
   ranking: "Ranking",
   myMonito: "Mi monito",
   change: "Cambiar",
@@ -304,9 +349,11 @@ export const invite = {
 
 export const networks = {
   linkedin: "LinkedIn",
-  instagram: "Instagram",
   whatsapp: "WhatsApp",
-  x: "X",
+  instagram: "Instagram",
+  x: "X (Twitter)",
+  github: "GitHub",
+  web: "Sitio web",
 };
 
 export const time = {
@@ -452,7 +499,7 @@ export const tour = {
   ],
   me: [
     { target: "avatar", title: "Tu monito", body: "Así te ven en el evento. Tócalo para cambiarlo; con el tiempo ganas ropa y accesorios por conectar." },
-    { target: "links", title: "Las redes que compartes", body: "Enciende solo las que quieras mostrar. Nadie las ve hasta que acepta una conexión contigo; las apagadas no se muestran a nadie." },
+    { target: "links", title: "Tus redes y quién las ve", body: "Elige para cada red: Todos, Conexiones (solo después de aceptar la conexión) o Solo yo." },
     { target: "badges", title: "Tus insignias", body: "Las ganas por conectar: la primera, madrugador, maratón… Hay cuatro secretas que no te decimos cómo se ganan." },
   ],
   ranking: [

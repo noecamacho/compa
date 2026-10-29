@@ -137,7 +137,7 @@ export const PatchMeBody = z
     links: z
       .partialRecord(LinkKey, z.string().trim().max(200))
       .optional()
-      .meta({ description: "`@user` or a URL; an empty string removes the link." }),
+      .meta({ description: "A handle (`@user`), for WhatsApp a phone number with country code, or a URL of that network; an empty string removes the link. A value that fails these rules returns 400." }),
     interestIds: z.array(z.int().positive()).max(10).optional(),
   })
   .meta({ id: "PatchMeBody" });
