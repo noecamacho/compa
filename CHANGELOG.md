@@ -30,6 +30,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Changed
 
+- Safer deploys: pull requests run lint, typecheck, tests and build (`.github/workflows/checks.yml`); the production deploy runs the same gates first and only deletes older deployments when the new one is READY.
 - On phones the top row (avatar, greeting and bell on Home; back and title elsewhere) stays pinned while scrolling, the dock respects the iPhone safe area, and overscroll no longer drags them. Home, incoming requests and the live person card now show the LinkedIn photo or the monito the person chose.
 - The landing page offers "Entrar con LinkedIn" (sign-up and sign-in) so people can reach their events without rescanning; joining an event still needs its QR.
 - Database migrations apply automatically on every production deploy: the workflow deploys with a remote Vercel build whose build command runs `db:migrate:deploy` before `next build`.
