@@ -76,3 +76,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] ingest | Compa V2 design handoff
 
 - Added `design/compa-v2/` (README, 16 screen mocks, 4 components) as the visual source of truth for the attendee screens, and ported its four components to React/SVG (`lib/monito`, `lib/badges`, `components/`). The handoff's points table (50 new / 20 reconnection / +5 topics / +15 voice note / +100 and +50 per invited friend) differs from data model M3 and M18; the migration is tracked in a follow-up PR and the "+20 for accepting" line is logged in [open-questions](open-questions.md) #28.
+
+## [2026-10-29] ingest | V2 attendee screens
+
+- The sixteen V2 screens live under `app/` (routes in [screens/README](screens/README.md)); pages read the API over HTTP with zod on the response, so mock mode serves every screen. New routes `GET /api/connections/{id}`, `GET /api/badges`, `GET /api/invites/me` and `POST /api/invites/{code}/claim` are registered (mock only until the points model lands). `lib/points.ts` now carries the V2 table (50/20, +5 topics, +15 note, +100/+50 invites) and migration `0001` moves the connections points check and adds `whatsapp` to the link vocabulary. [points-rules](points-rules.md) still describes the plan's table and needs the V2 rewrite with the data model follow-up.

@@ -31,7 +31,7 @@ describe("mockResponse", () => {
 
   test("serves a named example", async () => {
     const response = mockResponse(routes.acceptConnection, post({ "x-compa-mock-example": "reconnection" }));
-    expect(await response.json()).toMatchObject({ kind: "reconnection", points: 10 });
+    expect(await response.json()).toMatchObject({ kind: "reconnection", points: 20 });
   });
 
   test("selects an error by code", async () => {

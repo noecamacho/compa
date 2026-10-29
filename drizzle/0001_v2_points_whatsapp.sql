@@ -1,0 +1,3 @@
+ALTER TABLE "connections" DROP CONSTRAINT "connections_points_follow_kind_check";--> statement-breakpoint
+ALTER TABLE "users" ALTER COLUMN "visibility" SET DEFAULT '{"headline":"public","company":"public","interests":"public","links":{"linkedin":"connections","github":"connections","x":"connections","instagram":"connections","whatsapp":"connections","web":"connections"}}'::jsonb;--> statement-breakpoint
+ALTER TABLE "connections" ADD CONSTRAINT "connections_points_follow_kind_check" CHECK ("connections"."kind" is null or ("connections"."kind" = 'new' and "connections"."points" = 50) or ("connections"."kind" = 'reconnection' and "connections"."points" = 20));
