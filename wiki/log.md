@@ -103,3 +103,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | What testing is required for new work?
 
 - Captain decision: further development preferably ships with Playwright e2e specs that confirm the affected user flows (happy path, edge cases, errors) across 390/834/1440 and es/en, plus unit tests. Recorded in `AGENTS.md` §4, `docs/engineering-standards.md` (Testing) and the PR template; `AGENTS.md` also now states LinkedIn-only sign-in, responsive breakpoints and the bilingual UI.
+
+## [2026-10-29] query | Which P0 crash and visibility gaps remain on main?
+
+- P0-7 fixed (`withDefaultVisibility` in `lib/profile-fields.ts`), P0-6 fixed (screen notice on `RegisterForm`), P0-4 fixed for Ranking; Home P0-4 left to the v2-points-model branch, which already uses `apiGetOrNull` and no hard-coded slug there ([backend gap analysis](../docs/backend-gap-analysis.md) section 4).
