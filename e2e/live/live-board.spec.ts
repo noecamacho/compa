@@ -5,7 +5,7 @@
 // so the spec runs once, in the live-1920-en project.
 import type { Page, Route } from "@playwright/test";
 import path from "node:path";
-import { SCENARIOS, scenarioFrames, type ScenarioName } from "../../lib/testing/live-scenarios";
+import { FRAME_MS, SCENARIOS, scenarioFrames, type ScenarioName } from "../../lib/testing/live-scenarios";
 import { expect, test } from "../fixtures";
 
 const LIVE_PATH = "/e/k7m2p9xq4t/live";
@@ -15,7 +15,8 @@ const VIEWPORTS = { phone: { width: 390, height: 844 }, tablet: { width: 834, he
 
 type Serve = { fail?: (poll: number) => boolean; frames?: ReturnType<typeof scenarioFrames> };
 
-// Answers the board's polls in order; after the last frame it keeps answering with the last one.
+// Answers the board's polls in order; after the last frame it keeps answering with the last one, a poll later each
+// time, like a live server in a quiet room (a repeated `generatedAt` would read as a stuck snapshot).
 async function serveScenario(page: Page, name: ScenarioName, options: Serve = {}) {
   const frames = options.frames ?? scenarioFrames(name);
   const polls: number[] = [];
@@ -24,7 +25,9 @@ async function serveScenario(page: Page, name: ScenarioName, options: Serve = {}
     polls.push(Date.now());
     if (options.fail?.(poll)) return route.abort("internetdisconnected");
     const frame = frames[Math.min(poll, frames.length - 1)];
-    return route.fulfill({ json: frame });
+    const extra = Math.max(0, poll - frames.length + 1);
+    if (!frame || extra === 0) return route.fulfill({ json: frame });
+    return route.fulfill({ json: { ...frame, generatedAt: new Date(Date.parse(frame.generatedAt) + extra * FRAME_MS).toISOString() } });
   });
   return polls;
 }
