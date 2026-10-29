@@ -913,7 +913,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | Home bell |
 | Pre | — |
 | Happy path (intended) | The count of unseen items → tap → list (requests, acceptances, invitee connected, badge earned) |
-| Alternates | Live on every attendee screen: the private Realtime channel `user:<id>` pokes the app, which refetches `GET /api/notifications` (bell, incoming cards, a toast); polling every 3 s when Realtime is down, every 30 s as a safety net when it is up. Web Push alerts (`/notifications` → "Turn on alerts") when the app is closed |
+| Alternates | Live on every attendee screen: the private Realtime channel `user:<id>` pokes the app, which refetches `GET /api/notifications` (bell, a toast) and the incoming cards (`GET /api/connections`, otherwise polled every 3 s by `usePoll`, T-031); polling every 3 s when Realtime is down, every 30 s as a safety net when it is up. Web Push alerts (`/notifications` → "Turn on alerts") when the app is closed |
 | Errors | Push unsupported, blocked, or iPhone outside an installed Home Screen app: the alerts card says why and the in-app alerts keep working |
 | Edge cases | Declines never appear and never notify (M8). Opening the list marks seen through the newest item; the seen mark never moves backwards or into the future, and other tabs clear at once (`notifications.seen`). A badge that lands with an acceptance never hides it in the toast. Sign-out turns push off for that browser; a browser that signs in as someone else moves its subscription to them |
 | Status | UI Ready · API Ready · DB Ready |
