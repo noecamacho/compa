@@ -2,7 +2,7 @@
 
 Ticket: `COMPA-<TBD>` · Date: 2026-10-29 · Status: approved by the captain in conversation (brainstorming session, 2026-10-28/29) · Supersedes: the data model in `docs/plans/2026-10-28-mvp-api-plan.md` §5 and §8, and the four-table model in `wiki/data-model.md` (p. 9–10).
 
-Scope: database entities and the rules they enforce. API behavior is the next topic and gets its own spec.
+Scope: database entities and the rules they enforce. API behavior: [`2026-10-29-api.md`](2026-10-29-api.md), which also adds `users.handle`.
 
 ## 1. Decisions
 
@@ -62,6 +62,7 @@ create table users (
   id                 uuid primary key default gen_random_uuid(),
   auth_user_id       uuid not null unique references auth.users (id) on delete cascade,
   linkedin_sub       text not null unique,          -- LinkedIn's stable id (OIDC `sub`)
+  handle             text not null unique check (handle ~ '^[a-z0-9-]{2,32}$'), -- personal QR /u/<handle> (API spec A8)
   email              text,                           -- account only; never shown (M12)
   name               text not null,                  -- always public (M12)
   photo_url          text,                           -- always public (M12)
@@ -81,6 +82,7 @@ create table users (
   created_at         timestamptz not null default now()
 );
 
+-- seeded from lib/topics.ts so profile interests and AI summary topics share one vocabulary (API spec §2)
 create table interests (
   id   smallint generated always as identity primary key,
   slug text not null unique,                          -- 'ia', 'react', 'capital'

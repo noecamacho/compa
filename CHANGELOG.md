@@ -10,6 +10,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- `docs/specs/2026-10-29-api.md`: approved API spec with routes, request and response shapes, the visibility filter, connection behavior and Realtime channels.
 - `docs/specs/2026-10-29-data-model.md`: approved data model for multi-event COMPA with LinkedIn-only sign-in, event check-in, confirmed connections (20 new, 10 reconnection) and per-field profile visibility.
 - `docs/plans/2026-10-28-mvp-api-plan.md`: MVP API plan covering LinkedIn sign-up, profile import and field visibility, database entities, route behavior, connection tracking and the `/live` data contract.
 - AI core in `lib/ai/`: audio transcription and Spanish summary drafts with Structured Outputs and a verbatim fallback; placeholder topics vocabulary in `lib/topics.ts`.

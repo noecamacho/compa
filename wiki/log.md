@@ -40,3 +40,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Added `docs/specs/2026-10-29-data-model.md`, approved by the captain: multi-event, LinkedIn-only sign-in, check-in by event QR, confirmed connections (one per pair per event) scoring 20 new or 10 reconnection to both people, per-field and per-link visibility, always-on big screen with check-in consent. Supersedes the plan's four-table model (p. 9–10) and the MVP API plan's data model.
 - Updated `open-questions`: #5, #7, #8, #9, #10 resolved and #16 partly resolved; added #20–#25.
+
+## [2026-10-29] query | How does the COMPA API behave?
+
+- Added `docs/specs/2026-10-29-api.md`, approved by the captain: auto check-in when scanning a personal QR, live in-app requests, simple "Request sent" with live "Connected! +20", public interactive `/live` (person card, leaderboard on click), connections grouped by person. Adds `users.handle` to the data model and seeds `interests` from `lib/topics.ts`. Added open questions #26–#27.
