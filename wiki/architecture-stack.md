@@ -27,6 +27,6 @@ Caption in the source: "Everything goes through the server and /live listens for
 
 Scanning with the native camera avoids the iPhone problem: Safari has no `BarcodeDetector`, so no in-app scanner is built (p. 8).
 
-Package manager: pnpm; strict TypeScript (p. 17). Commands: `pnpm dev`, `pnpm lint`, `pnpm typecheck`, `pnpm build`, `pnpm seed` (p. 17).
+Package manager and runtime: Bun (team decision 2026-10-28, replaces the plan's pnpm); backend and hosting: Supabase and Vercel (confirmed by the team); strict TypeScript (p. 17). Commands: `bun run dev`, `bun run lint`, `bun run typecheck`, `bun run build`, `bun run seed` (p. 17).
 
 Decision records derived from this page: [ARCHITECTURE.md](../ARCHITECTURE.md). Related: [data-model](data-model.md), [api](api.md), [ai-jobs](ai-jobs.md), [agent-contract](agent-contract.md).

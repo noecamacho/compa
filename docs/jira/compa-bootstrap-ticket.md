@@ -35,7 +35,7 @@ Cut order if time runs out: P2, then recording, then @tag (p. 3).
 - [ ] No login or OAuth exists; the session is recoverable with handle + code (p. 5, p. 17).
 - [ ] Business rules (points, idempotency, hourly cap, author check) run only on the server; every write is zod-validated (p. 11, p. 17).
 - [ ] `/live` never shows summary text; recording requires the other person's consent; summaries require the author's approval (p. 12–13).
-- [ ] `pnpm lint && pnpm typecheck && pnpm build` pass on `main` (p. 17); every PR used the repository template.
+- [ ] `bun run lint && bun run typecheck && bun run build` pass on `main` (p. 17); every PR used the repository template.
 
 ## Task breakdown by build phase
 
@@ -44,11 +44,11 @@ Phases follow the plan's timeline (p. 16); each task is a child issue (Task) of 
 ### Phase 0 — Kickoff: scaffold (gate 1: PR #0 on `main`)
 
 **COMPA-<TBD> Task: Scaffold the application and contracts** (plan PR #0, owner A, p. 13)
-- [ ] Next.js (App Router) + strict TypeScript + Tailwind + pnpm; Supabase client; Vercel deploy from `main` (p. 8, p. 17).
+- [ ] Next.js (App Router) + strict TypeScript + Tailwind + Bun; Supabase client; Vercel deploy from `main` (p. 8, p. 17).
 - [ ] Migration `supabase/migrations/0001_init.sql` with `attendees`, `connections`, `interactions`, `points`, the ordered-pair unique index and the `points` uniqueness constraint (p. 9–10).
 - [ ] `lib/types.ts`, `lib/topics.ts` (about 40 topics plus "Other", resolves open question #4) and `lib/points.ts` server-only skeleton (p. 17).
 - [ ] Environment variables documented, including `OPENAI_STT_MODEL` and `OPENAI_TEXT_MODEL` (p. 12).
-- Acceptance: deploy URL responds; migration applies cleanly; `pnpm lint && pnpm typecheck && pnpm build` pass; the four team branches can start (p. 16).
+- Acceptance: deploy URL responds; migration applies cleanly; `bun run lint && bun run typecheck && bun run build` pass; the four team branches can start (p. 16).
 
 ### Phase 1 — P0 in parallel (gate 2: P0 flow end to end in production)
 
@@ -75,7 +75,7 @@ Phases follow the plan's timeline (p. 16); each task is a child issue (Task) of 
 **COMPA-<TBD> Task: Live dashboard and seed data** (plan PR #4, owner D, p. 6–7, p. 14, p. 18)
 - [ ] `/live` for 1920×1080: animated top-5 podium (framer-motion), bar race of 8 topics (shared topics ×1, approved-summary topics ×3), counters, join QR, event feed without summary text; strong colors, huge type, 300–500 ms transitions.
 - [ ] `GET /api/live` snapshot plus Supabase Realtime on `connections`, `interactions`, `points`.
-- [ ] `pnpm seed`: about 150 `is_seed` attendees with realistic JS-conference profiles, about 300 connections, about 80 summaries; optional simulator adding a connection every 3–5 s; toggle to hide seeds.
+- [ ] `bun run seed`: about 150 `is_seed` attendees with realistic JS-conference profiles, about 300 connections, about 80 summaries; optional simulator adding a connection every 3–5 s; toggle to hide seeds.
 - Acceptance (p. 2, p. 6, p. 13): update in under 2 s; readable from 10 m; never shows summary text; anonymous opt-out respected; seeds can be hidden before the public demo.
 
 ### Phase 2 — Integration

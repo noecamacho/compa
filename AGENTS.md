@@ -51,7 +51,7 @@ Page conventions: kebab-case file names; a `# Title` first line; short factual s
 
 Follow `docs/engineering-standards.md`: SOLID, KISS, DRY, **no nesting** (guard clauses, early returns, maximum depth 2, extract functions), clean code (intention-revealing names, small functions, one level of abstraction, no dead code, comments only for why), and **types at every boundary** (zod-validated untrusted input, inferred types, official SDK types, no `any`). Shell scripts follow the same nesting rule and are POSIX `sh`.
 
-Product rules from the plan, binding once application code exists (`wiki/agent-contract.md`, `ARCHITECTURE.md`): business rules and OpenAI calls only on the server; every write validated with zod; connections and points idempotent; mobile first at 375 px, `/live` at 1920×1080; no login or OAuth; `pnpm lint && pnpm typecheck && pnpm build` before finishing.
+Product rules from the plan, binding once application code exists (`wiki/agent-contract.md`, `ARCHITECTURE.md`): business rules and OpenAI calls only on the server; every write validated with zod; connections and points idempotent; mobile first at 375 px, `/live` at 1920×1080; no login or OAuth; `bun run lint && bun run typecheck && bun run build` before finishing. Stack is fixed by the team: Next.js + strict TypeScript + Tailwind on Bun (package manager and runtime: `bun install`, `bun add`, `bun run`, commit `bun.lock`, never pnpm or npm), Supabase for data, Vercel for hosting.
 
 ## 5. Git rules
 

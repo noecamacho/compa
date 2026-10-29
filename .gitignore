@@ -1,5 +1,9 @@
 # Dependencies
 node_modules/
+# Bun is the package manager: commit bun.lock, ignore other lockfiles
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
 
 # Next.js and build output
 .next/
