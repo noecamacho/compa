@@ -36,6 +36,13 @@ export const screenState = {
   goHome: "Ir al inicio",
 };
 
+// Any route that opens nothing (unknown person, connection or page).
+export const notFound = {
+  title: "Aquí no hay nada",
+  body: "Esa persona, conexión o página no existe o ya no está disponible.",
+  home: "Ir a inicio",
+};
+
 // What a failed request says on screen (errorText, lib/api/client.ts); server messages are English and never shown.
 export const apiErrors = {
   generic: "No pudimos completar esto. Inténtalo otra vez.",

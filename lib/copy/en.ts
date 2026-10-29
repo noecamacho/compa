@@ -80,6 +80,12 @@ export const eventNotFound: typeof es.eventNotFound = {
   home: "Go to compa.lol",
 };
 
+export const notFound: typeof es.notFound = {
+  title: "There's nothing here",
+  body: "That person, connection or page doesn't exist or is no longer available.",
+  home: "Go home",
+};
+
 export const admin: typeof es.admin = {
   title: "Admin",
   nav: { events: "Events", people: "People", testUsers: "Testing", app: "Back to the app" },
