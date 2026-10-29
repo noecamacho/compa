@@ -36,6 +36,18 @@ export const screenState = {
   goHome: "Ir al inicio",
 };
 
+// Any route that opens nothing (unknown person, connection or page).
+export const notFound = {
+  title: "Aquí no hay nada",
+  body: "Esa persona, conexión o página no existe o ya no está disponible.",
+  home: "Ir a inicio",
+};
+
+// Shown at the top of every attendee screen while the device has no network.
+export const offline = {
+  banner: "Sin conexión. Lo que hagas se guardará cuando vuelva el internet.",
+};
+
 // What a failed request says on screen (errorText, lib/api/client.ts); server messages are English and never shown.
 export const apiErrors = {
   generic: "No pudimos completar esto. Inténtalo otra vez.",
@@ -219,6 +231,7 @@ export const connect = {
     failed: "No pudimos abrir la cámara (¿otra app la usa?). Usa la app de cámara o busca por nombre.",
   },
   notFound: "No encontramos a nadie con ese nombre.",
+  invalidQr: "Ese QR no es de Compa. Escanea el QR personal de alguien.",
 };
 
 export const register = {
@@ -284,6 +297,8 @@ export const connections = {
   emptyTitle: "Aquí vivirá tu gente",
   emptyCta: "Ir a Conectar",
   emptyFiltered: "Nadie en este filtro todavía.",
+  searchPlaceholder: "Busca por nombre",
+  onlyThisEvent: "Solo las de este evento",
 };
 
 export const person = {

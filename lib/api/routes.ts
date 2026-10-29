@@ -125,6 +125,20 @@ export const listInterests = route({
   errors: [],
 });
 
+export const searchPeople = route({
+  id: "searchPeople",
+  method: "get",
+  path: "/api/users",
+  summary: "Search people by name",
+  description: "People checked in to your current event whose name contains `q`, accents ignored, up to 8, ordered by name and filtered for you (API spec §6). Empty when you are not at an event; test people never appear at a real event (M20).",
+  tags: ["profile"],
+  auth: "user",
+  query: S.PeopleSearchQuery,
+  success: { status: 200, description: "Matching people.", schema: S.PeopleSearch, example: { people: [X.valeriaPublic, X.rodrigo] } },
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.rateLimited],
+  rateLimit: [LIMITS.searchPerMinute],
+});
+
 export const getUser = route({
   id: "getUser",
   method: "get",
@@ -773,6 +787,7 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   patchMe,
   patchVisibility,
   listInterests,
+  searchPeople,
   getUser,
   listAdminEvents,
   createEvent,

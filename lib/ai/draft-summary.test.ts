@@ -55,4 +55,14 @@ describe("draftSummary", () => {
     const client = clientReturning(async () => ({ output_text: JSON.stringify(bad) }));
     expect(await draftSummary(input, client)).toEqual(fallback);
   });
+
+  test("falls back when OpenAI is not configured", async () => {
+    const key = process.env.OPENAI_API_KEY;
+    delete process.env.OPENAI_API_KEY;
+    try {
+      expect(await draftSummary(input)).toEqual(fallback);
+    } finally {
+      if (key !== undefined) process.env.OPENAI_API_KEY = key;
+    }
+  });
 });

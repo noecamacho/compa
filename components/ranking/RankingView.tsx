@@ -15,7 +15,7 @@ import type { MonitoLook } from "@/lib/monito/look";
 
 type Row = LeaderboardT["rows"][number];
 
-type Props = { me: MeT; boards: Record<LeaderboardScopeT, LeaderboardT>; looks: Record<string, MonitoLook | undefined>; handles: Record<string, string> };
+type Props = { me: MeT; boards: Record<LeaderboardScopeT, LeaderboardT>; looks: Record<string, MonitoLook | undefined> };
 
 const CONFETTI = [
   { left: 14, top: 30, color: "#FF8FAB", r: 20, delay: 0 },
@@ -32,12 +32,12 @@ const BLOCKS: Record<1 | 2 | 3, { height: number; color: string; number: number;
   3: { height: 86, color: "#F2A766", number: 30, px: 5 },
 };
 
-function Column({ row, place, look, handle, delay }: { row: Row | undefined; place: 1 | 2 | 3; look?: MonitoLook; handle?: string; delay: number }) {
+function Column({ row, place, look, delay }: { row: Row | undefined; place: 1 | 2 | 3; look?: MonitoLook; delay: number }) {
   const locale = useLocale();
   const block = BLOCKS[place];
-  if (!row) return <span />;
+  if (!row) return <span aria-hidden="true" />;
   return (
-    <Link href={handle ? `/people/${handle}` : "/ranking"} className="animate-podium flex min-w-0 flex-col items-center justify-end gap-[6px] tappable" style={{ animationDelay: `${delay}s` }}>
+    <Link href={`/people/${row.handle}`} aria-label={`#${place} ${row.name}`} className="animate-podium flex min-w-0 flex-col items-center justify-end gap-[6px] tappable" style={{ animationDelay: `${delay}s` }}>
       {place === 1 && (
         <svg width="44" height="34" viewBox="0 0 44 34" aria-hidden="true" className="mb-[-6px]">
           <path d="M4 30 L2 8 L14 18 L22 2 L30 18 L42 8 L40 30 Z" fill="#FFD93D" stroke="#1E1B2E" strokeWidth="2.5" strokeLinejoin="round" />
@@ -64,7 +64,7 @@ function Column({ row, place, look, handle, delay }: { row: Row | undefined; pla
 }
 
 // 11 Ranking: podium with confetti, tonight / all year, my card with the gap to the next person.
-export function RankingView({ me, boards, looks, handles }: Props) {
+export function RankingView({ me, boards, looks }: Props) {
   const { ranking: copy, rankingTips, tour } = useCopy();
   const locale = useLocale();
   const [scope, setScope] = useState<LeaderboardScopeT>("event");
@@ -99,9 +99,9 @@ export function RankingView({ me, boards, looks, handles }: Props) {
               style={{ ...piece, background: piece.color, border: "2px solid #1E1B2E", animationDelay: `${piece.delay}s`, ["--r" as string]: `${piece.r}deg` }}
             />
           ))}
-          <Column row={second} place={2} look={second && looks[second.userId]} handle={second && handles[second.userId]} delay={0.15} />
-          <Column row={first} place={1} look={first && looks[first.userId]} handle={first && handles[first.userId]} delay={0} />
-          <Column row={third} place={3} look={third && looks[third.userId]} handle={third && handles[third.userId]} delay={0.3} />
+          <Column row={second} place={2} look={second && looks[second.userId]} delay={0.15} />
+          <Column row={first} place={1} look={first && looks[first.userId]} delay={0} />
+          <Column row={third} place={3} look={third && looks[third.userId]} delay={0.3} />
         </div>
         <span aria-hidden="true" className="mx-1 mt-[-12px] block h-0" style={{ borderTop: "3px solid #1E1B2E" }} />
       </div>
@@ -131,7 +131,7 @@ export function RankingView({ me, boards, looks, handles }: Props) {
         </div>
 
         {mine?.above && (
-          <Link href={handles[mine.above.userId] ? `/people/${handles[mine.above.userId]}` : "/ranking"} className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable">
+          <Link href={`/people/${mine.above.handle}`} className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable">
             <span className="w-[30px] font-display text-[15px] font-bold text-muted">#{mine.above.rank}</span>
             <Avatar person={{ name: mine.above.name, look: looks[mine.above.userId] }} size={30} />
             <span className="flex-1 truncate text-[14px] font-extrabold">{mine.above.name}</span>

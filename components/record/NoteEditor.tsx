@@ -16,6 +16,7 @@ import { formatClock } from "@/lib/format";
 import { forgetNote, recallNote } from "@/lib/note-draft";
 import { SUMMARY_POINTS } from "@/lib/points";
 import { HIT_AREA } from "@/components/ui/hit-area";
+import { TOPICS, type Topic } from "@/lib/topics";
 
 type Summary = { interactionId: string; title: string; bullets: string[]; topics: string[]; pendingAction: string | null; seconds: number | null; approved: boolean };
 
@@ -25,6 +26,17 @@ type Phase = { kind: "recording"; seconds: number } | { kind: "transcribing" } |
 const DRAFT_TIMEOUT_MS = 35_000;
 
 const WAVE = [30, 54, 76, 46, 68, 34, 58, 80, 42, 64, 28];
+
+const isTopic = (value: string): value is Topic => (TOPICS as readonly string[]).includes(value);
+
+// "Recordar": a calendar event with the pending action, so the follow-up leaves Compa with the person.
+const reminderUrl = (action: string, other: string): string => {
+  const url = new URL("https://calendar.google.com/calendar/render");
+  url.searchParams.set("action", "TEMPLATE");
+  url.searchParams.set("text", action);
+  url.searchParams.set("details", `Compa · ${other}`);
+  return url.toString();
+};
 
 const fromInteraction = (interaction: NonNullable<ConnectionDetailT["interaction"]>): Summary => ({
   interactionId: interaction.id,
@@ -124,7 +136,8 @@ export function NoteEditor({ detail }: Props) {
     try {
       await apiCall("POST", `/api/interactions/${summary.interactionId}/approve`, Approved, {
         summary: summary.bullets.join(" "),
-        topics: [],
+        // The approve API only accepts vocabulary topics (lib/topics.ts).
+        topics: summary.topics.filter(isTopic),
         nextSteps: summary.pendingAction ? [summary.pendingAction] : [],
         title: summary.title,
         pendingAction: summary.pendingAction,
@@ -245,9 +258,14 @@ export function NoteEditor({ detail }: Props) {
             <SectionLabel>{copy.pendingLabel}</SectionLabel>
             <span className="text-[14px] font-extrabold">{summary.pendingAction}</span>
           </span>
-          <button type="button" className={`${HIT_AREA} h-8 cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable`}>
+          <a
+            href={reminderUrl(summary.pendingAction, detail.other.name)}
+            target="_blank"
+            rel="noreferrer"
+            className={`${HIT_AREA} flex h-8 cursor-pointer items-center rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable`}
+          >
             {copy.remind}
-          </button>
+          </a>
         </div>
       )}
 
@@ -257,7 +275,11 @@ export function NoteEditor({ detail }: Props) {
       </div>
 
       <div className="mt-auto flex flex-col gap-3 lg:mt-2">
-        {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
+        {error && (
+          <span role="alert" className="text-center text-[12px] font-extrabold text-coral">
+            {error}
+          </span>
+        )}
         {summary.approved ? (
           <Button variant="primary" onClick={() => router.push(`/people/${detail.other.handle}`)}>
             {copy.save}

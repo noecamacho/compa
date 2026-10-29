@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { MonitoGate } from "@/components/monito/MonitoGate";
 import { DockHost } from "@/components/nav/Dock";
 import { LiveNotifications } from "@/components/notifications/LiveNotifications";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 import { Me } from "@/lib/api/schemas";
 import { apiGetSafe } from "@/lib/api/server-fetch";
 import { isSuperAdmin } from "@/lib/roles";
@@ -20,6 +21,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   if (me && !me.avatar) return <MonitoGate />;
   const screens = (
     <div className="lg:[--rail:264px]">
+      <OfflineBanner />
       {children}
       <DockHost admin={isSuperAdmin(me)} />
     </div>

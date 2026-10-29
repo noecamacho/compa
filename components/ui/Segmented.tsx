@@ -1,6 +1,7 @@
 "use client";
 
 import { HIT_AREA } from "./hit-area";
+import { useHydrated } from "./useHydrated";
 
 type Option<T extends string> = { value: T; label: string };
 
@@ -20,6 +21,7 @@ const EASE = "cubic-bezier(.34,1.3,.5,1)";
 export function Segmented<T extends string>({ options, value, onChange, label, height = 40 }: Props<T>) {
   const count = options.length;
   const activeIndex = Math.max(0, options.findIndex((option) => option.value === value));
+  const hydrated = useHydrated();
   return (
     <div
       role="group"
@@ -44,6 +46,7 @@ export function Segmented<T extends string>({ options, value, onChange, label, h
             key={option.value}
             type="button"
             aria-pressed={on}
+            aria-disabled={hydrated ? undefined : true}
             onClick={() => onChange(option.value)}
             className={`${HIT_AREA} z-[1] cursor-pointer rounded-chip border-0 bg-transparent font-display font-bold`}
             style={{

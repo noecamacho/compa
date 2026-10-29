@@ -44,12 +44,14 @@ async function requestSummary(
   return SummaryOutput.parse(JSON.parse(response.output_text));
 }
 
+// The client is created inside the try: without an OpenAI key the SDK throws on construction, and that case
+// must fall back to the verbatim text like any other failure (plan p. 12), not fail the request.
 export async function draftSummary(
   input: DraftSummaryInput,
-  client: SummaryClient = getOpenAI(),
+  client?: SummaryClient,
 ): Promise<DraftSummary> {
   try {
-    return { ...(await requestSummary(input, client)), fallback: false };
+    return { ...(await requestSummary(input, client ?? getOpenAI())), fallback: false };
   } catch (error) {
     console.error("draftSummary failed, using verbatim text", error);
     return fallbackFor(input.text);

@@ -11,7 +11,7 @@ import { requestLocale } from "./locale";
 import { currentUserOrNull } from "./auth";
 import { connectionsOfRealPeople, LIVE_CACHE, requireEventByCode } from "./events";
 import { cardFor, usersByIds } from "./people";
-import { rankedAtEvent, rankedLifetime, type Ranked } from "./scores";
+import { onBoard, rankedAtEvent, rankedLifetime, type Ranked } from "./scores";
 
 // The snapshot carries the most recent links only, so its size stays flat as the room connects (about 1.15 MB at
 // 1,000 people and 6k links before the cap; Vercel refuses bodies over 4.5 MB). Counters still count every link.
@@ -92,7 +92,7 @@ async function myStanding(ranked: Ranked[]) {
 
 export async function leaderboard({ params, query }: InputOf<typeof R.leaderboard>): ResultOf<typeof R.leaderboard> {
   const event = await requireEventByCode(params.code);
-  const ranked = query.scope === "lifetime" ? await rankedLifetime({ includeTest: event.isTest }) : await rankedAtEvent(event);
+  const ranked = onBoard(query.scope === "lifetime" ? await rankedLifetime({ includeTest: event.isTest }) : await rankedAtEvent(event));
   const rows = ranked.slice(0, query.limit).map(toRow);
   const me = await myStanding(ranked);
   return { body: me ? { rows, me } : { rows }, headers: me ? undefined : LIVE_CACHE };

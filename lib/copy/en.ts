@@ -80,6 +80,16 @@ export const eventNotFound: typeof es.eventNotFound = {
   home: "Go to compa.lol",
 };
 
+export const offline: typeof es.offline = {
+  banner: "You're offline. What you do is saved when the internet is back.",
+};
+
+export const notFound: typeof es.notFound = {
+  title: "There's nothing here",
+  body: "That person, connection or page doesn't exist or is no longer available.",
+  home: "Go home",
+};
+
 export const admin: typeof es.admin = {
   title: "Admin",
   nav: { events: "Events", people: "People", testUsers: "Testing", app: "Back to the app" },
@@ -459,6 +469,7 @@ export const connect: typeof es.connect = {
     failed: "We couldn't open the camera (is another app using it?). Use the camera app or search by name.",
   },
   notFound: "We couldn't find anyone with that name.",
+  invalidQr: "That QR isn't from Compa. Scan someone's personal QR.",
 };
 
 export const register: typeof es.register = {
@@ -524,6 +535,8 @@ export const connections: typeof es.connections = {
   emptyTitle: "Your people will live here",
   emptyCta: "Go to Connect",
   emptyFiltered: "Nobody in this filter yet.",
+  searchPlaceholder: "Search by name",
+  onlyThisEvent: "Only this event",
 };
 
 export const person: typeof es.person = {

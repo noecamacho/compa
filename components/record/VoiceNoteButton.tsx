@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
+import { HIT_AREA } from "@/components/ui/hit-area";
 import { Muted } from "@/components/ui/Text";
 import { startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
 import { useCopy, useLocale } from "@/components/LocaleProvider";
@@ -109,7 +110,7 @@ export function VoiceNoteButton({ state, onChange }: Props) {
         <button
           type="button"
           onClick={start}
-          className="h-[30px] cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable"
+          className={`${HIT_AREA} h-[30px] cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable`}
         >
           {copy.rerecord}
         </button>

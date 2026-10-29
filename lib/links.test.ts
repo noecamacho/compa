@@ -26,6 +26,8 @@ describe("parseLink", () => {
     expect(parseLink("web", "https://user:pass@lucia.dev")).toBeNull();
     expect(parseLink("web", "localhost")).toBeNull();
     expect(parseLink("instagram", "  ")).toBeNull();
+    expect(parseLink("instagram", "@@ana")).toBeNull();
+    expect(parseLink("instagram", "ana@lopez")).toBeNull();
   });
 
   test("WhatsApp takes an international phone number or a wa.me link", () => {
@@ -34,6 +36,8 @@ describe("parseLink", () => {
     expect(parseLink("whatsapp", "https://wa.me/523312345678")).toBe("https://wa.me/523312345678");
     expect(parseLink("whatsapp", "https://api.whatsapp.com/send?phone=523312345678")).toBe("https://wa.me/523312345678");
     expect(parseLink("whatsapp", "1234567")).toBeNull();
+    expect(parseLink("whatsapp", "81 1234 5678")).toBeNull();
+    expect(parseLink("whatsapp", "+81 1234 5678")).toBe("https://wa.me/8112345678");
     expect(parseLink("whatsapp", "+52 33 abc")).toBeNull();
     expect(parseLink("whatsapp", "1234567890123456")).toBeNull();
     expect(parseLink("whatsapp", "https://evil.com/523312345678")).toBeNull();

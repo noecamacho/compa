@@ -98,6 +98,10 @@ export const Me = Card.extend({
   badges: z.array(BadgeId).optional().meta({ description: "Earned badges, most recent first." }),
 }).meta({ id: "Me" });
 
+// Search by name on the connect screen ("¿No sale el QR? Busca por nombre").
+export const PeopleSearchQuery = z.object({ q: z.string().trim().min(2).max(80).meta({ description: "Part of a name, accents ignored." }) });
+export const PeopleSearch = z.object({ people: z.array(Card) }).meta({ id: "PeopleSearch", description: "People at your event whose name matches, by name." });
+
 export const Interest = z.object({ id: z.int(), slug: z.string(), name: z.string() }).meta({ id: "Interest" });
 export const InterestList = z.array(Interest);
 
@@ -358,6 +362,7 @@ export const LeaderboardRow = z
   .object({
     rank: z.int(),
     userId: uuid,
+    handle,
     name: z.string(),
     photoUrl: z.string().nullable(),
     points: z.int(),

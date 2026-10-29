@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { valeriaProfile } from "../lib/api/examples";
 import { copyFor } from "../lib/copy";
 import { localeFromAcceptLanguage } from "../lib/i18n";
+import { fakeCamera } from "./fake-camera";
 import { expect, test } from "./fixtures";
 
 const copyOf = (testInfo: { project: { use: { locale?: string } } }) => copyFor(localeFromAcceptLanguage(testInfo.project.use.locale));
@@ -50,26 +51,7 @@ test.describe("in-app scanner without BarcodeDetector", () => {
   test("reads a personal QR with the JS decoder and offers to connect @mock", async ({ page, baseURL }, testInfo) => {
     const {  } = copyOf(testInfo);
     const qr = await QRCode.toDataURL(`${baseURL}/u/${HANDLE}`, { margin: 4, width: 480 });
-    await page.addInitScript((src: string) => {
-      delete (globalThis as { BarcodeDetector?: unknown }).BarcodeDetector;
-      const fake = async (): Promise<MediaStream> => {
-        const image = new Image();
-        image.src = src;
-        await image.decode();
-        const canvas = document.createElement("canvas");
-        canvas.width = 640;
-        canvas.height = 480;
-        const context = canvas.getContext("2d");
-        const draw = () => {
-          context?.fillRect(0, 0, 640, 480);
-          context?.drawImage(image, 80, 0, 480, 480);
-        };
-        draw();
-        setInterval(draw, 100);
-        return canvas.captureStream(10);
-      };
-      Object.defineProperty(navigator, "mediaDevices", { value: { getUserMedia: fake }, configurable: true });
-    }, qr);
+    await fakeCamera(page, qr);
     await page.goto("/connect?tab=scan");
     await expect(page.locator(`a[href="/connect/${HANDLE}"]`)).toBeVisible({ timeout: 30_000 });
   });

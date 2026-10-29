@@ -30,6 +30,7 @@ const HANDLE: Record<Exclude<LinkKey, "web" | "whatsapp">, RegExp> = {
 // E.164: up to 15 digits with the country code; 8 is the shortest real international number.
 const PHONE_DIGITS = /^\d{8,15}$/;
 const PHONE_CHARS = /^\+?[\d\s().-]+$/;
+const NATIONAL_DIGITS = 10;
 // "instagram.com/ana" is a URL without its scheme; "ana.lopez" stays a handle.
 const LOOKS_LIKE_URL = /^(https?:\/\/|[^/\s]+\.[^/\s]+\/)/i;
 
@@ -50,6 +51,8 @@ function whatsappLink(value: string): string | null {
   const number = url ? (url.searchParams.get("phone") ?? url.pathname.slice(1)) : value;
   if (!PHONE_CHARS.test(number)) return null;
   const digits = number.replace(/\D/g, "");
+  // Typed without "+", ten digits or fewer is a national number: wa.me needs the country code in front.
+  if (!url && !number.startsWith("+") && digits.length <= NATIONAL_DIGITS) return null;
   return PHONE_DIGITS.test(digits) ? `${BASE_URL.whatsapp}${digits}` : null;
 }
 

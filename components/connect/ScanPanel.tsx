@@ -6,9 +6,9 @@ import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Muted } from "@/components/ui/Text";
 import { ApiClientError, apiCall } from "@/lib/api/client";
-import { UserProfile, type CardT } from "@/lib/api/schemas";
 import { useCopy } from "@/components/LocaleProvider";
 import { errorText } from "@/lib/api/error-text";
+import { PeopleSearch, UserProfile, type CardT } from "@/lib/api/schemas";
 import { slugify } from "@/lib/slug";
 import { HIT_AREA } from "@/components/ui/hit-area";
 
@@ -66,12 +66,13 @@ async function jsDecoder(): Promise<Decode> {
 
 const errorName = (error: unknown): string => (error instanceof Error ? error.name : "");
 
-// onHandle lives in a ref so a re-render (every keystroke in the search box) never restarts the camera.
-function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onHandle: (handle: string) => void): CameraStatus {
+// onScan lives in a ref so a re-render (every keystroke in the search box) never restarts the camera.
+// It gets the handle of a personal QR, or null for a QR that is not one.
+function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onScan: (handle: string | null) => void): CameraStatus {
   const [status, setStatus] = useState<CameraStatus>("starting");
-  const handleRef = useRef(onHandle);
+  const scanRef = useRef(onScan);
   useEffect(() => {
-    handleRef.current = onHandle;
+    scanRef.current = onScan;
   });
   useEffect(() => {
     const video = videoRef.current;
@@ -83,8 +84,7 @@ function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onHandle:
     const scan = async (decode: Decode) => {
       const codes = await decode(video).catch(() => []);
       if (!active) return;
-      const handle = codes.map(handleFromQr).find(Boolean);
-      if (handle) handleRef.current(handle);
+      if (codes.length > 0) scanRef.current(codes.map(handleFromQr).find(Boolean) ?? null);
       timer = setTimeout(() => void scan(decode), SCAN_MS);
     };
     const start = async () => {
@@ -114,12 +114,34 @@ function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onHandle:
 
 const CORNER = "absolute h-[34px] w-[34px] border-mint";
 
+function PersonRow({ card, className }: { card: CardT; className: string }) {
+  const copy = useCopy().connect;
+  return (
+    <div className={`${className} flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3`}>
+      <Avatar person={avatarOf(card)} size={42} />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-[15px] font-extrabold">{card.name}</span>
+        <Muted className="truncate text-[12px] font-bold">{[card.headline, card.company].filter(Boolean).join(" · ")}</Muted>
+      </span>
+      <Link
+        href={`/connect/${card.handle}`}
+        aria-label={`${copy.connectButton}: ${card.name}`}
+        className={`${HIT_AREA} inline-flex h-[34px] shrink-0 items-center justify-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold whitespace-nowrap border-ink shadow-hard-2 pressable`}
+      >
+        {copy.connectButton}
+      </Link>
+    </div>
+  );
+}
+
 // Camera viewfinder with mint corners; a detected person appears in the row at the bottom (V2Conectar "Escanear").
+// Searching by name lists the matching people under the field, each with its own Conectar.
 export function ScanPanel() {
   const all = useCopy();
   const copy = all.connect;
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [found, setFound] = useState<CardT | null>(null);
+  const [results, setResults] = useState<CardT[]>([]);
   const [query, setQuery] = useState("");
   const [lookupError, setLookupError] = useState<string | null>(null);
   // One lookup per handle: the camera reads the same QR several times a second.
@@ -139,16 +161,28 @@ export function ScanPanel() {
   }
 
   const status = useCamera(videoRef, (handle) => {
+    if (!handle) return found ? undefined : setLookupError(copy.invalidQr);
     if (found || lastHandle.current === handle) return;
     lastHandle.current = handle;
     void lookUp(handle);
   });
   const available = status === "starting" || status === "scanning";
 
-  function search(event: FormEvent<HTMLFormElement>) {
+  async function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const handle = slugify(query);
-    if (handle.length >= 2) void lookUp(handle);
+    const text = query.trim();
+    if (text.length < 2) return;
+    try {
+      const { people } = await apiCall("GET", `/api/users?q=${encodeURIComponent(text)}`, PeopleSearch);
+      setResults(people);
+      // Search covers your current event only; a typed handle still finds anyone, as before.
+      const handle = slugify(text);
+      setLookupError(people.length === 0 && !handle ? copy.notFound : null);
+      if (people.length === 0 && handle) void lookUp(handle);
+    } catch (caught) {
+      setResults([]);
+      setLookupError(errorText(all, caught));
+    }
   }
 
   return (
@@ -171,21 +205,7 @@ export function ScanPanel() {
             style={{ boxShadow: "0 0 12px rgba(107,228,163,0.8)" }}
           />
         </span>
-        {found && (
-          <div className="animate-rise absolute right-3 bottom-3 left-3 flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3">
-            <Avatar person={avatarOf(found)} size={42} />
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="text-[15px] font-extrabold">{found.name}</span>
-              <Muted className="text-[12px] font-bold">{[found.headline, found.company].filter(Boolean).join(" · ")}</Muted>
-            </span>
-            <Link
-              href={`/connect/${found.handle}`}
-              className={`${HIT_AREA} inline-flex h-[34px] shrink-0 items-center justify-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold whitespace-nowrap border-ink shadow-hard-2 pressable`}
-            >
-              {copy.connectButton}
-            </Link>
-          </div>
-        )}
+        {found && <PersonRow card={found} className="animate-rise absolute right-3 bottom-3 left-3" />}
       </div>
       <form onSubmit={search} className="relative">
         <label htmlFor="search-handle" className="sr-only">
@@ -201,7 +221,20 @@ export function ScanPanel() {
           className="box-border block h-12 w-full rounded-[14px] bg-white pr-[14px] pl-11 font-body text-[15px] font-bold text-ink outline-none placeholder:text-muted border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
         />
       </form>
-      {lookupError && <Muted className="text-center text-[12px] font-extrabold">{lookupError}</Muted>}
+      {results.length > 0 && (
+        <ul aria-label={copy.searchLabel} className="m-0 flex list-none flex-col gap-2 p-0">
+          {results.map((card) => (
+            <li key={card.id}>
+              <PersonRow card={card} className="animate-rise" />
+            </li>
+          ))}
+        </ul>
+      )}
+      {lookupError && (
+        <span role="alert" className="text-center text-[12px] font-extrabold text-muted">
+          {lookupError}
+        </span>
+      )}
     </div>
   );
 }

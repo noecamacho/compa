@@ -1,7 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { z } from "zod";
 import { NETWORK_ORDER } from "@/components/brand/NetworkIcon";
 import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
@@ -9,11 +10,13 @@ import { Field } from "@/components/ui/Field";
 import { Header } from "@/components/ui/Header";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
+import { useHydrated } from "@/components/ui/useHydrated";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { apiCall } from "@/lib/api/client";
 import { Me, VisibilitySettings, type MeT } from "@/lib/api/schemas";
 import { useCopy } from "@/components/LocaleProvider";
 import { errorText } from "@/lib/api/error-text";
+import { forgetDraft, recallDraft, rememberDraft } from "@/lib/draft-store";
 import { linkInputValue, parseLink } from "@/lib/links";
 import { LINK_KEYS, type LinkKey, type Links, type Visibility, type VisibilitySettings as Settings } from "@/lib/profile-fields";
 import { LinkEditor } from "./LinkEditor";
@@ -41,21 +44,42 @@ const previewLinks = (values: LinkValues, initial: LinkValues, stored: Links | u
 const changedLinks = (values: LinkValues, initial: LinkValues): Partial<LinkValues> =>
   Object.fromEntries(LINK_KEYS.filter((key) => values[key] !== initial[key]).map((key) => [key, values[key]]));
 
+const DRAFT = "profile";
+
+const Draft = z.object({
+  fields: z.object({ name: z.string(), headline: z.string(), company: z.string(), city: z.string() }),
+  links: z.record(z.enum(LINK_KEYS), z.string()),
+  levels: VisibilitySettings,
+});
+type DraftT = z.infer<typeof Draft>;
+
 // 02 Perfil: LinkedIn data, the person's links, and who sees each item before and after connecting, with a live preview.
-// Also reached from "Editar perfil".
-export function ProfileForm({ me, next, back, onboarding }: Props) {
+// Also reached from "Editar perfil". Unsaved edits survive a reload or going back (sessionStorage draft): the form
+// mounts from the server data, then again in the browser from the draft.
+export function ProfileForm(props: Props) {
+  const hydrated = useHydrated();
+  const draft = useMemo(() => (hydrated ? recallDraft(DRAFT, props.me.id, Draft) : null), [hydrated, props.me.id]);
+  return <Form key={hydrated ? "browser" : "server"} {...props} draft={draft} restored={hydrated} />;
+}
+
+function Form({ me, next, back, onboarding, draft, restored }: Props & { draft: DraftT | null; restored: boolean }) {
   const all = useCopy();
   const { profile, visibility: visibilityCopy } = all;
   const router = useRouter();
-  const [fields, setFields] = useState({ name: me.name, headline: me.headline ?? "", company: me.company ?? "", city: me.city ?? "" });
+  const [fields, setFields] = useState(() => draft?.fields ?? { name: me.name, headline: me.headline ?? "", company: me.company ?? "", city: me.city ?? "" });
+  // What is stored, so only edits are sent; a restored draft only changes what the inputs start with.
   const [initialLinks] = useState(() => linkValuesOf(me.links));
-  const [links, setLinks] = useState<LinkValues>(initialLinks);
-  const [levels, setLevels] = useState<Settings>(me.visibility);
+  const [links, setLinks] = useState<LinkValues>(() => draft?.links ?? initialLinks);
+  const [levels, setLevels] = useState<Settings>(() => draft?.levels ?? me.visibility);
   const [removed, setRemoved] = useState<Partial<LinkValues>>({});
   const [touched, setTouched] = useState<Flags>({});
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (restored) rememberDraft(DRAFT, me.id, { fields, links, levels });
+  }, [restored, me.id, fields, links, levels]);
 
   const update = (key: keyof typeof fields) => (event: FormEvent<HTMLInputElement>) =>
     setFields({ ...fields, [key]: event.currentTarget.value });
@@ -95,6 +119,7 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
       const linkPatch = changedLinks(links, initialLinks);
       await apiCall("PATCH", "/api/me", Me, { ...fields, ...(Object.keys(linkPatch).length ? { links: linkPatch } : {}) });
       await apiCall("PATCH", "/api/me/visibility", VisibilitySettings, { headline: levels.headline, company: levels.company, links: levels.links });
+      forgetDraft(DRAFT, me.id);
       router.push(next);
     } catch (caught) {
       setError(errorText(all, caught));
@@ -117,7 +142,7 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
         <h1 className="m-0 font-display text-[28px] leading-[1.1] font-bold">{profile.title}</h1>
         <Muted className="text-[14px] font-bold">{profile.subtitle}</Muted>
       </div>
-      <form onSubmit={submit} noValidate className="flex flex-1 flex-col gap-[14px]">
+      <form onSubmit={submit} noValidate data-restored={restored ? "1" : undefined} className="flex flex-1 flex-col gap-[14px]">
         <section aria-label={visibilityCopy.title} className="flex flex-col gap-2 rounded-button bg-white px-[14px] py-3 border-ink shadow-hard-3">
           <span className="flex items-center gap-2">
             <Icon name="lock" size={16} />
