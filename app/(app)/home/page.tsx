@@ -9,11 +9,12 @@ import { Tour } from "@/components/tour/Tour";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type ConnectionListT, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
+import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, Notifications, type ConnectionListT, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
 import { home, tour } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
 import { isSuperAdmin } from "@/lib/roles";
+import { requestLocale } from "@/lib/server/locale";
 import type { MonitoLook } from "@/lib/monito/look";
 import { StickyBar } from "@/components/ui/StickyBar";
 
@@ -44,10 +45,12 @@ export default async function HomePage({ searchParams }: Props) {
   const { demo } = await searchParams;
   // `?demo=empty` previews the first-night state in mock mode.
   const me = await apiGet("/api/me", Me, demo === "empty" ? { mockExample: "empty" } : {});
-  const [live, listOrNull, invites] = await Promise.all([
+  const [live, listOrNull, invites, notificationList, locale] = await Promise.all([
     loadLive(me.currentEvent?.code),
     apiGetSafe("/api/connections", ConnectionList),
     apiGetOrNull("/api/invites/me", Invites),
+    apiGetSafe("/api/notifications", Notifications),
+    requestLocale(),
   ]);
   const list = listOrNull ?? NO_CONNECTIONS;
   const empty = demo === "empty" || list.totals.connections === 0;
@@ -60,7 +63,7 @@ export default async function HomePage({ searchParams }: Props) {
           <Avatar person={avatarOf(me)} size={46} shadow={3} />
           <span className="font-display text-[24px] leading-none font-bold">{home.hello(firstName(me.name))}</span>
         </Link>
-        <AlertsBell initial={incoming} />
+        <AlertsBell initial={notificationList?.unseenCount ?? 0} locale={locale} />
       </StickyBar>
 
       <IncomingRequests initial={incoming} />

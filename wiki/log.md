@@ -156,6 +156,10 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - PR #40 merged with a typecheck error (a teammate change made the monito body required). The Vercel build failed, and the keep-one-deployment cleanup still deleted the working deployment, so the site served 404 until the fix (PR #41) deployed. Now: PR checks gate merges, the deploy runs lint/typecheck/tests first, and cleanup only runs when the new deployment is READY.
 
+## [2026-10-29] query | What does the home notification bell show?
+
+- F-49/T-080 now has a notification list for pending requests, accepted requests, connected invitees and earned badges. The bell polls the unseen count, opening `/notifications` marks displayed items seen, and declines stay hidden (`docs/flows/catalog.md` F-49; `docs/flows/backlog.md` T-080).
+
 ## [2026-10-29] query | Admin console responsive pass
 
 - `/admin` now follows the V2 breakpoints (390/834/1440): tables from md, cards below, consequence dialogs proportional to stakes (`components/admin/ConfirmDialog.tsx`), inline validation in `EventForm`. UI only; no API or data-model change.
