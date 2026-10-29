@@ -297,6 +297,8 @@ export const connections = {
   emptyTitle: "Aquí vivirá tu gente",
   emptyCta: "Ir a Conectar",
   emptyFiltered: "Nadie en este filtro todavía.",
+  searchPlaceholder: "Busca por nombre",
+  onlyThisEvent: "Solo las de este evento",
 };
 
 export const person = {

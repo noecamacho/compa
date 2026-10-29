@@ -531,6 +531,8 @@ export const connections: typeof es.connections = {
   emptyTitle: "Your people will live here",
   emptyCta: "Go to Connect",
   emptyFiltered: "Nobody in this filter yet.",
+  searchPlaceholder: "Search by name",
+  onlyThisEvent: "Only this event",
 };
 
 export const person: typeof es.person = {

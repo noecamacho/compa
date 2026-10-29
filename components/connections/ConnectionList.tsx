@@ -1,15 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
+import { IconButton } from "@/components/ui/IconButton";
+import { StickyBar } from "@/components/ui/StickyBar";
 import { Muted } from "@/components/ui/Text";
 import type { PersonHistoryT } from "@/lib/api/schemas";
 import { useCopy } from "@/components/LocaleProvider";
+import { slugify } from "@/lib/slug";
 
 type PersonType = "new" | "reconnection" | "friend";
 type Filter = "all" | PersonType;
@@ -30,7 +33,11 @@ const FILTERS: { key: Filter; color: string; text: string }[] = [
 // Type falls back to the last meeting's kind when the API does not send it yet.
 const typeOf = (entry: PersonHistoryT): PersonType => entry.type ?? (entry.meetings[0]?.kind === "reconnection" ? "reconnection" : "new");
 
-type Props = { people: PersonHistoryT[] };
+// Me sends the current event's name and code, not its slug, so tonight's meetings are matched by name.
+const metAt = (entry: PersonHistoryT, eventName: string) => entry.meetings.some((meeting) => meeting.event.name === eventName && meeting.status === "accepted");
+
+// `requests` (the incoming requests) renders under the header and chip, above the list.
+type Props = { people: PersonHistoryT[]; eventName: string | null; requests?: ReactNode };
 
 // No connections at all: say what will appear here and point to the one action that fills it.
 function EmptyConnections() {
@@ -50,13 +57,67 @@ function EmptyConnections() {
   );
 }
 
-export function ConnectionList({ people }: Props) {
+// 07 Conexiones: search by name, the current-event chip narrows to tonight, the type chips filter, each row opens the person.
+export function ConnectionList({ people, eventName, requests }: Props) {
   const copy = useCopy().connections;
   const [filter, setFilter] = useState<Filter>("all");
-  if (people.length === 0) return <EmptyConnections />;
-  const shown = people.filter((entry) => filter === "all" || typeOf(entry) === filter);
+  const [searching, setSearching] = useState(false);
+  const [query, setQuery] = useState("");
+  const [onlyEvent, setOnlyEvent] = useState(false);
+  const searchId = useId();
+  // Closing the search box drops its filter, so the list never looks cut with no field to clear it.
+  const needle = searching ? slugify(query) : "";
+  const shown = people
+    .filter((entry) => filter === "all" || typeOf(entry) === filter)
+    .filter((entry) => !needle || slugify(entry.person.name).includes(needle))
+    .filter((entry) => !onlyEvent || !eventName || metAt(entry, eventName));
+  const eventChip = eventName && (
+    <Chip pressed={onlyEvent} onClick={() => setOnlyEvent(!onlyEvent)} className="self-start px-3 text-[13px]" title={copy.onlyThisEvent}>
+      <Icon name="calendar" size={15} />
+      {eventName}
+      <Icon name="chevronDown" size={14} strokeWidth={3} style={{ transform: onlyEvent ? "rotate(180deg)" : undefined, transition: "transform .2s ease" }} />
+    </Chip>
+  );
+  const heading = (
+    <StickyBar className="flex items-center justify-between">
+      <h1 className="m-0 font-display text-[28px] leading-[1.1] font-bold">{copy.title}</h1>
+      <IconButton label={copy.search} aria-expanded={searching} aria-controls={searchId} onClick={() => setSearching(!searching)}>
+        <Icon name="search" size={20} />
+      </IconButton>
+    </StickyBar>
+  );
+  if (people.length === 0) {
+    return (
+      <>
+        {heading}
+        {eventChip}
+        {requests}
+        <EmptyConnections />
+      </>
+    );
+  }
   return (
     <>
+      {heading}
+      {searching && (
+        <div id={searchId} className="animate-fade-in relative">
+          <label htmlFor={`${searchId}-input`} className="sr-only">
+            {copy.search}
+          </label>
+          <Icon name="search" size={20} className="absolute top-[14px] left-[14px] text-muted" />
+          <input
+            id={`${searchId}-input`}
+            type="search"
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={copy.searchPlaceholder}
+            className="box-border block h-12 w-full rounded-[14px] bg-white pr-[14px] pl-11 font-body text-[15px] font-bold text-ink outline-none placeholder:text-muted border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
+          />
+        </div>
+      )}
+      {eventChip}
+      {requests}
       <div role="group" aria-label={copy.filterLabel} className="flex gap-2">
         {FILTERS.map(({ key, color, text }) => (
           <Chip key={key} pressed={filter === key} pressedBackground={color} pressedColor={text} onClick={() => setFilter(key)} className="px-[10px] text-[12px]">
@@ -66,7 +127,7 @@ export function ConnectionList({ people }: Props) {
       </div>
       {/* Keyed by filter so the rows rise again, staggered, every time the list changes. */}
       {/* Phone: one column. Tablet: two. Desktop: three. */}
-      <div key={filter} className="flex flex-col gap-[10px] md:grid md:grid-cols-2 md:gap-3 lg:grid-cols-3">
+      <div key={`${filter}-${onlyEvent}`} aria-live="polite" className="flex flex-col gap-[10px] md:grid md:grid-cols-2 md:gap-3 lg:grid-cols-3">
         {shown.length === 0 && <Muted className="animate-fade-in text-center text-[13px] font-bold md:col-span-full">{copy.emptyFiltered}</Muted>}
         {shown.map((entry, index) => {
           const type = typeOf(entry);
