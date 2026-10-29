@@ -17,26 +17,10 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { DEFAULT_VISIBILITY, VISIBILITY_LEVELS, type Links, type VisibilitySettings } from "../lib/profile-fields";
 import { authUsers } from "./auth-schema";
 
-export const LINK_KEYS = ["linkedin", "github", "x", "instagram", "web"] as const;
-export type LinkKey = (typeof LINK_KEYS)[number];
-export const VISIBILITY_LEVELS = ["public", "connections", "hidden"] as const;
-export type Visibility = (typeof VISIBILITY_LEVELS)[number];
-export type Links = Partial<Record<LinkKey, string>>;
-export type VisibilitySettings = {
-  headline: Visibility;
-  company: Visibility;
-  interests: Visibility;
-  links: Record<LinkKey, Visibility>;
-};
-
-export const DEFAULT_VISIBILITY: VisibilitySettings = {
-  headline: "public",
-  company: "public",
-  interests: "public",
-  links: { linkedin: "connections", github: "connections", x: "connections", instagram: "connections", web: "connections" },
-};
+export type { LinkKey, Links, Visibility, VisibilitySettings } from "../lib/profile-fields";
 
 export const connectionStatus = pgEnum("connection_status", ["pending", "accepted", "declined", "expired"]);
 export const connectionKind = pgEnum("connection_kind", ["new", "reconnection"]);
