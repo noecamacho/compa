@@ -12,7 +12,8 @@
     "openapi": "bun scripts/openapi.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "bun db/seed.ts"
+    "db:seed": "bun db/seed.ts",
+    "db:migrate:deploy": "DATABASE_URL=\"${DATABASE_URL_DIRECT:-$DATABASE_URL}\" drizzle-kit migrate"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
