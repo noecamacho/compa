@@ -96,3 +96,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Is production migrated to the V2 points?
 
 - Applied `drizzle/0001_v2_points_whatsapp.sql` to the production Supabase project (no rows existed). The points check now enforces 50 for new and 20 for reconnection, matching the deployed code; the points table itself awaits captain ratification (gap analysis, open question #29).
+
+## [2026-10-29] query | Which user flows exist, what is missing, and what do agents build next?
+
+- Added `docs/flows/`: 74 user flows with status per layer and e2e coverage, an actor permission and CRUD matrix (34 missing operations), 40 risks, and 86 agent-ready tickets (12 P0, 48 P1, 26 P2; 11 in progress on the landing and real-mode branches). Per the captain's requirement, every ticket depends on the Playwright harness T-000 and ships e2e specs. New open questions #43–#56.
