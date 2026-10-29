@@ -70,7 +70,8 @@ export function defineRoute<
       const params = parse(spec.params, (await ctx?.params) ?? {}, "path");
       const query = parse(spec.query, Object.fromEntries(new URL(req.url).searchParams), "query");
       const user = await resolveUser(spec.auth);
-      const body = parse(spec.body, await readBody(spec, req), "body");
+      // Multipart handlers validate the request themselves so they can read its File fields.
+      const body = spec.bodyKind === "multipart" ? {} : parse(spec.body, await readBody(spec, req), "body");
       const input = { req, params, query, body, user } as Parameters<typeof handler>[0];
       return toResponse(await handler(input), spec.success.status);
     } catch (error) {

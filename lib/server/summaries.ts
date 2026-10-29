@@ -7,6 +7,7 @@ import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { draftSummary as draftWithAi } from "../ai/draft-summary";
 import { AudioValidationError, transcribe as transcribeAudio } from "../ai/transcribe";
+import { AudioUploadError, readAudioFile } from "./audio-upload";
 import { SUMMARY_POINTS } from "../points";
 import { broadcast, liveTopic } from "../realtime";
 import { requireAcceptedMembership } from "./connections";
@@ -15,9 +16,12 @@ import { isUniqueViolation, usersByIds } from "./people";
 // ---- POST /api/transcribe ----
 
 async function readAudio(req: Request): Promise<File> {
-  const form = await req.formData().catch(() => fail(E.invalidAudio));
-  const audio = form.get("audio");
-  return audio instanceof File ? audio : fail(E.invalidAudio);
+  try {
+    return await readAudioFile(req);
+  } catch (error) {
+    if (error instanceof AudioUploadError) return fail(E.invalidAudio);
+    throw error;
+  }
 }
 
 async function transcribeOrFail(file: File): Promise<string> {

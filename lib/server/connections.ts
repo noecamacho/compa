@@ -24,7 +24,7 @@ async function requireTarget(user: UserRow, toHandle: string): Promise<UserRow> 
 async function checkInScanner(user: UserRow, event: EventRow, screenConsent: boolean): Promise<void> {
   if (await isCheckedIn(user.id, event.id)) return;
   if (!screenConsent) fail(E.consentRequired);
-  await ensureCheckedIn(user, event);
+  await ensureCheckedIn(user, event, true);
 }
 
 async function insertRequest(event: EventRow, requester: UserRow, addressee: UserRow, knew: boolean | undefined) {

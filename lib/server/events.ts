@@ -45,7 +45,8 @@ export async function createEvent({ user, body }: InputOf<typeof R.createEvent>)
 export type CheckInResult = { checkedInAt: Date; created: boolean };
 
 // Repeat-safe check-in; broadcasts `attendee.checked_in` the first time (API spec §8).
-export async function ensureCheckedIn(user: UserRow, event: EventRow, db: Executor = getDb()): Promise<CheckInResult> {
+export async function ensureCheckedIn(user: UserRow, event: EventRow, screenConsent: boolean, db: Executor = getDb()): Promise<CheckInResult> {
+  if (!screenConsent) fail(E.consentRequired);
   const now = new Date();
   const [inserted] = await db
     .insert(eventAttendees)
@@ -76,10 +77,10 @@ export async function isCheckedIn(userId: string, eventId: string, db: Executor 
   return Boolean(row);
 }
 
-export async function checkIn({ user, params }: InputOf<typeof R.checkIn>): ResultOf<typeof R.checkIn> {
+export async function checkIn({ user, params, body }: InputOf<typeof R.checkIn>): ResultOf<typeof R.checkIn> {
   const event = await requireEvent(params.slug);
   if (!isRunning(event, new Date())) return fail(E.eventNotRunning);
-  const result = await ensureCheckedIn(user, event);
+  const result = await ensureCheckedIn(user, event, body.screenConsent);
   return {
     status: result.created ? 201 : 200,
     body: { event: { slug: event.slug, name: event.name }, checkedInAt: result.checkedInAt.toISOString(), alreadyCheckedIn: !result.created },
