@@ -7,6 +7,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Added
 
 - Monito builder: a "Soy" row with Hombre, Mujer and Otro (Mujer draws a skirt and suggests long hair), stored in the look; building a monito is now required before using the app, also when signing in with a LinkedIn photo.
+- Onboarding asks for job title and company (required) and city (optional), since LinkedIn shares only name, photo and email; anyone missing them is sent to the profile step first, and the step says so.
 - Sign out on the profile screen (`/me`), with a confirm step that warns you need your event's QR to get back in.
 - Email sign-in on the event door: people without LinkedIn enter their email and get a one-time link (Supabase magic link) that creates the account or signs them in. New route `POST /api/auth/email`. Requires the Supabase Email provider enabled and `/auth/callback` in the redirect allow list.
 

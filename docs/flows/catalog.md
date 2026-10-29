@@ -225,6 +225,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | `/onboarding/profile` (or `?from=me`) |
 | Pre | Session |
 | Happy path | `GET /api/me` → form with name, job title (`headline`), company and city; network toggles → Siguiente → `PATCH /api/me` + `PATCH /api/me/visibility` (on → `connections`, off → `hidden`) → 02b |
+| Required | Job title and company are required (`required`, non-blank) and city is optional, because LinkedIn OIDC shares only name, photo and email (OQ #33). The onboarding gate sends anyone missing them here first and carries `?next=` through 02b |
 | Alternates | `?from=me` returns to `/me`. Interests are editable in the API only (T-065) |
 | Errors | 400 `invalid_input` with `fields` → *raw msg* (`ProfileForm`) |
 | Edge cases | `city` passes zod and is **silently dropped** on `main` (IP stores it). `welcome.noteCreate` promises job title, company and city from LinkedIn, which is false (T-013). Headline is at most 120 characters, company and city at most 80 (DB checks). The WhatsApp number is normalized to digits. A network link may point to any `https` host (T-016) |
@@ -240,7 +241,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Actor | Signed-in attendee |
 | Entry | `/onboarding/monito` |
 | Pre | 02 done |
-| Happy path | Builder (body Hombre/Mujer/Otro, 5 skins, 4 hair styles, 4 hair colors, 6 shirts, extras, random) → `PATCH /api/me { avatar, avatarMode }` → `next` or `/home`. The look is always saved, also with the LinkedIn photo mode. Mandatory: the (app) layout renders `MonitoGate`, which sends anyone whose `avatar` is empty to `/onboarding/monito?next=<path>`; onboarding lives in its own `(onboarding)` route group so the gate cannot loop. IP: `avatar_mode` is `photo` by default (the LinkedIn photo copied to Storage) or `monito` |
+| Happy path | Builder (body Hombre/Mujer/Otro, 5 skins, 4 hair styles, 4 hair colors, 6 shirts, extras, random) → `PATCH /api/me { avatar, avatarMode }` → `next` or `/home`. The look is always saved, also with the LinkedIn photo mode. Mandatory: the (app) layout renders `OnboardingGate` with `pendingOnboarding(me)` (`lib/onboarding.ts`): no job title or company → 02, else no `avatar` → 02b, each with `?next=<path>`; onboarding lives in its own `(onboarding)` route group so the gate cannot loop. IP: `avatar_mode` is `photo` by default (the LinkedIn photo copied to Storage) or `monito` |
 | Alternates | No skip: leaving 02b and opening any app screen comes back to it |
 | Errors | Save failed → *raw msg* (`MonitoBuilder`); should keep the local choice and retry |
 | Edge cases | On `main` the server ignores `avatar`, so everyone shows the default monito (gap analysis U4). Stored jsonb is untrusted; IP `parseLook` drops an invalid look. No LinkedIn photo → the monito is the only option |

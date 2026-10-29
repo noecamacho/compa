@@ -16,12 +16,15 @@ export const common = {
 
 export const profile = {
   title: "Tu perfil",
-  subtitle: "Tu nombre viene de LinkedIn. Agrega tu puesto, empresa y ciudad.",
+  subtitle: "LinkedIn solo nos comparte tu nombre y foto. Agrega tu puesto y empresa; la ciudad es opcional.",
   fromLinkedIn: "Nombre de LinkedIn",
   name: "Nombre",
   role: "Puesto",
   company: "Empresa",
-  city: "Ciudad",
+  city: "Ciudad (opcional)",
+  rolePlaceholder: "Ej. Product Designer",
+  companyPlaceholder: "Ej. Compa",
+  cityPlaceholder: "Ej. Guadalajara",
   linksLabel: "Redes que compartes",
   linksOnlyConnections: "Solo las ven tus conexiones",
   linksHint: "Las apagadas no se muestran a nadie. Lo cambias cuando quieras desde tu perfil.",

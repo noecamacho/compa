@@ -66,10 +66,10 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
         <div className="flex flex-col gap-[10px]">
           <Field id="name" label={profile.name} value={fields.name} onInput={update("name")} required />
           <div className="grid grid-cols-2 gap-[10px]">
-            <Field id="headline" label={profile.role} value={fields.headline} onInput={update("headline")} />
-            <Field id="company" label={profile.company} value={fields.company} onInput={update("company")} />
+            <Field id="headline" label={profile.role} placeholder={profile.rolePlaceholder} value={fields.headline} onInput={update("headline")} required pattern=".*\S.*" maxLength={120} />
+            <Field id="company" label={profile.company} placeholder={profile.companyPlaceholder} value={fields.company} onInput={update("company")} required pattern=".*\S.*" maxLength={80} />
           </div>
-          <Field id="city" label={profile.city} value={fields.city} onInput={update("city")} />
+          <Field id="city" label={profile.city} placeholder={profile.cityPlaceholder} value={fields.city} onInput={update("city")} maxLength={80} />
         </div>
         <div className="flex flex-col gap-2 rounded-button bg-white px-[14px] py-3 border-ink shadow-hard-3">
           <span className="flex items-baseline justify-between gap-2">

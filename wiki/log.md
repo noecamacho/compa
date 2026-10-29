@@ -144,6 +144,6 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Captain decision: yes. The landing offers "Entrar con LinkedIn" for sign-up and sign-in (then `/home`); events stay exclusive because joining needs the QR link. API spec A10a records the amendment; the sign-out warning no longer says the QR is needed to come back.
 
-## [2026-10-29] query | Must every attendee build a monito, and can it show gender?
+## [2026-10-29] query | Must every attendee finish onboarding, and can the monito show gender?
 
-- Team decision (Sebastián): yes. The (app) layout sends anyone without a saved look to 02b and back (`MonitoGate`, `?next=`); onboarding moved to its own `(onboarding)` route group. The look gains an optional `body` (Hombre / Mujer / Otro), drawn as a skirt for Mujer; it lives in `users.avatar` jsonb, so no migration and no separate gender field. Recorded in [DESIGN.md](../DESIGN.md) 02b and `docs/flows/catalog.md` F-08.
+- Team decision (Sebastián): yes. LinkedIn OIDC shares only name, photo and email, so 02 asks for job title and company (required) and city (optional); the (app) layout sends anyone missing them to 02, then anyone without a saved look to 02b, and back (`OnboardingGate`, `pendingOnboarding`, `?next=`); open question #33 resolved; onboarding moved to its own `(onboarding)` route group. The look gains an optional `body` (Hombre / Mujer / Otro), drawn as a skirt for Mujer; it lives in `users.avatar` jsonb, so no migration and no separate gender field. Recorded in [DESIGN.md](../DESIGN.md) 02b and `docs/flows/catalog.md` F-08.
