@@ -135,3 +135,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Can people sign in without LinkedIn?
 
 - Yes, by request: the event door adds an email magic link (`POST /api/auth/email`, same `/auth/callback`). M2 in the data-model spec, `AGENTS.md` §4 and the API spec updated.
+
+## [2026-10-29] query | Why did shared links point to localhost?
+
+- The invite link, the personal QR (`/u/<handle>`) and the live join QR fell back to `http://localhost:3000` because `NEXT_PUBLIC_SITE_URL` was unset in Vercel. Set it to `https://compa.lol` and replaced the fallbacks with `requestOrigin()` (configured URL, else the request host, never localhost).

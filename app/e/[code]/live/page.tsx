@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { LiveBoard } from "@/components/live/LiveBoard";
@@ -7,23 +6,16 @@ import { joinUrl } from "@/lib/access-code";
 import { LiveSnapshot } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
 import { requestLocale } from "@/lib/server/locale";
+import { requestOrigin } from "@/lib/server/site";
 
 type Props = { params: Promise<{ code: string }> };
 
 export const metadata: Metadata = { title: "compa · live", robots: { index: false, follow: false } };
 
-async function siteOrigin(): Promise<string> {
-  const configured = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  if (configured) return configured;
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  return `${h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
-}
-
 // /e/<code>/live: the projected dashboard. The QR on screen is the event's own door, so people can join from their seat.
 export default async function LivePage({ params }: Props) {
   const { code } = await params;
-  const [snapshot, locale, origin] = await Promise.all([apiGetOrNull(`/api/e/${encodeURIComponent(code)}/live`, LiveSnapshot), requestLocale(), siteOrigin()]);
+  const [snapshot, locale, origin] = await Promise.all([apiGetOrNull(`/api/e/${encodeURIComponent(code)}/live`, LiveSnapshot), requestLocale(), requestOrigin()]);
   if (!snapshot) notFound();
   const url = joinUrl(origin, snapshot.event.code);
   const qrSvg = await QRCode.toString(url, { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#1E1B2E", light: "#FFFFFF" } });

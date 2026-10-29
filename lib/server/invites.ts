@@ -8,8 +8,8 @@ import type * as R from "../api/routes";
 import { GOLDEN_CAP_INVITES, INVITE_POINTS } from "../points";
 import { GOLDEN_CAP, withDefaults } from "../monito/look";
 import { cardsFor, isUniqueViolation } from "./people";
+import { requestOrigin } from "./site";
 
-const siteUrl = () => (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 
 // One open invite per inviter, created on first use; its code is the inviter's handle.
 async function ownInvite(user: UserRow, db: Executor): Promise<InviteRow> {
@@ -34,7 +34,7 @@ export async function myInvites({ user }: InputOf<typeof R.myInvites>): ResultOf
     if (!card) return [];
     return [{ person: card, firstConnectionAt: row.firstConnectionAt?.toISOString() ?? null, points: row.firstConnectionAt ? INVITE_POINTS.inviter : 0 }];
   });
-  return { body: { code: open.code, url: `${siteUrl()}/i/${open.code}`, invitees, target: GOLDEN_CAP_INVITES, goldenCap: user.goldenCapAt !== null } };
+  return { body: { code: open.code, url: `${(await requestOrigin())}/i/${open.code}`, invitees, target: GOLDEN_CAP_INVITES, goldenCap: user.goldenCapAt !== null } };
 }
 
 export async function claimInvite({ user, params }: InputOf<typeof R.claimInvite>): ResultOf<typeof R.claimInvite> {
