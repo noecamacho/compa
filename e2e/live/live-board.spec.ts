@@ -290,7 +290,7 @@ for (const locale of ["es-MX", "en-US"] as const) {
 // own (the reconnecting pill, state cards, the rotation strip) are masked out.
 async function stageMoves(page: Page): Promise<boolean> {
   const stage = page.getByTestId("live-stage");
-  const mask = [page.getByTestId("live-stale"), page.getByTestId("live-viz-indicator"), page.locator('[data-testid="live-empty"], [data-testid="live-ended"], [data-testid="live-upcoming"]')];
+  const mask = [page.getByTestId("live-stale"), page.getByTestId("live-viz-indicator"), page.locator('[data-testid="live-empty"] > div, [data-testid="live-ended"] > div, [data-testid="live-upcoming"] > div')];
   const before = await stage.screenshot({ animations: "allow", mask });
   await page.waitForTimeout(700);
   const after = await stage.screenshot({ animations: "allow", mask });
