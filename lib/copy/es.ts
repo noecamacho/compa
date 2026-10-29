@@ -34,6 +34,32 @@ export const screenState = {
   goHome: "Ir al inicio",
 };
 
+// What a failed request says on screen (errorText, lib/api/client.ts); server messages are English and never shown.
+export const apiErrors = {
+  generic: "No pudimos completar esto. Inténtalo otra vez.",
+  server: "Algo falló de nuestro lado. Inténtalo otra vez en un momento.",
+  signedOut: "Tu sesión se cerró. Vuelve a entrar para seguir.",
+  codes: {
+    offline: "Estás sin internet. Conéctate y vuelve a intentarlo.",
+    timeout: "La red está muy lenta y no respondió. Inténtalo otra vez.",
+    network_error: "No pudimos conectar con Compa. Revisa tu internet e inténtalo otra vez.",
+    invalid_input: "Revisa los datos e inténtalo otra vez.",
+    handle_taken: "Alguien ya usa ese nombre de usuario. Prueba otro.",
+    not_pending: "Esta solicitud ya fue respondida.",
+    event_ended: "El evento terminó y la solicitud expiró.",
+    event_not_running: "El evento no está activo en este momento.",
+    self_connection: "No puedes conectar contigo.",
+    not_at_event: "Esa persona no está en un evento ahora.",
+    connection_not_accepted: "La otra persona aún no acepta la conexión.",
+    not_substantive: "Cuéntale a Compa un poco más de lo que hablaron.",
+    already_approved: "Esta conexión ya tiene una nota guardada.",
+    summary_failed: "No pudimos resumir la nota. Inténtalo otra vez.",
+    transcription_failed: "No pudimos entender el audio. Reintenta o escribe la nota.",
+    connection_not_found: "No encontramos esa conexión.",
+    user_not_found: "No encontramos a esa persona.",
+  },
+};
+
 export const profile = {
   title: "Tu perfil",
   subtitle: "Tu nombre viene de LinkedIn. Agrega lo demás y decide quién ve cada cosa.",
@@ -162,11 +188,19 @@ export const connect = {
   scan: "Escanear",
   qrLabel: (name: string) => `Código QR de ${name}`,
   showIt: "Muéstralo para que te escaneen.",
-  aim: "Apunta a su QR",
   connectButton: "Conectar",
   searchLabel: "Buscar por nombre",
   searchPlaceholder: "¿No sale el QR? Busca por nombre",
-  cameraUnavailable: "Sin cámara aquí. Pide que te escaneen o busca por nombre.",
+  // Viewfinder banner per camera state (ScanPanel). Without a camera, the phone's own camera app reads any personal QR.
+  camera: {
+    starting: "Abriendo la cámara…",
+    scanning: "Apunta a su QR",
+    denied: "Sin permiso de cámara. Actívalo en los ajustes del navegador, o abre su QR con la app de cámara.",
+    no_camera: "Sin cámara aquí. Pide que te escaneen o busca por nombre.",
+    unsupported: "Este navegador no abre la cámara. Usa la app de cámara de tu teléfono con su QR, o busca por nombre.",
+    no_decoder: "No pudimos leer QR aquí. Usa la app de cámara de tu teléfono con su QR, o busca por nombre.",
+    failed: "No pudimos abrir la cámara (¿otra app la usa?). Usa la app de cámara o busca por nombre.",
+  },
   notFound: "No encontramos a nadie con ese nombre.",
 };
 
@@ -189,6 +223,7 @@ export const register = {
   sending: "Enviando…",
   screenNotice: "Al confirmar, tu nombre y foto aparecerán en la pantalla del evento.",
   micUnavailable: "No pudimos usar el micrófono; puedes seguir sin nota.",
+  retryUpload: "Reintentar envío",
 };
 
 export const confirmation = {
@@ -272,6 +307,7 @@ export const note = {
   failed: "No pudimos resumir la nota. Escribe de qué hablaron:",
   notePlaceholder: "Escribe de qué hablaron",
   draftButton: "Resumir",
+  retryUpload: "Reintentar envío de la nota",
 };
 
 export const me = {
@@ -434,6 +470,10 @@ export const live = {
   loading: "Cargando…",
   noWebgl: "Este navegador no puede dibujar la red. Los números siguen en vivo.",
   stale: "Reconectando…",
+  staleFor: (seconds: number) => `Reconectando… datos de hace ${seconds} s`,
+  codeChanged: "El código del evento cambió. Abre el nuevo enlace de pantalla desde Admin.",
+  outageTitle: "La pantalla perdió la conexión",
+  outageBody: "Reintentando sola cada pocos segundos. No hace falta tocar nada.",
 };
 
 // Unknown or rotated event code: says nothing about whether the event exists.

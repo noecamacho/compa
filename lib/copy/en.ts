@@ -68,6 +68,10 @@ export const live: typeof es.live = {
   loading: "Loading…",
   noWebgl: "This browser can't draw the network. The numbers stay live.",
   stale: "Reconnecting…",
+  staleFor: (seconds: number) => `Reconnecting… data from ${seconds} s ago`,
+  codeChanged: "The event code changed. Open the new screen link from Admin.",
+  outageTitle: "The screen lost its connection",
+  outageBody: "Retrying on its own every few seconds. No need to touch anything.",
 };
 
 export const eventNotFound: typeof es.eventNotFound = {
