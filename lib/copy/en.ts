@@ -9,7 +9,7 @@ export const landing: typeof es.landing = {
   doorTitle: "You get in only by scanning your event's QR.",
   doorHint: "It's at the entrance and on the event screen. Point your phone camera at it.",
   backToEvent: "Back to my event",
-  signInError: "We couldn't sign you in with LinkedIn. Scan your event's QR again.",
+  signInError: "We couldn't sign you in. Scan your event's QR again.",
   sceneLabel: "Two monitos connect and earn +50",
   sampleTopic: "Raising capital",
 };
@@ -25,6 +25,13 @@ export const door: typeof es.door = {
   notStarted: (hour: string) => `Doors open at ${hour}. Scan again then.`,
   ended: "This event has ended. Thanks for coming.",
   watchLive: "Watch the live screen",
+  orEmail: "or enter with your email",
+  emailLabel: "Email",
+  emailPlaceholder: "you@email.com",
+  emailCta: "Send me a link",
+  emailSending: "Sending…",
+  emailSent: (email: string) => `Done. Open the link we sent to ${email} on this phone.`,
+  emailFailed: "We couldn't send the email. Check the address and try again.",
 };
 
 export const join: typeof es.join = {

@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
+import { EmailSignIn } from "@/components/event/EmailSignIn";
 import { Icon } from "@/components/icons";
 import { Card, type Tone } from "@/components/ui/Card";
 import { ButtonLink } from "@/components/ui/Button";
@@ -80,6 +81,7 @@ export default async function EventDoorPage({ params }: Props) {
                 {signedIn ? copy.ctaSignedIn : copy.cta}
               </ButtonLink>
               {!signedIn && <span className="text-center text-[12px] leading-[1.4] font-extrabold text-muted">{copy.note}</span>}
+              {!signedIn && <EmailSignIn next={joinPath(event.code)} mock={process.env.API_MODE === "mock"} locale={locale} />}
             </>
           )}
           <a
