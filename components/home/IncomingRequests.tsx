@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import { Avatar } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
-import { IconButton } from "@/components/ui/IconButton";
 import { Muted } from "@/components/ui/Text";
 import { apiCall } from "@/lib/api/client";
 import { ConnectionList, type ConnectionListT } from "@/lib/api/schemas";
@@ -48,9 +47,10 @@ export function AlertsBell({ initial }: { initial: Incoming }) {
       )}
     </>
   );
-  if (!first) return <IconButton label={home.alerts(0)} className="relative">{bell}</IconButton>;
+  // With a request it opens the first one; without, the connections list (where answered requests end up).
+  const href = first ? `/requests/${first.connectionId}` : "/connections";
   return (
-    <Link href={`/requests/${first.connectionId}`} aria-label={home.alerts(count)} className="relative box-border flex h-11 w-11 items-center justify-center rounded-[14px] bg-white border-ink shadow-hard-3 pressable">
+    <Link href={href} aria-label={home.alerts(count)} className="relative box-border flex h-11 w-11 items-center justify-center rounded-[14px] bg-white border-ink shadow-hard-3 pressable">
       {bell}
     </Link>
   );
