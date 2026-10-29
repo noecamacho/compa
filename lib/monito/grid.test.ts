@@ -21,6 +21,15 @@ describe("grid", () => {
     expect(rows[19]).toBe("...oooooooooo...");
   });
 
+  test("woman draws a skirt with bare legs; man and other keep the base body", () => {
+    const rows = grid(withDefaults({ body: "woman" })).map((row) => row.join(""));
+    expect(rows[16]).toBe("...oppppppppo...");
+    expect(rows[17]).toBe("....ossoosso....");
+    const base = grid(DEFAULT_LOOK).map((row) => row.join(""));
+    expect(grid(withDefaults({ body: "man" })).map((row) => row.join(""))).toEqual(base);
+    expect(grid(withDefaults({ body: "other" })).map((row) => row.join(""))).toEqual(base);
+  });
+
   test("a cap clears the top rows and covers the hair", () => {
     const rows = grid(withDefaults({ hat: "cap" })).map((row) => row.join(""));
     expect(rows[0]).toBe("................");
