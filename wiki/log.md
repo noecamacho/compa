@@ -116,6 +116,14 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Added the spotlight tour (`components/tour/Tour.tsx`): the screen dims except one element and a card explains it, step by step, once per screen (home, connect, register, profile, ranking) and again from "Guía rápida" in the profile or `?tour=1`. Home now shows incoming requests as cards and polls `GET /api/connections` every 3 s (bell links to the newest); the confirmation screen refreshes when a pending request is answered; `/u/[handle]` keeps the handle through LinkedIn sign-in; `/` forwards a signed-in person to `/home`; home renders outside an event. Closes gap-analysis U1, U7, U10, U15 and U16.
 
+## [2026-10-29] query | Does a profile show the LinkedIn photo or the monito?
+
+- Captain decision: the LinkedIn photo by default, the monito by choice. Branch `fix/COMPA-TBD-photo-default-v2` adds `users.avatar_mode` (migration `0003_avatar_mode`), copies the photo to the Storage bucket `avatars` at sign-in, and makes Home and Ranking tolerate failed secondary calls. Status: `docs/backend-gap-analysis.md` §0.
+
+## [2026-10-29] query | Which user flows exist, what is missing, and what do agents build next?
+
+- Added `docs/flows/`: 74 user flows with status per layer and e2e coverage, an actor permission and CRUD matrix (34 missing operations), 40 risks, and 86 agent-ready tickets (12 P0, 48 P1, 26 P2; 11 in progress on the landing and real-mode branches). Per the captain's requirement, every ticket depends on the Playwright harness T-000 and ships e2e specs. New open questions #43–#56.
+
 ## [2026-10-29] query | Which P0 crash and visibility gaps remain on main?
 
-- P0-7 fixed (`withDefaultVisibility` in `lib/profile-fields.ts`), P0-6 fixed (screen notice on `RegisterForm`), P0-4 fixed for Ranking; Home P0-4 left to the v2-points-model branch, which already uses `apiGetOrNull` and no hard-coded slug there ([backend gap analysis](../docs/backend-gap-analysis.md) section 4).
+- P0-4 and P0-7 were already fixed on main (`apiGetSafe`, `withDefaultVisibility` in `lib/visibility.ts`); P0-6 fixed: the register screen shows the event-screen notice before sending `screenConsent: true` ([backend gap analysis](../docs/backend-gap-analysis.md) section 4).

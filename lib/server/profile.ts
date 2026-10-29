@@ -8,8 +8,7 @@ import type * as R from "../api/routes";
 import type { MeT } from "../api/schemas";
 import { hasEnded, statusForViewer } from "../connection-status";
 import { mergeLinks } from "../links";
-import { withDefaultVisibility } from "../profile-fields";
-import { toCard } from "../visibility";
+import { toCard, withDefaultVisibility } from "../visibility";
 import { earnedBadgeIds } from "./badges";
 import { latestInteraction } from "./connection-detail";
 import { cardFor, cardsFor, connectedPeers, findCurrentEvent, findUserByHandle, interestNamesFor, pairCondition, usersByIds } from "./people";
@@ -54,6 +53,7 @@ function profileChanges(user: UserRow, body: PatchMe): Partial<typeof users.$inf
   if (body.company !== undefined) changes.company = body.company || null;
   if (body.city !== undefined) changes.city = body.city || null;
   if (body.avatar !== undefined) changes.avatar = body.avatar;
+  if (body.avatarMode !== undefined) changes.avatarMode = body.avatarMode;
   if (body.links) changes.links = mergeLinks(user.links, body.links);
   return changes;
 }

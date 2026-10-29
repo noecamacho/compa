@@ -1,7 +1,8 @@
 // The single visibility filter for every view of another person (API spec §6, data model §4.5).
 import type { CardT } from "./api/schemas";
+import { effectiveAvatarMode, type AvatarMode } from "./avatar-mode";
 import type { MonitoLook } from "./monito/look";
-import { LINK_KEYS, withDefaultVisibility, type Links, type Visibility, type VisibilitySettings } from "./profile-fields";
+import { DEFAULT_VISIBILITY, LINK_KEYS, type Links, type Visibility, type VisibilitySettings } from "./profile-fields";
 
 // public: anonymous or not connected; connected: an accepted connection at any event; self: the owner.
 export type Relation = "public" | "connected" | "self";
@@ -12,6 +13,7 @@ export type CardSource = {
   name: string;
   photoUrl: string | null;
   avatar: MonitoLook | null;
+  avatarMode?: AvatarMode | null;
   headline: string | null;
   company: string | null;
   city: string | null;
@@ -19,6 +21,13 @@ export type CardSource = {
   visibility: VisibilitySettings;
   interests: string[];
 };
+
+// Rows written before a setting existed (e.g. `whatsapp` in migration 0001) lack its key; defaults fill the gap.
+export const withDefaultVisibility = (stored: Partial<VisibilitySettings> | null | undefined): VisibilitySettings => ({
+  ...DEFAULT_VISIBILITY,
+  ...stored,
+  links: { ...DEFAULT_VISIBILITY.links, ...stored?.links },
+});
 
 export function canSee(level: Visibility | undefined, relation: Relation): boolean {
   if (relation === "self") return true;
@@ -45,6 +54,7 @@ export function toCard(stored: CardSource, relation: Relation): CardT {
     handle: owner.handle,
     name: owner.name,
     photoUrl: owner.photoUrl,
+    avatarMode: effectiveAvatarMode(owner.avatarMode, owner.photoUrl),
     // The monito and the city are public like the name and photo (design handoff).
     ...optionalField("avatar", owner.avatar, true),
     ...optionalField("headline", owner.headline, canSee(owner.visibility.headline, relation)),

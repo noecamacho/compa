@@ -30,6 +30,18 @@ Status legend, measured **end to end in real mode** (page + API + database):
 
 Effort: **S** < 1 h, **M** 1–3 h, **L** > 3 h.
 
+## 0. Update after PR #21 and branch `fix/COMPA-TBD-photo-default-v2` (2026-10-29)
+
+PR #21 (V2 points model, migration `0002_v2_model`) made `GET /api/connections/{id}`, `/api/badges`, `/api/invites/me` and the invite claim real, stored `city`, `avatar` and connection `topics`, awarded topic and invite points through `bonus_points`, and implemented `scope=lifetime`. Rows below marked "see §0" were re-checked against the code; the other rows still carry their pre-#21 status and need the same pass.
+
+| Item | Now | Still open |
+| --- | --- | --- |
+| Profile picture (U4, C7, #21) | `users.avatar_mode` (migration `0003_avatar_mode`, default `photo`); cards and `Me` expose the effective `avatarMode` (`monito` without a photo); the shared Avatar draws the photo; 02b and "Mi monito" offer "Usar mi foto de LinkedIn" or "Crear mi monito" | Podium and live pairs still draw the monito for people outside my connections (rows carry no mode) |
+| LinkedIn photo expiry (#21 open question) | Sign-in copies the photo to the public Storage bucket `avatars` (`<userId>.jpg`, jpeg/png/webp, at most 2 MB), keeps an earlier copy or the LinkedIn URL when that fails, respects `photo_edited` | Needs `SUPABASE_SERVICE_ROLE_KEY`; existing users are copied at their next sign-in |
+| Home and Ranking crash (U5, U6, P0-4) | Only `/api/me` is critical; live, connections, invites, boards and badges render empty when their call fails | Hard-coded `founders-fest` fallback (landing branch) |
+| Old visibility rows (U3, P0-7) | Defaults merged on read in `buildMe`, `toCard` and `patchVisibility` | — |
+| Ranking all year (U26) | `scope=lifetime` (PR #21) | — |
+
 ## 1. Use-case catalogue
 
 | # | Use case (screen → route) | Status | Endpoints the screen calls | What is lacking in real mode | Effort |
@@ -37,9 +49,9 @@ Effort: **S** < 1 h, **M** 1–3 h, **L** > 3 h.
 | U1 | Onboarding: LinkedIn sign-in (01 → `/`) | Partial | `GET /auth/linkedin?next=/onboarding/profile` or `/home` | Works to the Supabase redirect. A signed-in visitor on `/` is not sent onward. The LinkedIn round trip is unverified; app ownership is open (#20) | S |
 | U2 | Profile prefill and edit (02 → `/onboarding/profile`) | Partial | `GET /api/me`, `PATCH /api/me`, `PATCH /api/me/visibility` | **`city` passes zod but is silently dropped**: no column, and `profileChanges` ignores it. LinkedIn provides no job title, company or city (#33) | S |
 | U3 | Network toggles (02, 09) | Partial | `PATCH /api/me/visibility` (on → `connections`, off → `hidden`) | `whatsapp` was added (migration 0001 default). **Users created before 0001 have no `whatsapp` key**, so the strict `VisibilitySettings` zod check in `apiGet` fails and every page reading `Me` errors [Inference from code] | S |
-| U4 | Monito builder (02b → `/onboarding/monito`) | Mock-only | `PATCH /api/me` `{ avatar }` | No `users.avatar` column; the server ignores `avatar`, so the look is lost and everyone shows the default monito (#35) | M |
-| U5 | Home live (03 → `/home`) | Mock-only | `GET /api/me`, `…/live`, `GET /api/events/{slug}`, `GET /api/connections`, **`GET /api/invites/me`** | `GET /api/invites/me` returns 501, so the page throws. Without a current event it falls back to `founders-fest`, which is a 404 in production | S (tolerate errors) |
-| U6 | Home empty, first night (03b → `/home`) | Mock-only | as U5 | as U5 | — |
+| U4 | Monito builder (02b → `/onboarding/monito`) | Ready (see §0) | `PATCH /api/me` `{ avatar }` | No `users.avatar` column; the server ignores `avatar`, so the look is lost and everyone shows the default monito (#35) | M |
+| U5 | Home live (03 → `/home`) | Ready (see §0) | `GET /api/me`, `…/live`, `GET /api/events/{slug}`, `GET /api/connections`, **`GET /api/invites/me`** | `GET /api/invites/me` returns 501, so the page throws. Without a current event it falls back to `founders-fest`, which is a 404 in production | S (tolerate errors) |
+| U6 | Home empty, first night (03b → `/home`) | Ready (see §0) | as U5 | as U5 | — |
 | U7 | Home outside an event | Missing | as U5 | `currentEvent: null` → hard-coded `founders-fest` → 404 → error page. Not designed | S |
 | U8 | Show my QR (04 → `/connect`) | Ready | `GET /api/me` | QR rendered with `qrcode`, encoding `/u/<handle>` | — |
 | U9 | Scan in app (04 → `/connect?tab=scan`) | Partial | `GET /api/users/{handle}` | Uses `BarcodeDetector`, which iOS Safari does not support [Inference]; there the viewfinder shows "camera unavailable" and the native camera with `/u/` is the fallback | M (jsQR fallback) |
@@ -59,7 +71,7 @@ Effort: **S** < 1 h, **M** 1–3 h, **L** > 3 h.
 | U23 | My profile (09 → `/me`) | Partial | `GET /api/me` | `scores`, `stats` and `badges` are not filled, so the page shows 0 / "—". No sign-out button | S–M |
 | U24 | Badges (10 → `/me/badges`) | Mock-only | `GET /api/badges` (501) | The page throws; no award logic (#34) | M (subset on read) |
 | U25 | Ranking tonight (11 → `/ranking`) | Partial | `GET /api/me`, `GET …/leaderboard?scope=event`, `GET /api/connections` | Rows are real. `me` (rank, gap, person above) is not filled. Needs a current event, otherwise `founders-fest` gives 404 and the page throws | S |
-| U26 | Ranking all year (11) | Mock-only | `GET …/leaderboard?scope=lifetime` | **`scope` is parsed but ignored by `lib/server/live.ts`**, so it returns the event board again (#37) | S |
+| U26 | Ranking all year (11) | Ready (see §0) | `GET …/leaderboard?scope=lifetime` | **`scope` is parsed but ignored by `lib/server/live.ts`**, so it returns the event board again (#37) | S |
 | U27 | Invites and rewards (12 → `/invite`, `/i/[code]`) | Mock-only | `GET /api/invites/me` (501), `POST /api/invites/{code}/claim` (501) | No model, no rewards (#36) | L |
 | U28 | Notifications (bell on 03) | Partial | `GET /api/connections` `incoming.length` | The count is real, but the bell is not a link and there is no list (and Home is blocked by U5) | S |
 | U29 | Big screen `/live/[slug]` | Partial | — | API ready (`…/live`, `…/live/people/{userId}`, `…/leaderboard`, public, 1 s cache); **the page does not exist** (404) | L |

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { VoiceNoteButton, type NoteState } from "@/components/record/VoiceNoteButton";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -70,7 +70,7 @@ export function RegisterForm({ profile }: Props) {
     <Screen gap={16}>
       <Header back="/connect?tab=scan" title={copy.title} />
       <Card className="flex items-center gap-[14px] px-[14px] py-3">
-        <Avatar person={{ name: person.name, look: person.avatar }} size={56} />
+        <Avatar person={avatarOf(person)} size={56} />
         <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
           <span className="font-display text-[19px] leading-[1.15] font-bold">{person.name}</span>
           <Muted className="text-[13px] font-bold">{[person.headline, person.company, person.city?.split(",")[0]].filter(Boolean).join(" · ")}</Muted>

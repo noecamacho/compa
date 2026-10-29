@@ -1,0 +1,2 @@
+ALTER TABLE "users" ADD COLUMN "avatar_mode" text DEFAULT 'photo' NOT NULL;--> statement-breakpoint
+ALTER TABLE "users" ADD CONSTRAINT "users_avatar_mode_check" CHECK ("users"."avatar_mode" in ('photo', 'monito'));

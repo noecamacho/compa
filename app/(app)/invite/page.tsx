@@ -1,6 +1,6 @@
 import { Icon } from "@/components/icons";
 import { InviteActions } from "@/components/invite/InviteActions";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Monito } from "@/components/monito/Monito";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -50,7 +50,7 @@ export default async function InvitePage() {
               {invitee ? (
                 <>
                   <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-sun-soft border-ink shadow-hard-2">
-                    <Avatar person={{ name: invitee.person.name, look: invitee.person.avatar }} size={48} />
+                    <Avatar person={avatarOf(invitee.person)} size={48} />
                   </span>
                   <span className="text-center text-[12px] font-extrabold">{firstName(invitee.person.name)}</span>
                   <Muted className="text-[11px] font-bold">+{invitee.points} pts</Muted>
