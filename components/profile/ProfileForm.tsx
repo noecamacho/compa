@@ -10,7 +10,7 @@ import { Header } from "@/components/ui/Header";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
-import { apiCall } from "@/lib/api/client";
+import { apiCall, errorText } from "@/lib/api/client";
 import { Me, VisibilitySettings, type MeT } from "@/lib/api/schemas";
 import { profile, visibility as visibilityCopy } from "@/lib/copy/es";
 import { linkInputValue, parseLink } from "@/lib/links";
@@ -94,7 +94,7 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
       await apiCall("PATCH", "/api/me/visibility", VisibilitySettings, { headline: levels.headline, company: levels.company, links: levels.links });
       router.push(next);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(errorText(caught));
       setSaving(false);
     }
   }

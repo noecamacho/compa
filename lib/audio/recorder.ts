@@ -181,15 +181,22 @@ async function toApiError(response: Response): Promise<ApiError> {
   return new ApiError(response.status, parsed.data.error.code, parsed.data.error.message);
 }
 
-/** POSTs the recording to /api/transcribe. Any ApiError means: show the text field. */
+// /api/transcribe may run 30 s (maxDuration); past this the upload is abandoned and the caller keeps the file to retry.
+export const UPLOAD_TIMEOUT_MS = 40_000;
+
+const uploadSignal = (): AbortSignal | undefined =>
+  typeof AbortSignal.timeout === "function" ? AbortSignal.timeout(UPLOAD_TIMEOUT_MS) : undefined;
+
+/** POSTs the recording to /api/transcribe. Any ApiError means: offer a retry with the same file, or the text field. */
 export async function uploadForTranscript(
   file: File,
   fetchImpl: FetchLike = fetch,
 ): Promise<{ text: string }> {
   const body = new FormData();
   body.append("audio", file);
-  const response = await fetchImpl("/api/transcribe", { method: "POST", body }).catch((error: unknown) => {
-    throw new ApiError(0, "network_error", errorName(error) || "network error");
+  const response = await fetchImpl("/api/transcribe", { method: "POST", body, signal: uploadSignal() }).catch((error: unknown) => {
+    const name = errorName(error);
+    throw new ApiError(0, name === "TimeoutError" || name === "AbortError" ? "timeout" : "network_error", name || "network error");
   });
   if (!response.ok) throw await toApiError(response);
   const parsed = TranscribeResponse.safeParse(await response.json().catch(() => null));

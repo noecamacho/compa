@@ -1,9 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { Muted } from "@/components/ui/Text";
-import { RecorderError, startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
+import { errorText } from "@/lib/api/client";
+import { startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
 import { register as copy } from "@/lib/copy/es";
 import { formatClock } from "@/lib/format";
 
@@ -17,12 +18,38 @@ const WAVE = [10, 18, 22, 14, 20, 12, 18, 22];
 
 type Props = { state: NoteState; onChange: (state: NoteState) => void };
 
+type Audio = { file: File; seconds: number };
+
 // The three note states of V2Registrar: not recorded / recording / saved. Audio goes to /api/transcribe.
 export function VoiceNoteButton({ state, onChange }: Props) {
   const recording = useRef<Recording | null>(null);
   const [seconds, setSeconds] = useState(0);
+  // A failed upload keeps the recording so the person can retry instead of recording again.
+  const [unsent, setUnsent] = useState<Audio | null>(null);
+
+  // Leaving the screen mid-recording (or while the mic prompt is open) releases the microphone.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      recording.current?.cancel();
+    };
+  }, []);
+
+  function transcribe(audio: Audio) {
+    setUnsent(null);
+    onChange({ status: "transcribing", seconds: audio.seconds });
+    uploadForTranscript(audio.file)
+      .then(({ text }) => onChange({ status: "ready", seconds: audio.seconds, text }))
+      .catch((error: unknown) => {
+        setUnsent(audio);
+        onChange({ status: "idle", error: errorText(error) });
+      });
+  }
 
   async function start() {
+    setUnsent(null);
     try {
       let elapsed = 0;
       recording.current = await startRecording({
@@ -31,16 +58,12 @@ export function VoiceNoteButton({ state, onChange }: Props) {
           setSeconds(elapsed);
           onChange({ status: "recording", seconds: elapsed });
         },
-        onStop: (file) => {
-          onChange({ status: "transcribing", seconds: elapsed });
-          uploadForTranscript(file)
-            .then(({ text }) => onChange({ status: "ready", seconds: elapsed, text }))
-            .catch(() => onChange({ status: "idle", error: copy.micUnavailable }));
-        },
+        onStop: (file) => transcribe({ file, seconds: elapsed }),
       });
+      if (!mounted.current) return recording.current.cancel();
       onChange({ status: "recording", seconds: 0 });
-    } catch (error) {
-      onChange({ status: "idle", error: error instanceof RecorderError ? copy.micUnavailable : String(error) });
+    } catch {
+      onChange({ status: "idle", error: copy.micUnavailable });
     }
   }
 
@@ -107,6 +130,15 @@ export function VoiceNoteButton({ state, onChange }: Props) {
         </span>
       </button>
       {state.error && <Muted className="text-[12px] font-extrabold">{state.error}</Muted>}
+      {unsent && (
+        <button
+          type="button"
+          onClick={() => transcribe(unsent)}
+          className="h-[34px] cursor-pointer self-start rounded-[10px] bg-white px-3 font-display text-[13px] font-bold text-ink border-ink shadow-hard-2 pressable"
+        >
+          {copy.retryUpload}
+        </button>
+      )}
     </div>
   );
 }

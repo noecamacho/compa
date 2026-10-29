@@ -9,8 +9,8 @@ import { Tag } from "@/components/ui/Chip";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { apiCall, errorText } from "@/lib/api/client";
 import { Approved, Draft, type ConnectionDetailT, type DraftT } from "@/lib/api/schemas";
-import { ApiError as UploadError, RecorderError, startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
-import { common, note as copy } from "@/lib/copy/es";
+import { startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
+import { note as copy } from "@/lib/copy/es";
 import { formatClock } from "@/lib/format";
 import { forgetNote, recallNote } from "@/lib/note-draft";
 import { SUMMARY_POINTS } from "@/lib/points";
@@ -19,6 +19,9 @@ import { HIT_AREA } from "@/components/ui/hit-area";
 type Summary = { interactionId: string; title: string; bullets: string[]; topics: string[]; pendingAction: string | null; seconds: number | null; approved: boolean };
 
 type Phase = { kind: "recording"; seconds: number } | { kind: "transcribing" } | { kind: "typing"; text: string; error: string | null } | { kind: "ready"; summary: Summary };
+
+// The draft route may run 30 s (maxDuration); give it a little more before giving up.
+const DRAFT_TIMEOUT_MS = 35_000;
 
 const WAVE = [30, 54, 76, 46, 68, 34, 58, 80, 42, 64, 28];
 
@@ -51,6 +54,18 @@ export function NoteEditor({ detail }: Props) {
   const [phase, setPhase] = useState<Phase>(() => (detail.interaction ? { kind: "ready", summary: fromInteraction(detail.interaction) } : { kind: "typing", text: "", error: null }));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // A failed upload keeps the recording so the person can retry instead of recording again.
+  const [unsent, setUnsent] = useState<{ file: File; seconds: number } | null>(null);
+
+  // Leaving the screen mid-recording (or while the mic prompt is open) releases the microphone.
+  const mounted = useRef(true);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      recording.current?.cancel();
+    };
+  }, []);
 
   // A note recorded on the register screen is drafted as soon as this screen opens.
   useEffect(() => {
@@ -63,14 +78,26 @@ export function NoteEditor({ detail }: Props) {
   async function draftFrom(text: string, seconds: number | null) {
     setPhase({ kind: "transcribing" });
     try {
-      const draft = await apiCall("POST", "/api/interactions/draft", Draft, { connectionId: detail.connectionId, text });
+      const draft = await apiCall("POST", "/api/interactions/draft", Draft, { connectionId: detail.connectionId, text }, { timeoutMs: DRAFT_TIMEOUT_MS });
       setPhase({ kind: "ready", summary: fromDraft(draft, seconds) });
     } catch (caught) {
-      setPhase({ kind: "typing", text, error: caught instanceof Error ? errorText(caught) : copy.failed });
+      setPhase({ kind: "typing", text, error: errorText(caught) });
     }
   }
 
+  function transcribe(audio: { file: File; seconds: number }) {
+    setUnsent(null);
+    setPhase({ kind: "transcribing" });
+    uploadForTranscript(audio.file)
+      .then(({ text }) => draftFrom(text, audio.seconds))
+      .catch((caught: unknown) => {
+        setUnsent(audio);
+        setPhase({ kind: "typing", text: "", error: errorText(caught) });
+      });
+  }
+
   async function record() {
+    setUnsent(null);
     try {
       let elapsed = 0;
       recording.current = await startRecording({
@@ -78,16 +105,12 @@ export function NoteEditor({ detail }: Props) {
           elapsed = Math.round(ms / 1000);
           setPhase({ kind: "recording", seconds: elapsed });
         },
-        onStop: (file) => {
-          setPhase({ kind: "transcribing" });
-          uploadForTranscript(file)
-            .then(({ text }) => draftFrom(text, elapsed))
-            .catch((caught: unknown) => setPhase({ kind: "typing", text: "", error: caught instanceof UploadError && caught.code === "rate_limited" ? common.rateLimited : copy.failed }));
-        },
+        onStop: (file) => transcribe({ file, seconds: elapsed }),
       });
+      if (!mounted.current) return recording.current.cancel();
       setPhase({ kind: "recording", seconds: 0 });
-    } catch (caught) {
-      setPhase({ kind: "typing", text: "", error: caught instanceof RecorderError ? copy.failed : String(caught) });
+    } catch {
+      setPhase({ kind: "typing", text: "", error: copy.failed });
     }
   }
 
@@ -105,7 +128,7 @@ export function NoteEditor({ detail }: Props) {
       forgetNote(detail.connectionId);
       router.push(`/people/${detail.other.handle}`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(errorText(caught));
       setSaving(false);
     }
   }
@@ -150,6 +173,12 @@ export function NoteEditor({ detail }: Props) {
         <Card className="flex flex-col gap-3 p-4">
           <SectionLabel>{copy.question}</SectionLabel>
           {phase.error && <Muted className="text-[12px] font-extrabold">{phase.error}</Muted>}
+          {unsent && !phase.text.trim() && (
+            <Button height={46} onClick={() => transcribe(unsent)}>
+              <Icon name="mic" size={16} strokeWidth={2.8} />
+              {copy.retryUpload}
+            </Button>
+          )}
           <textarea
             value={phase.text}
             onChange={(event) => setPhase({ ...phase, text: event.target.value })}

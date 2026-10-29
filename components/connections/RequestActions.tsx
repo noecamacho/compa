@@ -5,7 +5,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
-import { apiCall } from "@/lib/api/client";
+import { ApiClientError, apiCall, errorText } from "@/lib/api/client";
 import { Accepted } from "@/lib/api/schemas";
 import { common, request as copy } from "@/lib/copy/es";
 
@@ -24,17 +24,22 @@ export function RequestActions({ connectionId }: Props) {
       await apiCall("POST", `/api/connections/${connectionId}/accept`, Accepted, {});
       router.push(`/connections/${connectionId}/done`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(errorText(caught));
       setBusy(null);
     }
   }
 
+  // A failed decline stays on screen with the reason; only an answered request ("not_pending") is done anyway.
   async function decline() {
     setBusy("decline");
+    setError(null);
     try {
       await apiCall("POST", `/api/connections/${connectionId}/decline`, z.undefined());
-    } finally {
       router.push("/home");
+    } catch (caught) {
+      if (caught instanceof ApiClientError && caught.code === "not_pending") return router.push("/home");
+      setError(errorText(caught));
+      setBusy(null);
     }
   }
 
