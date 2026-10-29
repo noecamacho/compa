@@ -10,7 +10,7 @@ import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { Icon } from "@/components/icons";
 import { ConnectionDetail, Me, UserProfile } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
-import { request as copy } from "@/lib/copy/es";
+import { apiErrors, request as copy } from "@/lib/copy/es";
 import { firstName, timeAgo } from "@/lib/format";
 
 type Props = { params: Promise<{ id: string }> };
@@ -108,7 +108,11 @@ export default async function RequestPage({ params }: Props) {
         {copy.bothWin}
       </Muted>
 
-      <RequestActions connectionId={detail.connectionId} />
+      {detail.status === "expired" ? (
+        <Muted className="mt-auto text-center text-[13px] font-extrabold">{apiErrors.codes.event_ended}</Muted>
+      ) : (
+        <RequestActions connectionId={detail.connectionId} />
+      )}
     </Screen>
   );
 }

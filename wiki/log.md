@@ -218,3 +218,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Fixed findings 10, 16, 17, 19 and 20 of [conference-load](../docs/research/conference-load.md): jsQR scanner fallback with clear camera messages, invite claim and creation races, client request timeouts and Spanish errors with kept audio, and a live screen that survives code rotation and outages. Pages updated: [risks](risks.md), [delivery-checklist](delivery-checklist.md), [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (findings 10, 16, 17, 19, 20 marked fixed), ADR-004 in `ARCHITECTURE.md`; new open questions #58 and #59.
 
+
+## [2026-10-29] query | How does an addressee find incoming requests?
+
+- T-031: home and `/connections` show incoming requests on top, polled every 3 s through `lib/use-poll.ts` (pauses on hidden tabs, backs off on errors); the bell opens `/notifications`. A request whose event ended shows the expired copy instead of accept (API spec §7.3). See [screens/connections](screens/connections.md).

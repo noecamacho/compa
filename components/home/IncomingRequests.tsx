@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
@@ -12,6 +12,7 @@ import { copyFor } from "@/lib/copy";
 import { firstName } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import { tour } from "@/lib/copy/es";
+import { usePoll } from "@/lib/use-poll";
 
 type Incoming = ConnectionListT["incoming"];
 
@@ -20,35 +21,13 @@ const POLL_MS = 3000;
 // Polls my connections so a request shows up seconds after someone scans me (docs/api-quickstart.md: poll every 3 s).
 export function useIncomingRequests(initial: Incoming): Incoming {
   const [incoming, setIncoming] = useState(initial);
-  useEffect(() => {
-    let active = true;
-    const tick = async () => {
-      const list = await apiCall("GET", "/api/connections", ConnectionList).catch(() => null);
-      if (active && list) setIncoming(list.incoming);
-    };
-    const timer = setInterval(tick, POLL_MS);
-    return () => {
-      active = false;
-      clearInterval(timer);
-    };
-  }, []);
+  usePoll(async () => setIncoming((await apiCall("GET", "/api/connections", ConnectionList)).incoming), POLL_MS);
   return incoming;
 }
 
 export function AlertsBell({ initial, locale }: { initial: number; locale: Locale }) {
   const [count, setCount] = useState(initial);
-  useEffect(() => {
-    let active = true;
-    const tick = async () => {
-      const result = await apiCall("GET", "/api/notifications", Notifications).catch(() => null);
-      if (active && result) setCount(result.unseenCount);
-    };
-    const timer = setInterval(tick, POLL_MS);
-    return () => {
-      active = false;
-      clearInterval(timer);
-    };
-  }, []);
+  usePoll(async () => setCount((await apiCall("GET", "/api/notifications", Notifications)).unseenCount), POLL_MS);
   const copy = copyFor(locale).notifications;
   return (
     <Link href="/notifications" aria-label={copy.bellLabel(count)} className="relative box-border flex h-11 w-11 items-center justify-center rounded-[14px] bg-white border-ink shadow-hard-3 pressable">
