@@ -7,6 +7,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Changed
 
 - Package manager and runtime is Bun instead of pnpm (team decision); Next.js, TypeScript, Supabase and Vercel unchanged. Commands are `bun run dev|lint|typecheck|build|seed`.
+- Transcription and AI summaries are in Spanish (team decision); code and docs stay English.
 
 ### Added
 

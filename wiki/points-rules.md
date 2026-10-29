@@ -22,6 +22,7 @@ Business rules live on the server, never on the client: points, idempotency, the
 
 - `POST /api/connections` creates the connection idempotently and awards points.
 - `POST /api/interactions/:id/approve` approves, shares with both and awards points (+25 to each, p. 18).
+- Summary points live in `lib/points.ts` as `awardSummaryPoints`, written by the AI lane (person C) because it lands before the connections lane; the connections lane adds its functions to the same file (team decision 2026-10-29).
 
 Risk "spam to climb the podium" → hourly cap and points only for mutual connections (p. 20).
 
