@@ -206,3 +206,6 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | How do I write and run Playwright e2e specs?
 
 - T-000 harness shipped: `playwright.config.ts` (viewport × locale projects), fixtures in `e2e/fixtures/` (mock, realUser, testEvent, twoUsers), `e2e/smoke.spec.ts` and `.github/workflows/e2e.yml`. Tags `@mock`, `@real`, `@prod` pick what runs where. Method in `docs/flows/README.md` "E2E tests"; real mode in `docs/testing/real-mode.md`.
+## [2026-10-29] change | UI follow-ups (hero fallback, seam, note gap)
+
+- Landing hero: `lib/landing/hero-budget.ts` decides when to skip or leave the Three.js scene (weak device hints; median frame time over 36 ms drops to 1x pixels, then to the SVG). `Crowd.tsx` now draws the six monitos and floor at the scene's first-frame positions. Scene topics `Agents` / `Open Source` come from `lib/topics.ts`. `Screen` holds a fixed dot layer and `StickyBar` is translucent paper over it (iOS ignores `background-attachment: fixed`). Note screen buttons no longer pin to the viewport bottom from 1024. WebKit could not run on the build host (missing system libraries), so devices were emulated with Chromium profiles.

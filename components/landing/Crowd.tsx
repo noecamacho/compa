@@ -5,18 +5,23 @@ import { Pill } from "@/components/ui/Pill";
 import { SAMPLE_PEOPLE, type SampleId } from "@/lib/monito/sample-people";
 import { HeroStage } from "./HeroStage";
 
-type Spot = { who: SampleId; left: string; width: string; tilt: number; delay: number; flip?: boolean; back?: boolean };
+type Spot = { who: SampleId; left: string; bottom: string; tilt: number; delay: number; flip?: boolean };
 
-// Five monitos at an event; the two in the middle just connected. Positions are percentages so the scene scales.
+// The six monitos of the Three.js scene at its first frame (HOMES in lib/landing/hero-timeline.ts, projected by the
+// scene's camera on a 16:10 box), so the cross-fade from this SVG to the canvas keeps every monito where it stands.
+// Same cast order as CAST in HeroScene.tsx. Values are percentages so the crowd scales with the box.
+const SPOT_WIDTH = "16.2%";
 const SPOTS: Spot[] = [
-  { who: "XS", left: "2%", width: "17%", tilt: -3, delay: 0.6, back: true },
-  { who: "DR", left: "21%", width: "22%", tilt: -4, delay: 0 },
-  { who: "VO", left: "57%", width: "22%", tilt: 4, delay: 1.1, flip: true },
-  { who: "CI", left: "81%", width: "17%", tilt: 3, delay: 1.8, back: true },
+  { who: "XS", left: "0%", bottom: "35%", tilt: -2, delay: 0.6 },
+  { who: "DR", left: "13.9%", bottom: "27%", tilt: -3, delay: 0 },
+  { who: "ST", left: "26.9%", bottom: "37.3%", tilt: 2, delay: 1.4 },
+  { who: "VO", left: "40.8%", bottom: "27.6%", tilt: 3, delay: 1.1, flip: true },
+  { who: "PN", left: "54.7%", bottom: "36.7%", tilt: -2, delay: 0.3, flip: true },
+  { who: "CI", left: "67.7%", bottom: "28.8%", tilt: 3, delay: 1.8, flip: true },
 ];
 
 const spotStyle = (spot: Spot): CSSProperties =>
-  ({ left: spot.left, width: spot.width, animationDelay: `${spot.delay}s`, "--tilt": `${spot.tilt}deg` }) as CSSProperties;
+  ({ left: spot.left, bottom: spot.bottom, width: SPOT_WIDTH, animationDelay: `${spot.delay}s`, "--tilt": `${spot.tilt}deg` }) as CSSProperties;
 
 // Words the animated hero says: extra topics after `topic`, the greeting on hover, and the reconnection badge.
 export type CrowdStory = { topics: readonly string[]; hello: string; reconnection: string };
@@ -27,11 +32,14 @@ type Props = { label: string; topic: string; story?: CrowdStory };
 function CrowdArt({ topic }: { topic: string }) {
   return (
     <>
-      <span className="absolute right-[4%] bottom-[9%] left-[4%] h-[2.5px] rounded-full bg-ink opacity-80" />
-      <span className="absolute top-[42%] right-[36%] left-[36%]" style={{ borderTop: "3px dashed #1E1B2E" }} />
+      <span
+        aria-hidden="true"
+        className="absolute right-[4.4%] bottom-[19.2%] left-[4.4%] h-[26%] rounded-[50%] bg-[#FFFDF7]"
+        style={{ border: "2.5px solid #1E1B2E", boxShadow: "5px 5px 0 #1E1B2E" }}
+      />
       {SPOTS.map((spot) => (
-        <span key={spot.who} aria-hidden="true" className="animate-bob absolute bottom-[9%] block origin-bottom" style={spotStyle(spot)}>
-          <span className="block" style={{ transform: spot.flip ? "scaleX(-1)" : undefined, opacity: spot.back ? 0.92 : 1 }}>
+        <span key={spot.who} aria-hidden="true" className="animate-bob absolute block origin-bottom" style={spotStyle(spot)}>
+          <span className="block" style={{ transform: spot.flip ? "scaleX(-1)" : undefined, }}>
             <Monito look={SAMPLE_PEOPLE[spot.who].look} label={SAMPLE_PEOPLE[spot.who].name} className="h-auto w-full" />
           </span>
         </span>

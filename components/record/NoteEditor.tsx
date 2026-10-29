@@ -127,7 +127,7 @@ export function NoteEditor({ detail }: Props) {
           <span className="text-center font-display text-[20px] leading-[1.2] font-bold">{copy.question}</span>
           <Muted className="text-center text-[14px] leading-[1.4] font-bold">{copy.hint}</Muted>
         </Card>
-        <div className="mt-auto flex flex-col items-center gap-[14px]">
+        <div className="mt-auto flex flex-col items-center gap-[14px] lg:mt-2">
           <button
             type="button"
             aria-label={copy.stop}
@@ -161,7 +161,7 @@ export function NoteEditor({ detail }: Props) {
             {copy.draftButton}
           </Button>
         </Card>
-        <div className="mt-auto flex flex-col items-center gap-[14px]">
+        <div className="mt-auto flex flex-col items-center gap-[14px] lg:mt-2">
           <button type="button" aria-label={copy.rerecord} onClick={record} className="flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full bg-coral p-0 shadow-hard-4 pressable" style={{ border: "3px solid #1E1B2E" }}>
             <Icon name="mic" size={34} />
           </button>
@@ -223,7 +223,7 @@ export function NoteEditor({ detail }: Props) {
         <span className="text-[13px] font-extrabold">{copy.pointsNote.replace("15", String(SUMMARY_POINTS))}</span>
       </div>
 
-      <div className="mt-auto flex flex-col gap-3">
+      <div className="mt-auto flex flex-col gap-3 lg:mt-2">
         {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
         {summary.approved ? (
           <Button variant="primary" onClick={() => router.push(`/people/${detail.other.handle}`)}>

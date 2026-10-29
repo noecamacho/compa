@@ -10,9 +10,9 @@ type Props = { story: HeroStory; onReady: () => void; onUnavailable: () => void 
 const CAST: SampleId[] = ["XS", "DR", "ST", "VO", "PN", "CI"];
 const TAP_SLOP_PX = 8;
 
-function createScene(host: HTMLElement, story: HeroStory, onFirstFrame: () => void): Scene | null {
+function createScene(host: HTMLElement, story: HeroStory, onFirstFrame: () => void, onSlow: () => void): Scene | null {
   try {
-    return new Scene(host, story, CAST.map((id) => SAMPLE_PEOPLE[id].look), onFirstFrame);
+    return new Scene(host, story, CAST.map((id) => SAMPLE_PEOPLE[id].look), onFirstFrame, onSlow);
   } catch {
     return null;
   }
@@ -79,7 +79,7 @@ export default function HeroScene({ story, onReady, onUnavailable }: Props) {
   useEffect(() => {
     const host = hostRef.current;
     if (!host) return;
-    const scene = createScene(host, story, () => handlers.current.onReady());
+    const scene = createScene(host, story, () => handlers.current.onReady(), () => handlers.current.onUnavailable());
     if (!scene) {
       handlers.current.onUnavailable();
       return;

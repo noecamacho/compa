@@ -19,6 +19,7 @@ import {
   type LinkKind,
   type LinkState,
 } from "@/lib/landing/hero-timeline";
+import { FrameBudget } from "@/lib/landing/hero-budget";
 import type { MonitoLook } from "@/lib/monito/look";
 import { TONE, dashCanvas, dotsBubble, monitoCanvas, pointsBadge, qrCard, scanLineCanvas, textBubble, topicBubble, type BubbleSide, type Sticker, type Tone } from "./hero-textures";
 
@@ -123,12 +124,14 @@ export class HeroScene {
   private last = 0;
   private running = false;
   private rendered = false;
+  private readonly budget = new FrameBudget();
 
   constructor(
     private readonly host: HTMLElement,
     private readonly copy: HeroStory,
     cast: MonitoLook[],
     private readonly onFirstFrame: () => void,
+    private readonly onSlow: () => void,
   ) {
     this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -331,13 +334,27 @@ export class HeroScene {
 
   private readonly tick = (now: number): void => {
     // rAF timestamps can trail the performance.now() taken on resume; never step the story backwards.
-    const dt = Math.min(0.1, Math.max(0, (now - this.last) / 1000));
+    const frameMs = Math.max(0, now - this.last);
+    const dt = Math.min(0.1, frameMs / 1000);
     this.last = now;
     this.story += dt;
     this.wall += dt;
     this.render(dt);
+    if (this.budget.push(frameMs) === "slow" && this.degrade()) return;
     this.frame = requestAnimationFrame(this.tick);
   };
+
+  // Slow device: first render at 1x pixels; if it is still slow, hand over to the SVG crowd. True when handed over.
+  private degrade(): boolean {
+    if (this.renderer.getPixelRatio() > 1) {
+      this.renderer.setPixelRatio(1);
+      this.resize();
+      this.budget.reset();
+      return false;
+    }
+    this.onSlow();
+    return true;
+  }
 
   private render(dt = 0): void {
     this.moveCamera(dt);
