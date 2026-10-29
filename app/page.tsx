@@ -8,11 +8,12 @@ import { requestLocale } from "@/lib/server/locale";
 
 type Props = { searchParams: Promise<{ error?: string }> };
 
-// compa.lol for everyone (API spec A10): one promise, no sign-up. People get in only through their event's QR;
-// someone already checked in gets one way back to their event.
+// compa.lol for everyone (API spec A10, amended 2026-10-29): one promise and one LinkedIn button that both signs up and
+// signs in. Events stay exclusive: joining one still needs its QR (/e/<code>). Signed-in people get a way back to the app.
 export default async function LandingPage({ searchParams }: Props) {
   const [{ error }, locale, me] = await Promise.all([searchParams, requestLocale(), currentMe()]);
   const copy = copyFor(locale).landing;
+  const signedIn = Boolean(me);
   const inEvent = Boolean(me?.currentEvent);
   return (
     <main lang={locale} className="paper-dots min-h-dvh w-full overflow-x-hidden">
@@ -54,11 +55,18 @@ export default async function LandingPage({ searchParams }: Props) {
               </p>
             )}
 
-            {inEvent && (
+            {signedIn ? (
               <ButtonLink href="/home" variant="primary" className="sm:max-w-[320px]">
-                {copy.backToEvent}
+                {inEvent ? copy.backToEvent : copy.goToAccount}
                 <Icon name="chevronRight" size={20} strokeWidth={3} />
               </ButtonLink>
+            ) : (
+              <div className="flex flex-col gap-2 sm:max-w-[360px]">
+                <ButtonLink href="/auth/linkedin?next=/home" variant="linkedin">
+                  {copy.signIn}
+                </ButtonLink>
+                <span className="text-[12px] leading-[1.4] font-extrabold text-muted">{copy.signInNote}</span>
+              </div>
             )}
           </div>
         </div>

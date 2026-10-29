@@ -25,6 +25,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Changed
 
+- The landing page offers "Entrar con LinkedIn" (sign-up and sign-in) so people can reach their events without rescanning; joining an event still needs its QR.
 - Database migrations apply automatically on every production deploy: the workflow deploys with a remote Vercel build whose build command runs `db:migrate:deploy` before `next build`.
 - `GET /api/me` returns `currentEvent: { code, name }`; the home and ranking screens reach the live data through it and show an "out of an event" state when it is null. Onboarding copy no longer promises title, company or city from LinkedIn (only name, photo and email come from it).
 
