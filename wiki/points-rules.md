@@ -26,6 +26,21 @@ Supersedes the event-scoped invites of PR #73. Everyone always has a referral co
 
 "Accept a request: +20 for each" from the handoff README is not awarded separately; it is the reconnection line ([open-questions](open-questions.md) #28).
 
+## Connections outside an event
+
+Owner decision, 2026-10-29: a connection made outside any event (`connections.event_id` null, see [connection-flow](connection-flow.md#as-built-scanning-someone-outside-an-event-2026-10-29)) pays nothing.
+
+| Award | Outside an event |
+| --- | --- |
+| New / reconnection accepted | 0 to both; the kind is still decided and stored (`pointsFor(kind, null)` is 0; DB check pins `points = 0`) |
+| Topics marked while registering | 0 (no `bonus_points` row) |
+| Voice note approved | 0 (`interactions.points = 0`, `pointsAwarded: 0`) |
+| Referral: invitee's first accepted connection | not paid here; it waits for the friend's first accepted connection at an event |
+| Badges | none awarded; badge facts read only connections and notes at events |
+| Event and lifetime rankings, live board | untouched: `event_scores` skips event-less rows; no `connection.accepted` or `summary.approved` broadcast |
+
+**A later meeting at an event** (decision for this feature): an accepted event-less connection counts as having met before, so the pair's next connection at an event is a **reconnection, +20** (`metAtEarlierEvent` in `lib/server/connections.ts`, `decideKind` in `lib/points.ts`). The register screen already preselects "reconnection" for anyone the scanner is connected with. Accepting an event-less request after either person has checked in to an event still pays 0: the context is fixed when the request is created.
+
 ## Idempotency
 
 - `connections` has a unique index on `(event_id, least(requester_id, addressee_id), greatest(...))` (data model M5).

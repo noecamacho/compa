@@ -114,7 +114,7 @@ Since the first version (11 Ready, 11 Partial, 7 Missing, 5 Conflict, all judged
 | --- | --- | --- |
 | Double scan, same event | Yes | Unique index + `onConflictDoNothing` → 200 with the existing row (`createConnection`) |
 | Self-scan | Yes | 409 `self_connection` + DB check |
-| Target not at an event | Yes (API) | 409 `not_at_event`; `RegisterForm` shows the API's English `message` |
+| Target not at an event | Yes (API, UI) | Since 2026-10-29 a connection outside an event (`event: null`, no points), labelled on the register screen; `not_at_event` was removed |
 | Scanner not checked in | Partial | The API asks for `screenConsent`, but **the UI always sends `true` without showing the notice** (M13) |
 | Event ended | Yes | 409 `event_ended`, expiry on read, 409 `event_not_running` on check-in |
 | Check-in before `starts_at` | Refused | `isRunning` (#22) |

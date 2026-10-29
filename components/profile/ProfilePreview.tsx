@@ -63,7 +63,7 @@ export function ProfilePreview({ me, draft }: Props) {
             {card.city && <Muted className="truncate text-[12px] font-bold">{card.city}</Muted>}
           </span>
         </span>
-        {card.links ? <SocialLinks links={card.links} labelFor={(network) => network} /> : <Muted className="text-[12px] font-bold">{copy.noLinks}</Muted>}
+        {card.links ? <SocialLinks links={card.links} /> : <Muted className="text-[12px] font-bold">{copy.noLinks}</Muted>}
       </div>
       <Muted className="text-[12px] font-bold">{unlocked.length ? copy.unlocks(unlocked.join(", ")) : copy.nothingLocked}</Muted>
     </section>

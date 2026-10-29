@@ -96,7 +96,7 @@ export default async function ConfirmationPage({ params }: Props) {
             <Muted className="text-[12px] font-bold">{pending ? copy.pendingNote : copy.keepTalking}</Muted>
           </span>
         </span>
-        <SocialLinks links={other.links ?? {}} labelFor={(network) => copy.linkLabel(network, first(other.name))} />
+        <SocialLinks links={other.links ?? {}} owner={first(other.name)} />
       </Card>
 
       <div className="animate-rise" style={{ animationDelay: ".7s" }}>

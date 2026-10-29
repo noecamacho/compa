@@ -77,7 +77,7 @@ Column abbreviations:
 | Check in (with screen consent) | ✗ 401 | ✓\* (API; no page on `main`) | ✓ (repeat-safe 200) | — | — | — | ✓ | — | `POST /api/events/{slug}/check-in` → `/api/e/{code}/check-in` (IP) |
 | Leave an event | — | — | M | — | — | — | M | — | T-026 |
 | Show my QR | ✗ (redirect `/`) | ✓ | ✓ | — | — | — | ✓ | — | `/connect` |
-| Send a request (scan) | ✗ 401 | ✓ (auto check-in to the target's event; `consent_required`) | ✓ | — | — | ✓ (a reconnection at a new event) | ✓ | — | `POST /api/connections`; ✗ 409 `self_connection`, `not_at_event` |
+| Send a request (scan) | ✗ 401 | ✓ (auto check-in to the target's event; `consent_required`) | ✓ | — | — | ✓ (a reconnection at a new event) | ✓ | — | `POST /api/connections`; ✗ 409 `self_connection`; a target at no event gives a connection outside an event (no points) |
 | Set "we knew each other" | — | — | — | ✓\* (no UI) | ✗ 403 | — | ✗ 403 | — | `PATCH /api/connections/{id}/knew`; T-043 |
 | Withdraw my pending request | — | — | — | M | — | — | — | — | T-035 |
 | Accept or decline | — | — | — | ✗ 403 | ✓ (page loads via a 501 on `main`; IP real-mode) | — | ✗ 403 | — | `POST …/accept`, `…/decline`; ✗ 409 `not_pending`, `event_ended` |

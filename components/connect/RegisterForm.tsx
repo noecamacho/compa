@@ -62,7 +62,8 @@ export function RegisterForm({ profile }: Props) {
       const result = await apiCall("POST", "/api/connections", ConnectionRequest, {
         toHandle: person.handle,
         knew: kind === "reconnection",
-        screenConsent: true,
+        // Consent only when the screen notice was shown; if the person checks in meanwhile, the API asks for it.
+        ...(outside ? {} : { screenConsent: true as const }),
         topics,
       });
       if (note.status === "ready") rememberNote(result.connectionId, note);

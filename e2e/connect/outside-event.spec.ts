@@ -1,6 +1,6 @@
 // Connections outside an event (wiki/points-rules.md): scanning someone who is at no running event creates a request
 // with `event: null`. Same pending → accept flow and notifications, no points, no ranking, not on any live board.
-import type { Browser, BrowserContext, Page } from "@playwright/test";
+import type { Browser, BrowserContext, BrowserContextOptions, Page } from "@playwright/test";
 import type { TestUserT } from "../../lib/api/admin-schemas";
 import { LiveRecent } from "../../lib/api/schemas";
 import type { RealModeClient } from "../../lib/testing/real-mode";
@@ -8,16 +8,18 @@ import { expect, test } from "../fixtures";
 import { AdminEvents, accept, copyOf, detailOf, expectError, json, listOf, notificationsOf, sendRequest, skipTours } from "./helpers";
 
 type Outsider = { user: TestUserT; context: BrowserContext; page: Page };
+// The project's device settings, as the twoUsers fixture passes them.
+type ContextOptions = Pick<BrowserContextOptions, "baseURL" | "locale" | "viewport" | "isMobile" | "hasTouch" | "extraHTTPHeaders">;
 
 // Fresh test users checked in nowhere, each signed in in its own context; deleted afterwards (cascades their rows).
 async function outsiders(
   count: number,
-  { browser, realMode, signIn, baseURL, locale, viewport }: { browser: Browser; realMode: RealModeClient; signIn: (context: BrowserContext, user: TestUserT) => Promise<unknown>; baseURL?: string; locale?: string; viewport: { width: number; height: number } | null },
+  { browser, realMode, signIn, ...options }: { browser: Browser; realMode: RealModeClient; signIn: (context: BrowserContext, user: TestUserT) => Promise<unknown> } & ContextOptions,
 ): Promise<{ people: Outsider[]; cleanup: () => Promise<void> }> {
   const users = await realMode.createTestUsers({ count });
   const people: Outsider[] = [];
   for (const user of users) {
-    const context = await browser.newContext({ baseURL, locale, viewport });
+    const context = await browser.newContext(options);
     await skipTours(context);
     await signIn(context, user);
     people.push({ user, context, page: await context.newPage() });
@@ -30,19 +32,19 @@ async function outsiders(
 }
 
 test.describe("connect: outside an event @real", () => {
-  test("neither at an event: labelled scan, accept, no points, in the list, not on the live board @real", async ({ browser, realMode, signIn, baseURL, locale, viewport, testEvent }, testInfo) => {
+  test("neither at an event: labelled scan, accept, no points, in the list @real", async ({ browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders }, testInfo) => {
     const copy = copyOf(testInfo);
-    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport });
+    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders });
     const [ana, bruno] = people;
     if (!ana || !bruno) throw new Error("test users not created");
     try {
       // Before sending: the register screen says there are no points.
       await ana.page.goto(`/connect/${bruno.user.handle}`);
-      await expect(ana.page.getByText(copy.common.outsideEvent)).toBeVisible();
-      await expect(ana.page.getByText(copy.register.outsideEventNotice)).toBeVisible();
+      await expect(ana.page.getByText(copy.common.outsideEvent, { exact: true }).first()).toBeVisible();
+      await expect(ana.page.getByText(copy.register.outsideEventNotice, { exact: true }).first()).toBeVisible();
       await ana.page.getByRole("button", { name: copy.register.confirmOutsideEvent }).click();
       await expect(ana.page).toHaveURL(/\/connections\/[0-9a-f-]+\/done$/);
-      await expect(ana.page.getByText(copy.common.outsideEvent)).toBeVisible();
+      await expect(ana.page.getByText(copy.common.outsideEvent, { exact: true }).first()).toBeVisible();
       const connectionId = ana.page.url().split("/").at(-2) ?? "";
       expect((await detailOf(ana.page.request, connectionId)).event).toBeNull();
 
@@ -50,9 +52,9 @@ test.describe("connect: outside an event @real", () => {
       const notifications = await notificationsOf(bruno.page.request);
       expect(notifications.notifications).toContainEqual(expect.objectContaining({ kind: "request", connectionId, eventName: null }));
       await bruno.page.goto("/home");
-      await expect(bruno.page.getByText(copy.common.outsideEventShort)).toBeVisible();
+      await expect(bruno.page.getByText(copy.common.outsideEventShort, { exact: true }).first()).toBeVisible();
       await bruno.page.goto(`/requests/${connectionId}`);
-      await expect(bruno.page.getByText(copy.request.bothWinOutsideEvent)).toBeVisible();
+      await expect(bruno.page.getByText(copy.request.bothWinOutsideEvent, { exact: true }).first()).toBeVisible();
       await bruno.page.getByRole("button", { name: copy.request.accept }).click();
       await expect(bruno.page).toHaveURL(new RegExp(`/connections/${connectionId}/done$`));
 
@@ -64,17 +66,13 @@ test.describe("connect: outside an event @real", () => {
       expect(list.people.map((entry) => entry.person.id)).toContain(bruno.user.id);
       await ana.page.goto("/connections");
       await expect(ana.page.getByRole("link", { name: new RegExp(bruno.user.name) })).toContainText(copy.common.outsideEventShort);
-
-      // No event board sees it.
-      const recent = await json(await ana.page.request.get(`/api/e/${testEvent.accessCode}/live/recent`), LiveRecent);
-      expect(recent.pairs.map((pair) => pair.id)).not.toContain(connectionId);
     } finally {
       await cleanup();
     }
   });
 
-  test("a repeat or reverse scan returns the same request; a double accept pays once (zero) @real", async ({ browser, realMode, signIn, baseURL, locale, viewport }) => {
-    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport });
+  test("a repeat or reverse scan returns the same request; a double accept pays once (zero) @real", async ({ browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders }) => {
+    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders });
     const [ana, bruno] = people;
     if (!ana || !bruno) throw new Error("test users not created");
     try {
@@ -97,8 +95,8 @@ test.describe("connect: outside an event @real", () => {
     }
   });
 
-  test("only the scanner is at an event: the scanned person's context wins, so no event and no points @real", async ({ browser, realMode, signIn, baseURL, locale, viewport, testEvent }) => {
-    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport });
+  test("only the scanner is at an event: the scanned person's context wins, so no event, no points, not on its live board @real", async ({ browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders, testEvent }) => {
+    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders });
     const [ana, bruno] = people;
     if (!ana || !bruno) throw new Error("test users not created");
     try {
@@ -107,6 +105,9 @@ test.describe("connect: outside an event @real", () => {
       const { body } = await sendRequest(ana.page.request, bruno.user.handle);
       expect(body.event).toBeNull();
       expect(await (await accept(bruno.page.request, body.connectionId)).json()).toMatchObject({ points: 0 });
+      // The scanner's event board never sees it.
+      const recent = await json(await ana.page.request.get(`/api/e/${testEvent.accessCode}/live/recent`), LiveRecent);
+      expect(recent.pairs.map((pair) => pair.id)).not.toContain(body.connectionId);
       // The other way round, the scanner joins the scanned person's event and it scores as before.
       const back = await sendRequest(bruno.page.request, ana.user.handle);
       expect(back.body.event?.slug).toBe(testEvent.slug);
@@ -115,8 +116,8 @@ test.describe("connect: outside an event @real", () => {
     }
   });
 
-  test("accepted after checking in to an event it still pays nothing; meeting at an event later is a +20 reconnection @real", async ({ browser, realMode, signIn, baseURL, locale, viewport }) => {
-    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport });
+  test("accepted after checking in to an event it still pays nothing; meeting at an event later is a +20 reconnection @real", async ({ browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders }) => {
+    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders });
     const [ana, bruno] = people;
     if (!ana || !bruno) throw new Error("test users not created");
     const admin = await AdminEvents.signIn(realMode, baseURL ?? "");
@@ -138,8 +139,8 @@ test.describe("connect: outside an event @real", () => {
     }
   });
 
-  test("an erased person takes the connection with them; a self-scan still fails @real", async ({ browser, realMode, signIn, baseURL, locale, viewport }) => {
-    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport });
+  test("an erased person takes the connection with them; a self-scan still fails @real", async ({ browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders }) => {
+    const { people, cleanup } = await outsiders(2, { browser, realMode, signIn, baseURL, locale, viewport, isMobile, hasTouch, extraHTTPHeaders });
     const [ana, bruno] = people;
     if (!ana || !bruno) throw new Error("test users not created");
     try {

@@ -69,7 +69,7 @@ export default async function PersonPage({ params }: Props) {
           {(card.links || !connected) && (
             <Card className="order-1 flex flex-col gap-[10px] px-[14px] py-3 md:order-none" ariaLabel={copy.links}>
               <SectionLabel>{copy.links}</SectionLabel>
-              {card.links && <SocialLinks links={card.links} labelFor={(network) => copy.linkLabel(network, card.name)} />}
+              {card.links && <SocialLinks links={card.links} owner={card.name} />}
               {!connected && <Muted className="text-[12px] font-bold">{copy.linksLocked}</Muted>}
             </Card>
           )}

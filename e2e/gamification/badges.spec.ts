@@ -71,8 +71,10 @@ test.describe("badges in real mode", () => {
     const [ana, bruno] = await people([{}, {}]);
     if (!ana || !bruno) throw new Error("test users not created");
     await acceptedConnection(ana, bruno);
+    // Badges are awarded right after the accept response (conference-scale finding 13), so wait for them.
+    const earned = async () => (await call(ana.page.request, "GET", "/api/badges", BadgeList)).badges.find((status) => status.id === "apreton")?.earnedAt ?? null;
+    await expect.poll(earned).toBeTruthy();
     const list = await call(ana.page.request, "GET", "/api/badges", BadgeList);
-    expect(list.badges.find((status) => status.id === "apreton")?.earnedAt).toBeTruthy();
     await ana.page.goto("/me/badges");
     await expect(ana.page.getByText(copy.earned(list.earned, list.total))).toBeVisible();
     await ana.page.getByRole("group", { name: copy.filterLabel }).getByRole("button", { name: copy.filters.earned }).click();

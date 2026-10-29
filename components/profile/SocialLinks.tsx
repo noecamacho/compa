@@ -4,12 +4,14 @@ import { NETWORK_COLOR, NETWORK_ORDER, NetworkIcon } from "@/components/brand/Ne
 import { useCopy } from "@/components/LocaleProvider";
 import type { Links } from "@/lib/profile-fields";
 
-type Props = { links: Links; labelFor: (network: string) => string };
+// `owner` names whose links they are in the accessible label; a server page cannot pass a label function here.
+type Props = { links: Links; owner?: string };
 
 // Another person's visible links as labelled brand tiles (06 Confirmación, 08 PerfilOtro, the profile preview).
 // `links` is already filtered by toCard, so this only draws what the viewer may see.
-export function SocialLinks({ links, labelFor }: Props) {
-  const { networks } = useCopy();
+export function SocialLinks({ links, owner }: Props) {
+  const { networks, confirmation } = useCopy();
+  const labelFor = (network: string) => (owner ? confirmation.linkLabel(network, owner) : network);
   const shown = NETWORK_ORDER.filter((key) => links[key]);
   if (shown.length === 0) return null;
   return (
