@@ -17,6 +17,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { AVATAR_MODES, type AvatarMode } from "../lib/avatar-mode";
 import { generateAccessCode } from "../lib/access-code";
 import type { MonitoLook } from "../lib/monito/look";
 import { DEFAULT_VISIBILITY, VISIBILITY_LEVELS, type Links, type VisibilitySettings } from "../lib/profile-fields";
@@ -53,6 +54,8 @@ export const users = pgTable(
     city: text("city"),
     // The pixel-art monito (lib/monito/look.ts); null until the person builds one.
     avatar: jsonb("avatar").$type<MonitoLook>(),
+    // Which picture the person shows: the LinkedIn photo (default) or the monito (captain decision, 2026-10-29).
+    avatarMode: text("avatar_mode", { enum: AVATAR_MODES }).$type<AvatarMode>().notNull().default("photo"),
     goldenCapAt: timestamp("golden_cap_at", { withTimezone: true }),
     links: jsonb("links").$type<Links>().notNull().default({}),
     visibility: jsonb("visibility").$type<VisibilitySettings>().notNull().default(DEFAULT_VISIBILITY),
@@ -66,6 +69,7 @@ export const users = pgTable(
     check("users_headline_check", sql`char_length(${t.headline}) <= 120`),
     check("users_company_check", sql`char_length(${t.company}) <= 80`),
     check("users_city_check", sql`char_length(${t.city}) <= 80`),
+    check("users_avatar_mode_check", sql`${t.avatarMode} in ('photo', 'monito')`),
   ],
 ).enableRLS();
 

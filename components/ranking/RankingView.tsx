@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { ButtonLink } from "@/components/ui/Button";
 import { Segmented } from "@/components/ui/Segmented";
 import { Muted, ProgressBar } from "@/components/ui/Text";
@@ -101,7 +101,7 @@ export function RankingView({ me, boards, looks, handles }: Props) {
 
       <div data-tour="you" className="mt-[2px] flex flex-col gap-[10px] rounded-[20px] bg-gum-soft px-[14px] py-3 shadow-hard-4" style={{ border: "3px solid #1E1B2E" }}>
         <div className="flex items-center gap-3">
-          <Avatar person={{ name: me.name, look: me.avatar }} size={50} />
+          <Avatar person={avatarOf(me)} size={50} />
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-display text-[24px] leading-none font-bold">{copy.youRank(mine?.rank ?? null)}</span>
             <Muted className="text-[13px] font-extrabold">{copy.youSub(formatPoints(mine?.points ?? 0), sub)}</Muted>

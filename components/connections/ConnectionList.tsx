@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Chip } from "@/components/ui/Chip";
 import { Muted } from "@/components/ui/Text";
 import type { PersonHistoryT } from "@/lib/api/schemas";
@@ -52,7 +52,7 @@ export function ConnectionList({ people }: Props) {
               href={`/people/${entry.person.handle}`}
               className="flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3"
             >
-              <Avatar person={{ name: entry.person.name, look: entry.person.avatar }} size={46} />
+              <Avatar person={avatarOf(entry.person)} size={46} />
               <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
                 <span className="truncate text-[15px] font-extrabold">{entry.person.name}</span>
                 <Muted className="truncate text-[12px] font-bold">{(entry.topics ?? entry.person.interests ?? []).join(" · ")}</Muted>

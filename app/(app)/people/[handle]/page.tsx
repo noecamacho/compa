@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
 import { Icon } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Header } from "@/components/ui/Header";
 import { Pill } from "@/components/ui/Pill";
@@ -37,7 +37,7 @@ export default async function PersonPage({ params }: Props) {
       />
       <div className="mt-[-4px] flex items-center gap-4">
         <span className="flex h-[140px] w-[132px] shrink-0 items-end justify-center rounded-card bg-sky-soft pb-[6px] border-ink shadow-hard-4">
-          <Avatar person={{ name: card.name, look: card.avatar }} px={6} />
+          <Avatar person={avatarOf(card)} px={6} />
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-2">
           <h1 className="m-0 font-display text-[26px] leading-[1.05] font-bold">{card.name}</h1>
@@ -89,7 +89,7 @@ export default async function PersonPage({ params }: Props) {
             <span className="flex items-center">
               {relationship.mutual.slice(0, 3).map((person, index) => (
                 <span key={person.id} className="block" style={{ marginLeft: index ? -8 : 0 }}>
-                  <Avatar person={{ name: person.name, look: person.avatar }} size={28} />
+                  <Avatar person={avatarOf(person)} size={28} />
                 </span>
               ))}
             </span>

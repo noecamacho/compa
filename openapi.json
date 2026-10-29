@@ -6958,6 +6958,9 @@
           "avatar": {
             "$ref": "#/components/schemas/MonitoLook"
           },
+          "avatarMode": {
+            "$ref": "#/components/schemas/AvatarMode"
+          },
           "links": {
             "description": "`@user` or a URL; an empty string removes the link.",
             "type": "object",
@@ -7093,6 +7096,14 @@
           "extra"
         ],
         "description": "The person's pixel-art monito (design/compa-v2/README.md)."
+      },
+      "AvatarMode": {
+        "type": "string",
+        "enum": [
+          "photo",
+          "monito"
+        ],
+        "description": "Which picture to show; always `monito` when there is no photo."
       },
       "LinkKey": {
         "type": "string",
@@ -7377,6 +7388,9 @@
           },
           "avatar": {
             "$ref": "#/components/schemas/MonitoLookOutput"
+          },
+          "avatarMode": {
+            "$ref": "#/components/schemas/AvatarMode"
           },
           "headline": {
             "type": "string"
@@ -7731,6 +7745,9 @@
           },
           "avatar": {
             "$ref": "#/components/schemas/MonitoLookOutput"
+          },
+          "avatarMode": {
+            "$ref": "#/components/schemas/AvatarMode"
           },
           "headline": {
             "type": "string"

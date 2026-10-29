@@ -9,13 +9,15 @@ import { Tour } from "@/components/tour/Tour";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
-import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
+import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type ConnectionListT, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
+import { apiGet, apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
 import { home, tour } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
 
 type Props = { searchParams: Promise<{ demo?: string }> };
+
+const NO_CONNECTIONS: ConnectionListT = { incoming: [], people: [], totals: { points: 0, connections: 0, people: 0 } };
 
 type Live = { snapshot: LiveSnapshotT; event: EventDoorT };
 
@@ -40,11 +42,12 @@ export default async function HomePage({ searchParams }: Props) {
   const { demo } = await searchParams;
   // `?demo=empty` previews the first-night state in mock mode.
   const me = await apiGet("/api/me", Me, demo === "empty" ? { mockExample: "empty" } : {});
-  const [live, list, invites] = await Promise.all([
+  const [live, listOrNull, invites] = await Promise.all([
     loadLive(me.currentEvent?.code),
-    apiGet("/api/connections", ConnectionList),
+    apiGetSafe("/api/connections", ConnectionList),
     apiGetOrNull("/api/invites/me", Invites),
   ]);
+  const list = listOrNull ?? NO_CONNECTIONS;
   const empty = demo === "empty" || list.totals.connections === 0;
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
   const incoming = empty ? [] : list.incoming;

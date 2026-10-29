@@ -48,6 +48,13 @@ export const monito = {
   done: "Listo, entrar",
   step: "Paso 2 de 2 · lo puedes cambiar desde tu perfil",
   labelOwn: "Tu monito",
+  choiceLabel: "Cómo te ven",
+  usePhoto: "Usar mi foto de LinkedIn",
+  usePhotoHint: "Tu foto, en círculo, en todo Compa",
+  noPhoto: "LinkedIn no nos dio foto",
+  createMonito: "Crear mi monito",
+  createMonitoHint: "Tu personaje pixel art; gana ropa conectando",
+  photoLabel: "Tu foto",
 };
 
 export const home = {

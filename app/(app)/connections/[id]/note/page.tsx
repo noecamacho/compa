@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { NoteEditor } from "@/components/record/NoteEditor";
 import { Header } from "@/components/ui/Header";
 import { Screen } from "@/components/ui/Screen";
@@ -21,7 +21,7 @@ export default async function NotePage({ params }: Props) {
     <Screen gap={16}>
       <Header back={`/people/${detail.other.handle}`} title={copy.title} />
       <div className="flex items-center gap-3">
-        <Avatar person={{ name: detail.other.name, look: detail.other.avatar }} size={46} />
+        <Avatar person={avatarOf(detail.other)} size={46} />
         <span className="flex flex-col">
           <span className="font-display text-[17px] leading-[1.2] font-bold">{detail.other.name}</span>
           <Muted className="text-[13px] font-bold">{copy.reconnectionAgo(kind, timeAgo(detail.at))}</Muted>

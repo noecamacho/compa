@@ -2,6 +2,7 @@
 // Types are inferred from these schemas; lib/api/routes.ts wires them into the OpenAPI document.
 import "zod-openapi";
 import { z } from "zod";
+import { AVATAR_MODES } from "../avatar-mode";
 import { BADGE_IDS } from "../badges/catalog";
 import { MonitoLook } from "../monito/look";
 import { LINK_KEYS, VISIBILITY_LEVELS } from "../profile-fields";
@@ -45,6 +46,9 @@ export const CurrentEvent = z.object({ code: accessCode, name: z.string() }).met
 
 export const Avatar = MonitoLook.meta({ id: "MonitoLook", description: "The person's pixel-art monito (design/compa-v2/README.md)." });
 export const BadgeId = z.enum(BADGE_IDS).meta({ id: "BadgeId" });
+export const AvatarMode = z
+  .enum(AVATAR_MODES)
+  .meta({ id: "AvatarMode", description: "Which picture to show; always `monito` when there is no photo." });
 
 // Fields the V2 screens read; optional until the handlers fill them (design handoff, follow-up PR).
 export const Card = z
@@ -54,6 +58,7 @@ export const Card = z
     name: z.string(),
     photoUrl: z.string().nullable(),
     avatar: Avatar.optional(),
+    avatarMode: AvatarMode.optional(),
     headline: z.string().optional(),
     company: z.string().optional(),
     city: z.string().optional(),
@@ -120,6 +125,7 @@ export const PatchMeBody = z
     company: optionalText(80),
     city: optionalText(80),
     avatar: Avatar.optional(),
+    avatarMode: AvatarMode.optional(),
     links: z
       .partialRecord(LinkKey, z.string().trim().max(200))
       .optional()
@@ -418,3 +424,4 @@ export type DraftT = z.infer<typeof Draft>;
 export type VisibilitySettingsT = z.infer<typeof VisibilitySettings>;
 export type ConnectionStatusForMeT = z.infer<typeof ConnectionStatusForMe>;
 export type ConnectionKindT = z.infer<typeof ConnectionKind>;
+export type AvatarModeT = z.infer<typeof AvatarMode>;

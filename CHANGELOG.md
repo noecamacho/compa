@@ -11,6 +11,8 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Fixed
 
 - The AI summary prompt is event-neutral: it no longer tells the model it is at a JavaScript conference.
+- Home, Ranking and Badges render a section empty instead of the error page when a secondary call fails; profiles stored before the `whatsapp` link existed parse again.
+
 - Accept Chrome and Android voice notes: MediaRecorder webm files carry no duration, so the server now rejects only audio whose known length exceeds two minutes or that contains no audio track.
 - Require explicit screen consent before writing an event check-in; accept multipart transcription uploads with server-side size and two-minute duration limits.
 
@@ -30,6 +32,8 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Event door `/e/<code>` (name, live counters, Enter with LinkedIn), check-in screen with the big-screen notice `/e/<code>/join`, and the projected dashboard `/e/<code>/live` (Three.js loom of accepted connections colored new vs reconnection, counters, join QR, leaderboard, person cards; polls every 3 s; 390 to 1920 px).
 - Spanish or English by the visitor's first preferred language (`lib/i18n.ts`, `lib/copy/en.ts`) for the landing and event-entry screens.
 - Guided onboarding: a spotlight tour that dims everything but one button and explains it, per screen and replayable from the profile; incoming connection requests on home with 3 s polling and a live bell; the confirmation screen refreshes when the other person answers; the personal QR link survives sign-in; home works outside an event; app icon.
+- Profile pictures default to the LinkedIn photo, copied to Supabase Storage at sign-in because LinkedIn URLs expire; the monito is a choice on the monito screen (captain decision). Migration `0003_avatar_mode` adds `users.avatar_mode`.
+
 - V2 data model and handlers: migration `0002` (monito avatar, city, golden cap, connection topics, note title and pending action, `bonus_points`, `user_badges`, `invites`, score views that pay notes to their author and count bonus points), badge rules with progress, invite links with +100/+50 and the golden cap, connection detail, leaderboard `scope` with the viewer's standing, and AI summaries with a title and a pending action.
 - The sixteen V2 attendee screens (`app/`), Spanish copy in `lib/copy/es.ts`, typed API fetch helpers for pages and clients, four mock-only V2 routes (connection detail, badges, invites), the V2 points table in `lib/points.ts` and migration `0001` (connections check 50/20, `whatsapp` link).
 - V2 design system from the `design/compa-v2` handoff: paper/ink theme tokens and keyframes in `app/globals.css`, Fredoka and Nunito via `next/font`, the pixel-art monito (`lib/monito`, `components/monito`), the 20 badges (`lib/badges`, `components/badges`), the travelling-pill dock (`components/nav/Dock.tsx`), UI primitives in `components/ui` and a visual QA gallery at `/design`.
