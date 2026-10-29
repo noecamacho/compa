@@ -24,6 +24,17 @@ const format = (locale: Locale, date: Date, timeZone: string, options: Intl.Date
 const zoneName = (locale: Locale, date: Date, timeZone: string) =>
   new Intl.DateTimeFormat(TAG[locale], { timeZone, timeZoneName: "short" }).formatToParts(date).find((part) => part.type === "timeZoneName")?.value ?? timeZone;
 
+export const localeTag = (locale: Locale): string => TAG[locale];
+
+// One date or time in the event's zone, never throwing on a bad stored zone (edge case 14).
+export const inZone = (locale: Locale, iso: string, timeZone: string, options: Intl.DateTimeFormatOptions): string =>
+  format(locale, new Date(iso), zoneOrUtc(timeZone).timeZone, options);
+
+export function zoneAbbreviation(locale: Locale, iso: string, timeZone: string): string {
+  const zone = zoneOrUtc(timeZone);
+  return zone.known ? zoneName(locale, new Date(iso), zone.timeZone) : "?";
+}
+
 // "Thu, Oct 29 · 10:00–22:00 CST", or both dates when the event ends on another local day: "Oct 29, 10:00 – Oct 30, 02:00 CST".
 export function eventWhen(locale: Locale, startsAt: string, endsAt: string, timeZone: string): string {
   const { timeZone: zone, known } = zoneOrUtc(timeZone);

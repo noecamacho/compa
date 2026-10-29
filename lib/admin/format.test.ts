@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { eventWhen, formatCount, relative } from "./format";
+import { eventWhen, formatCount, inZone, relative, zoneAbbreviation } from "./format";
 
 const ZONE = "America/Mexico_City";
 
@@ -59,5 +59,17 @@ describe("formatCount", () => {
   test("renders a dash for a missing number", () => {
     expect(formatCount("en", null)).toBe("—");
     expect(formatCount("es", undefined)).toBe("—");
+  });
+});
+
+describe("inZone and zoneAbbreviation", () => {
+  test("format in the event's zone", () => {
+    expect(inZone("en", "2026-10-29T04:30:00Z", "America/Mexico_City", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })).toBe("22:30");
+    expect(zoneAbbreviation("en", "2026-10-29T16:00:00Z", "America/Mexico_City")).toBe("CST");
+  });
+
+  test("an unknown zone falls back to UTC instead of throwing", () => {
+    expect(inZone("en", "2026-10-29T04:30:00Z", "Mars/Olympus", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" })).toBe("04:30");
+    expect(zoneAbbreviation("en", "2026-10-29T16:00:00Z", "Mars/Olympus")).toBe("?");
   });
 });

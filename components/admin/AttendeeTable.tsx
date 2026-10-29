@@ -6,10 +6,10 @@ import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Muted } from "@/components/ui/Text";
-import { formatCount, relative } from "@/lib/admin/format";
+import { formatCount, inZone, relative } from "@/lib/admin/format";
 import { sortDirection, type SortDir } from "@/lib/admin/sort";
 import { hrefWith, type UrlParams } from "@/lib/admin/url";
-import { AddedAttendee, type AdminAttendeeT } from "@/lib/api/admin-schemas";
+import { ATTENDEE_SORTS, AddedAttendee, type AdminAttendeeT } from "@/lib/api/admin-schemas";
 import { apiCall } from "@/lib/api/client";
 import { NoBody } from "@/lib/api/route-spec";
 import { copyFor, type Dictionary } from "@/lib/copy";
@@ -18,6 +18,7 @@ import { CardList, Cell, DataTable, EmptyState, FilterTabs, Row, type Column } f
 import { writeErrors } from "./EventActions";
 import { Notice } from "./Notice";
 import { Pagination } from "./Pagination";
+import { PersonAvatar } from "./PersonAvatar";
 import { PickDialog } from "./PickDialog";
 import { Pill } from "@/components/ui/Pill";
 import { ToolbarSelect } from "./ToolbarSelect";
@@ -26,7 +27,7 @@ import { useAdminAction } from "./useAdminAction";
 
 export const ATTENDEE_FILTERS = ["all", "test", "admin"] as const;
 export type AttendeeFilter = (typeof ATTENDEE_FILTERS)[number];
-type AttendeeSort = "checkedInAt" | "name" | "points" | "connections";
+type AttendeeSort = (typeof ATTENDEE_SORTS)[number];
 
 export type AttendeeParams = { q?: string; filter: AttendeeFilter; sort: AttendeeSort; dir?: SortDir; page: number };
 
@@ -44,19 +45,10 @@ type Props = {
 };
 
 const DEFAULTS: UrlParams = { filter: "all", sort: "checkedInAt" };
-const SORTS: AttendeeSort[] = ["checkedInAt", "name", "points", "connections"];
 // Email and Company only where the content column is wide enough beside the QR column (≈1800 px, not 2xl: at 1536 the
 // column is ~720 px and the table would clip). Cells are px-3 so the base columns fit that ~720 px column.
 const WIDE = "hidden min-[1800px]:table-cell";
 const TIGHT = "px-3!";
-
-const initials = (name: string) =>
-  name
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((word) => word[0]?.toUpperCase())
-    .join("");
 
 // People tab (spec §5.3): toolbar, sortable table (cards on a phone), pagination of 50, check-in through a dialog and
 // removal behind a confirm that names the person and their connections. Every write ends in router.refresh().
@@ -171,7 +163,7 @@ function Toolbar({ copy, locale, params, path, href, counts, action, total, page
             count: chipCount[key] === undefined ? undefined : formatCount(locale, chipCount[key]),
           }))}
         />
-        <ToolbarSelect name="sort" label={t.sortLabel} value={params.sort} options={SORTS.map((key) => ({ value: key, label: t.sorts[key] }))} />
+        <ToolbarSelect name="sort" label={t.sortLabel} value={params.sort} options={ATTENDEE_SORTS.map((key) => ({ value: key, label: t.sorts[key] }))} />
       </div>
       {total > 0 && (
         <p role="status" className="m-0 text-[13px] font-extrabold text-muted tabular-nums">
@@ -232,21 +224,10 @@ function Results({ attendees, total, params, href, ...rows }: RowsProps & { atte
   );
 }
 
-function exactTime(locale: Locale, iso: string, timeZone: string): string {
-  const options: Intl.DateTimeFormatOptions = { dateStyle: "medium", timeStyle: "short" };
-  try {
-    return new Intl.DateTimeFormat(locale === "es" ? "es-MX" : "en-US", { ...options, timeZone }).format(new Date(iso));
-  } catch {
-    return new Date(iso).toISOString();
-  }
-}
-
 function Person({ user, test }: { user: AdminAttendeeT["user"]; test: string }) {
   return (
     <span className="flex min-w-0 items-center gap-3">
-      <span aria-hidden className={`box-border flex size-9 shrink-0 items-center justify-center rounded-full font-display text-[13px] font-bold border-ink ${user.isTest ? "bg-gum-soft" : "bg-sky-soft"}`} style={{ borderWidth: 2 }}>
-        {initials(user.name)}
-      </span>
+      <PersonAvatar name={user.name} isTest={user.isTest} />
       <span className="min-w-0">
         <span className="block truncate text-[15px] font-extrabold" title={user.name}>
           {user.name}
@@ -284,7 +265,7 @@ function AttendeeRow({ attendee, full, locale, now, timeZone, busy, remove }: Ro
         <Person user={user} test={full.events.test} />
       </Cell>
       <Cell className={`${TIGHT} whitespace-nowrap`}>
-        <time dateTime={checkedInAt} title={exactTime(locale, checkedInAt, timeZone)} className="block">
+        <time dateTime={checkedInAt} title={inZone(locale, checkedInAt, timeZone, { dateStyle: "medium", timeStyle: "short" })} className="block">
           {relative(locale, checkedInAt, new Date(now))}
         </time>
         <Muted className="block text-[12px] font-bold">

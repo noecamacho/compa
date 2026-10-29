@@ -122,8 +122,9 @@ export default async function AdminEventsPage({ searchParams }: Props) {
   );
   const shell = { copy, locale, admin, active: "events" as const, title: copy.events.title, primary: create, live: Boolean(stats?.events.running) };
   const counts = stats ? { events: notArchived(stats), people: stats.people.total, testUsers: stats.people.test } : undefined;
-  // First run: nothing anywhere, so no wall of zeros and no toolbar (edge case 33).
-  const firstRun = list.total === 0 && !state.filtered && (stats ? notArchived(stats) + stats.events.archived === 0 : true);
+  // First run: nothing anywhere, so no wall of zeros and no toolbar (edge case 33). Without stats we cannot know that
+  // archived events exist, so keep the toolbar and its Archived chip reachable.
+  const firstRun = list.total === 0 && !state.filtered && (stats ? notArchived(stats) + stats.events.archived === 0 : false);
   if (firstRun) {
     return (
       <AdminShell {...shell}>
@@ -132,7 +133,7 @@ export default async function AdminEventsPage({ searchParams }: Props) {
     );
   }
   const from = (list.page - 1) * list.pageSize + 1;
-  const result = list.events.length ? copy.ui.list.range(from, from + list.events.length - 1, list.total) : copy.ui.resultCount(0);
+  const result = list.events.length ? copy.ui.list.range(from, from + list.events.length - 1, list.total) : copy.ui.resultCount(list.total);
   const sort: TableSort = { key: state.sort, dir: state.effectiveDir, hrefFor: (key, dir) => link(state.url, { sort: key, dir }) };
   const events = list.events;
   return (

@@ -67,12 +67,15 @@ export function useAdminAction(failedText: string) {
     setBusy(true);
     setError(null);
     setNotice(null);
-    const failed = (await settleInChunks(items, action)).failed.map((entry) => entry.item);
-    router.refresh();
-    if (failed.length) setError(summary(failed));
-    else setNotice(summary(failed));
-    setBusy(false);
-    return true;
+    try {
+      const failed = (await settleInChunks(items, action)).failed.map((entry) => entry.item);
+      router.refresh();
+      if (failed.length) setError(summary(failed));
+      else setNotice(summary(failed));
+      return true;
+    } finally {
+      setBusy(false);
+    }
   }
 
   // A result that needs no server write (a copied link): the same live regions, no refresh. `dismiss` clears both.

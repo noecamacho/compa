@@ -23,7 +23,7 @@ export const writeErrors = (ui: Ui, byCode: Record<string, string> = {}): Record
 type Lifecycle = { canEnd: boolean; canArchive: boolean; canRestore: boolean };
 
 // Edge cases 9 and 10: "End now" only while the window is open or ahead; "Restore" only when archived.
-const lifecycle = (phase: EventPhaseT): Lifecycle => ({
+export const lifecycle = (phase: EventPhaseT): Lifecycle => ({
   canEnd: phase === "running" || phase === "upcoming",
   canArchive: phase !== "archived",
   canRestore: phase === "archived",
@@ -57,9 +57,10 @@ const LIVE_LINK =
 // Header actions (spec §5.3): Copy link (from md), Open live ↗ and a ⋯ menu with the lifecycle. The notices wrap onto
 // their own line below the header.
 export function EventHeaderActions({ locale, slug, name, joinUrl, liveUrl, phase }: HeaderProps) {
-  const { full, busy, error, notice, dialog, rotate, end, archive, restore } = useEventLifecycle(locale, slug);
+  const { full, busy, error, notice, dialog, announce, rotate, end, archive, restore } = useEventLifecycle(locale, slug);
   const { canEnd, canArchive, canRestore } = lifecycle(phase);
   const ui = full.ui;
+  const copyLink = () => void navigator.clipboard.writeText(joinUrl).then(() => announce(full.detail.copied), () => announce(ui.detail.copyFailed, "error"));
   const menuId = "event-menu";
   return (
     <>
@@ -72,7 +73,7 @@ export function EventHeaderActions({ locale, slug, name, joinUrl, liveUrl, phase
           {ui.menu.openLive}
         </a>
         <RowMenu id={menuId} label={ui.menu.moreFor(name)}>
-          <RowMenuItem menuId={menuId} onClick={() => void navigator.clipboard.writeText(joinUrl).catch(() => undefined)}>
+          <RowMenuItem menuId={menuId} onClick={copyLink}>
             {ui.menu.copyLink}
           </RowMenuItem>
           <RowMenuSeparator />

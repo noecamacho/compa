@@ -8,6 +8,7 @@ import { AdminEventBody } from "@/lib/api/admin-schemas";
 import { apiCall } from "@/lib/api/client";
 import { copyFor, type Dictionary } from "@/lib/copy";
 import type { Locale } from "@/lib/i18n";
+import { lifecycle as phaseActions, writeErrors } from "./EventActions";
 import { Notice } from "./Notice";
 import { RowMenu, RowMenuItem, RowMenuSeparator } from "./RowMenu";
 import { useAdminAction, type Outcome } from "./useAdminAction";
@@ -38,8 +39,8 @@ function useEvents(): Ctx {
   return ctx;
 }
 
-const canEnd = (event: ListEvent) => event.phase === "running" || event.phase === "upcoming";
-const canArchive = (event: ListEvent) => event.phase !== "archived";
+const canEnd = (event: ListEvent) => phaseActions(event.phase).canEnd;
+const canArchive = (event: ListEvent) => phaseActions(event.phase).canArchive;
 const base = (event: ListEvent) => `/api/admin/events/${event.slug}`;
 const lifecycleCall = (event: ListEvent, kind: Lifecycle) => apiCall("POST", `${base(event)}/${kind}`, AdminEventBody);
 
@@ -78,7 +79,7 @@ export function EventsProvider({ locale, events, children }: ProviderProps) {
 
   const confirmFor = (kind: Lifecycle, body: string): Outcome => {
     const { title, confirm, done } = copy.ui.dialogs[kind];
-    return { confirm: { title, body, confirmLabel: confirm, cancelLabel: copy.ui.cancel, danger: true }, done };
+    return { confirm: { title, body, confirmLabel: confirm, cancelLabel: copy.ui.cancel, danger: true }, done, errors: writeErrors(copy.ui) };
   };
 
   const value: Ctx = {
@@ -90,7 +91,7 @@ export function EventsProvider({ locale, events, children }: ProviderProps) {
     busy: action.busy,
     lifecycle: (event, kind) => void action.run(() => lifecycleCall(event, kind), confirmFor(kind, kind === "end" ? copy.detail.endConfirm : copy.detail.archiveConfirm)),
     // Back to `ended`, not `live`, so the door does not silently reopen (edge case 22). No confirm: it is the undo.
-    restore: (event) => void action.run(() => apiCall("PATCH", base(event), AdminEventBody, { status: "ended" }), { done: copy.ui.eventList.restored }),
+    restore: (event) => void action.run(() => apiCall("PATCH", base(event), AdminEventBody, { status: "ended" }), { done: copy.ui.eventList.restored, errors: writeErrors(copy.ui) }),
     copyLink: (event) =>
       void navigator.clipboard.writeText(event.joinUrl).then(
         () => action.announce(copy.ui.eventList.copied),

@@ -13,6 +13,7 @@ import { Pill } from "@/components/ui/Pill";
 import { relative } from "@/lib/admin/format";
 import { parsePageParams, type RawSearchParams } from "@/lib/admin/page-params";
 import { sortDirection } from "@/lib/admin/sort";
+import { PAGE_SIZES, TEST_SCOPES } from "@/lib/admin/events-query";
 import { hrefWith, type UrlParams } from "@/lib/admin/url";
 import { AdminUserList, UserSearchQuery, type AdminUserT } from "@/lib/api/admin-schemas";
 import { apiGet } from "@/lib/api/server-fetch";
@@ -24,9 +25,7 @@ type Props = { searchParams: Promise<RawSearchParams> };
 type Copy = Dictionary["admin"];
 
 const PATH = "/admin/people";
-const TESTS = ["include", "exclude", "only"] as const;
 const ROLES = ["any", "super_admin"] as const;
-const PAGE_SIZES = [25, 50, 100] as const;
 const DEFAULTS: UrlParams = { test: "include", role: "any", sort: "name", limit: "25" };
 
 // The console offers "any" and "super admins"; any other role in the URL falls back to "any" rather than hide a filter.
@@ -96,7 +95,7 @@ export default async function AdminPeoplePage({ searchParams }: Props) {
         owned={["role", "sort", "dir"]}
         searchLabel={copy.people.searchLabel}
         submitLabel={copy.people.search}
-        chips={<FilterTabs label={copy.people.title} active={query.test} options={TESTS.map((test) => ({ key: test, label: copy.people.filter[test], href: href({ test }) }))} />}
+        chips={<FilterTabs label={copy.people.title} active={query.test} options={TEST_SCOPES.map((test) => ({ key: test, label: copy.people.filter[test], href: href({ test }) }))} />}
         selects={
           <>
             <ToolbarSelect name="role" label={copy.people.roleLabel} value={query.role} options={ROLES.map((role) => ({ value: role, label: copy.people.roles[role] }))} />

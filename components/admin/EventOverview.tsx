@@ -7,30 +7,12 @@ import type { Dictionary } from "@/lib/copy";
 import type { ScheduleEntry } from "@/lib/events/schedule";
 import type { Locale } from "@/lib/i18n";
 import { KpiStrip } from "./KpiStrip";
+import { inZone, localeTag, zoneAbbreviation } from "@/lib/admin/format";
 
 type Props = { copy: Dictionary["admin"]; locale: Locale; event: AdminEventT; phase: EventPhaseT; testUsers: number | null };
 
-const TAG: Record<Locale, string> = { es: "es-MX", en: "en-US" };
-
-// Formatting stays in the event's zone (spec §6.3); an unknown stored zone falls back to UTC instead of throwing.
-function inZone(locale: Locale, iso: string, timeZone: string, options: Intl.DateTimeFormatOptions): string {
-  try {
-    return new Intl.DateTimeFormat(TAG[locale], { ...options, timeZone }).format(new Date(iso));
-  } catch {
-    return new Intl.DateTimeFormat(TAG[locale], { ...options, timeZone: "UTC" }).format(new Date(iso));
-  }
-}
-
-function zoneAbbreviation(locale: Locale, iso: string, timeZone: string): string {
-  try {
-    return new Intl.DateTimeFormat(TAG[locale], { timeZone, timeZoneName: "short" }).formatToParts(new Date(iso)).find((part) => part.type === "timeZoneName")?.value ?? "?";
-  } catch {
-    return "?";
-  }
-}
-
 // A schedule date is a plain calendar day ("2026-10-29"), so it is formatted at UTC noon to never shift a day.
-const dayLabel = (locale: Locale, date: string) => new Intl.DateTimeFormat(TAG[locale], { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T12:00:00Z`));
+const dayLabel = (locale: Locale, date: string) => new Intl.DateTimeFormat(localeTag(locale), { weekday: "short", day: "numeric", month: "short", timeZone: "UTC" }).format(new Date(`${date}T12:00:00Z`));
 
 function byDay(schedule: ScheduleEntry[]): [string, ScheduleEntry[]][] {
   const sorted = [...schedule].sort((a, b) => `${a.date}${a.start}`.localeCompare(`${b.date}${b.start}`));
@@ -46,7 +28,7 @@ const BLANK = " ";
 export function EventOverview({ copy, locale, event, phase, testUsers }: Props) {
   const t = copy.ui.detail;
   const { attendees, connections, pending, organizers } = event.counts;
-  const perPerson = attendees > 0 ? new Intl.NumberFormat(TAG[locale], { maximumFractionDigits: 1 }).format(connections / attendees) : null;
+  const perPerson = attendees > 0 ? new Intl.NumberFormat(localeTag(locale), { maximumFractionDigits: 1 }).format(connections / attendees) : null;
   const open = phase === "running" || phase === "upcoming";
   const endTime = inZone(locale, event.endsAt, event.timezone, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
   return (

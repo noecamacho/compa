@@ -4,6 +4,8 @@ import { sortDirection } from "./sort";
 describe("sortDirection", () => {
   test("names sort A to Z by default", () => expect(sortDirection("name")).toBe("asc"));
 
+  test("status sorts in phase order, running first", () => expect(sortDirection("status")).toBe("asc"));
+
   test("everything else sorts newest or largest first", () => {
     expect(sortDirection("startsAt")).toBe("desc");
     expect(sortDirection("points")).toBe("desc");

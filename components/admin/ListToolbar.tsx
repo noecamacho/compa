@@ -29,7 +29,8 @@ const hiddenEntries = (params: UrlParams, owned: string[]) =>
 export function ListToolbar({ action, params, owned = [], searchLabel, placeholder, submitLabel, chips, selects, result }: Props) {
   return (
     <div className="z-20 -mx-4 bg-paper px-4 py-3 md:sticky md:top-0 md:-mx-6 md:border-b-[1.5px] md:border-ink/15 md:px-6 xl:-mx-8 xl:px-8 2xl:-mx-12 2xl:px-12">
-      <form method="get" action={action} role="search" className="flex flex-col gap-3 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center xl:flex xl:flex-row">
+      {/* Keyed by the URL state: a client navigation (sort header, Clear filters) must reset the uncontrolled inputs. */}
+      <form key={JSON.stringify(params)} method="get" action={action} role="search" className="flex flex-col gap-3 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center xl:flex xl:flex-row">
         {hiddenEntries(params, owned).map(([key, value]) => (
           <input key={key} type="hidden" name={key} value={value} />
         ))}

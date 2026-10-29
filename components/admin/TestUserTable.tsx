@@ -22,7 +22,7 @@ type Props = {
   busy: boolean;
   onSignIn: (user: TestUserT) => void;
   onDelete: (user: TestUserT) => void;
-  // Resolves with the users that were deleted, so the selection can drop them.
+  // Deleted rows leave the selection on their own after the refresh; failed ones stay picked for a retry.
   onDeleteMany: (users: TestUserT[]) => Promise<boolean>;
 };
 
@@ -46,10 +46,6 @@ export function TestUserTable({ copy, locale, users, meId, now, busy, onSignIn, 
   const toggleAll = () => setPicked(allPicked ? [] : selectable.map((user) => user.id));
   const createdOf = (user: TestUserT) => relative(locale, user.createdAt, new Date(now));
 
-  async function deleteSelected() {
-    // Deleted rows leave the selection on their own after the refresh; failed ones stay picked for a retry.
-    await onDeleteMany(selected);
-  }
 
   const selectAll = (
     <Check label={tests.selectAll} checked={allPicked} mixed={selected.length > 0 && !allPicked} disabled={busy || selectable.length === 0} onChange={toggleAll} />
@@ -111,7 +107,7 @@ export function TestUserTable({ copy, locale, users, meId, now, busy, onSignIn, 
       {selected.length > 0 && (
         <div role="toolbar" aria-label={copy.ui.bulk.selected(selected.length)} className="sticky bottom-4 z-20 hidden items-center gap-3 rounded-[16px] bg-ink px-4 py-3 text-paper shadow-hard-4 lg:flex">
           <span className="flex-1 text-[15px] font-extrabold">{copy.ui.bulk.selected(selected.length)}</span>
-          <Button height={44} className="w-auto! px-4 text-[14px]" disabled={busy} onClick={deleteSelected}>
+          <Button height={44} className="w-auto! px-4 text-[14px]" disabled={busy} onClick={() => void onDeleteMany(selected)}>
             {tests.deleteN(selected.length)}
           </Button>
           <button type="button" onClick={() => setPicked([])} className="min-h-11 cursor-pointer px-2 text-[14px] font-extrabold text-paper underline">

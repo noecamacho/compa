@@ -1,11 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { Card } from "@/components/ui/Card";
+import type { SortDir } from "@/lib/admin/sort";
 
 // Shared building blocks of the console. Desktop shows dense tables, a phone shows stacked cards; each page renders both
 // and CSS picks one (`hidden md:block` / `md:hidden`), so there is no client-side width check and no layout flash.
-
-export type SortDir = "asc" | "desc";
 
 export type Column = {
   key: string;

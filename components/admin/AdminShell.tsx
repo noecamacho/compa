@@ -201,13 +201,3 @@ function BottomNav({ copy, active, live }: Pick<Props, "copy" | "active" | "live
     </nav>
   );
 }
-
-// A page header with its own layout (detail pages). Prefer AdminShell's `title` + `primary` for plain pages.
-export function AdminTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <h1 className="m-0 min-w-0 font-display text-[28px] leading-[1.1] font-bold [overflow-wrap:anywhere] md:text-[34px]">{children}</h1>
-      {right}
-    </div>
-  );
-}
