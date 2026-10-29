@@ -23,7 +23,7 @@ Si pierdes contexto: lee este archivo, luego `e2e/MAPA.md` y `e2e/INVENTARIO.md`
 - [x] 3. Specs por pantalla (bienvenida, perfil, monito, inicio, conectar, registrar, conexion-dos-pasos, confirmacion, conexiones, perfil-otro, nota, mi-perfil, insignias, ranking, invitar).
 - [x] 4. Handles de redes (`redes.spec`).
 - [x] 5. Transversales (puntos, navegacion, persistencia, offline, doble-tap, textos-largos, accesibilidad, consola).
-- [ ] 6. Suite completa en verde en 3 viewports (corriendo la primera pasada completa).
+- [x] 6. Suite completa en 3 viewports: primera pasada 290/291 con 1 intermitente (bienvenida › LinkedIn sign-in, 1280: el tap en "Aceptar y entrar" se perdía antes de hidratar; reproducido en 375 y corregido en producto con `aria-disabled` hasta hidratar + calentamiento del dev server en `e2e/global-setup.ts`); segunda pasada completa para confirmar.
 - [ ] 7. `RESUMEN.md`, push y PR.
 
 ## Qué sigue
@@ -51,6 +51,7 @@ Leer el resultado de la pasada completa (`npx playwright test`), corregir lo que
 17. 404 de Next en inglés sin salida; ahora pantalla en español con botón.
 18. Sin estado offline; ahora franja "Sin conexión".
 19. Áreas de toque < 44 px.
+20. Un tap antes de que React hidrate se perdía sin aviso (botones, chips, segmentos): ahora leen `aria-disabled` hasta estar listos.
 
 ## Notas de ejecución
 
