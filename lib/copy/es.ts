@@ -309,6 +309,13 @@ export const apiErrors = {
   internal_error: "Algo salió mal. Inténtalo otra vez.",
 } as Record<string, string>;
 
+// Any route that opens nothing (unknown person, connection or page).
+export const notFound = {
+  title: "Aquí no hay nada",
+  body: "Esa persona, conexión o página no existe o ya no está disponible.",
+  home: "Ir a inicio",
+};
+
 // Shown at the top of every screen while the device has no network.
 export const offline = {
   banner: "Sin conexión. Lo que hagas se guardará cuando vuelva el internet.",
