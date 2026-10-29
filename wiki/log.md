@@ -155,3 +155,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Why did compa.lol go down?
 
 - PR #40 merged with a typecheck error (a teammate change made the monito body required). The Vercel build failed, and the keep-one-deployment cleanup still deleted the working deployment, so the site served 404 until the fix (PR #41) deployed. Now: PR checks gate merges, the deploy runs lint/typecheck/tests first, and cleanup only runs when the new deployment is READY.
+
+## [2026-10-29] query | Responsive public pages and landing CTA
+
+- Landing, event door, join, not found and live reviewed at 390/834/1440 (live 1280/1920) in both locales; LinkedIn sign-in is the landing's single primary action (`app/page.tsx`, `components/brand/LinkedInMark.tsx`), event entry screens share one frame (`components/event/layout.ts`). DESIGN.md breakpoints unchanged.

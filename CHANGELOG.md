@@ -30,6 +30,8 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Changed
 
+- Landing: "Entrar con LinkedIn" / "Sign in with LinkedIn" is now the one primary action, with the LinkedIn mark and a short reassurance line, above the fold on a 390 phone and pinned to the bottom edge on shorter screens; the event-QR hint became a quiet secondary row. Public pages (landing, event door, join, not found, live) reflow at 390, 834 and 1440 (live also at 1280 and 1920) with safe-area padding, grouped content on tablets and desktops, and a 16 px email field so iOS does not zoom.
+
 - Safer deploys: pull requests run lint, typecheck, tests and build (`.github/workflows/checks.yml`); the production deploy runs the same gates first and only deletes older deployments when the new one is READY.
 - On phones the top row (avatar, greeting and bell on Home; back and title elsewhere) stays pinned while scrolling, the dock respects the iPhone safe area, and overscroll no longer drags them. Home, incoming requests and the live person card now show the LinkedIn photo or the monito the person chose.
 - The landing page offers "Entrar con LinkedIn" (sign-up and sign-in) so people can reach their events without rescanning; joining an event still needs its QR.
