@@ -8,8 +8,10 @@ const { draftSummary } = await import("./draft-summary");
 const input = { text: "  Hablamos de agentes con LLMs.  ", author: "Ana", other: "Luis" };
 const fallback = {
   summary: "Hablamos de agentes con LLMs.",
+  title: "Hablamos de agentes con LLMs.",
   topics: [],
   next_steps: [],
+  pending_action: null,
   substantive: true,
   fallback: true,
 };
@@ -26,8 +28,10 @@ describe("draftSummary", () => {
   test("parses a valid structured response", async () => {
     const output: SummaryOutput = {
       summary: "Ana y Luis hablaron de agentes.",
+      title: "Agentes con LLMs",
       topics: ["Agents", "LLMs"],
       next_steps: ["Probar un agente"],
+      pending_action: "Luis prueba un agente y le cuenta a Ana",
       substantive: true,
     };
     const client = clientReturning(async () => ({ output_text: JSON.stringify(output) }));
