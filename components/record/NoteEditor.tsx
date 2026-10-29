@@ -232,7 +232,7 @@ export function NoteEditor({ detail }: Props) {
             href={reminderUrl(summary.pendingAction, detail.other.name)}
             target="_blank"
             rel="noreferrer"
-            className="flex h-8 cursor-pointer items-center rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable"
+            className="hit-44 flex h-8 cursor-pointer items-center rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable"
           >
             {copy.remind}
           </a>

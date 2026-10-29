@@ -75,7 +75,7 @@ function PersonRow({ card, className }: { card: CardT; className: string }) {
       <Link
         href={`/connect/${card.handle}`}
         aria-label={`${copy.connectButton} con ${card.name}`}
-        className="inline-flex h-[34px] shrink-0 items-center justify-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold whitespace-nowrap border-ink shadow-hard-2 pressable"
+        className="hit-44 inline-flex h-[34px] shrink-0 items-center justify-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold whitespace-nowrap border-ink shadow-hard-2 pressable"
       >
         {copy.connectButton}
       </Link>

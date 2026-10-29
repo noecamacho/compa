@@ -83,7 +83,7 @@ export function VoiceNoteButton({ state, onChange }: Props) {
         <button
           type="button"
           onClick={start}
-          className="h-[30px] cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable"
+          className="hit-44 h-[30px] cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable"
         >
           {copy.rerecord}
         </button>

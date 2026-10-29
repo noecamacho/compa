@@ -50,7 +50,7 @@ export default async function PersonPage({ params }: Props) {
             {card.city?.split(",")[0]}
           </Muted>
           {scores && (
-            <Link href="/ranking" className="self-start tappable">
+            <Link href="/ranking" className="hit-44 self-start tappable">
               <Pill tone="sun" height={34} className="rounded-chip px-3 text-[14px]">
                 <Icon name="bolt" size={14} />
                 {copy.pointsRank(formatPoints(scores.event.points), scores.event.rank)}

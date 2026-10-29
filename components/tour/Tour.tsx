@@ -173,7 +173,7 @@ export function Tour({ id, steps }: Props) {
             <span className="inline-flex h-6 items-center rounded-[8px] bg-sun-soft px-2 font-display text-[11px] font-bold" style={{ border: "2px solid #1E1B2E" }}>
               {copy.step(index + 1, steps.length)}
             </span>
-            <button type="button" onClick={finish} className="cursor-pointer border-0 bg-transparent p-0 text-[12px] font-extrabold text-muted tappable">
+            <button type="button" onClick={finish} className="hit-44 cursor-pointer border-0 bg-transparent p-0 text-[12px] font-extrabold text-muted tappable">
               {copy.skip}
             </button>
           </span>

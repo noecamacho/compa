@@ -43,7 +43,7 @@ export function Segmented<T extends string>({ options, value, onChange, label, h
             type="button"
             aria-pressed={on}
             onClick={() => onChange(option.value)}
-            className="relative z-[1] cursor-pointer rounded-chip border-0 bg-transparent font-display font-bold"
+            className="hit-44 z-[1] cursor-pointer rounded-chip border-0 bg-transparent font-display font-bold"
             style={{
               height,
               fontSize: height >= 40 ? 15 : 14,

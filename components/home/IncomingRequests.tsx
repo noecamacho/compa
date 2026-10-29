@@ -78,7 +78,7 @@ export function IncomingRequests({ initial }: { initial: Incoming }) {
             <span className="font-display text-[16px] leading-[1.15] font-bold">{tour.incoming.title(firstName(request.from.name))}</span>
             <Muted className="text-[12px] font-bold">{tour.incoming.hint}</Muted>
           </span>
-          <span className="inline-flex h-[34px] items-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold border-ink shadow-hard-2">{tour.incoming.view}</span>
+          <span className="hit-44 inline-flex h-[34px] items-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold border-ink shadow-hard-2">{tour.incoming.view}</span>
         </Card>
       ))}
     </div>

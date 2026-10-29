@@ -36,7 +36,7 @@ export function InviteActions({ url }: Props) {
         <button
           type="button"
           onClick={copyLink}
-          className="h-[30px] cursor-pointer rounded-[10px] px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable"
+          className="hit-44 h-[30px] cursor-pointer rounded-[10px] px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable"
           style={{ background: copied ? "#6BE4A3" : "#FFFFFF" }}
         >
           {copied ? copy.copied : copy.copy}

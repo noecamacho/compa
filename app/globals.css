@@ -210,6 +210,20 @@
   }
 }
 
+/* 44 px touch target for small controls (chips, swatches, text buttons) without changing how they look. */
+@utility hit-44 {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: max(100%, 44px);
+    height: max(100%, 44px);
+    transform: translate(-50%, -50%);
+  }
+}
+
 /* Press feedback for flat rows and links without a shadow. */
 @utility tappable {
   transition:
