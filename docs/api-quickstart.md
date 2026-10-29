@@ -55,6 +55,6 @@ Every error is `{ "error": { "code": "snake_case", "message": "…", "fields"?: 
 
 ## Realtime
 
-The server broadcasts on Supabase Realtime (API spec §8): `user:<userId>` (private) gets `request.received` and `request.accepted`; `event:<slug>:live` gets `connection.accepted`, `attendee.checked_in` and `summary.approved`. Until private channels are authorized, poll `GET /api/connections` every 3 s.
+The server broadcasts on Supabase Realtime (API spec §8): `user:<userId>` (private) gets `request.received` and `request.accepted`; `event:<slug>:live` gets `connection.accepted`, `attendee.checked_in` and `summary.approved`. Until private channels are authorized, poll `GET /api/connections` every 5 s with `lib/use-poll.ts` (one call in flight, paused in a hidden tab, backoff on errors).
 
 Related: `lib/api/routes.ts`, `lib/api/mock.ts`, `lib/visibility.ts`.

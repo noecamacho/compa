@@ -17,14 +17,21 @@ import { usePoll } from "@/lib/use-poll";
 
 type Incoming = ConnectionListT["incoming"];
 
+// With my private Realtime channel joined, a request arrives as a poke and polling is only a safety net; without it,
+// polling every 3 s is the fast path (conference-scale finding 3: about 4 calls a minute per phone instead of 40).
 const POLL_MS = 3000;
+const SAFETY_POLL_MS = 30_000;
 
-// Polls my connections so a request shows up seconds after someone scans me (docs/api-quickstart.md: poll every 3 s),
+// Polls my connections so a request shows up seconds after someone scans me (docs/api-quickstart.md),
 // and refetches at once when my private Realtime channel announces one (T-081).
 export function useIncomingRequests(initial: Incoming): Incoming {
   const [incoming, setIncoming] = useState(initial);
-  const refresh = useCallback(async () => setIncoming((await apiCall("GET", "/api/connections", ConnectionList)).incoming), []);
-  usePoll(refresh, POLL_MS);
+  const live = useLiveNotifications();
+  const refresh = useCallback(
+    async (signal?: AbortSignal) => setIncoming((await apiCall("GET", "/api/connections", ConnectionList, undefined, { signal })).incoming),
+    [],
+  );
+  usePoll(refresh, live?.mode === "realtime" ? SAFETY_POLL_MS : POLL_MS);
   useUserEvent((event) => {
     if (event === "request.received") void refresh().catch(() => undefined);
   });
