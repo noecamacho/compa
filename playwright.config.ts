@@ -60,6 +60,13 @@ export default defineConfig({
   projects: [...VIEWPORTS.flatMap((viewport) => LOCALES.map((locale) => project(viewport, locale))), reducedMotion],
   webServer: process.env.E2E_BASE_URL
     ? undefined
-    : { command: "bun run dev", url: LOCAL_URL, // A running dev server may lack API_MODE=mock, so mock runs always start their own.
-        reuseExistingServer: !process.env.CI && !isMockServer, timeout: 180_000, env: { API_MODE: process.env.API_MODE ?? "" } },
+    : {
+        // CI serves a production build: `next dev` compiles each route on its first hit, too slow for the full matrix.
+        command: process.env.CI ? "bun run build && bun run start" : "bun run dev",
+        url: LOCAL_URL,
+        // A running dev server may lack API_MODE=mock, so mock runs always start their own.
+        reuseExistingServer: !process.env.CI && !isMockServer,
+        timeout: 600_000,
+        env: { API_MODE: process.env.API_MODE ?? "" },
+      },
 });
