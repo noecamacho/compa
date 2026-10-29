@@ -171,3 +171,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Responsive public pages and landing CTA
 
 - Landing, event door, join, not found and live reviewed at 390/834/1440 (live 1280/1920) in both locales; LinkedIn sign-in is the landing's single primary action (`app/page.tsx`, `components/brand/LinkedInMark.tsx`), event entry screens share one frame (`components/event/layout.ts`). DESIGN.md breakpoints unchanged.
+
+## [2026-10-29] query | Does sign-in keep the deep link?
+
+- T-011: yes. `proxy.ts` sets `x-pathname`; the `(app)` and onboarding layouts redirect signed-out visitors to `/auth/linkedin?next=<path>` via `signInForRequest` (`lib/server/session.ts`); `safeNext` moved to `lib/safe-next.ts` unchanged (`docs/flows/backlog.md` T-011).

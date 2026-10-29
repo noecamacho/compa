@@ -6,6 +6,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Sign-in keeps the deep link: a signed-out visitor opening any app screen (for example `/connections`) or onboarding step now goes to `/auth/linkedin?next=<path>` and comes back to that screen, instead of landing on `/` and losing the path. A new `proxy.ts` passes the requested path to layouts as `x-pathname`; unsafe paths still fall back through `safeNext` (T-011).
 - Badges: `GET /api/badges` no longer fails for signed-in users (a raw date in the sign-up count broke the query), so the badge screen and awarding work again; badges still to earn show their own art, faded with a lock, and only secret ones stay grey.
 
 ### Documentation
