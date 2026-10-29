@@ -1,11 +1,16 @@
 // Registry of every API route (API spec §5, summaries contract). The OpenAPI document, mock mode and
 // the route handlers all read these specs, so a route's contract lives in exactly one place.
+import * as AX from "./admin-examples";
+import * as A from "./admin-schemas";
 import * as X from "./examples";
 import { E } from "./errors";
 import { NoBody, route, type AnyRouteSpec } from "./route-spec";
 import * as S from "./schemas";
 
 const WITH_USER = [E.unauthorized] as const;
+// Admin routes answer 404 to everyone who is not a super admin, signed in or not (A11).
+const ADMIN = "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11).";
+const AUTOMATION = `${ADMIN} Also opens with the \`x-compa-automation\` header (TEST_AUTOMATION_SECRET) for test runners.`;
 
 export const authLinkedin = route({
   id: "authLinkedin",
@@ -120,31 +125,99 @@ export const getUser = route({
   errors: [E.unauthorized, E.userNotFound],
 });
 
+export const listAdminEvents = route({
+  id: "listAdminEvents",
+  method: "get",
+  path: "/api/admin/events",
+  summary: "All events (super admins)",
+  description: `${ADMIN} Newest first; archived events only with \`archived=1\` or \`status=archived\`.`,
+  tags: ["admin"],
+  auth: "admin",
+  query: A.AdminEventQuery,
+  success: { status: 200, description: "Events with their counts.", schema: A.AdminEventList, example: { events: [AX.adminEvent, AX.testEvent] } },
+  errors: [E.invalidInput, E.notFound],
+});
+
 export const createEvent = route({
   id: "createEvent",
   method: "post",
   path: "/api/admin/events",
-  summary: "Create an event (admins)",
-  tags: ["events"],
+  summary: "Create an event (super admins)",
+  description: `${ADMIN} Only name, slug and window are required; details, schedule, status (default \`live\`) and \`isTest\` are optional.`,
+  tags: ["admin", "events"],
   auth: "admin",
-  body: S.CreateEventBody,
-  bodyExample: { name: X.event.name, slug: X.event.slug, startsAt: X.event.startsAt, endsAt: X.event.endsAt },
+  body: A.AdminCreateEventBody,
+  bodyExample: { name: X.event.name, slug: X.event.slug, startsAt: X.event.startsAt, endsAt: X.event.endsAt, timezone: "America/Mexico_City", venueName: "Casa Jalisco" },
   success: {
     status: 201,
     description: "Created, with the access code and the join URL to print in the event QR (M19).",
     schema: S.CreatedEvent,
     example: { event: { ...X.event, id: X.ids.event, accessCode: X.accessCode, joinUrl: X.joinUrl } },
   },
-  errors: [E.invalidInput, E.unauthorized, E.notAdmin, E.slugTaken],
+  errors: [E.invalidInput, E.notFound, E.slugTaken],
+});
+
+export const getAdminEvent = route({
+  id: "getAdminEvent",
+  method: "get",
+  path: "/api/admin/events/{slug}",
+  summary: "One event with every detail (super admins)",
+  description: ADMIN,
+  tags: ["admin"],
+  auth: "admin",
+  params: S.SlugParams,
+  success: { status: 200, description: "The event.", schema: A.AdminEventBody, example: { event: AX.adminEvent } },
+  errors: [E.notFound, E.eventNotFound],
+});
+
+export const patchAdminEvent = route({
+  id: "patchAdminEvent",
+  method: "patch",
+  path: "/api/admin/events/{slug}",
+  summary: "Edit an event (super admins)",
+  description: `${ADMIN} \`null\` clears a detail. The merged window must keep endsAt after startsAt, and schedule days must fall inside it in the event time zone. \`status: ended\` also closes the window now.`,
+  tags: ["admin"],
+  auth: "admin",
+  params: S.SlugParams,
+  body: A.PatchEventBody,
+  bodyExample: { venueName: "Casa Jalisco", timezone: "America/Mexico_City", schedule: [{ date: "2026-10-29", start: "10:00", end: "22:00" }] },
+  success: { status: 200, description: "The updated event.", schema: A.AdminEventBody, example: { event: AX.adminEvent } },
+  errors: [E.invalidInput, E.notFound, E.eventNotFound],
+});
+
+export const endAdminEvent = route({
+  id: "endAdminEvent",
+  method: "post",
+  path: "/api/admin/events/{slug}/end",
+  summary: "End an event now (super admins)",
+  description: `${ADMIN} Sets endsAt to now and status to \`ended\`; pending requests then read as expired.`,
+  tags: ["admin"],
+  auth: "admin",
+  params: S.SlugParams,
+  success: { status: 200, description: "The ended event.", schema: A.AdminEventBody, example: { event: { ...AX.adminEvent, status: "ended", isRunning: false } } },
+  errors: [E.notFound, E.eventNotFound],
+});
+
+export const archiveAdminEvent = route({
+  id: "archiveAdminEvent",
+  method: "post",
+  path: "/api/admin/events/{slug}/archive",
+  summary: "Archive an event (super admins)",
+  description: `${ADMIN} Soft delete: the door, live and leaderboard routes return 404; check-ins, connections and points are kept. PATCH \`status\` brings it back.`,
+  tags: ["admin"],
+  auth: "admin",
+  params: S.SlugParams,
+  success: { status: 200, description: "The archived event.", schema: A.AdminEventBody, example: { event: { ...AX.adminEvent, status: "archived", isRunning: false } } },
+  errors: [E.notFound, E.eventNotFound],
 });
 
 export const rotateEventCode = route({
   id: "rotateEventCode",
   method: "post",
   path: "/api/admin/events/{slug}/rotate-code",
-  summary: "Rotate an event's access code (admins)",
-  description: "Issues a new code; the old QR, door and live links stop working at once (A10). Check-ins are kept.",
-  tags: ["events"],
+  summary: "Rotate an event's access code (super admins)",
+  description: `${ADMIN} Issues a new code; the old QR, door and live links stop working at once (A10). Check-ins are kept.`,
+  tags: ["admin", "events"],
   auth: "admin",
   params: S.SlugParams,
   success: {
@@ -153,7 +226,161 @@ export const rotateEventCode = route({
     schema: S.RotatedCode,
     example: { slug: X.founders.slug, accessCode: "w3nq8r5tzc", joinUrl: "https://compa.lol/e/w3nq8r5tzc" },
   },
-  errors: [E.unauthorized, E.notAdmin, E.eventNotFound],
+  errors: [E.notFound, E.eventNotFound],
+});
+
+export const listAttendees = route({
+  id: "listAttendees",
+  method: "get",
+  path: "/api/admin/events/{slug}/attendees",
+  summary: "An event's attendees with counts (super admins)",
+  description: `${ADMIN} Newest check-in first, test users included and counted apart.`,
+  tags: ["admin"],
+  auth: "admin",
+  params: S.SlugParams,
+  success: { status: 200, description: "Attendees.", schema: A.AdminAttendeeList, example: AX.attendees },
+  errors: [E.notFound, E.eventNotFound],
+});
+
+export const addAttendee = route({
+  id: "addAttendee",
+  method: "post",
+  path: "/api/admin/events/{slug}/attendees",
+  summary: "Check someone in on their behalf (super admins)",
+  description: `${ADMIN} Screen consent is recorded as admin-assigned. Repeat-safe. A test user only joins a test event.`,
+  tags: ["admin"],
+  auth: "admin",
+  params: S.SlugParams,
+  body: A.AddAttendeeBody,
+  bodyExample: { userId: AX.adminIds.testAna },
+  success: {
+    status: 201,
+    description: "Checked in.",
+    alsoStatus: { status: 200, description: "Already checked in." },
+    schema: A.AddedAttendee,
+    example: { attendee: AX.attendees.attendees[0]!, alreadyCheckedIn: false },
+  },
+  errors: [E.invalidInput, E.notFound, E.eventNotFound, E.userNotFound, E.testUserNotAllowed],
+});
+
+export const removeAttendee = route({
+  id: "removeAttendee",
+  method: "delete",
+  path: "/api/admin/events/{slug}/attendees/{userId}",
+  summary: "Remove someone from an event (super admins)",
+  description: `${ADMIN} Also removes that person's connections at this event (and the points they carried).`,
+  tags: ["admin"],
+  auth: "admin",
+  params: A.EventUserParams,
+  success: { status: 204, description: "Removed.", schema: NoBody },
+  errors: [E.notFound, E.eventNotFound, E.userNotFound, E.attendeeNotFound],
+});
+
+export const listOrganizers = route({
+  id: "listOrganizers",
+  method: "get",
+  path: "/api/admin/events/{slug}/organizers",
+  summary: "An event's organizers (super admins)",
+  description: ADMIN,
+  tags: ["admin"],
+  auth: "admin",
+  params: S.SlugParams,
+  success: { status: 200, description: "Organizers, first assigned first.", schema: A.OrganizerList, example: { organizers: [AX.organizer] } },
+  errors: [E.notFound, E.eventNotFound],
+});
+
+export const setOrganizer = route({
+  id: "setOrganizer",
+  method: "post",
+  path: "/api/admin/events/{slug}/organizers",
+  summary: "Assign an organizer (super admins)",
+  description: `${ADMIN} Repeat-safe; assigning again changes the role.`,
+  tags: ["admin"],
+  auth: "admin",
+  params: S.SlugParams,
+  body: A.SetOrganizerBody,
+  bodyExample: { userId: AX.adminIds.noe, role: "owner" },
+  success: { status: 200, description: "The organizer.", schema: A.OrganizerBody, example: { organizer: AX.organizer } },
+  errors: [E.invalidInput, E.notFound, E.eventNotFound, E.userNotFound],
+});
+
+export const removeOrganizer = route({
+  id: "removeOrganizer",
+  method: "delete",
+  path: "/api/admin/events/{slug}/organizers/{userId}",
+  summary: "Remove an organizer (super admins)",
+  description: ADMIN,
+  tags: ["admin"],
+  auth: "admin",
+  params: A.EventUserParams,
+  success: { status: 204, description: "Removed.", schema: NoBody },
+  errors: [E.notFound, E.eventNotFound, E.userNotFound],
+});
+
+export const searchUsers = route({
+  id: "searchUsers",
+  method: "get",
+  path: "/api/admin/users",
+  summary: "Search people (super admins)",
+  description: `${ADMIN} By name, handle, email or company; \`test\` includes, excludes or isolates test users.`,
+  tags: ["admin"],
+  auth: "admin",
+  query: A.UserSearchQuery,
+  success: { status: 200, description: "Matching people, by name.", schema: A.AdminUserList, example: { users: [AX.noe, AX.testAna] } },
+  errors: [E.invalidInput, E.notFound],
+});
+
+export const createTestUsers = route({
+  id: "createTestUsers",
+  method: "post",
+  path: "/api/admin/test-users",
+  summary: "Create mock test users (super admins, automation)",
+  description: `${AUTOMATION} Creates the Supabase auth row (email \`<handle>@test.compa.lol\`, no password) and a full profile, never LinkedIn. Send \`users\` to set fields, or \`count\` + \`preset\` to generate. \`checkInTo\` must be a test event.`,
+  tags: ["admin", "testing"],
+  auth: "automation",
+  body: A.CreateTestUsersBody,
+  bodyExample: { count: 3, preset: "random", seed: 42, checkInTo: "codex-conf-2026" },
+  success: { status: 201, description: "The created test users.", schema: A.TestUserList, example: { users: [AX.testUser] } },
+  errors: [E.invalidInput, E.notFound, E.eventNotFound, E.handleTaken, E.notTestEvent, E.harnessUnavailable],
+});
+
+export const listTestUsers = route({
+  id: "listTestUsers",
+  method: "get",
+  path: "/api/admin/test-users",
+  summary: "List test users (super admins, automation)",
+  description: `${AUTOMATION} Newest first; never returns a real person.`,
+  tags: ["admin", "testing"],
+  auth: "automation",
+  query: A.TestUserQuery,
+  success: { status: 200, description: "Test users.", schema: A.TestUserList, example: { users: [AX.testUser] } },
+  errors: [E.invalidInput, E.notFound],
+});
+
+export const deleteTestUser = route({
+  id: "deleteTestUser",
+  method: "delete",
+  path: "/api/admin/test-users/{id}",
+  summary: "Delete a test user (super admins, automation)",
+  description: `${AUTOMATION} Removes the auth row and, by cascade, the profile, check-ins, connections, summaries and points. A real person's id reads as unknown.`,
+  tags: ["admin", "testing"],
+  auth: "automation",
+  params: A.TestUserParams,
+  success: { status: 204, description: "Deleted.", schema: NoBody },
+  errors: [E.notFound, E.testUserNotFound, E.harnessUnavailable],
+});
+
+export const createTestSession = route({
+  id: "createTestSession",
+  method: "post",
+  path: "/api/admin/test-users/{id}/session",
+  summary: "Sign in as a test user (super admins, automation)",
+  description: `${AUTOMATION} Sets the Supabase session cookies for that test user on this response, replacing the caller's session. Refused (404) for anyone not flagged \`is_test\`.`,
+  tags: ["admin", "testing"],
+  auth: "automation",
+  params: A.TestUserParams,
+  success: { status: 200, description: "Signed in; cookies in `Set-Cookie`.", schema: A.TestSession, example: AX.testSession },
+  errors: [E.notFound, E.testUserNotFound, E.sessionFailed, E.harnessUnavailable],
 });
 
 const CODE_GATED = "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404.";
@@ -189,7 +416,7 @@ export const checkIn = route({
     schema: S.CheckIn,
     example: { event: X.foundersDoor, checkedInAt: "2026-10-29T17:02:31.000Z", alreadyCheckedIn: false },
   },
-  errors: [E.invalidInput, E.unauthorized, E.eventNotFound, E.eventNotRunning],
+  errors: [E.invalidInput, E.unauthorized, E.eventNotFound, E.eventNotRunning, E.testUserNotAllowed],
 });
 
 export const createConnection = route({
@@ -210,7 +437,7 @@ export const createConnection = route({
     schema: S.ConnectionRequest,
     example: { connectionId: X.ids.connection, status: "pending", event: X.founders, to: X.valeriaPublic },
   },
-  errors: [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired],
+  errors: [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed],
 });
 
 export const listConnections = route({
@@ -470,8 +697,24 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   patchVisibility,
   listInterests,
   getUser,
+  listAdminEvents,
   createEvent,
+  getAdminEvent,
+  patchAdminEvent,
+  endAdminEvent,
+  archiveAdminEvent,
   rotateEventCode,
+  listAttendees,
+  addAttendee,
+  removeAttendee,
+  listOrganizers,
+  setOrganizer,
+  removeOrganizer,
+  searchUsers,
+  createTestUsers,
+  listTestUsers,
+  deleteTestUser,
+  createTestSession,
   getEvent,
   checkIn,
   createConnection,

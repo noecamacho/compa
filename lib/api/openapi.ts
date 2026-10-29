@@ -16,6 +16,7 @@ import { ROUTES } from "./routes";
 import { ErrorFields } from "./schemas";
 
 const SESSION = "supabaseSession";
+const AUTOMATION = "automationSecret";
 
 type StatusKey = `${1 | 2 | 3 | 4 | 5}${string}`;
 const statusKey = (status: number) => `${status}` as StatusKey;
@@ -79,13 +80,19 @@ const MOCK_PARAMETERS = (["mock", "error", "status", "example"] as const).map((k
   $ref: `#/components/parameters/${key}MockHeader`,
 }));
 
+function securityFor(auth: AnyRouteSpec["auth"]): Record<string, string[]>[] {
+  if (auth === "public") return [];
+  if (auth === "automation") return [{ [SESSION]: [] }, { [AUTOMATION]: [] }];
+  return [{ [SESSION]: [] }];
+}
+
 function operation(spec: AnyRouteSpec): ZodOpenApiOperationObject {
   return {
     operationId: spec.id,
     summary: spec.summary,
     description: spec.description,
     tags: spec.tags,
-    security: spec.auth === "public" ? [] : [{ [SESSION]: [] }],
+    security: securityFor(spec.auth),
     "x-compa-auth": spec.auth,
     requestParams: { path: spec.params, query: spec.query },
     parameters: MOCK_PARAMETERS,
@@ -117,6 +124,12 @@ const components: ZodOpenApiObject["components"] = {
       name: "sb-<project-ref>-auth-token",
       description: "Supabase Auth session cookie set by `/auth/callback` (LinkedIn OIDC). Same-origin fetch sends it.",
     },
+    [AUTOMATION]: {
+      type: "apiKey",
+      in: "header",
+      name: "x-compa-automation",
+      description: "Test runners only: the value of TEST_AUTOMATION_SECRET. Opens the test-user routes; off when the variable is unset.",
+    },
   },
   parameters: {
     mockMockHeader: headerParameter(MOCK_HEADERS.mock, "`1` serves the documented example; no auth or database.", "1"),
@@ -139,6 +152,8 @@ export function buildOpenApiDocument(routes: readonly AnyRouteSpec[] = ROUTES) {
       { name: "connections" },
       { name: "live", description: "Public big screen (A5, A6)" },
       { name: "summaries", description: "AI summaries (M18, A9)" },
+      { name: "admin", description: "Super-admin console; 404 for everyone else (A11)" },
+      { name: "testing", description: "Real-mode test harness: test users and sessions (A11, docs/testing/real-mode.md)" },
     ],
     paths: paths(routes),
     components,

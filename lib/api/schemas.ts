@@ -6,6 +6,7 @@ import { AVATAR_MODES } from "../avatar-mode";
 import { BADGE_IDS } from "../badges/catalog";
 import { MonitoLook } from "../monito/look";
 import { LINK_KEYS, VISIBILITY_LEVELS } from "../profile-fields";
+import { USER_ROLES } from "../roles";
 import { TOPICS } from "../topics";
 
 const uuid = z.uuid();
@@ -41,6 +42,7 @@ export const VisibilitySettings = z
   .meta({ id: "VisibilitySettings" });
 
 export const EventRef = z.object({ slug: eventSlug, name: z.string() }).meta({ id: "EventRef" });
+export { accessCode as AccessCodeSchema, eventSlug as EventSlugSchema, handle as HandleSchema, isoDate as IsoDateSchema };
 // What a checked-in attendee needs to reach their event's public routes (A10).
 export const CurrentEvent = z.object({ code: accessCode, name: z.string() }).meta({ id: "CurrentEvent" });
 
@@ -77,12 +79,18 @@ export const ProfileStats = z
   .object({ newConnections: z.int(), reconnections: z.int(), events: z.int() })
   .meta({ id: "ProfileStats" });
 
+export const UserRole = z
+  .enum(USER_ROLES)
+  .meta({ id: "UserRole", description: "`super_admin` opens /admin and /api/admin/* (A11); everyone else gets 404 there." });
+
 export const Me = Card.extend({
   email: z.string().nullable(),
   visibility: VisibilitySettings,
   nameEdited: z.boolean(),
   photoEdited: z.boolean(),
-  isAdmin: z.boolean(),
+  isAdmin: z.boolean().meta({ description: "Deprecated: `role === \"super_admin\"`." }),
+  role: UserRole,
+  isTest: z.boolean().meta({ description: "A synthetic real-mode test user (docs/testing/real-mode.md)." }),
   currentEvent: CurrentEvent.nullable().meta({ description: "The event you are checked in to right now (A2), or null." }),
   stats: ProfileStats.optional(),
   scores: Scores.optional(),
@@ -147,8 +155,9 @@ export const Event = z
   .object({ slug: eventSlug, name: z.string(), startsAt: isoDate, endsAt: isoDate, isRunning: z.boolean() })
   .meta({ id: "Event" });
 
-export const CreateEventBody = z
-  .object({ name: z.string().trim().min(1).max(120), slug: eventSlug, startsAt: isoDate, endsAt: isoDate })
+export const CreateEventFields = z.object({ name: z.string().trim().min(1).max(120), slug: eventSlug, startsAt: isoDate, endsAt: isoDate });
+
+export const CreateEventBody = CreateEventFields
   .refine((body) => Date.parse(body.endsAt) > Date.parse(body.startsAt), {
     path: ["endsAt"],
     message: "endsAt must be after startsAt",

@@ -3,7 +3,8 @@ import { z } from "zod";
 import type { UserRow } from "../../db/schema";
 import { ApiError, E, errorResponse, toApiError } from "./errors";
 import { isMockRequest, mockResponse } from "./mock";
-import type { Auth, Handler, HandlerResult, ObjectSchema, RouteSpec } from "./route-spec";
+import { automationFrom } from "./automation";
+import { isAdminAuth, type Auth, type Handler, type HandlerResult, type ObjectSchema, type RouteSpec } from "./route-spec";
 
 type NextContext = { params: Promise<Record<string, string | string[] | undefined>> } | undefined;
 export type RouteHandler = (req: Request, ctx: NextContext) => Promise<Response>;
@@ -36,11 +37,19 @@ async function readBody(spec: { bodyKind: string }, req: Request): Promise<unkno
 }
 
 // Loaded lazily so that mock mode and unit tests never import the database or Supabase.
-async function resolveUser(auth: Auth): Promise<UserRow | null> {
+async function resolveUser(auth: Auth, req: Request): Promise<UserRow | null> {
   if (auth === "public") return null;
-  const { requireUser, requireAdmin } = await import("../server/auth");
-  return auth === "admin" ? requireAdmin() : requireUser();
+  if (auth === "automation" && automationFrom(req)) return null;
+  const { requireUser, currentUserOrNull } = await import("../server/auth");
+  if (auth === "user") return requireUser();
+  const { requireSuperAdmin } = await import("./admin-gate");
+  return requireSuperAdmin(await currentUserOrNull());
 }
+
+// Per-request mocks (header or ?mock=1) would answer admin paths for anyone; they serve admin routes only on a
+// mock deployment (API_MODE=mock), so in real mode a stranger always meets the same 404 (A11).
+const servesMock = (spec: { auth: Auth }, req: Request): boolean =>
+  isMockRequest(req) && (!isAdminAuth(spec.auth) || process.env.API_MODE === "mock");
 
 function toResponse<R extends z.ZodType>(result: HandlerResult<R>, defaultStatus: number): Response {
   if (result instanceof Response) return result;
@@ -63,13 +72,13 @@ export function defineRoute<
   A extends Auth,
 >(spec: RouteSpec<P, Q, B, R, A>, handler?: Handler<P, Q, B, R, A>): RouteHandler {
   return async (req, ctx) => {
-    if (isMockRequest(req)) return mockResponse(spec, req);
+    if (servesMock(spec, req)) return mockResponse(spec, req);
     if (!handler) return errorResponse(toApiError(E.notImplemented));
     try {
       // Next.js passes no params for static paths.
       const params = parse(spec.params, (await ctx?.params) ?? {}, "path");
       const query = parse(spec.query, Object.fromEntries(new URL(req.url).searchParams), "query");
-      const user = await resolveUser(spec.auth);
+      const user = await resolveUser(spec.auth, req);
       // Multipart handlers validate the request themselves so they can read its File fields.
       const body = spec.bodyKind === "multipart" ? {} : parse(spec.body, await readBody(spec, req), "body");
       const input = { req, params, query, body, user } as Parameters<typeof handler>[0];
