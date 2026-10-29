@@ -84,3 +84,15 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] ingest | V2 attendee screens
 
 - The sixteen V2 screens live under `app/` (routes in [screens/README](screens/README.md)); pages read the API over HTTP with zod on the response, so mock mode serves every screen. New routes `GET /api/connections/{id}`, `GET /api/badges`, `GET /api/invites/me` and `POST /api/invites/{code}/claim` are registered (mock only until the points model lands). `lib/points.ts` now carries the V2 table (50/20, +5 topics, +15 note, +100/+50 invites) and migration `0001` moves the connections points check and adds `whatsapp` to the link vocabulary. [points-rules](points-rules.md) still describes the plan's table and needs the V2 rewrite with the data model follow-up.
+
+## [2026-10-29] query | What does V2 need from the backend?
+
+- Rewrote `DESIGN.md` from the V2 handoff (with the bilingual UI decision and "AI language follows the speaker") and added `docs/backend-gap-analysis.md` (34 use cases: 11 Ready, 11 Partial, 7 Missing, 5 Conflict); open question #6 superseded by the bilingual decision; conflicts logged as [open-questions](open-questions.md) #29–#42.
+
+## [2026-10-29] query | Which V2 screens work outside mock mode?
+
+- Re-checked the gap analysis against the V2 screens (PR #14/#17) and PR #15: 35 use cases, 2 Ready, 15 Partial, 13 Mock-only, 4 Missing, 1 Conflict. `GET /api/connections/{id}`, `/api/badges` and `/api/invites/me` answer 501 in real mode and block 06, 06b, 08b, Home, Badges and Invite; `lib/server/*` ignores the new `city`, `avatar`, `topics` and `scope` fields. Open questions #29, #31, #32 and #42 note what the code now does.
+
+## [2026-10-29] query | Is production migrated to the V2 points?
+
+- Applied `drizzle/0001_v2_points_whatsapp.sql` to the production Supabase project (no rows existed). The points check now enforces 50 for new and 20 for reconnection, matching the deployed code; the points table itself awaits captain ratification (gap analysis, open question #29).
