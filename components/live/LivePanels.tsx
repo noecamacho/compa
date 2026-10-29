@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { LivePersonCard, type LivePersonCardT, type LiveSnapshotT } from "@/lib/api/schemas";
 import { copyFor, formatNumber, type Dictionary } from "@/lib/copy";
 import type { Locale } from "@/lib/i18n";
@@ -90,7 +90,7 @@ function PersonBody({ card, copy, locale }: { card: LivePersonCardT; copy: LiveC
   return (
     <>
       <div className="flex items-center gap-3">
-        <Avatar person={{ name: person.name, look: person.avatar }} size={72} shadow={3} />
+        <Avatar person={avatarOf(person)} size={72} shadow={3} />
         <div className="flex min-w-0 flex-col gap-1">
           <h2 className={titleClass}>{person.name}</h2>
           {details && <span className="text-[14px] font-extrabold text-muted lg:text-[clamp(14px,0.95vw,22px)]">{details}</span>}

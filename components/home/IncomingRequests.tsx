@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Muted } from "@/components/ui/Text";
 import { apiCall } from "@/lib/api/client";
@@ -78,7 +78,7 @@ export function IncomingRequests({ initial }: { initial: Incoming }) {
           style={{ animationDelay: `${index * 0.06}s` }}
         >
           <span className="animate-wiggle block">
-            <Avatar person={{ name: request.from.name, look: request.from.avatar }} size={46} />
+            <Avatar person={avatarOf(request.from)} size={46} />
           </span>
           <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
             <span className="font-display text-[16px] leading-[1.15] font-bold">{tour.incoming.title(firstName(request.from.name))}</span>

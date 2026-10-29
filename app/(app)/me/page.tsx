@@ -16,22 +16,25 @@ import { apiGet } from "@/lib/api/server-fetch";
 import { BADGE_IDS } from "@/lib/badges/catalog";
 import { me as copy, tour } from "@/lib/copy/es";
 import { formatPoints } from "@/lib/format";
+import { isSuperAdmin } from "@/lib/roles";
+import { StickyBar } from "@/components/ui/StickyBar";
 
 // 09 MiPerfil.
 export default async function MePage() {
   const me = await apiGet("/api/me", Me);
   const badges = me.badges ?? [];
   const stats = me.stats ?? { newConnections: 0, reconnections: 0, events: 0 };
+  const admin = isSuperAdmin(me);
   return (
-    <Screen dock>
-      <div className="flex items-center justify-between">
+    <Screen dock admin={admin}>
+      <StickyBar className="flex items-center justify-between">
         <IconLink href="/connect" label={copy.myQr}>
           <Icon name="qr" size={20} />
         </IconLink>
         <IconLink href="/onboarding/profile?from=me" label={copy.edit}>
           <Icon name="pencil" size={19} />
         </IconLink>
-      </div>
+      </StickyBar>
 
       <Link href="/onboarding/monito?from=me" aria-label={copy.changeMonito} className="mt-[-4px] flex items-center gap-4 tappable" data-tour="avatar">
         <span className="flex h-[140px] w-[132px] shrink-0 items-end justify-center rounded-card bg-sky-soft pb-[6px] border-ink shadow-hard-4">
@@ -48,6 +51,11 @@ export default async function MePage() {
             <Icon name="bolt" size={14} />
             {copy.pointsRank(formatPoints(me.scores?.event.points ?? 0), me.scores?.event.rank ?? null)}
           </Pill>
+          {me.isTest && (
+            <Pill tone="gum-soft" shadow={false} className="self-start">
+              {copy.testUser}
+            </Pill>
+          )}
         </span>
       </Link>
 
@@ -87,6 +95,13 @@ export default async function MePage() {
           <span className="flex-1">{tour.replay}</span>
           <Icon name="chevronRight" size={18} strokeWidth={3} />
         </Link>
+        {admin && (
+          <Link href="/admin" className="dashed-ink flex h-12 items-center gap-3 px-4 text-[15px] font-extrabold">
+            <span className="flex-1">{copy.admin}</span>
+            <Muted className="text-[13px]">{copy.adminHint}</Muted>
+            <Icon name="chevronRight" size={18} strokeWidth={3} />
+          </Link>
+        )}
       </Card>
 
       <SignOutButton />

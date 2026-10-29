@@ -1,0 +1,3 @@
+# Unit tests live next to the code in lib/. e2e/ holds Playwright specs (*.spec.ts) that bun must not run.
+[test]
+root = "lib"

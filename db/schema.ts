@@ -21,6 +21,8 @@ import { AVATAR_MODES, type AvatarMode } from "../lib/avatar-mode";
 import { generateAccessCode } from "../lib/access-code";
 import type { MonitoLook } from "../lib/monito/look";
 import { DEFAULT_VISIBILITY, VISIBILITY_LEVELS, type Links, type VisibilitySettings } from "../lib/profile-fields";
+import { EVENT_STATUSES, ORGANIZER_ROLES, USER_ROLES, type EventStatus, type OrganizerRole, type UserRole } from "../lib/roles";
+import type { ScheduleEntry } from "../lib/events/schedule";
 import { authUsers } from "./auth-schema";
 
 export type { LinkKey, Links, Visibility, VisibilitySettings } from "../lib/profile-fields";
@@ -62,7 +64,11 @@ export const users = pgTable(
     notificationsSeenAt: timestamp("notifications_seen_at", { withTimezone: true }),
     linkedinRaw: jsonb("linkedin_raw"),
     linkedinSyncedAt: timestamp("linkedin_synced_at", { withTimezone: true }),
+    // Kept in sync with role for code that still reads it; `role` is the source of truth (M20).
     isAdmin: boolean("is_admin").notNull().default(false),
+    role: text("role", { enum: USER_ROLES }).$type<UserRole>().notNull().default("user"),
+    // Synthetic people for real-mode tests (docs/testing/real-mode.md); never shown at non-test events (M20).
+    isTest: boolean("is_test").notNull().default(false),
     createdAt: createdAt(),
   },
   (t) => [
@@ -71,6 +77,7 @@ export const users = pgTable(
     check("users_company_check", sql`char_length(${t.company}) <= 80`),
     check("users_city_check", sql`char_length(${t.city}) <= 80`),
     check("users_avatar_mode_check", sql`${t.avatarMode} in ('photo', 'monito')`),
+    check("users_role_check", sql`${t.role} in ('user', 'super_admin')`),
   ],
 ).enableRLS();
 
@@ -106,11 +113,30 @@ export const events = pgTable(
     createdBy: uuid("created_by")
       .notNull()
       .references(() => users.id),
+    // Event details edited in /admin (M20). All optional except the time zone, which formats every hour shown.
+    description: text("description"),
+    venueName: text("venue_name"),
+    address: text("address"),
+    city: text("city"),
+    country: text("country"),
+    websiteUrl: text("website_url"),
+    timezone: text("timezone").notNull().default("America/Mexico_City"),
+    schedule: jsonb("schedule").$type<ScheduleEntry[]>().notNull().default([]),
+    // draft and archived close every public route; ended closes the window (lib/connection-status.ts).
+    status: text("status", { enum: EVENT_STATUSES }).$type<EventStatus>().notNull().default("live"),
+    isTest: boolean("is_test").notNull().default(false),
     createdAt: createdAt(),
   },
   (t) => [
     check("events_window_check", sql`${t.endsAt} > ${t.startsAt}`),
     check("events_access_code_check", sql`${t.accessCode} ~ '^[a-z0-9]{8,32}$'`),
+    check("events_status_check", sql`${t.status} in ('draft', 'live', 'ended', 'archived')`),
+    check("events_description_check", sql`char_length(${t.description}) <= 2000`),
+    check("events_venue_name_check", sql`char_length(${t.venueName}) <= 120`),
+    check("events_address_check", sql`char_length(${t.address}) <= 200`),
+    check("events_city_check", sql`char_length(${t.city}) <= 80`),
+    check("events_country_check", sql`char_length(${t.country}) <= 80`),
+    check("events_website_url_check", sql`char_length(${t.websiteUrl}) <= 500`),
   ],
 ).enableRLS();
 
@@ -125,8 +151,30 @@ export const eventAttendees = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     checkedInAt: timestamp("checked_in_at", { withTimezone: true }).notNull().defaultNow(),
     screenConsentAt: timestamp("screen_consent_at", { withTimezone: true }).notNull(),
+    // Set when a super admin checked the person in on their behalf; consent is then admin-assigned (M20).
+    addedBy: uuid("added_by").references(() => users.id, { onDelete: "set null" }),
   },
   (t) => [primaryKey({ columns: [t.eventId, t.userId] })],
+).enableRLS();
+
+// People who run an event (M20). Assigned by super admins; organizers get no extra powers yet.
+export const eventOrganizers = pgTable(
+  "event_organizers",
+  {
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => events.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ORGANIZER_ROLES }).$type<OrganizerRole>().notNull().default("organizer"),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.eventId, t.userId] }),
+    check("event_organizers_role_check", sql`${t.role} in ('owner', 'organizer', 'staff')`),
+    index("event_organizers_user_idx").on(t.userId),
+  ],
 ).enableRLS();
 
 export const connections = pgTable(
@@ -300,3 +348,4 @@ export type EventRow = typeof events.$inferSelect;
 export type ConnectionRow = typeof connections.$inferSelect;
 export type InteractionRow = typeof interactions.$inferSelect;
 export type InviteRow = typeof invites.$inferSelect;
+export type EventOrganizerRow = typeof eventOrganizers.$inferSelect;

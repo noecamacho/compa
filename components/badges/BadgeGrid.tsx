@@ -6,7 +6,7 @@ import { Muted } from "@/components/ui/Text";
 import type { BadgeStatusT } from "@/lib/api/schemas";
 import { BADGES, isSecret } from "@/lib/badges/catalog";
 import { badges as copy } from "@/lib/copy/es";
-import { Badge } from "./Badge";
+import { Badge, type BadgeState } from "./Badge";
 
 type Filter = "all" | "earned" | "pending";
 
@@ -14,6 +14,11 @@ const subtitle = (status: BadgeStatusT): string => {
   if (status.earnedAt) return status.earnedNote ?? "";
   if (isSecret(status.id) || !status.progress) return copy.secret;
   return copy.progress(status.progress.current, status.progress.total, status.progress.label);
+};
+
+const badgeState = (status: BadgeStatusT): BadgeState => {
+  if (status.earnedAt) return "earned";
+  return isSecret(status.id) ? "locked" : "pending";
 };
 
 type Props = { badges: BadgeStatusT[] };
@@ -45,7 +50,7 @@ export function BadgeGrid({ badges }: Props) {
               className="animate-rise flex min-w-0 flex-col items-center gap-[6px] rounded-[18px] bg-white px-2 py-3 text-center border-ink shadow-hard-3"
               style={{ animationDelay: `${Math.min(index, 11) * 0.035}s` }}
             >
-              <Badge id={status.id} size={64} state={earned ? "earned" : "locked"} tilted />
+              <Badge id={status.id} size={64} state={badgeState(status)} tilted />
               <span className="text-[12px] leading-[1.2] font-extrabold">{BADGES[status.id].name}</span>
               <Muted className="text-[11px] leading-[1.2] font-extrabold">{subtitle(status)}</Muted>
               {showBar && status.progress && (

@@ -28,7 +28,3 @@ export async function currentUserOrNull(): Promise<UserRow | null> {
   return (await findUserByAuthId(data.user.id)) ?? null;
 }
 
-export async function requireAdmin(): Promise<UserRow> {
-  const user = await requireUser();
-  return user.isAdmin ? user : fail(E.notAdmin);
-}
