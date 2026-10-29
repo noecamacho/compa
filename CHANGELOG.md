@@ -6,7 +6,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
-- End-to-end coverage for every built flow and all 46 API operations, in mock mode and in real mode against a local Supabase, at 390/834/1440 in Spanish and English (`docs/flows/catalog.md` "E2E coverage status"). CI builds the app and runs the mock specs in six shards.
+- End-to-end coverage for every built flow and all 46 API operations, in mock mode and in real mode against a local Supabase, at 390/834/1440 in Spanish and English (`docs/flows/catalog.md` "E2E coverage status"). CI builds the app and runs the mock specs in eight shards.
 - Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
 
 ### Changed

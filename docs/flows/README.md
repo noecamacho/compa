@@ -149,7 +149,7 @@ Asking for an error a route does not document returns `400 mock_error_unknown`. 
 
 ### Artifacts and CI
 
-- `.github/workflows/e2e.yml` runs on every pull request. The `mock` job installs Chromium and WebKit, builds the app and runs the specs against `next start` with `API_MODE=mock`, in six shards.
+- `.github/workflows/e2e.yml` runs on every pull request. The `mock` job installs Chromium and WebKit, builds the app and runs the specs against `next start` with `API_MODE=mock`, in eight shards.
 - The `real` job runs `@real` specs only when the captain sets the repository variable `E2E_TEST_BASE_URL` (a deployment on the separate test project) and the secret `E2E_TEST_AUTOMATION_SECRET`.
 - Every test keeps its trace, screenshot and video on failure (`retain-on-failure`, `only-on-failure`); the job uploads them with the HTML report.
 
