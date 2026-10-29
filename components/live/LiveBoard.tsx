@@ -6,7 +6,7 @@ import { Pill } from "@/components/ui/Pill";
 import type { LiveSnapshotT } from "@/lib/api/schemas";
 import { copyFor, formatNumber, type Dictionary } from "@/lib/copy";
 import { browserLocale, type Locale } from "@/lib/i18n";
-import { boardRows, closingMinutes, moodOf } from "@/lib/live/live-model";
+import { LIVE_BOARD_ROWS, boardRows, closingMinutes, moodOf } from "@/lib/live/live-model";
 import { Feed, Podium, Pulse, StateCard, stateCardFor } from "./LiveActivity";
 import { LeaderboardPanel, PersonPanel } from "./LivePanels";
 import { useLiveSnapshot } from "./useLiveSnapshot";
@@ -137,7 +137,7 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
         <div className="flex min-h-0 flex-col gap-4 lg:gap-[1.6vh]">
           {ended && rows.length > 0 && <Podium rows={rows} locale={locale} onSelect={setSelectedId} />}
           {selected && <PersonPanel code={code} id={selected} rank={rows.find((row) => row.id === selected)?.rank ?? null} locale={locale} onClose={() => setSelectedId(null)} />}
-          {!selected && !(ended && rows.length <= 3) && <LeaderboardPanel rows={rows} locale={locale} onSelect={setSelectedId} from={ended ? 3 : 0} limit={5} />}
+          {!selected && !(ended && rows.length <= 3) && <LeaderboardPanel rows={rows} locale={locale} onSelect={setSelectedId} from={ended ? 3 : 0} limit={LIVE_BOARD_ROWS} />}
           {!ended && <Feed snapshot={snapshot} locale={locale} limit={4} />}
         </div>
       </div>

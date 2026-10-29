@@ -7,6 +7,9 @@ import type { LiveSnapshotT } from "@/lib/api/schemas";
 // shortcut: the pulse undercounts if more than this many land within its 30 minutes; send per-minute counts then.
 export const LIVE_LINK_LIMIT = 1000;
 
+// Ranking rows on the big screen: five stay readable from 10 m next to the feed (more clip at 1920×1080).
+export const LIVE_BOARD_ROWS = 5;
+
 export type Mood = "upcoming" | "empty" | "quiet" | "steady" | "rush" | "ended";
 
 export const PULSE_MINUTES = 30;

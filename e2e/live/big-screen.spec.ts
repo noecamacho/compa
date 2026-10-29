@@ -5,6 +5,7 @@ import { leaderboard as leaderboardExample, liveSnapshot, valeriaPublic } from "
 import { Leaderboard, LivePersonCard, LiveSnapshot, type LiveSnapshotT } from "../../lib/api/schemas";
 import { formatNumber, type Dictionary } from "../../lib/copy";
 import type { Locale } from "../../lib/i18n";
+import { LIVE_BOARD_ROWS } from "../../lib/live/live-model";
 import { connectAndAccept, copyOf, endedWindow, expect, expectEventNotFound, localeOf, test } from "../events/helpers";
 
 const EMAIL = /[\w.+-]+@[\w-]+\.[\w.-]+/;
@@ -57,8 +58,10 @@ test.describe("big screen in mock mode @mock", () => {
     await expect(page.getByText(copy.live.hint)).toBeVisible();
     await expect(page.getByRole("region", { name: copy.live.vizLabel })).toBeVisible();
     const rows = board(page, copy).getByRole("listitem");
-    await expect(rows).toHaveCount(liveSnapshot.people.length);
-    for (const [index, person] of liveSnapshot.people.entries()) await expect(rows.nth(index)).toContainText(person.name);
+    // The board shows the top LIVE_BOARD_ROWS, readable from 10 m.
+    const shown = liveSnapshot.people.slice(0, LIVE_BOARD_ROWS);
+    await expect(rows).toHaveCount(shown.length);
+    for (const [index, person] of shown.entries()) await expect(rows.nth(index)).toContainText(person.name);
     await expectNoEmail(page, seen);
     expect(seen.errors).toEqual([]);
   });

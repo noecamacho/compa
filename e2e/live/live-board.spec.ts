@@ -305,6 +305,8 @@ test.describe("live visualizations @live @mock", () => {
   for (const id of VIZ_IDS) {
     for (const name of ["zero", "rush", "ended", "thousands"] as const satisfies readonly ScenarioName[]) {
       test(`${id} in ${name}: shows, keeps moving, fits`, async ({ page }) => {
+        // Two polls, two stage captures and two screenshots of a WebGL or canvas view: slow on a loaded machine.
+        test.slow();
         await openBoard(page, name, 2, { query: `?viz=${id}` });
         await expect(viewIn(page, id)).toBeVisible();
         await expect(page.getByTestId("live-viz-indicator")).toHaveCount(0);
