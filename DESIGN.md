@@ -28,6 +28,10 @@ Design intent derived from the build plan (`raw/pasillo-plan-de-construccion.pdf
 - Top: large counters (connections, summaries, active people) and the join QR.
 - Bottom: feed of recent events ("Ana ⇄ Luis talked about AI") with no summary text.
 
+## Responsive breakpoints (captain decision, 2026-10-29)
+
+Every view works at **390** (phone, primary), **834** (tablet) and **1440+** (desktop): fluid layout, readable content centered on wide screens, no horizontal scroll, touch targets of at least 44 px. `/e/<code>/live` is designed for **1920×1080** and also works on a 1280 laptop and in phone portrait (counters plus a compact network). The V2 visual system in `design/compa-v2/README.md` is the visual source of truth; the event entry flow (landing, `/e/<code>`, `/e/<code>/join`, `/e/<code>/live`) is specified in API spec A10.
+
 ## Visual and interaction direction
 
 - Strong colors, huge typography, 300–500 ms transitions on `/live` (p. 6); framer-motion for reordering podium and bars (p. 8).
