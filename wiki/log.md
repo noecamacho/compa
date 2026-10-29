@@ -103,3 +103,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | What testing is required for new work?
 
 - Captain decision: further development preferably ships with Playwright e2e specs that confirm the affected user flows (happy path, edge cases, errors) across 390/834/1440 and es/en, plus unit tests. Recorded in `AGENTS.md` §4, `docs/engineering-standards.md` (Testing) and the PR template; `AGENTS.md` also now states LinkedIn-only sign-in, responsive breakpoints and the bilingual UI.
+
+## [2026-10-29] query | Does a profile show the LinkedIn photo or the monito?
+
+- Captain decision: the LinkedIn photo by default, the monito by choice. Branch `fix/COMPA-TBD-photo-default-v2` adds `users.avatar_mode` (migration `0003_avatar_mode`), copies the photo to the Storage bucket `avatars` at sign-in, and makes Home and Ranking tolerate failed secondary calls. Status: `docs/backend-gap-analysis.md` §0.

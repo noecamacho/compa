@@ -6,6 +6,8 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Home, Ranking and Badges render a section empty instead of the error page when a secondary call fails; profiles stored before the `whatsapp` link existed parse again.
+
 - Accept Chrome and Android voice notes: MediaRecorder webm files carry no duration, so the server now rejects only audio whose known length exceeds two minutes or that contains no audio track.
 - Require explicit screen consent before writing an event check-in; accept multipart transcription uploads with server-side size and two-minute duration limits.
 
@@ -17,6 +19,8 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Transcription and AI summaries follow the language the note was spoken or written in (captain decision, replaces Spanish-only); topics still come from the fixed vocabulary. Code and docs stay English.
 
 ### Added
+
+- Profile pictures default to the LinkedIn photo, copied to Supabase Storage at sign-in because LinkedIn URLs expire; the monito is a choice on the monito screen (captain decision). Migration `0003_avatar_mode` adds `users.avatar_mode`.
 
 - V2 data model and handlers: migration `0002` (monito avatar, city, golden cap, connection topics, note title and pending action, `bonus_points`, `user_badges`, `invites`, score views that pay notes to their author and count bonus points), badge rules with progress, invite links with +100/+50 and the golden cap, connection detail, leaderboard `scope` with the viewer's standing, and AI summaries with a title and a pending action.
 - The sixteen V2 attendee screens (`app/`), Spanish copy in `lib/copy/es.ts`, typed API fetch helpers for pages and clients, four mock-only V2 routes (connection detail, badges, invites), the V2 points table in `lib/points.ts` and migration `0001` (connections check 50/20, `whatsapp` link).
