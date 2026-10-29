@@ -6,7 +6,7 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Screen } from "@/components/ui/Screen";
 import { Muted } from "@/components/ui/Text";
-import { screenState as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { withDefaults } from "@/lib/monito/look";
 
 const LOOK = withDefaults({});
@@ -15,6 +15,7 @@ type Props = { error: Error & { digest?: string }; retry: () => void };
 
 // Any attendee screen whose data failed to load: say what happened and offer a retry, never a blank page.
 export default function AppError({ retry }: Props) {
+  const copy = useCopy().screenState;
   return (
     <Screen width="focus" className="justify-center">
       <Card className="flex flex-col items-center gap-3 px-5 py-6 text-center">

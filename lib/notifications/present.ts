@@ -4,11 +4,14 @@ import type { Dictionary } from "../copy";
 
 type Copy = Dictionary["notifications"];
 
-export function notificationText(item: NotificationT, copy: Copy): string {
+// Badge names come from the dictionary by id, so the text follows the locale; the API name is only a fallback.
+export const badgeLabel = (badgeNames: Dictionary["badgeNames"], badgeId: string, fallback: string): string => badgeNames[badgeId as keyof Dictionary["badgeNames"]]?.name ?? fallback;
+
+export function notificationText(item: NotificationT, copy: Copy, badgeNames: Dictionary["badgeNames"]): string {
   if (item.kind === "request") return copy.request(item.person.name, item.eventName);
   if (item.kind === "accepted") return copy.accepted(item.person.name, item.eventName);
   if (item.kind === "invitee_connected") return copy.inviteeConnected(item.person.name);
-  return copy.badgeEarned(item.badgeName);
+  return copy.badgeEarned(badgeLabel(badgeNames, item.badgeId, item.badgeName));
 }
 
 export function notificationHref(item: NotificationT): string {

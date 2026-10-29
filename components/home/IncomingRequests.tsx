@@ -12,7 +12,7 @@ import { ConnectionList, type ConnectionListT } from "@/lib/api/schemas";
 import { copyFor } from "@/lib/copy";
 import { firstName } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
-import { tour } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { usePoll } from "@/lib/use-poll";
 
 type Incoming = ConnectionListT["incoming"];
@@ -50,6 +50,7 @@ export function AlertsBell({ initial, locale }: { initial: number; locale: Local
 // One card per pending request, newest first (V2Solicitud entry point; README "Avisos").
 export function IncomingRequests({ initial }: { initial: Incoming }) {
   const incoming = useIncomingRequests(initial);
+  const { tour } = useCopy();
   if (incoming.length === 0) return null;
   return (
     <div className="flex flex-col gap-[10px] md:grid md:grid-cols-2">

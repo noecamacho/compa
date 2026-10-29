@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Muted } from "@/components/ui/Text";
 import type { PersonHistoryT } from "@/lib/api/schemas";
-import { connections as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 
 type PersonType = "new" | "reconnection" | "friend";
 type Filter = "all" | PersonType;
@@ -34,6 +34,7 @@ type Props = { people: PersonHistoryT[] };
 
 // No connections at all: say what will appear here and point to the one action that fills it.
 function EmptyConnections() {
+  const copy = useCopy().connections;
   return (
     <Card tone="gum-soft" className="animate-fade-in flex flex-col items-center gap-3 px-5 py-6 text-center md:mx-auto md:w-full md:max-w-[480px]">
       <span className="flex h-14 w-14 items-center justify-center rounded-button bg-white border-ink shadow-hard-2" style={{ transform: "rotate(-5deg)" }}>
@@ -50,6 +51,7 @@ function EmptyConnections() {
 }
 
 export function ConnectionList({ people }: Props) {
+  const copy = useCopy().connections;
   const [filter, setFilter] = useState<Filter>("all");
   if (people.length === 0) return <EmptyConnections />;
   const shown = people.filter((entry) => filter === "all" || typeOf(entry) === filter);

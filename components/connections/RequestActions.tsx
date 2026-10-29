@@ -5,14 +5,17 @@ import { useState } from "react";
 import { z } from "zod";
 import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
-import { ApiClientError, apiCall, errorText } from "@/lib/api/client";
+import { ApiClientError, apiCall } from "@/lib/api/client";
 import { Accepted } from "@/lib/api/schemas";
-import { common, request as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
+import { errorText } from "@/lib/api/error-text";
 
 type Props = { connectionId: string };
 
 // Accept (both earn the kind points) or decline silently (V2Solicitud).
 export function RequestActions({ connectionId }: Props) {
+  const all = useCopy();
+  const { common, request: copy } = all;
   const router = useRouter();
   const [busy, setBusy] = useState<"accept" | "decline" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +27,7 @@ export function RequestActions({ connectionId }: Props) {
       await apiCall("POST", `/api/connections/${connectionId}/accept`, Accepted, {});
       router.push(`/connections/${connectionId}/done`);
     } catch (caught) {
-      setError(errorText(caught));
+      setError(errorText(all, caught));
       setBusy(null);
     }
   }
@@ -38,7 +41,7 @@ export function RequestActions({ connectionId }: Props) {
       router.push("/home");
     } catch (caught) {
       if (caught instanceof ApiClientError && caught.code === "not_pending") return router.push("/home");
-      setError(errorText(caught));
+      setError(errorText(all, caught));
       setBusy(null);
     }
   }

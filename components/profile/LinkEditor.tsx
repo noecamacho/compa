@@ -3,7 +3,7 @@
 import { NETWORK_COLOR, NetworkIcon } from "@/components/brand/NetworkIcon";
 import { Icon } from "@/components/icons";
 import { Field } from "@/components/ui/Field";
-import { networks, profile as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import type { LinkKey, Visibility } from "@/lib/profile-fields";
 import { VisibilityPicker } from "./VisibilityPicker";
 
@@ -26,6 +26,7 @@ type Props = {
 
 // One network: its brand tile and name, the field, an explicit "Quitar" and who sees it (V2Perfil "Tus redes").
 export function LinkEditor({ network, value, level, error, removed, onValue, onBlur, onLevel, onRemove, onUndo }: Props) {
+  const { networks, profile: copy } = useCopy();
   const id = `link-${network}`;
   const name = networks[network];
   const filled = value.trim() !== "";

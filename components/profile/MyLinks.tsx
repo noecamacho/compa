@@ -6,7 +6,7 @@ import { NETWORK_COLOR, NETWORK_ORDER, NetworkIcon } from "@/components/brand/Ne
 import { Muted } from "@/components/ui/Text";
 import { apiCall } from "@/lib/api/client";
 import { VisibilitySettings, type VisibilitySettingsT } from "@/lib/api/schemas";
-import { me as copy, networks } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { linkInputValue } from "@/lib/links";
 import type { LinkKey, Links, Visibility } from "@/lib/profile-fields";
 import { VisibilityPicker } from "./VisibilityPicker";
@@ -15,6 +15,7 @@ type Props = { visibility: VisibilitySettingsT; links: Links };
 
 // My links on 09 MiPerfil, each with who sees it; a change saves at once and rolls back if the save fails.
 export function MyLinks({ visibility, links }: Props) {
+  const { me: copy, networks } = useCopy();
   const [levels, setLevels] = useState(visibility.links);
   const filled = NETWORK_ORDER.filter((key) => links[key]);
 

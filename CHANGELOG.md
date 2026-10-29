@@ -28,6 +28,10 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Marking notifications seen never moves backwards (a stale tab) nor into the future.
 - Badges: `GET /api/badges` no longer fails for signed-in users (a raw date in the sign-up count broke the query), so the badge screen and awarding work again; badges still to earn show their own art, faded with a lock, and only secret ones stay grey.
 
+### Changed
+
+- Every attendee screen, state, error, dialog and badge name now reads in English or Spanish from the system locale, not only the landing and event door. Copy comes from `lib/copy/{es,en}.ts` through `useCopy()` (client) and `requestCopy()` (server); `<html lang>`, the page description, relative times, clocks and number formats follow the locale; failed calls show text mapped from the API error `code` instead of the API's English message; the ranking tip, badge progress and badge dates are built from raw values so they follow the locale. A test fails on a missing key, an untranslated string, or any direct import of a single locale's dictionary.
+
 ### Documentation
 
 - Describe the attendee flows that are implemented and document the custom SMTP or Send Email hook requirement for hosted Supabase email sign-in.

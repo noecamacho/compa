@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Chip";
 import { Muted, SectionLabel } from "@/components/ui/Text";
-import { apiCall, errorText } from "@/lib/api/client";
+import { apiCall } from "@/lib/api/client";
 import { Approved, Draft, type ConnectionDetailT, type DraftT } from "@/lib/api/schemas";
 import { startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
-import { note as copy } from "@/lib/copy/es";
+import { useCopy, useLocale } from "@/components/LocaleProvider";
+import { errorText } from "@/lib/api/error-text";
 import { formatClock } from "@/lib/format";
 import { forgetNote, recallNote } from "@/lib/note-draft";
 import { SUMMARY_POINTS } from "@/lib/points";
@@ -49,6 +50,9 @@ type Props = { detail: ConnectionDetailT };
 
 // 08b NotaVoz: record (or type), let Compa draft the summary, then save it to the connection (+15).
 export function NoteEditor({ detail }: Props) {
+  const all = useCopy();
+  const copy = all.note;
+  const locale = useLocale();
   const router = useRouter();
   const recording = useRef<Recording | null>(null);
   const [phase, setPhase] = useState<Phase>(() => (detail.interaction ? { kind: "ready", summary: fromInteraction(detail.interaction) } : { kind: "typing", text: "", error: null }));
@@ -81,7 +85,7 @@ export function NoteEditor({ detail }: Props) {
       const draft = await apiCall("POST", "/api/interactions/draft", Draft, { connectionId: detail.connectionId, text }, { timeoutMs: DRAFT_TIMEOUT_MS });
       setPhase({ kind: "ready", summary: fromDraft(draft, seconds) });
     } catch (caught) {
-      setPhase({ kind: "typing", text, error: errorText(caught) });
+      setPhase({ kind: "typing", text, error: errorText(all, caught) });
     }
   }
 
@@ -92,7 +96,7 @@ export function NoteEditor({ detail }: Props) {
       .then(({ text }) => draftFrom(text, audio.seconds))
       .catch((caught: unknown) => {
         setUnsent(audio);
-        setPhase({ kind: "typing", text: "", error: errorText(caught) });
+        setPhase({ kind: "typing", text: "", error: errorText(all, caught) });
       });
   }
 
@@ -128,7 +132,7 @@ export function NoteEditor({ detail }: Props) {
       forgetNote(detail.connectionId);
       router.push(`/people/${detail.other.handle}`);
     } catch (caught) {
-      setError(errorText(caught));
+      setError(errorText(all, caught));
       setSaving(false);
     }
   }
@@ -140,7 +144,7 @@ export function NoteEditor({ detail }: Props) {
         <Card tone="coral-soft" className="flex h-[486px] flex-col items-center gap-[14px] px-5 py-6">
           <span className="inline-flex h-[30px] items-center gap-2 rounded-[10px] bg-coral px-3 font-display text-[13px] font-bold border-ink">
             <span className="animate-blink h-[9px] w-[9px] rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
-            {recordingNow ? copy.recording(formatClock(phase.seconds)) : copy.transcribing}
+            {recordingNow ? copy.recording(formatClock(locale, phase.seconds)) : copy.transcribing}
           </span>
           <div aria-hidden="true" className="flex h-[90px] items-center justify-center gap-[5px]">
             {WAVE.map((height, index) => (
@@ -208,7 +212,7 @@ export function NoteEditor({ detail }: Props) {
           <SectionLabel>{copy.understood}</SectionLabel>
           {summary.seconds !== null && (
             <span className="inline-flex h-6 items-center rounded-[8px] bg-mint-soft px-2 text-[11px] font-extrabold" style={{ border: "2px solid #1E1B2E", transform: "rotate(3deg)" }}>
-              {formatClock(summary.seconds)}
+              {formatClock(locale, summary.seconds)}
             </span>
           )}
         </span>

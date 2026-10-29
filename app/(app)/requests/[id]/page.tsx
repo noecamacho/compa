@@ -10,7 +10,7 @@ import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { Icon } from "@/components/icons";
 import { ConnectionDetail, Me, UserProfile } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
-import { apiErrors, request as copy } from "@/lib/copy/es";
+import { requestCopy } from "@/lib/server/locale";
 import { firstName, timeAgo } from "@/lib/format";
 
 type Props = { params: Promise<{ id: string }> };
@@ -19,6 +19,8 @@ const TAG_COLORS = ["#DDF1FF", "#FFE3EA", "#FFF3BF"];
 
 // 06b Solicitud: what the scanned person sees. Nothing is shared until they accept.
 export default async function RequestPage({ params }: Props) {
+  const { locale, copy: all } = await requestCopy();
+  const copy = all.request;
   const { id } = await params;
   const [me, detail] = await Promise.all([apiGet("/api/me", Me), apiGetOrNull(`/api/connections/${id}`, ConnectionDetail, { mockExample: "incoming" })]);
   if (!detail) notFound();
@@ -52,7 +54,7 @@ export default async function RequestPage({ params }: Props) {
         </div>
         <div className="animate-rise flex flex-col items-center gap-1 text-center" style={{ animationDelay: ".2s" }}>
           <h1 className="m-0 font-display text-[26px] leading-[1.1] font-bold">{copy.title(firstName(other.name))}</h1>
-          <Muted className="text-[13px] font-bold">{copy.scannedAgo(timeAgo(detail.at), [interests[0], other.city?.split(",")[0]].filter(Boolean).join(", "))}</Muted>
+          <Muted className="text-[13px] font-bold">{copy.scannedAgo(timeAgo(locale, detail.at), [interests[0], other.city?.split(",")[0]].filter(Boolean).join(", "))}</Muted>
         </div>
       </div>
 
@@ -109,7 +111,7 @@ export default async function RequestPage({ params }: Props) {
       </Muted>
 
       {detail.status === "expired" ? (
-        <Muted className="mt-auto text-center text-[13px] font-extrabold">{apiErrors.codes.event_ended}</Muted>
+        <Muted className="mt-auto text-center text-[13px] font-extrabold">{all.apiErrors.codes.event_ended}</Muted>
       ) : (
         <RequestActions connectionId={detail.connectionId} />
       )}

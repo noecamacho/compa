@@ -155,7 +155,8 @@ function ToastIcon({ item }: { item: NotificationT }) {
 
 function NotificationToast({ item, locale, onClose }: { item: NotificationT; locale: Locale; onClose: () => void }) {
   const pathname = usePathname();
-  const copy = copyFor(locale).notifications;
+  const all = copyFor(locale);
+  const copy = all.notifications;
   useEffect(() => {
     const timer = setTimeout(onClose, TOAST_MS);
     return () => clearTimeout(timer);
@@ -167,7 +168,7 @@ function NotificationToast({ item, locale, onClose }: { item: NotificationT; loc
       <div className="animate-rise pointer-events-auto flex w-full max-w-[420px] items-center gap-3 rounded-[18px] bg-gum-soft px-[14px] py-[10px] border-ink shadow-hard-3">
         <Link href={notificationHref(item)} onClick={onClose} data-testid="notification-toast" className="flex min-w-0 flex-1 items-center gap-3">
           <ToastIcon item={item} />
-          <span className="font-display text-[15px] leading-tight font-bold">{notificationText(item, copy)}</span>
+          <span className="font-display text-[15px] leading-tight font-bold">{notificationText(item, copy, all.badgeNames)}</span>
         </Link>
         <button type="button" onClick={onClose} aria-label={copy.dismiss} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] bg-white border-ink pressable">
           <Icon name="close" size={16} />

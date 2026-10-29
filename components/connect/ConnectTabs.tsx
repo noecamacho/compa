@@ -12,7 +12,7 @@ import { Segmented } from "@/components/ui/Segmented";
 import { Muted } from "@/components/ui/Text";
 import { Tour } from "@/components/tour/Tour";
 import type { MeT } from "@/lib/api/schemas";
-import { connect as copy, tour } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 import { ScanPanel } from "./ScanPanel";
 
 type Tab = "qr" | "scan";
@@ -21,6 +21,7 @@ type Props = { me: MeT; qrSvg: string };
 
 // 04 Conectar: "Mi QR" (show it) and "Escanear" (camera plus search by name). The dock stays at the bottom.
 export function ConnectTabs({ me, qrSvg }: Props) {
+  const { connect: copy, tour } = useCopy();
   const router = useRouter();
   const params = useSearchParams();
   const urlTab: Tab = params.get("tab") === "scan" ? "scan" : "qr";

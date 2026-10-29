@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { tour as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 
 export type TourStep = {
   // Matches `data-tour="<target>"` on the element to spotlight.
@@ -100,6 +100,7 @@ const previousAvailable = (steps: TourStep[], from: number): number | null => {
 
 // Dims the whole screen except one element and explains it in a card (guided onboarding, step by step).
 export function Tour({ id, steps }: Props) {
+  const copy = useCopy().tour;
   const router = useRouter();
   const params = useSearchParams();
   const forced = params.get("tour") === "1";

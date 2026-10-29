@@ -4,7 +4,7 @@ import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { ConnectionList, Leaderboard, Me, type LeaderboardT } from "@/lib/api/schemas";
 import { apiGet, apiGetSafe } from "@/lib/api/server-fetch";
-import { common, ranking as copy } from "@/lib/copy/es";
+import { requestCopy } from "@/lib/server/locale";
 import type { MonitoLook } from "@/lib/monito/look";
 
 const NO_BOARD: LeaderboardT = { rows: [] };
@@ -22,6 +22,7 @@ async function loadBoards(code: string | undefined): Promise<[LeaderboardT, Lead
 
 // 11 Ranking: both scopes are loaded up front so the toggle is instant.
 export default async function RankingPage() {
+  const { common, ranking: copy } = (await requestCopy()).copy;
   const me = await apiGet("/api/me", Me);
   const [[event, lifetime], list] = await Promise.all([loadBoards(me.currentEvent?.code), apiGetSafe("/api/connections", ConnectionList)]);
   // Monito looks and handles come from my connections; strangers on the podium show the default monito.

@@ -6,7 +6,8 @@ import { E, fail } from "../api/errors";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { isRunning } from "../connection-status";
-import { rankingTips } from "../copy/es";
+import { copyFor } from "../copy";
+import { requestLocale } from "./locale";
 import { currentUserOrNull } from "./auth";
 import { connectionsOfRealPeople, LIVE_CACHE, requireEventByCode } from "./events";
 import { cardFor, usersByIds } from "./people";
@@ -77,6 +78,7 @@ const toRow = (entry: Ranked, index: number) => ({ rank: index + 1, ...entry });
 
 // My row, the person just above me and the gap to pass them (V2Ranking). Not cached: it depends on the viewer.
 async function myStanding(ranked: Ranked[]) {
+  const { rankingTips } = copyFor(await requestLocale());
   const viewer = await currentUserOrNull();
   if (!viewer) return undefined;
   const index = ranked.findIndex((entry) => entry.userId === viewer.id);

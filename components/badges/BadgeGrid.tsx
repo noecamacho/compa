@@ -4,16 +4,19 @@ import { useState } from "react";
 import { Segmented } from "@/components/ui/Segmented";
 import { Muted } from "@/components/ui/Text";
 import type { BadgeStatusT } from "@/lib/api/schemas";
-import { BADGES, isSecret } from "@/lib/badges/catalog";
-import { badges as copy } from "@/lib/copy/es";
+import { isSecret } from "@/lib/badges/catalog";
+import { useCopy } from "@/components/LocaleProvider";
+import type { Dictionary } from "@/lib/copy";
 import { Badge, type BadgeState } from "./Badge";
 
 type Filter = "all" | "earned" | "pending";
 
-const subtitle = (status: BadgeStatusT): string => {
-  if (status.earnedAt) return status.earnedNote ?? "";
+// The API sends Spanish earnedNote/progress labels; the screen builds both from the raw values so they follow the locale.
+const subtitle = (status: BadgeStatusT, all: Dictionary): string => {
+  const { badges: copy, badgeProgress } = all;
+  if (status.earnedAt) return badgeProgress.earnedOn(new Date(status.earnedAt));
   if (isSecret(status.id) || !status.progress) return copy.secret;
-  return copy.progress(status.progress.current, status.progress.total, status.progress.label);
+  return copy.progress(status.progress.current, status.progress.total, badgeProgress.labels[status.id] ?? "");
 };
 
 const badgeState = (status: BadgeStatusT): BadgeState => {
@@ -25,6 +28,8 @@ type Props = { badges: BadgeStatusT[] };
 
 // 10 Insignias: the 20 in a showcase of 3 columns (phone), 4 (tablet) or 5 (desktop); secret ones show no hint.
 export function BadgeGrid({ badges }: Props) {
+  const all = useCopy();
+  const { badges: copy, badgeNames: names } = all;
   const [filter, setFilter] = useState<Filter>("all");
   const shown = badges.filter((status) => filter === "all" || (filter === "earned" ? Boolean(status.earnedAt) : !status.earnedAt));
   return (
@@ -53,8 +58,8 @@ export function BadgeGrid({ badges }: Props) {
               style={{ animationDelay: `${Math.min(index, 11) * 0.035}s` }}
             >
               <Badge id={status.id} size={64} state={badgeState(status)} tilted />
-              <span className="text-[12px] leading-[1.2] font-extrabold">{BADGES[status.id].name}</span>
-              <Muted className="text-[11px] leading-[1.2] font-extrabold">{subtitle(status)}</Muted>
+              <span className="text-[12px] leading-[1.2] font-extrabold">{names[status.id].name}</span>
+              <Muted className="text-[11px] leading-[1.2] font-extrabold">{subtitle(status, all)}</Muted>
               {showBar && status.progress && (
                 <span className="block h-[10px] w-full overflow-hidden rounded-[5px] bg-white" style={{ border: "2px solid #1E1B2E" }}>
                   <span

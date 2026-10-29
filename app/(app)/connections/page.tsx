@@ -6,7 +6,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { Screen } from "@/components/ui/Screen";
 import { ConnectionList, Me } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
-import { connections as copy } from "@/lib/copy/es";
+import { requestCopy } from "@/lib/server/locale";
 import { StickyBar } from "@/components/ui/StickyBar";
 
 type Props = { searchParams: Promise<{ demo?: string }> };
@@ -14,6 +14,7 @@ type Props = { searchParams: Promise<{ demo?: string }> };
 // 07 Conexiones: everyone I connected with, filtered by type, scoped to the current event chip.
 // `?demo=empty` previews the first-night state in mock mode, like Home.
 export default async function ConnectionsPage({ searchParams }: Props) {
+  const copy = (await requestCopy()).copy.connections;
   const { demo } = await searchParams;
   const [me, list] = await Promise.all([apiGet("/api/me", Me), apiGet("/api/connections", ConnectionList)]);
   const people = demo === "empty" ? [] : list.people;

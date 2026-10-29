@@ -14,13 +14,15 @@ import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { Me } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
 import { BADGE_IDS } from "@/lib/badges/catalog";
-import { me as copy, tour } from "@/lib/copy/es";
+import { requestCopy } from "@/lib/server/locale";
 import { formatPoints } from "@/lib/format";
 import { isSuperAdmin } from "@/lib/roles";
 import { StickyBar } from "@/components/ui/StickyBar";
 
 // 09 MiPerfil.
 export default async function MePage() {
+  const { locale, copy: all } = await requestCopy();
+  const { me: copy, tour } = all;
   const me = await apiGet("/api/me", Me);
   const badges = me.badges ?? [];
   const stats = me.stats ?? { newConnections: 0, reconnections: 0, events: 0 };
@@ -53,7 +55,7 @@ export default async function MePage() {
               </Muted>
               <Pill tone="sun" height={34} className="self-start rounded-chip px-3 text-[14px]">
                 <Icon name="bolt" size={14} />
-                {copy.pointsRank(formatPoints(me.scores?.event.points ?? 0), me.scores?.event.rank ?? null)}
+                {copy.pointsRank(formatPoints(locale, me.scores?.event.points ?? 0), me.scores?.event.rank ?? null)}
               </Pill>
               {me.isTest && (
                 <Pill tone="gum-soft" shadow={false} className="self-start">

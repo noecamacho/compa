@@ -10,9 +10,10 @@ import { Header } from "@/components/ui/Header";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
-import { apiCall, errorText } from "@/lib/api/client";
+import { apiCall } from "@/lib/api/client";
 import { Me, VisibilitySettings, type MeT } from "@/lib/api/schemas";
-import { profile, visibility as visibilityCopy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
+import { errorText } from "@/lib/api/error-text";
 import { linkInputValue, parseLink } from "@/lib/links";
 import { LINK_KEYS, type LinkKey, type Links, type Visibility, type VisibilitySettings as Settings } from "@/lib/profile-fields";
 import { LinkEditor } from "./LinkEditor";
@@ -43,6 +44,8 @@ const changedLinks = (values: LinkValues, initial: LinkValues): Partial<LinkValu
 // 02 Perfil: LinkedIn data, the person's links, and who sees each item before and after connecting, with a live preview.
 // Also reached from "Editar perfil".
 export function ProfileForm({ me, next, back, onboarding }: Props) {
+  const all = useCopy();
+  const { profile, visibility: visibilityCopy } = all;
   const router = useRouter();
   const [fields, setFields] = useState({ name: me.name, headline: me.headline ?? "", company: me.company ?? "", city: me.city ?? "" });
   const [initialLinks] = useState(() => linkValuesOf(me.links));
@@ -94,7 +97,7 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
       await apiCall("PATCH", "/api/me/visibility", VisibilitySettings, { headline: levels.headline, company: levels.company, links: levels.links });
       router.push(next);
     } catch (caught) {
-      setError(errorText(caught));
+      setError(errorText(all, caught));
       setSaving(false);
     }
   }

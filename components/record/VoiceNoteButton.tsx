@@ -3,9 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { Muted } from "@/components/ui/Text";
-import { errorText } from "@/lib/api/client";
 import { startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
-import { register as copy } from "@/lib/copy/es";
+import { useCopy, useLocale } from "@/components/LocaleProvider";
+import { errorText } from "@/lib/api/error-text";
 import { formatClock } from "@/lib/format";
 
 export type NoteState =
@@ -22,6 +22,9 @@ type Audio = { file: File; seconds: number };
 
 // The three note states of V2Registrar: not recorded / recording / saved. Audio goes to /api/transcribe.
 export function VoiceNoteButton({ state, onChange }: Props) {
+  const all = useCopy();
+  const copy = all.register;
+  const locale = useLocale();
   const recording = useRef<Recording | null>(null);
   const [seconds, setSeconds] = useState(0);
   // A failed upload keeps the recording so the person can retry instead of recording again.
@@ -44,7 +47,7 @@ export function VoiceNoteButton({ state, onChange }: Props) {
       .then(({ text }) => onChange({ status: "ready", seconds: audio.seconds, text }))
       .catch((error: unknown) => {
         setUnsent(audio);
-        onChange({ status: "idle", error: errorText(error) });
+        onChange({ status: "idle", error: errorText(all, error) });
       });
   }
 
@@ -81,7 +84,7 @@ export function VoiceNoteButton({ state, onChange }: Props) {
           <span className="block h-4 w-4 rounded-[4px] bg-ink" />
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-          <span className="text-[14px] font-extrabold">{copy.recording(formatClock(seconds))}</span>
+          <span className="text-[14px] font-extrabold">{copy.recording(formatClock(locale, seconds))}</span>
           <span aria-hidden="true" className="flex h-[22px] items-center gap-1">
             {WAVE.map((height, index) => (
               <span key={index} className="animate-bounce-bar block w-[5px] rounded-[3px] bg-ink" style={{ height, animationDelay: `${index * 0.12}s` }} />
@@ -100,7 +103,7 @@ export function VoiceNoteButton({ state, onChange }: Props) {
           <Icon name="check" size={18} strokeWidth={3} />
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
-          <span className="text-[14px] font-extrabold">{copy.noteSaved(formatClock(state.seconds))}</span>
+          <span className="text-[14px] font-extrabold">{copy.noteSaved(formatClock(locale, state.seconds))}</span>
           <Muted className="text-[12px] font-bold">{copy.noteSavedHint}</Muted>
         </span>
         <button

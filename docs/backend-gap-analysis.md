@@ -80,7 +80,7 @@ PR #21 (V2 points model, migration `0002_v2_model`) made `GET /api/connections/{
 | U32 | Sign out | Partial | `POST /api/auth/signout` | API ready, no button | S |
 | U33 | Delete my account | Missing | — | No route (#24) | M |
 | U34 | Summary points | Conflict | `POST /api/interactions/{id}/approve` | `SUMMARY_POINTS = 15` and the route says "+15 to the author", but the `event_scores` view still credits approved interactions to **both** people (#29) | S |
-| U35 | Bilingual UI (system locale) | Missing | — | Only `lib/copy/es.ts`; no English dictionary, no detection, `es-MX` hard-coded in `lib/format.ts`, `lang="es"`, API `message` shown on errors (§5) | M–L |
+| U35 | Bilingual UI (system locale) | Ready | `lib/i18n.ts`, `lib/copy/{es,en}.ts`, `components/LocaleProvider.tsx` | Every attendee screen, error code, badge name and time format follows the locale (2026-10-29); `/design` and the Supabase email template stay Spanish | — |
 
 **Counts (35 use cases):** Ready 2 (U8, U12) · Partial 15 (U1, U2, U3, U9, U10, U11, U19, U20, U23, U25, U28, U29, U30, U31, U32) · Mock-only 13 (U4, U5, U6, U13, U14, U15, U17, U18, U21, U22, U24, U26, U27) · Missing 4 (U7, U16, U33, U35) · Conflict 1 (U34).
 
@@ -186,7 +186,7 @@ Captain decisions, 2026-10-29: the app is **bilingual, English and Spanish**, de
 | Summary language | Prompt and JSON-schema description say "same language as the note" (PR #15). The prompt still says "at a JavaScript conference" | **Done**; neutral event wording open (S, P1-8) |
 | Topic vocabulary | `SummaryOutput`, `SUMMARY_JSON_SCHEMA`, `Topic` in `lib/api/schemas.ts` and the prompt read `TOPICS` from `lib/topics.ts`; `interests` is seeded from it. The register chips are a separate free list in `lib/copy/es.ts` | Open (P1-8): load `interests` at request time and build the schema from it, or keep `TOPICS` as the seed source with a test asserting they match; make the chips come from the same list |
 | Interest and topic labels | `interests.name` is one column (English labels such as "AI Products") | Open: per-language labels keyed by `slug` in the UI dictionary; no migration |
-| English UI dictionary | Only `lib/copy/es.ts` (28 imports across `app/` and `components/`) | **Missing** (P1-1) |
+| English UI dictionary | `lib/copy/en.ts` mirrors `lib/copy/es.ts`; `lib/copy/copy.test.ts` enforces it | **Done** (P1-1) |
 | Locale detection | None; copy is imported directly | **Missing** (P1-1) |
 | Number and date formatting | `lib/format.ts` hard-codes `es-MX` | Open (P1-1) |
 | Error messages | API `message` is English only (acceptable). **Components display it** (`RegisterForm`, `RequestActions`, `ProfileForm`, `MonitoBuilder`, `NoteEditor`) instead of mapping `code` | Open (P1-1) |

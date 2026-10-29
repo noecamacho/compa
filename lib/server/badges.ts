@@ -6,7 +6,8 @@ import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { BADGE_IDS, BADGE_LIST, type BadgeId } from "../badges/catalog";
 import { earnedBadges, progressFor, type BadgeFacts } from "../badges/rules";
-import { badgeProgress } from "../copy/es";
+import { copyFor } from "../copy";
+import { requestLocale } from "./locale";
 import { findCurrentEvent } from "./people";
 
 const FOUNDERS_FEST_2026 = "founders-fest";
@@ -139,6 +140,7 @@ export async function awardBadges(user: UserRow, event: EventRow | undefined, re
 
 export async function listBadges({ user }: InputOf<typeof R.listBadges>): ResultOf<typeof R.listBadges> {
   const db = getDb();
+  const { badgeProgress } = copyFor(await requestLocale());
   const event = await findCurrentEvent(user.id, new Date(), db);
   const [facts, rows] = await Promise.all([
     badgeFactsFor(user, event, db),

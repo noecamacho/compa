@@ -8,9 +8,10 @@ import { Header } from "@/components/ui/Header";
 import { IconButton } from "@/components/ui/IconButton";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
-import { apiCall, errorText } from "@/lib/api/client";
+import { apiCall } from "@/lib/api/client";
 import { Me, type AvatarModeT, type MeT } from "@/lib/api/schemas";
-import { monito as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
+import { errorText } from "@/lib/api/error-text";
 import {
   BODIES,
   BODY_HAIR,
@@ -98,6 +99,8 @@ const initialMode = (me: MeT): AvatarModeT => (me.photoUrl ? (me.avatarMode ?? "
 
 // 02b Monito: few options on purpose (README "Monito"); the rest is earned by connecting.
 export function MonitoBuilder({ me, next, back, onboarding }: Props) {
+  const all = useCopy();
+  const copy = all.monito;
   const router = useRouter();
   const base = me.avatar;
   const [state, setState] = useState<BuilderState>(() => (base ? builderFromLook(base) : randomBuilder()));
@@ -116,7 +119,7 @@ export function MonitoBuilder({ me, next, back, onboarding }: Props) {
       await apiCall("PATCH", "/api/me", Me, { avatar: look, avatarMode: usePhoto ? "photo" : "monito" });
       router.push(next);
     } catch (caught) {
-      setError(errorText(caught));
+      setError(errorText(all, caught));
       setSaving(false);
     }
   }
