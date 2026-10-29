@@ -36,7 +36,7 @@ Choose the answer:
 Asking for an error the route does not document returns `400 mock_error_unknown` listing the ones it does. Mock responses carry `x-compa-mock: 1`.
 
 ```sh
-curl -H 'x-compa-mock: 1' localhost:3000/api/events/founders-fest/live
+curl -H 'x-compa-mock: 1' localhost:3000/api/e/k7m2p9xq4t/live
 curl -X POST -H 'x-compa-mock: 1' -H 'x-compa-mock-error: event_ended' localhost:3000/api/connections/0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a/accept
 curl -X POST 'localhost:3000/api/interactions/draft?mock=1&mockExample=fallback'
 ```
@@ -45,7 +45,7 @@ curl -X POST 'localhost:3000/api/interactions/draft?mock=1&mockExample=fallback'
 
 - Sign-in is LinkedIn only: link the user to `/auth/linkedin?next=/u/<handle>` (or any same-site path). `/auth/callback` sets the Supabase session cookie and redirects to `next` or `/me`; failure goes to `/?error=linkedin`.
 - Same-origin `fetch` sends the cookie; no header needed. No session → `401 unauthorized`.
-- Public routes (no session): `/api/interests`, `/api/events/:slug`, `/api/events/:slug/live`, `/api/events/:slug/live/people/:userId`, `/api/events/:slug/leaderboard`.
+- Public routes (no session): `/api/interests`, and the code-gated event routes `/api/e/:code`, `/api/e/:code/live`, `/api/e/:code/live/people/:userId`, `/api/e/:code/leaderboard` (any wrong code is `404 event_not_found`, API spec A10).
 - Admin routes (`users.is_admin`): `POST /api/admin/events`. Promote someone with `SEED_ADMIN_HANDLE=<handle> bun run db:seed`.
 
 ## Errors

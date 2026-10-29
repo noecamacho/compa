@@ -42,4 +42,5 @@ export async function broadcast(...messages: BroadcastMessage[]): Promise<void> 
 }
 
 export const userTopic = (userId: string) => `user:${userId}` as const;
-export const liveTopic = (slug: string) => `event:${slug}:live` as const;
+// Keyed by the access code, not the slug, so only people with the event QR can follow the public channel (A10).
+export const liveTopic = (accessCode: string) => `event:${accessCode}:live` as const;

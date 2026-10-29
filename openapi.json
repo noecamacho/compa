@@ -54,10 +54,10 @@
             "in": "query",
             "name": "next",
             "schema": {
-              "description": "Relative path to return to, e.g. `/u/luis` or `/e/founders-fest`.",
+              "description": "Relative path to return to, e.g. `/u/luis` or `/e/k7m2p9xq4t/join`.",
               "type": "string"
             },
-            "description": "Relative path to return to, e.g. `/u/luis` or `/e/founders-fest`."
+            "description": "Relative path to return to, e.g. `/u/luis` or `/e/k7m2p9xq4t/join`."
           },
           {
             "$ref": "#/components/parameters/mockMockHeader"
@@ -103,10 +103,10 @@
             "in": "query",
             "name": "next",
             "schema": {
-              "description": "Relative path to return to, e.g. `/u/luis` or `/e/founders-fest`.",
+              "description": "Relative path to return to, e.g. `/u/luis` or `/e/k7m2p9xq4t/join`.",
               "type": "string"
             },
-            "description": "Relative path to return to, e.g. `/u/luis` or `/e/founders-fest`."
+            "description": "Relative path to return to, e.g. `/u/luis` or `/e/k7m2p9xq4t/join`."
           },
           {
             "in": "query",
@@ -332,7 +332,7 @@
                       "photoEdited": false,
                       "isAdmin": false,
                       "currentEvent": {
-                        "slug": "founders-fest",
+                        "code": "k7m2p9xq4t",
                         "name": "Founders Fest GDL"
                       },
                       "stats": {
@@ -412,7 +412,7 @@
                       "photoEdited": false,
                       "isAdmin": false,
                       "currentEvent": {
-                        "slug": "founders-fest",
+                        "code": "k7m2p9xq4t",
                         "name": "Founders Fest GDL"
                       },
                       "stats": {
@@ -598,7 +598,7 @@
                   "photoEdited": false,
                   "isAdmin": false,
                   "currentEvent": {
-                    "slug": "founders-fest",
+                    "code": "k7m2p9xq4t",
                     "name": "Founders Fest GDL"
                   },
                   "stats": {
@@ -1421,7 +1421,7 @@
         },
         "responses": {
           "201": {
-            "description": "Created.",
+            "description": "Created, with the access code and the join URL to print in the event QR (M19).",
             "content": {
               "application/json": {
                 "example": {
@@ -1431,7 +1431,9 @@
                     "startsAt": "2026-10-29T16:00:00.000Z",
                     "endsAt": "2026-10-30T04:00:00.000Z",
                     "isRunning": true,
-                    "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55"
+                    "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
+                    "accessCode": "k7m2p9xq4t",
+                    "joinUrl": "https://compa.lol/e/k7m2p9xq4t"
                   }
                 },
                 "schema": {
@@ -1680,15 +1682,20 @@
         }
       }
     },
-    "/api/events/{slug}": {
-      "get": {
-        "operationId": "getEvent",
-        "summary": "Event join page",
+    "/api/admin/events/{slug}/rotate-code": {
+      "post": {
+        "operationId": "rotateEventCode",
+        "summary": "Rotate an event's access code (admins)",
+        "description": "Issues a new code; the old QR, door and live links stop working at once (A10). Check-ins are kept.",
         "tags": [
           "events"
         ],
-        "security": [],
-        "x-compa-auth": "public",
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
         "parameters": [
           {
             "in": "path",
@@ -1714,18 +1721,132 @@
         ],
         "responses": {
           "200": {
-            "description": "The event.",
+            "description": "The new code and join URL.",
             "content": {
               "application/json": {
                 "example": {
                   "slug": "founders-fest",
-                  "name": "Founders Fest GDL",
-                  "startsAt": "2026-10-29T16:00:00.000Z",
-                  "endsAt": "2026-10-30T04:00:00.000Z",
-                  "isRunning": true
+                  "accessCode": "w3nq8r5tzc",
+                  "joinUrl": "https://compa.lol/e/w3nq8r5tzc"
                 },
                 "schema": {
-                  "$ref": "#/components/schemas/Event"
+                  "$ref": "#/components/schemas/RotatedCode"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "forbidden"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "forbidden": {
+                    "summary": "Only COMPA admins can create events.",
+                    "value": {
+                      "error": {
+                        "code": "forbidden",
+                        "message": "Only COMPA admins can create events."
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -1776,11 +1897,11 @@
                 },
                 "examples": {
                   "event_not_found": {
-                    "summary": "No event with that slug.",
+                    "summary": "Event not found.",
                     "value": {
                       "error": {
                         "code": "event_not_found",
-                        "message": "No event with that slug."
+                        "message": "Event not found."
                       }
                     }
                   }
@@ -1791,11 +1912,131 @@
         }
       }
     },
-    "/api/events/{slug}/check-in": {
+    "/api/e/{code}": {
+      "get": {
+        "operationId": "getEvent",
+        "summary": "Event door (event QR)",
+        "description": "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404. Name, window and the two counters the door shows.",
+        "tags": [
+          "events"
+        ],
+        "security": [],
+        "x-compa-auth": "public",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "Event access code from the event QR."
+            },
+            "required": true,
+            "description": "Event access code from the event QR."
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "k7m2p9xq4t",
+                  "name": "Founders Fest GDL",
+                  "startsAt": "2026-10-29T16:00:00.000Z",
+                  "endsAt": "2026-10-30T04:00:00.000Z",
+                  "isRunning": true,
+                  "phase": "running",
+                  "counters": {
+                    "checkedIn": 340,
+                    "connections": 218
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/EventDoor"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "event_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "event_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/e/{code}/check-in": {
       "post": {
         "operationId": "checkIn",
         "summary": "Check in to an event (event QR)",
-        "description": "Repeat-safe. `screenConsent: true` records that the person saw the big-screen notice (M13).",
+        "description": "Repeat-safe. `screenConsent: true` records that the person saw the big-screen notice (M13). Unknown code: 404 (A10).",
         "tags": [
           "events"
         ],
@@ -1808,12 +2049,15 @@
         "parameters": [
           {
             "in": "path",
-            "name": "slug",
+            "name": "code",
             "schema": {
               "type": "string",
-              "pattern": "^[a-z0-9-]{2,48}$"
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "Event access code from the event QR."
             },
-            "required": true
+            "required": true,
+            "description": "Event access code from the event QR."
           },
           {
             "$ref": "#/components/parameters/mockMockHeader"
@@ -1848,7 +2092,7 @@
               "application/json": {
                 "example": {
                   "event": {
-                    "slug": "founders-fest",
+                    "code": "k7m2p9xq4t",
                     "name": "Founders Fest GDL"
                   },
                   "checkedInAt": "2026-10-29T17:02:31.000Z",
@@ -1866,7 +2110,7 @@
               "application/json": {
                 "example": {
                   "event": {
-                    "slug": "founders-fest",
+                    "code": "k7m2p9xq4t",
                     "name": "Founders Fest GDL"
                   },
                   "checkedInAt": "2026-10-29T17:02:31.000Z",
@@ -2045,11 +2289,11 @@
                 },
                 "examples": {
                   "event_not_found": {
-                    "summary": "No event with that slug.",
+                    "summary": "Event not found.",
                     "value": {
                       "error": {
                         "code": "event_not_found",
-                        "message": "No event with that slug."
+                        "message": "Event not found."
                       }
                     }
                   }
@@ -4043,11 +4287,11 @@
         }
       }
     },
-    "/api/events/{slug}/live": {
+    "/api/e/{code}/live": {
       "get": {
         "operationId": "liveSnapshot",
         "summary": "Big screen snapshot",
-        "description": "Public (A6). Accepted connections only; cached for at most 1 s.",
+        "description": "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404. Accepted connections only; cached for at most 1 s (A6).",
         "tags": [
           "live"
         ],
@@ -4056,12 +4300,15 @@
         "parameters": [
           {
             "in": "path",
-            "name": "slug",
+            "name": "code",
             "schema": {
               "type": "string",
-              "pattern": "^[a-z0-9-]{2,48}$"
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "Event access code from the event QR."
             },
-            "required": true
+            "required": true,
+            "description": "Event access code from the event QR."
           },
           {
             "$ref": "#/components/parameters/mockMockHeader"
@@ -4083,7 +4330,7 @@
               "application/json": {
                 "example": {
                   "event": {
-                    "slug": "founders-fest",
+                    "code": "k7m2p9xq4t",
                     "name": "Founders Fest GDL",
                     "isRunning": true
                   },
@@ -4214,11 +4461,11 @@
                 },
                 "examples": {
                   "event_not_found": {
-                    "summary": "No event with that slug.",
+                    "summary": "Event not found.",
                     "value": {
                       "error": {
                         "code": "event_not_found",
-                        "message": "No event with that slug."
+                        "message": "Event not found."
                       }
                     }
                   }
@@ -4229,11 +4476,11 @@
         }
       }
     },
-    "/api/events/{slug}/live/people/{userId}": {
+    "/api/e/{code}/live/people/{userId}": {
       "get": {
         "operationId": "livePerson",
         "summary": "Big screen person card",
-        "description": "Public fields only; the viewer is anonymous (A5).",
+        "description": "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404. Public fields only; the viewer is anonymous (A5).",
         "tags": [
           "live"
         ],
@@ -4242,12 +4489,15 @@
         "parameters": [
           {
             "in": "path",
-            "name": "slug",
+            "name": "code",
             "schema": {
               "type": "string",
-              "pattern": "^[a-z0-9-]{2,48}$"
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "Event access code from the event QR."
             },
-            "required": true
+            "required": true,
+            "description": "Event access code from the event QR."
           },
           {
             "in": "path",
@@ -4364,11 +4614,11 @@
                 },
                 "examples": {
                   "event_not_found": {
-                    "summary": "No event with that slug.",
+                    "summary": "Event not found.",
                     "value": {
                       "error": {
                         "code": "event_not_found",
-                        "message": "No event with that slug."
+                        "message": "Event not found."
                       }
                     }
                   },
@@ -4388,11 +4638,11 @@
         }
       }
     },
-    "/api/events/{slug}/leaderboard": {
+    "/api/e/{code}/leaderboard": {
       "get": {
         "operationId": "leaderboard",
         "summary": "Event leaderboard",
-        "description": "Ordered by points, then connections, then earliest check-in.",
+        "description": "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404. Ordered by points, then connections, then earliest check-in.",
         "tags": [
           "live"
         ],
@@ -4401,12 +4651,15 @@
         "parameters": [
           {
             "in": "path",
-            "name": "slug",
+            "name": "code",
             "schema": {
               "type": "string",
-              "pattern": "^[a-z0-9-]{2,48}$"
+              "minLength": 1,
+              "maxLength": 64,
+              "description": "Event access code from the event QR."
             },
-            "required": true
+            "required": true,
+            "description": "Event access code from the event QR."
           },
           {
             "in": "query",
@@ -4699,11 +4952,11 @@
                 },
                 "examples": {
                   "event_not_found": {
-                    "summary": "No event with that slug.",
+                    "summary": "Event not found.",
                     "value": {
                       "error": {
                         "code": "event_not_found",
-                        "message": "No event with that slug."
+                        "message": "Event not found."
                       }
                     }
                   }
@@ -7178,12 +7431,13 @@
           "currentEvent": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/EventRef"
+                "$ref": "#/components/schemas/CurrentEvent"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "description": "The event you are checked in to right now (A2), or null."
           },
           "stats": {
             "$ref": "#/components/schemas/ProfileStats"
@@ -7275,19 +7529,20 @@
         ],
         "additionalProperties": false
       },
-      "EventRef": {
+      "CurrentEvent": {
         "type": "object",
         "properties": {
-          "slug": {
+          "code": {
             "type": "string",
-            "pattern": "^[a-z0-9-]{2,48}$"
+            "pattern": "^[a-z0-9]{8,32}$",
+            "description": "Event access code from the event QR (`/e/<code>`)."
           },
           "name": {
             "type": "string"
           }
         },
         "required": [
-          "slug",
+          "code",
           "name"
         ],
         "additionalProperties": false
@@ -7627,6 +7882,16 @@
                 "type": "string",
                 "format": "uuid",
                 "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "accessCode": {
+                "type": "string",
+                "pattern": "^[a-z0-9]{8,32}$",
+                "description": "Event access code from the event QR (`/e/<code>`)."
+              },
+              "joinUrl": {
+                "type": "string",
+                "format": "uri",
+                "description": "What the event QR encodes: `<site>/e/<accessCode>`."
               }
             },
             "required": [
@@ -7635,7 +7900,9 @@
               "startsAt",
               "endsAt",
               "isRunning",
-              "id"
+              "id",
+              "accessCode",
+              "joinUrl"
             ],
             "additionalProperties": false
           }
@@ -7645,12 +7912,38 @@
         ],
         "additionalProperties": false
       },
-      "Event": {
+      "RotatedCode": {
         "type": "object",
         "properties": {
+          "accessCode": {
+            "type": "string",
+            "pattern": "^[a-z0-9]{8,32}$",
+            "description": "Event access code from the event QR (`/e/<code>`)."
+          },
+          "joinUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "What the event QR encodes: `<site>/e/<accessCode>`."
+          },
           "slug": {
             "type": "string",
             "pattern": "^[a-z0-9-]{2,48}$"
+          }
+        },
+        "required": [
+          "accessCode",
+          "joinUrl",
+          "slug"
+        ],
+        "additionalProperties": false
+      },
+      "EventDoor": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "pattern": "^[a-z0-9]{8,32}$",
+            "description": "Event access code from the event QR (`/e/<code>`)."
           },
           "name": {
             "type": "string"
@@ -7667,14 +7960,45 @@
           },
           "isRunning": {
             "type": "boolean"
+          },
+          "phase": {
+            "type": "string",
+            "enum": [
+              "upcoming",
+              "running",
+              "ended"
+            ],
+            "description": "Where now falls in the event window."
+          },
+          "counters": {
+            "type": "object",
+            "properties": {
+              "checkedIn": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "connections": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "checkedIn",
+              "connections"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
-          "slug",
+          "code",
           "name",
           "startsAt",
           "endsAt",
-          "isRunning"
+          "isRunning",
+          "phase",
+          "counters"
         ],
         "additionalProperties": false
       },
@@ -7682,7 +8006,7 @@
         "type": "object",
         "properties": {
           "event": {
-            "$ref": "#/components/schemas/EventRef"
+            "$ref": "#/components/schemas/CurrentEvent"
           },
           "checkedInAt": {
             "type": "string",
@@ -7723,6 +8047,23 @@
           "status",
           "event",
           "to"
+        ],
+        "additionalProperties": false
+      },
+      "EventRef": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{2,48}$"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "slug",
+          "name"
         ],
         "additionalProperties": false
       },
@@ -7947,9 +8288,10 @@
           "event": {
             "type": "object",
             "properties": {
-              "slug": {
+              "code": {
                 "type": "string",
-                "pattern": "^[a-z0-9-]{2,48}$"
+                "pattern": "^[a-z0-9]{8,32}$",
+                "description": "Event access code from the event QR (`/e/<code>`)."
               },
               "name": {
                 "type": "string"
@@ -7959,7 +8301,7 @@
               }
             },
             "required": [
-              "slug",
+              "code",
               "name",
               "isRunning"
             ],

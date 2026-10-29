@@ -2,35 +2,51 @@ import Link from "next/link";
 import { InviteCard } from "@/components/home/InviteCard";
 import { LiveCard } from "@/components/home/LiveCard";
 import { Icon } from "@/components/icons";
-import { Avatar, avatarOf } from "@/components/monito/Avatar";
+import { Avatar } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, Event, Invites, LiveSnapshot, Me, type ConnectionListT } from "@/lib/api/schemas";
+import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type ConnectionListT, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
 import { apiGet, apiGetSafe } from "@/lib/api/server-fetch";
 import { home } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
 
+type Props = { searchParams: Promise<{ demo?: string }> };
+
 const NO_CONNECTIONS: ConnectionListT = { incoming: [], people: [], totals: { points: 0, connections: 0, people: 0 } };
 
-type Props = { searchParams: Promise<{ demo?: string }> };
+type Live = { snapshot: LiveSnapshotT; event: EventDoorT };
+
+// The live card needs the current event; its code comes from /api/me (API spec A10).
+async function loadLive(code: string | undefined): Promise<Live | null> {
+  if (!code) return null;
+  const [snapshot, event] = await Promise.all([apiGetSafe(`/api/e/${code}/live`, LiveSnapshot), apiGetSafe(`/api/e/${code}`, EventDoor)]);
+  return snapshot && event ? { snapshot, event } : null;
+}
+
+function NoEventCard() {
+  return (
+    <Card tone="sky-soft" className="flex flex-col gap-1 px-4 py-[14px]">
+      <span className="font-display text-[20px] leading-[1.1] font-bold">{home.noEventTitle}</span>
+      <span className="text-[13px] font-extrabold">{home.noEventHint}</span>
+    </Card>
+  );
+}
 
 // 03 Inicio and 03b InicioVacio: one page, the empty branch when the person has no connections yet.
 export default async function HomePage({ searchParams }: Props) {
   const { demo } = await searchParams;
   // `?demo=empty` previews the first-night state in mock mode.
   const me = await apiGet("/api/me", Me, demo === "empty" ? { mockExample: "empty" } : {});
-  const slug = me.currentEvent?.slug ?? "founders-fest";
   // Only /api/me is critical; every other section renders empty when its call fails.
-  const [snapshot, event, connections, invites] = await Promise.all([
-    apiGetSafe(`/api/events/${slug}/live`, LiveSnapshot),
-    apiGetSafe(`/api/events/${slug}`, Event),
+  const [live, listOrNull, invites] = await Promise.all([
+    loadLive(me.currentEvent?.code),
     apiGetSafe("/api/connections", ConnectionList),
     apiGetSafe("/api/invites/me", Invites),
   ]);
-  const list = connections ?? NO_CONNECTIONS;
+  const list = listOrNull ?? NO_CONNECTIONS;
   const empty = demo === "empty" || list.totals.connections === 0;
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
   const alerts = list.incoming.length;
@@ -38,7 +54,7 @@ export default async function HomePage({ searchParams }: Props) {
     <Screen dock>
       <div className="flex h-[46px] items-center justify-between">
         <Link href="/me" className="flex items-center gap-3">
-          <Avatar person={avatarOf(me)} size={46} shadow={3} />
+          <Avatar person={{ name: me.name, look: me.avatar }} size={46} shadow={3} />
           <span className="font-display text-[24px] leading-none font-bold">{home.hello(firstName(me.name))}</span>
         </Link>
         <IconButton label={home.alerts(empty ? 0 : alerts)} className="relative">
@@ -54,7 +70,7 @@ export default async function HomePage({ searchParams }: Props) {
         </IconButton>
       </div>
 
-      {snapshot && event && <LiveCard snapshot={snapshot} me={me} endsAt={event.endsAt} looks={looks} empty={empty} />}
+      {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard />}
 
       <Card href="/connect" tone="mint" className="relative flex items-center gap-[14px] px-4 py-[14px]">
         {empty && (

@@ -6,7 +6,10 @@ The plan defined seven screens (p. 4). The V2 design handoff (`design/compa-v2/R
 
 | # | Mock | Route | Goes to |
 | --- | --- | --- | --- |
-| 01 | V2Bienvenida | `/` | Crear cuenta → `/auth/linkedin?next=/onboarding/profile` · Ya tengo cuenta → `/auth/linkedin?next=/home` |
+| 01 | Landing (replaces V2Bienvenida, API spec A10) | `/` | No sign-up; "Volver a mi evento" → `/home` for checked-in people |
+| — | Event door | `/e/[code]` (event QR) | Entrar con LinkedIn → `/auth/linkedin?next=/e/[code]/join` |
+| — | Check-in notice | `/e/[code]/join` | Aceptar → `POST /api/e/[code]/check-in` → `/home` |
+| — | Live dashboard | `/e/[code]/live` | Tap a person → card · empty space → leaderboard |
 | 02 | V2Perfil | `/onboarding/profile` (`?from=me` to edit) | → `/onboarding/monito` |
 | 02b | V2Monito | `/onboarding/monito` (`?from=me` to change) | → `/home` |
 | 03 / 03b | V2Inicio / V2InicioVacio | `/home` (empty branch when there are no connections; `?demo=empty` in mock mode) | `/me`, `/ranking`, `/connect`, `/invite` |

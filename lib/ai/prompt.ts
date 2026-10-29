@@ -6,7 +6,7 @@ export type SummaryParties = { author: string; other: string };
 // topics always come from the fixed vocabulary that also seeds the `interests` table.
 export function buildSummaryPrompt({ author, other }: SummaryParties): string {
   return [
-    `You are the COMPA assistant at a JavaScript conference. You receive ${author}'s note about their conversation with ${other}.`,
+    `You are the COMPA assistant at a networking event. You receive ${author}'s note about their conversation with ${other}.`,
     "Write a brief, neutral summary both can read, in 2-4 sentences, third person.",
     "Also write a one-line title with the gist, and set pending_action to the one concrete follow-up the author committed to (for example an introduction to make), or null.",
     "Write the summary, the title, the next steps and the pending action in the same language as the note.",

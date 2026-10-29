@@ -104,6 +104,14 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Captain decision: further development preferably ships with Playwright e2e specs that confirm the affected user flows (happy path, edge cases, errors) across 390/834/1440 and es/en, plus unit tests. Recorded in `AGENTS.md` §4, `docs/engineering-standards.md` (Testing) and the PR template; `AGENTS.md` also now states LinkedIn-only sign-in, responsive breakpoints and the bilingual UI.
 
+## [2026-10-29] query | How do database migrations reach production?
+
+- Automatically: pushes to `main` deploy through a remote Vercel build whose command is `bun run db:migrate:deploy && bun run build` (`DATABASE_URL_DIRECT`, a sensitive Vercel env value, is readable only during Vercel builds). A failed migration fails the deploy. Rule added to `AGENTS.md`: migrations are additive and backward-compatible.
+
+## [2026-10-29] query | How do people reach an event?
+
+- Captain decision: only through the unguessable access code in the event QR, `compa.lol/e/<code>` (data model M19, API spec A10). Public event routes moved to `/api/e/{code}/…` with one indistinguishable 404 for any wrong code; slugs are admin-only; admins rotate codes with `POST /api/admin/events/{slug}/rotate-code`. `compa.lol` is a landing page with no sign-up; Spanish for `es*` languages, English otherwise. Migration `0003_event_access_code` backfills existing events. Resolves open question #2 (domain) and annotates #6 (language).
+
 ## [2026-10-29] query | Does a profile show the LinkedIn photo or the monito?
 
 - Captain decision: the LinkedIn photo by default, the monito by choice. Branch `fix/COMPA-TBD-photo-default-v2` adds `users.avatar_mode` (migration `0003_avatar_mode`), copies the photo to the Storage bucket `avatars` at sign-in, and makes Home and Ranking tolerate failed secondary calls. Status: `docs/backend-gap-analysis.md` §0.

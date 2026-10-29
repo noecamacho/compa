@@ -12,6 +12,8 @@ const uuid = z.uuid();
 const isoDate = z.iso.datetime({ offset: true });
 const handle = z.string().regex(/^[a-z0-9-]{2,32}$/);
 const eventSlug = z.string().regex(/^[a-z0-9-]{2,48}$/);
+// The secret in the event QR (M19, lib/access-code.ts).
+const accessCode = z.string().regex(/^[a-z0-9]{8,32}$/).meta({ description: "Event access code from the event QR (`/e/<code>`)." });
 
 export const Visibility = z.enum(VISIBILITY_LEVELS).meta({ id: "Visibility" });
 export const LinkKey = z.enum(LINK_KEYS).meta({ id: "LinkKey" });
@@ -39,6 +41,8 @@ export const VisibilitySettings = z
   .meta({ id: "VisibilitySettings" });
 
 export const EventRef = z.object({ slug: eventSlug, name: z.string() }).meta({ id: "EventRef" });
+// What a checked-in attendee needs to reach their event's public routes (A10).
+export const CurrentEvent = z.object({ code: accessCode, name: z.string() }).meta({ id: "CurrentEvent" });
 
 export const Avatar = MonitoLook.meta({ id: "MonitoLook", description: "The person's pixel-art monito (design/compa-v2/README.md)." });
 export const BadgeId = z.enum(BADGE_IDS).meta({ id: "BadgeId" });
@@ -79,7 +83,7 @@ export const Me = Card.extend({
   nameEdited: z.boolean(),
   photoEdited: z.boolean(),
   isAdmin: z.boolean(),
-  currentEvent: EventRef.nullable(),
+  currentEvent: CurrentEvent.nullable().meta({ description: "The event you are checked in to right now (A2), or null." }),
   stats: ProfileStats.optional(),
   scores: Scores.optional(),
   badges: z.array(BadgeId).optional().meta({ description: "Earned badges, most recent first." }),
@@ -151,11 +155,30 @@ export const CreateEventBody = z
   })
   .meta({ id: "CreateEventBody" });
 
-export const CreatedEvent = z.object({ event: Event.extend({ id: uuid }) }).meta({ id: "CreatedEvent" });
+export const EventAccess = z
+  .object({ accessCode, joinUrl: z.url().meta({ description: "What the event QR encodes: `<site>/e/<accessCode>`." }) })
+  .meta({ id: "EventAccess" });
+
+export const CreatedEvent = z.object({ event: Event.extend({ id: uuid }).extend(EventAccess.shape) }).meta({ id: "CreatedEvent" });
+
+export const RotatedCode = EventAccess.extend({ slug: eventSlug }).meta({ id: "RotatedCode" });
+
+// The event door (/e/<code>): no slug, nothing beyond what the projected screen already shows.
+export const EventDoor = z
+  .object({
+    code: accessCode,
+    name: z.string(),
+    startsAt: isoDate,
+    endsAt: isoDate,
+    isRunning: z.boolean(),
+    phase: z.enum(["upcoming", "running", "ended"]).meta({ description: "Where now falls in the event window." }),
+    counters: z.object({ checkedIn: z.int(), connections: z.int() }),
+  })
+  .meta({ id: "EventDoor" });
 
 export const CheckInBody = z.object({ screenConsent: z.literal(true) }).meta({ id: "CheckInBody" });
 export const CheckIn = z
-  .object({ event: EventRef, checkedInAt: isoDate, alreadyCheckedIn: z.boolean() })
+  .object({ event: CurrentEvent, checkedInAt: isoDate, alreadyCheckedIn: z.boolean() })
   .meta({ id: "CheckIn" });
 
 const Topic = z.enum(TOPICS);
@@ -280,7 +303,7 @@ const LiveConnection = z.object({ id: uuid, a: uuid, b: uuid, kind: ConnectionKi
 
 export const LiveSnapshot = z
   .object({
-    event: z.object({ slug: eventSlug, name: z.string(), isRunning: z.boolean() }),
+    event: z.object({ code: accessCode, name: z.string(), isRunning: z.boolean() }),
     people: z.array(LivePerson),
     connections: z.array(LiveConnection),
     counters: z.object({
@@ -371,10 +394,13 @@ export const Approved = z
 export const SlugParams = z.object({ slug: eventSlug });
 export const HandleParams = z.object({ handle });
 export const IdParams = z.object({ id: uuid });
-export const LivePersonParams = z.object({ slug: eventSlug, userId: uuid });
+// Any string reaches the handler, so a malformed code gets the same 404 as an unknown one (A10).
+const codeParam = z.string().min(1).max(64).meta({ description: "Event access code from the event QR." });
+export const EventCodeParams = z.object({ code: codeParam });
+export const LivePersonParams = z.object({ code: codeParam, userId: uuid });
 export const CodeParams = z.object({ code: z.string().regex(/^[a-z0-9-]{2,40}$/) });
 export const NextQuery = z.object({
-  next: z.string().optional().meta({ description: "Relative path to return to, e.g. `/u/luis` or `/e/founders-fest`." }),
+  next: z.string().optional().meta({ description: "Relative path to return to, e.g. `/u/luis` or `/e/k7m2p9xq4t/join`." }),
 });
 export const CallbackQuery = NextQuery.extend({ code: z.string().optional(), error: z.string().optional() });
 
@@ -392,6 +418,8 @@ export type BadgeListT = z.infer<typeof BadgeList>;
 export type BadgeStatusT = z.infer<typeof BadgeStatus>;
 export type InvitesT = z.infer<typeof Invites>;
 export type LiveSnapshotT = z.infer<typeof LiveSnapshot>;
+export type LivePersonCardT = z.infer<typeof LivePersonCard>;
+export type EventDoorT = z.infer<typeof EventDoor>;
 export type DraftT = z.infer<typeof Draft>;
 export type VisibilitySettingsT = z.infer<typeof VisibilitySettings>;
 export type ConnectionStatusForMeT = z.infer<typeof ConnectionStatusForMe>;

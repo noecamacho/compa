@@ -37,7 +37,7 @@ export type RouteSpec<
 > = {
   id: string;
   method: Method;
-  // OpenAPI style: /api/events/{slug}
+  // OpenAPI style: /api/e/{code}
   path: string;
   summary: string;
   description?: string;

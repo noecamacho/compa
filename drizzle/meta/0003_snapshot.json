@@ -1,5 +1,5 @@
 {
-  "id": "214e9c8e-39e4-4600-8a2d-355182d65ba9",
+  "id": "20d0d010-0d10-4536-9699-c7ca912d3200",
   "prevId": "d777a322-bcf3-4ca2-9cec-eaf60588b9bf",
   "version": "7",
   "dialect": "postgresql",
@@ -436,6 +436,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "access_code": {
+          "name": "access_code",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -492,6 +498,13 @@
           "columns": [
             "slug"
           ]
+        },
+        "events_access_code_unique": {
+          "name": "events_access_code_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "access_code"
+          ]
         }
       },
       "policies": {},
@@ -499,6 +512,10 @@
         "events_window_check": {
           "name": "events_window_check",
           "value": "\"events\".\"ends_at\" > \"events\".\"starts_at\""
+        },
+        "events_access_code_check": {
+          "name": "events_access_code_check",
+          "value": "\"events\".\"access_code\" ~ '^[a-z0-9]{8,32}$'"
         }
       },
       "isRLSEnabled": true
@@ -1029,13 +1046,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "avatar_mode": {
-          "name": "avatar_mode",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'photo'"
-        },
         "golden_cap_at": {
           "name": "golden_cap_at",
           "type": "timestamp with time zone",
@@ -1141,10 +1151,6 @@
         "users_city_check": {
           "name": "users_city_check",
           "value": "char_length(\"users\".\"city\") <= 80"
-        },
-        "users_avatar_mode_check": {
-          "name": "users_avatar_mode_check",
-          "value": "\"users\".\"avatar_mode\" in ('photo', 'monito')"
         }
       },
       "isRLSEnabled": true
