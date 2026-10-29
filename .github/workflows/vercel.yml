@@ -1,6 +1,7 @@
 # Deploys production through the Vercel CLI with the team owner's token, because Vercel Pro
 # blocks native git deploys whose commit author is not a member of the Vercel team.
 # No preview deployments: the captain decided only production exists (2026-10-29).
+# The last 10 production deployments are kept so Vercel Instant Rollback works (wiki/event-day-runbook.md).
 # Database migrations run automatically on every deploy (vercel.json buildCommand).
 name: Vercel
 
@@ -41,20 +42,24 @@ jobs:
       - name: Summary
         run: |
           echo "Deployed (production): ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
-      - name: Keep only the new deployment
+      # Instant Rollback needs older production deployments to exist, so the last KEEP_DEPLOYMENTS stay.
+      - name: Prune old deployments (keep the last 10 production)
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           NEW_URL: ${{ steps.deploy.outputs.url }}
+          KEEP_DEPLOYMENTS: "10"
         run: |
           api="https://api.vercel.com"
           auth="Authorization: Bearer $VERCEL_TOKEN"
           new=$(curl -sf "$api/v13/deployments/${NEW_URL#https://}?teamId=$VERCEL_ORG_ID" -H "$auth")
-          keep=$(echo "$new" | jq -r '.id // empty')
+          current=$(echo "$new" | jq -r '.id // empty')
           state=$(echo "$new" | jq -r '.readyState // empty')
-          [ -n "$keep" ] || { echo "Could not resolve the new deployment; skipping cleanup"; exit 0; }
-          # Never delete the live deployment unless the new one is serving: a failed build would take the site down.
+          [ -n "$current" ] || { echo "Could not resolve the new deployment; skipping cleanup"; exit 0; }
+          # Never prune unless the new one is serving: a failed build must leave every rollback target in place.
           [ "$state" = "READY" ] || { echo "New deployment is $state, not READY; keeping older deployments"; exit 1; }
-          curl -sf "$api/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_ORG_ID&limit=100" -H "$auth" \
-            | jq -r --arg keep "$keep" '.deployments[].uid | select(. != $keep)' \
+          # Only READY production deployments are counted; builds still running or failed are never touched.
+          curl -sf "$api/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_ORG_ID&target=production&state=READY&limit=100" -H "$auth" \
+            | jq -r --arg current "$current" --argjson keep "$KEEP_DEPLOYMENTS" \
+                '.deployments | sort_by(-.created) | .[$keep:][].uid | select(. != $current)' \
             | xargs -r -I{} curl -sf -X DELETE "$api/v13/deployments/{}?teamId=$VERCEL_ORG_ID" -H "$auth" -o /dev/null
-          echo "Kept only $keep" >> "$GITHUB_STEP_SUMMARY"
+          echo "Kept the newest $KEEP_DEPLOYMENTS production deployments (current: $current)" >> "$GITHUB_STEP_SUMMARY"

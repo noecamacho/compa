@@ -20,5 +20,6 @@ The project is ready when the full flow works in production from two different p
 - README states what was built during the Build Day and what is missing
 - Licenses, privacy and absence of secrets checked; reuse declared
 - Submitted before Thursday 2026-10-29 at 10:00; improvements allowed until Friday 2026-10-30 at 13:00
+- Event day: `main` frozen from one hour before doors, rollback target and `/api/health` checked ([event-day-runbook](event-day-runbook.md))
 
 The "public repository with a license" item conflicts with the current private repository; see [open-questions](open-questions.md). Related: [timeline](timeline.md), [demo-script](demo-script.md).

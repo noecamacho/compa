@@ -4,7 +4,7 @@ import { buildOpenApiDocument } from "./openapi";
 import { isAdminAuth, NoBody } from "./route-spec";
 import { ROUTES } from "./routes";
 
-const NOT_IN_CONTRACT = new Set(["/api/openapi.json", "/api/docs"]);
+const NOT_IN_CONTRACT = new Set(["/api/openapi.json", "/api/docs", "/api/health"]);
 
 // app/api/e/[code]/route.ts → /api/e/{code}
 const toOpenApiPath = (file: string) =>

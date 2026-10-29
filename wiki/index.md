@@ -47,6 +47,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 - [agent-contract](agent-contract.md) — the plan's draft agent contract and the four prompts, translated.
 - [demo-script](demo-script.md) — the 3-minute demo script, key lines and pre-stage checklist.
 - [risks](risks.md) — eight risks with signals and plan B.
+- [event-day-runbook](event-day-runbook.md) — deploy freeze, Instant Rollback (last 10 production deployments kept), health endpoint and structured error logs.
 - [delivery-checklist](delivery-checklist.md) — the eight items that define "ready".
 
 ## Repository documents outside the wiki
