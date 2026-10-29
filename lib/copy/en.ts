@@ -74,3 +74,16 @@ export const eventNotFound: typeof es.eventNotFound = {
   body: "Check that you scanned your event's whole QR, or ask the organizers to show it again.",
   home: "Go to compa.lol",
 };
+
+export const notifications: typeof es.notifications = {
+  title: "Notifications",
+  home: "Home",
+  emptyTitle: "You're all caught up",
+  emptyHint: "New requests, connections and badges will show up here.",
+  newLabel: "New",
+  bellLabel: (count) => (count ? `Notifications, ${count} new` : "Notifications"),
+  request: (name, event) => `${name} sent you a request at ${event}`,
+  accepted: (name, event) => `${name} accepted your request at ${event}`,
+  inviteeConnected: (name) => `${name} connected with someone through your invite`,
+  badgeEarned: (name) => `You earned the ${name} badge`,
+};

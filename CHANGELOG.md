@@ -15,6 +15,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Notification bell now opens a live-updating list for requests, accepted connections, invitees and earned badges; opening the list marks displayed items as seen.
 - Connection confirm screen now shows the event-screen notice before sending `screenConsent: true` (M13).
 - The AI summary prompt is event-neutral: it no longer tells the model it is at a JavaScript conference.
 - Home, Ranking and Badges render a section empty instead of the error page when a secondary call fails; profiles stored before the `whatsapp` link existed parse again.

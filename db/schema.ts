@@ -59,6 +59,7 @@ export const users = pgTable(
     goldenCapAt: timestamp("golden_cap_at", { withTimezone: true }),
     links: jsonb("links").$type<Links>().notNull().default({}),
     visibility: jsonb("visibility").$type<VisibilitySettings>().notNull().default(DEFAULT_VISIBILITY),
+    notificationsSeenAt: timestamp("notifications_seen_at", { withTimezone: true }),
     linkedinRaw: jsonb("linkedin_raw"),
     linkedinSyncedAt: timestamp("linkedin_synced_at", { withTimezone: true }),
     isAdmin: boolean("is_admin").notNull().default(false),

@@ -143,3 +143,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Can people sign in from compa.lol?
 
 - Captain decision: yes. The landing offers "Entrar con LinkedIn" for sign-up and sign-in (then `/home`); events stay exclusive because joining needs the QR link. API spec A10a records the amendment; the sign-out warning no longer says the QR is needed to come back.
+
+## [2026-10-29] query | What does the home notification bell show?
+
+- F-49/T-080 now has a notification list for pending requests, accepted requests, connected invitees and earned badges. The bell polls the unseen count, opening `/notifications` marks displayed items seen, and declines stay hidden (`docs/flows/catalog.md` F-49; `docs/flows/backlog.md` T-080).

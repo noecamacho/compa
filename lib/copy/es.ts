@@ -59,7 +59,6 @@ export const monito = {
 
 export const home = {
   hello: (name: string) => `Hola, ${name}`,
-  alerts: (count: number) => (count ? `Avisos, ${count} nuevos` : "Avisos"),
   until: (name: string, hour: string) => `${name} · hasta las ${hour}`,
   connectionsTonight: "conexiones esta noche",
   pairsNow: "Conexiones que están pasando ahora",
@@ -77,6 +76,19 @@ export const home = {
   goldenCapLabel: "Tu monito con la gorra dorada",
   noEventTitle: "No estás en un evento ahora",
   noEventHint: "Escanea el QR de tu evento para entrar y ver quién está conectando.",
+};
+
+export const notifications = {
+  title: "Avisos",
+  home: "Inicio",
+  emptyTitle: "Todo al día",
+  emptyHint: "Aquí verás solicitudes, conexiones e insignias nuevas.",
+  newLabel: "Nuevo",
+  bellLabel: (count: number) => (count ? `Avisos, ${count} nuevos` : "Avisos"),
+  request: (name: string, event: string) => `${name} te envió una solicitud en ${event}`,
+  accepted: (name: string, event: string) => `${name} aceptó tu solicitud en ${event}`,
+  inviteeConnected: (name: string) => `${name} conectó con alguien por tu invitación`,
+  badgeEarned: (name: string) => `Ganaste la insignia ${name}`,
 };
 
 export const connect = {

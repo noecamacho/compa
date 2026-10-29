@@ -5,12 +5,13 @@ import { useEffect, useState } from "react";
 import { Icon } from "@/components/icons";
 import { Avatar } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
-import { IconButton } from "@/components/ui/IconButton";
 import { Muted } from "@/components/ui/Text";
 import { apiCall } from "@/lib/api/client";
-import { ConnectionList, type ConnectionListT } from "@/lib/api/schemas";
-import { home, tour } from "@/lib/copy/es";
+import { ConnectionList, Notifications, type ConnectionListT } from "@/lib/api/schemas";
+import { copyFor } from "@/lib/copy";
 import { firstName } from "@/lib/format";
+import type { Locale } from "@/lib/i18n";
+import { tour } from "@/lib/copy/es";
 
 type Incoming = ConnectionListT["incoming"];
 
@@ -34,24 +35,29 @@ export function useIncomingRequests(initial: Incoming): Incoming {
   return incoming;
 }
 
-export function AlertsBell({ initial }: { initial: Incoming }) {
-  const incoming = useIncomingRequests(initial);
-  const count = incoming.length;
-  const first = incoming[0];
-  const bell = (
-    <>
+export function AlertsBell({ initial, locale }: { initial: number; locale: Locale }) {
+  const [count, setCount] = useState(initial);
+  useEffect(() => {
+    let active = true;
+    const tick = async () => {
+      const result = await apiCall("GET", "/api/notifications", Notifications).catch(() => null);
+      if (active && result) setCount(result.unseenCount);
+    };
+    const timer = setInterval(tick, POLL_MS);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, []);
+  const copy = copyFor(locale).notifications;
+  return (
+    <Link href="/notifications" aria-label={copy.bellLabel(count)} className="relative box-border flex h-11 w-11 items-center justify-center rounded-[14px] bg-white border-ink shadow-hard-3 pressable">
       <Icon name="bell" />
       {count > 0 && (
-        <span aria-hidden="true" className="animate-pop-in absolute top-[-9px] right-[-9px] flex h-[22px] w-[22px] items-center justify-center rounded-full bg-coral font-display text-[11px] font-bold border-ink">
+        <span aria-hidden="true" className="animate-pop-in absolute top-[-9px] right-[-9px] flex h-[22px] min-w-[22px] items-center justify-center rounded-full bg-coral px-1 font-display text-[11px] font-bold border-ink">
           {count}
         </span>
       )}
-    </>
-  );
-  if (!first) return <IconButton label={home.alerts(0)} className="relative">{bell}</IconButton>;
-  return (
-    <Link href={`/requests/${first.connectionId}`} aria-label={home.alerts(count)} className="relative box-border flex h-11 w-11 items-center justify-center rounded-[14px] bg-white border-ink shadow-hard-3 pressable">
-      {bell}
     </Link>
   );
 }
