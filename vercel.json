@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "installCommand": "bun install --frozen-lockfile",
-  "buildCommand": "bun run db:migrate:deploy && bun run build",
+  "buildCommand": "if [ \"$VERCEL_ENV\" = production ]; then bun run db:migrate:deploy; fi && bun run build",
   "git": {
     "deploymentEnabled": false
   }

@@ -24,13 +24,13 @@ export const authCallback = route({
   id: "authCallback",
   method: "get",
   path: "/auth/callback",
-  summary: "Finish LinkedIn sign-in",
+  summary: "Finish sign-in",
   description:
-    "Exchanges the code for a session, creates the user (unique handle) or syncs name and photo unless edited (M14), then redirects to `next` or `/me`. Failure redirects to `/?error=linkedin`.",
+    "Exchanges the code for a session, creates the user (unique handle) or syncs name and photo unless edited (M14), then redirects to `next` or `/me`. Failure redirects to `/?error=signin`.",
   tags: ["auth"],
   auth: "public",
   query: S.CallbackQuery,
-  success: { status: 302, description: "Redirect to `next`, `/me`, or `/?error=linkedin`.", redirect: "/me" },
+  success: { status: 302, description: "Redirect to `next`, `/me`, or `/?error=signin`.", redirect: "/me" },
   errors: [],
 });
 
