@@ -14,4 +14,6 @@ The biggest risk is the live demo (network, time and adoption); each risk has a 
 | Time runs out | P0 incomplete mid-evening | Cut in the order of the scope section; feature freeze 45 min before closing |
 | Closing time uncertain (page says 7 and 9 p.m.) | — | Confirm with the organizers now and adjust the timeline |
 
+Conference-scale infrastructure risks, measured and with fix status: [conference-scale](conference-scale.md).
+
 Related: [mvp-scope](mvp-scope.md) (cut order), [timeline](timeline.md), [open-questions](open-questions.md).
