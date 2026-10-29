@@ -2,6 +2,7 @@
 
 import { useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatCount } from "@/lib/admin/format";
@@ -48,6 +49,15 @@ export function QrPanel({ locale, name, slug, joinUrl, svg, variant, stats }: Pr
         <CopyButton text={joinUrl} label={full.detail.copy} copiedLabel={full.detail.copied} failedLabel={t.copyFailed} onFail={() => selectText(codeRef.current)} />
       </div>
       <div className="grid grid-cols-2 gap-2">
+        <a
+          href={`/admin/events/${slug}/poster`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="col-span-2 box-border flex h-11 items-center justify-center gap-2 rounded-button bg-sun px-3 font-display text-[15px] font-bold whitespace-nowrap text-ink no-underline border-ink shadow-hard-2 pressable"
+        >
+          <Icon name="qr" size={18} />
+          {full.ui.poster.panelLink}
+        </a>
         <a
           href={svgHref(svg)}
           download={`${slug}-qr.svg`}

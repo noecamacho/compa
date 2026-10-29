@@ -51,6 +51,9 @@
   --animate-scan: scan 2.4s ease-in-out infinite;
   --animate-bump: bump 0.36s cubic-bezier(0.34, 1.4, 0.5, 1) both;
   --animate-overlay-in: overlay-in 0.25s ease-out both;
+  --animate-poster-swap: poster-swap 10s ease-in-out infinite;
+  --animate-marquee: marquee 32s linear infinite;
+  --animate-fall: fall 10s linear infinite;
 
   --ease-spring: cubic-bezier(0.34, 1.3, 0.5, 1);
   --ease-out-soft: cubic-bezier(0.2, 0.8, 0.3, 1);
@@ -138,6 +141,21 @@
   @keyframes overlay-in {
     from { opacity: 0; }
     to { opacity: 1; }
+  }
+  /* Admin QR poster: two languages share one spot; the second runs half a loop behind (negative delay). */
+  @keyframes poster-swap {
+    0%, 42%, 100% { opacity: 1; transform: none; }
+    50%, 92% { opacity: 0; transform: translateY(-0.25em); }
+  }
+  /* A track holding its items twice slides by one copy, so the loop has no seam. */
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  /* Poster confetti: each piece sets --sway and --spin. */
+  @keyframes fall {
+    from { transform: translate3d(0, -8vh, 0) rotate(0deg); }
+    to { transform: translate3d(var(--sway, 0), 108vh, 0) rotate(var(--spin, 360deg)); }
   }
 }
 
@@ -309,6 +327,27 @@
     animation: scroll-fade linear both;
     animation-timeline: scroll(self inline);
   }
+}
+
+/* Admin QR poster frame: brand colors turning around the QR card plus a sun glow that pulses outward. Only the ring
+   behind the card moves; the QR itself never does, so it stays scannable. */
+@property --poster-turn {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+@keyframes poster-turn {
+  to { --poster-turn: 360deg; }
+}
+@keyframes poster-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 217, 61, 0.85); }
+  70% { box-shadow: 0 0 0 max(14px, 3vmin) rgba(255, 217, 61, 0); }
+}
+@utility poster-halo {
+  background: conic-gradient(from var(--poster-turn), #6be4a3, #6cc4ff, #ff8fab, #ffd93d, #ff6b4a, #6be4a3);
+  animation:
+    poster-turn 6s linear infinite,
+    poster-glow 2s ease-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {

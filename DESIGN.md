@@ -220,6 +220,10 @@ Approved decisions (A5, A6, M13, M16). The handoff has no big-screen mock.
 - **As built (Loom+):** the network is "El Telar" (a ring of pegs, threads between them), with a 30-minute pulse and mood line, a "Just now" feed of the newest pairs, the top 5 (shared places for ties), state cards for upcoming, empty and ended, a final podium after the close, an "Ends in N min" pill in the last ten minutes and a "Reconnecting… last update" pill. Rationale and screenshots: [docs/research/live-dataviz-decision.md](docs/research/live-dataviz-decision.md).
 - **Figma file:** [COMPA — App flows (V2)](https://www.figma.com/design/UEnpABAPbq7WJUfhfoYi46): foundations, components, every flow with happy, empty, error and edge states, and the prototype.
 
+### Admin QR poster
+
+`/admin/events/<slug>/poster` (`components/admin/QrPoster.tsx`, opened in a new tab by the sun "Show QR poster" button in the event header at every width, and by "Full-screen poster" in the QR panel): a bare full-screen promo for a projector, TV, iPad or phone, 360 px to 3840×2160, that fits one screen with no scroll. A hero-sized logo (`--logo`, about a third of the short side in landscape), the event name as a small muted line, the owner's caption "BE THE ONE WHO CONNECTS THE MOST AND WIN A PRIZE FOR FREE" / "SÉ QUIEN MÁS CONECTE Y GANA UN PREMIO GRATIS" (`--cta`, "connects the most" in mint, "for free" on a coral sticker), and the join QR as large as the screen allows (`--qr`, at least 40 % of the short side). Landscape (laptop, TV, iPad 1180×820) puts logo and caption beside the QR; portrait (phone, iPad 820×1180) stacks logo, caption, QR. Sizes come from `vmin`, `vw` and `dvh`. **The QR never moves:** it stays white with dark modules and a 4-module quiet zone, and the motion (falling confetti behind the content, the `poster-halo` ring behind the QR card, the bobbing logo, the caption's language cross-fade `--animate-poster-swap`, the wiggling sticker, the monito ticker `--animate-marquee`) never covers, transforms or blurs it. With reduced motion everything is still and both captions stack.
+
 ## Decided vs open
 
 Decided:

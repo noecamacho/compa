@@ -913,6 +913,17 @@ export const admin = {
       restore: "Restaurar",
       moreFor: (name: string) => `Más acciones para ${name}`,
     },
+    // The promo poster prints both languages (lib/copy/en.ts holds the English lines); only the controls follow the locale.
+    poster: {
+      open: "Mostrar póster QR",
+      panelLink: "Póster a pantalla completa",
+      stage: (name: string) => `Póster de ${name}`,
+      fullscreen: "Pantalla completa",
+      back: "Volver al evento",
+      cta: ["SÉ QUIEN", "MÁS CONECTE", "Y GANA UN PREMIO", "GRATIS"],
+      scan: "Escanea y entra",
+      ticker: ["¡CONECTA MÁS!", "GANA UN PREMIO", "¡ES GRATIS!"],
+    },
     bulk: {
       selected: (count: number) => (count === 1 ? "1 seleccionado" : `${num(count)} seleccionados`),
       clear: "Quitar selección",

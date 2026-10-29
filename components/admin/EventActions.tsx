@@ -53,6 +53,8 @@ type HeaderProps = { locale: Locale; slug: string; name: string; joinUrl: string
 
 const LIVE_LINK =
   "box-border flex h-11 items-center justify-center gap-2 rounded-button bg-white px-4 font-display text-[15px] font-bold whitespace-nowrap text-ink no-underline border-ink shadow-hard-2 pressable";
+// The poster is what an organizer reaches for at the door, so it stands out in sun.
+const POSTER_LINK = LIVE_LINK.replace("bg-white", "bg-sun");
 
 // Header actions (spec §5.3): Copy link (from md), Open live ↗ and a ⋯ menu with the lifecycle. The notices wrap onto
 // their own line below the header.
@@ -71,6 +73,10 @@ export function EventHeaderActions({ locale, slug, name, joinUrl, liveUrl, phase
         <a href={liveUrl} target="_blank" rel="noopener noreferrer" className={LIVE_LINK}>
           <Icon name="external" size={18} />
           {ui.menu.openLive}
+        </a>
+        <a href={`/admin/events/${slug}/poster`} target="_blank" rel="noopener noreferrer" className={POSTER_LINK}>
+          <Icon name="qr" size={18} />
+          {ui.poster.open}
         </a>
         <RowMenu id={menuId} label={ui.menu.moreFor(name)}>
           <RowMenuItem menuId={menuId} onClick={copyLink}>

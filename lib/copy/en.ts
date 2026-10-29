@@ -374,6 +374,17 @@ export const admin: typeof es.admin = {
       restore: "Restore",
       moreFor: (name: string) => `More actions for ${name}`,
     },
+    poster: {
+      open: "Show QR poster",
+      panelLink: "Full-screen poster",
+      stage: (name: string) => `Poster for ${name}`,
+      fullscreen: "Full screen",
+      back: "Back to event",
+      // Read in order it is the owner's caption, word for word; the second part is highlighted, the last is a sticker.
+      cta: ["BE THE ONE WHO", "CONNECTS THE MOST", "AND WIN A PRIZE", "FOR FREE"],
+      scan: "Scan to join",
+      ticker: ["CONNECT THE MOST!", "WIN A PRIZE", "IT'S FREE!"],
+    },
     bulk: {
       selected: (count: number) => `${num(count)} selected`,
       clear: "Clear selection",
