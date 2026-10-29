@@ -33,15 +33,15 @@ test.describe("i18n", () => {
     await expect(page.getByText(copy.badges.secret).first()).toBeVisible();
   });
 
-  test("a rate-limited accept shows the localized text, never the API message @mock", async ({ page, mock }, testInfo) => {
+  test("an already answered accept shows the localized text, never the API message @mock", async ({ page, mock }, testInfo) => {
     const { copy } = copyOf(testInfo);
     await page.goto(`/requests/${REQUEST_ID}`);
-    await mock.mockError("rate_limited", "**/api/connections/*/accept");
+    await mock.mockError("not_pending", "**/api/connections/*/accept");
     const alert = page.getByRole("alert").filter({ hasText: /\S/ });
     await expect(async () => {
       await page.getByRole("button", { name: copy.request.accept }).click();
       await expect(alert).toBeVisible({ timeout: 5_000 });
     }).toPass({ timeout: 45_000 });
-    await expect(alert).toContainText(copy.errors.codes.rate_limited ?? "");
+    await expect(alert).toContainText(copy.errors.codes.not_pending ?? "");
   });
 });
