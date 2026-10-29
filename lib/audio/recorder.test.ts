@@ -138,6 +138,18 @@ describe("startRecording", () => {
     await expect(result).rejects.toMatchObject({ reason: "permission_denied" });
   });
 
+  test("a recorder that fails to start releases the microphone", async () => {
+    const { deps, stream } = fakeDeps();
+    class BrokenRecorder extends deps.Recorder {
+      start(): void {
+        throw new DOMException("bad type", "NotSupportedError");
+      }
+    }
+    const result = startRecording({ onStop: () => {} }, { ...deps, Recorder: BrokenRecorder });
+    await expect(result).rejects.toMatchObject({ reason: "failed" });
+    expect(stream.tracks[0]?.stopped).toBe(true);
+  });
+
   test("no MediaRecorder in this runtime rejects as unsupported", async () => {
     await expect(startRecording({ onStop: () => {} })).rejects.toMatchObject({ reason: "unsupported" });
   });

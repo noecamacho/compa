@@ -120,11 +120,22 @@ export async function startRecording<S extends StreamLike>(
   return record(options, browser);
 }
 
-async function record<S extends StreamLike>(
+async function record<S extends StreamLike>(options: RecordingOptions, deps: RecorderDeps<S>): Promise<Recording> {
+  const stream = await requestMicrophone(deps);
+  try {
+    return startOn(stream, options, deps);
+  } catch (error) {
+    // The mic is already open: release it or the iOS mic indicator stays on.
+    releaseMicrophone(stream);
+    throw new RecorderError("failed", { cause: error });
+  }
+}
+
+function startOn<S extends StreamLike>(
+  stream: S,
   { maxMs = DEFAULT_MAX_MS, onTick, onStop }: RecordingOptions,
   deps: RecorderDeps<S>,
-): Promise<Recording> {
-  const stream = await requestMicrophone(deps);
+): Recording {
   const mimeType = pickMimeType((type) => deps.Recorder.isTypeSupported(type));
   const recorder = new deps.Recorder(stream, mimeType ? { mimeType } : undefined);
   const chunks: Blob[] = [];
@@ -139,11 +150,7 @@ async function record<S extends StreamLike>(
     cancelled = true;
     stop();
   };
-  const stopTicking = deps.interval(() => {
-    elapsedMs += TICK_MS;
-    onTick?.(elapsedMs);
-    if (elapsedMs >= maxMs) stop();
-  }, TICK_MS);
+  let stopTicking = () => {};
 
   recorder.ondataavailable = (event) => {
     if (event.data.size > 0) chunks.push(event.data);
@@ -154,6 +161,12 @@ async function record<S extends StreamLike>(
     if (!cancelled) onStop(toFile(chunks, recorder.mimeType || mimeType));
   };
   recorder.start(TICK_MS);
+  // Tick only once recording really started, so a failed start leaves no timer behind.
+  stopTicking = deps.interval(() => {
+    elapsedMs += TICK_MS;
+    onTick?.(elapsedMs);
+    if (elapsedMs >= maxMs) stop();
+  }, TICK_MS);
   return { stop, cancel };
 }
 
