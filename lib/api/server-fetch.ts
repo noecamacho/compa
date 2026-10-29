@@ -57,3 +57,13 @@ export async function apiGetOrNull<T extends z.ZodType>(path: string, schema: T,
     throw error;
   }
 }
+
+// Secondary data (invites, badges, boards): any failure renders that section empty instead of the error page.
+export async function apiGetSafe<T extends z.ZodType>(path: string, schema: T, options?: Options): Promise<z.output<T> | null> {
+  try {
+    return await apiGet(path, schema, options);
+  } catch (error) {
+    console.error(`optional fetch failed: ${path}`, error);
+    return null;
+  }
+}

@@ -2,16 +2,18 @@ import Link from "next/link";
 import { InviteCard } from "@/components/home/InviteCard";
 import { LiveCard } from "@/components/home/LiveCard";
 import { Icon } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, Event, Invites, LiveSnapshot, Me } from "@/lib/api/schemas";
-import { apiGet } from "@/lib/api/server-fetch";
+import { ConnectionList, Event, Invites, LiveSnapshot, Me, type ConnectionListT } from "@/lib/api/schemas";
+import { apiGet, apiGetSafe } from "@/lib/api/server-fetch";
 import { home } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
+
+const NO_CONNECTIONS: ConnectionListT = { incoming: [], people: [], totals: { points: 0, connections: 0, people: 0 } };
 
 type Props = { searchParams: Promise<{ demo?: string }> };
 
@@ -21,12 +23,14 @@ export default async function HomePage({ searchParams }: Props) {
   // `?demo=empty` previews the first-night state in mock mode.
   const me = await apiGet("/api/me", Me, demo === "empty" ? { mockExample: "empty" } : {});
   const slug = me.currentEvent?.slug ?? "founders-fest";
-  const [snapshot, event, list, invites] = await Promise.all([
-    apiGet(`/api/events/${slug}/live`, LiveSnapshot),
-    apiGet(`/api/events/${slug}`, Event),
-    apiGet("/api/connections", ConnectionList),
-    apiGet("/api/invites/me", Invites),
+  // Only /api/me is critical; every other section renders empty when its call fails.
+  const [snapshot, event, connections, invites] = await Promise.all([
+    apiGetSafe(`/api/events/${slug}/live`, LiveSnapshot),
+    apiGetSafe(`/api/events/${slug}`, Event),
+    apiGetSafe("/api/connections", ConnectionList),
+    apiGetSafe("/api/invites/me", Invites),
   ]);
+  const list = connections ?? NO_CONNECTIONS;
   const empty = demo === "empty" || list.totals.connections === 0;
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
   const alerts = list.incoming.length;
@@ -34,7 +38,7 @@ export default async function HomePage({ searchParams }: Props) {
     <Screen dock>
       <div className="flex h-[46px] items-center justify-between">
         <Link href="/me" className="flex items-center gap-3">
-          <Avatar person={{ name: me.name, look: me.avatar }} size={46} shadow={3} />
+          <Avatar person={avatarOf(me)} size={46} shadow={3} />
           <span className="font-display text-[24px] leading-none font-bold">{home.hello(firstName(me.name))}</span>
         </Link>
         <IconButton label={home.alerts(empty ? 0 : alerts)} className="relative">
@@ -50,7 +54,7 @@ export default async function HomePage({ searchParams }: Props) {
         </IconButton>
       </div>
 
-      <LiveCard snapshot={snapshot} me={me} endsAt={event.endsAt} looks={looks} empty={empty} />
+      {snapshot && event && <LiveCard snapshot={snapshot} me={me} endsAt={event.endsAt} looks={looks} empty={empty} />}
 
       <Card href="/connect" tone="mint" className="relative flex items-center gap-[14px] px-4 py-[14px]">
         {empty && (
@@ -68,7 +72,7 @@ export default async function HomePage({ searchParams }: Props) {
         <Icon name="chevronRight" size={20} strokeWidth={3} />
       </Card>
 
-      <InviteCard invites={empty ? { ...invites, invitees: [] } : invites} />
+      {invites && <InviteCard invites={empty ? { ...invites, invitees: [] } : invites} />}
     </Screen>
   );
 }
