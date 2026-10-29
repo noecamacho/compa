@@ -28,7 +28,7 @@ describe("firstViz", () => {
   });
 
   test("covers every visualization across draws", () => {
-    const seen = new Set([0, 0.26, 0.51, 0.76].map((random) => firstViz(null, random)));
+    const seen = new Set(VIZ_IDS.map((_, index) => firstViz(null, (index + 0.5) / VIZ_IDS.length)));
     expect(seen.size).toBe(VIZ_IDS.length);
   });
 
@@ -39,7 +39,7 @@ describe("firstViz", () => {
 
 describe("nextViz", () => {
   test("cycles in order and wraps", () => {
-    expect(VIZ_IDS.map((id) => nextViz(id))).toEqual(["orbit", "race", "wave", "loom"]);
+    expect(VIZ_IDS.map((id) => nextViz(id))).toEqual([...VIZ_IDS.slice(1), VIZ_IDS[0]]);
   });
 
   test("a dropped current view hands over to the first available", () => {

@@ -8,12 +8,17 @@ import { VIZ_IDS, firstViz, isVizId, nextViz, rotationFrom, type Rotation, type 
 import type { VizProps } from "./viz/types";
 
 // Each visualization is its own chunk and never runs on the server (canvas, WebGL).
-const VIEWS: Record<Exclude<VizId, "loom">, ComponentType<VizProps>> = {
+const VIEWS: Record<VizId, ComponentType<VizProps>> = {
+  loom: dynamic(() => import("./viz/LoomViz"), { ssr: false }),
   orbit: dynamic(() => import("./viz/Orbit"), { ssr: false }),
   race: dynamic(() => import("./viz/Race"), { ssr: false }),
   wave: dynamic(() => import("./viz/Wave"), { ssr: false }),
+  cosmos: dynamic(() => import("./viz/Cosmos"), { ssr: false }),
+  garden: dynamic(() => import("./viz/Garden"), { ssr: false }),
+  marquee: dynamic(() => import("./viz/Marquee"), { ssr: false }),
+  marbles: dynamic(() => import("./viz/Marbles"), { ssr: false }),
+  skyline: dynamic(() => import("./viz/Skyline"), { ssr: false }),
 };
-const LoomViz = dynamic(() => import("./viz/LoomViz"), { ssr: false });
 
 const LAST_KEY = "compa.live.viz";
 const FADE_MS = 700;
@@ -49,22 +54,25 @@ function writeLast(id: VizId): void {
   }
 }
 
-type Shown = { current: VizId; leaving: VizId | null; rotation: Rotation; available: VizId[] };
+// `held`: a view pinned by tap on the switcher; it stays until tapped again, whatever the rotation says.
+type Shown = { current: VizId; leaving: VizId | null; rotation: Rotation; available: VizId[]; held: VizId | null };
 
 // Picks a different visualization than the last load, then moves on every `rotation.seconds` with a cross-fade.
 // The stage only ever renders in the browser (LiveBoard loads it with ssr: false), so it can read the URL at once.
 function initialStage(): Shown {
   const rotation = rotationFrom(window.location.search);
   const current = rotation.pinned ?? firstViz(readLast(), Math.random());
-  return { current, leaving: null, rotation, available: [...VIZ_IDS] };
+  return { current, leaving: null, rotation, available: [...VIZ_IDS], held: null };
 }
 
-function useStage(reducedMotion: boolean): [Shown | null, (id: VizId) => void] {
+type Stage = { shown: Shown | null; drop: (id: VizId) => void; pick: (id: VizId) => void };
+
+function useStage(reducedMotion: boolean): Stage {
   const [shown, setShown] = useState<Shown | null>(initialStage);
 
   const current = shown?.current;
   // Reduced motion: no hard cut every 30 s unless the URL asked for a period.
-  const seconds = !shown || (reducedMotion && !shown.rotation.explicit) ? 0 : shown.rotation.seconds;
+  const seconds = !shown || shown.held || (reducedMotion && !shown.rotation.explicit) ? 0 : shown.rotation.seconds;
   useEffect(() => {
     if (!current) return;
     writeLast(current);
@@ -89,39 +97,60 @@ function useStage(reducedMotion: boolean): [Shown | null, (id: VizId) => void] {
       return { ...state, available, current: state.current === id ? firstViz(readLast(), Math.random(), available) : state.current, leaving: null };
     });
 
-  return [shown, drop];
+  // Tap a view to hold it; tap the held one again to let the rotation go on from there.
+  const pick = (id: VizId) =>
+    setShown((state) => {
+      if (!state) return state;
+      if (state.held === id) return { ...state, held: null };
+      return { ...state, held: id, current: id, leaving: state.current === id ? null : state.current };
+    });
+
+  return { shown, drop, pick };
 }
 
-function View({ id, props, onUnavailable }: { id: VizId; props: VizProps; onUnavailable: () => void }) {
-  if (id === "loom") return <LoomViz {...props} onUnavailable={onUnavailable} />;
+function View({ id, props }: { id: VizId; props: VizProps }) {
   const Component = VIEWS[id];
   return <Component {...props} />;
 }
 
-// Which view is on and how long until the next: a strip of named dots with a filling bar, so the change never surprises.
-function Indicator({ shown, locale, reducedMotion }: { shown: Shown; locale: Locale; reducedMotion: boolean }) {
-  const names = copyFor(locale).live.vizNames;
-  const seconds = shown.rotation.seconds;
+type SwitcherProps = { shown: Shown; locale: Locale; reducedMotion: boolean; onPick: (id: VizId) => void };
+
+// Which view is on and how long until the next, as a strip of buttons: tap one to hold it (the bar stops), tap it
+// again to release. Keyboard reaches it like any button, so it works on a projector with a remote keyboard.
+function Switcher({ shown, locale, reducedMotion, onPick }: SwitcherProps) {
+  const copy = copyFor(locale).live;
+  const seconds = shown.held ? 0 : shown.rotation.seconds;
   return (
-    <ol className="pointer-events-none absolute bottom-2 left-2 m-0 flex list-none items-center gap-1.5 rounded-chip bg-white/90 px-2 py-1 border-ink shadow-hard-2" aria-hidden="true" data-testid="live-viz-indicator">
-      {shown.available.map((id) => (
-        <li key={id} className={`relative overflow-hidden rounded-full px-2 text-[12px] font-extrabold lg:text-[clamp(12px,0.8vw,18px)] ${id === shown.current ? "bg-sun" : "text-ink/60"}`}>
-          {names[id]}
-          {id === shown.current && seconds > 0 && !reducedMotion && (
-            <span key={id} className="absolute bottom-0 left-0 h-[3px] bg-ink" style={{ animation: `viz-progress ${seconds}s linear forwards` }} />
-          )}
-        </li>
-      ))}
-    </ol>
+    <div role="group" aria-label={copy.pickViz} className="absolute bottom-2 left-2 flex max-w-[calc(100%-16px)] flex-wrap items-center gap-1 rounded-chip bg-white/90 px-1.5 py-1 border-ink shadow-hard-2" data-testid="live-viz-indicator" data-held={shown.held ?? undefined}>
+      {shown.available.map((id) => {
+        const on = id === shown.current;
+        return (
+          <button
+            key={id}
+            type="button"
+            aria-pressed={shown.held === id}
+            title={shown.held === id ? copy.release : undefined}
+            onClick={(event) => {
+              event.stopPropagation();
+              onPick(id);
+            }}
+            className={`relative cursor-pointer overflow-hidden rounded-full px-2 py-0.5 text-[12px] font-extrabold lg:text-[clamp(12px,0.8vw,18px)] ${on ? "bg-sun text-ink" : "text-ink/60 hover:bg-sun-soft"} ${shown.held === id ? "ring-2 ring-ink" : ""}`}
+          >
+            {copy.vizNames[id]}
+            {shown.held === id && <span className="ml-1 text-[0.8em] opacity-70">📌</span>}
+            {on && seconds > 0 && !reducedMotion && <span key={id} className="absolute bottom-0 left-0 h-[3px] bg-ink" style={{ animation: `viz-progress ${seconds}s linear forwards` }} />}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
 // The stage behind the counters: one visualization at a time, a new one on every load and every 30 s by default.
 export default function LiveStage({ locale, ...rest }: Props) {
   const reducedMotion = usePrefersReducedMotion();
-  const [shown, drop] = useStage(reducedMotion);
+  const { shown, drop, pick } = useStage(reducedMotion);
   if (!shown) return null;
-  const props: VizProps = { ...rest, reducedMotion };
   const layers = shown.leaving && !reducedMotion ? [shown.leaving, shown.current] : [shown.current];
   return (
     <div className="absolute inset-0" data-testid="live-stage" data-current={shown.current}>
@@ -131,10 +160,10 @@ export default function LiveStage({ locale, ...rest }: Props) {
           className="absolute inset-0"
           style={{ animation: reducedMotion ? undefined : `${id === shown.current ? "viz-in" : "viz-out"} ${FADE_MS}ms ease-in-out both`, pointerEvents: id === shown.current ? "auto" : "none" }}
         >
-          <View id={id} props={props} onUnavailable={() => drop(id)} />
+          <View id={id} props={{ ...rest, reducedMotion, onUnavailable: () => drop(id) }} />
         </div>
       ))}
-      {!shown.rotation.pinned && shown.available.length > 1 && <Indicator shown={shown} locale={locale} reducedMotion={reducedMotion} />}
+      {!shown.rotation.pinned && shown.available.length > 1 && <Switcher shown={shown} locale={locale} reducedMotion={reducedMotion} onPick={pick} />}
     </div>
   );
 }

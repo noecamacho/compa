@@ -94,7 +94,16 @@ export const live: typeof es.live = {
   endedBody: (people: string, links: string) => `${people} people wove ${links} connections. Thanks for coming.`,
   podium: "Final podium",
   tie: "tie",
-  vizNames: { loom: "Loom", orbit: "Orbit", race: "Race", wave: "Pulse" },
+  vizNames: { loom: "Loom", orbit: "Orbit", race: "Race", wave: "Pulse", cosmos: "Cosmos", garden: "Garden", marquee: "Type", marbles: "Marbles", skyline: "Skyline" },
+  pickViz: "Pick a view",
+  pinned: "pinned",
+  release: "Release",
+  events: {
+    joined: (name: string) => `${name} is in`,
+    points: (points: string, name: string) => `+${points} ${name}`,
+    rank: (name: string, place: string) => `${name} → #${place}`,
+    more: (count: string) => `+${count} more`,
+  },
 };
 
 export const eventNotFound: typeof es.eventNotFound = {

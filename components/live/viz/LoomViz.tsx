@@ -5,10 +5,8 @@ import Loom from "../Loom";
 import type { LoomData } from "../loom-scene";
 import type { VizProps } from "./types";
 
-type Props = VizProps & { onUnavailable: () => void };
-
 // The loom behind the shared visualization contract; it reads reduced motion itself.
-export default function LoomViz({ snapshot, label, selectedId, onSelect, onUnavailable }: Props) {
+export default function LoomViz({ snapshot, label, selectedId, onSelect, onUnavailable = () => {} }: VizProps) {
   const data: LoomData = useMemo(() => ({ people: snapshot.people, links: snapshot.connections }), [snapshot]);
   return (
     <div className="absolute inset-0" data-viz="loom">
