@@ -8,10 +8,15 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 - Package manager and runtime is Bun instead of pnpm (team decision); Next.js, TypeScript, Supabase and Vercel unchanged. Commands are `bun run dev|lint|typecheck|build|seed`.
 - TypeScript is 6.0 instead of 7.0: typescript-eslint and the Next.js build checker do not support the TS 7 API yet. The seed command is `bun run db:seed`.
+- Transcription and AI summaries are in Spanish (team decision); code and docs stay English.
 
 ### Added
 
 - API scaffold: Next.js App Router on Bun, Drizzle schema and init migration for the 2026-10-29 data model (with RLS on every table), an interests seed, every API-spec route with zod validation, an OpenAPI 3.1 document (`/api/openapi.json`, `/api/docs`, `openapi.json`), mock mode on every route (`API_MODE=mock`, `x-compa-mock`, error simulation) and real handlers for profile, events, connections, live and summaries. See `docs/api-quickstart.md`.
+- `docs/specs/2026-10-29-api.md`: approved API spec with routes, request and response shapes, the visibility filter, connection behavior and Realtime channels.
+- `docs/specs/2026-10-29-data-model.md`: approved data model for multi-event COMPA with LinkedIn-only sign-in, event check-in, confirmed connections (20 new, 10 reconnection) and per-field profile visibility.
+- `docs/plans/2026-10-28-mvp-api-plan.md`: MVP API plan covering LinkedIn sign-up, profile import and field visibility, database entities, route behavior, connection tracking and the `/live` data contract.
+- Browser audio recorder in `lib/audio/recorder.ts` (2-minute auto-stop, typed errors, transcript upload) and the AI summaries API contract in `docs/contracts/ai-summaries-api.md`.
 - AI core in `lib/ai/`: audio transcription and Spanish summary drafts with Structured Outputs and a verbatim fallback; placeholder topics vocabulary in `lib/topics.ts`.
 - LLM wiki (`raw/`, `wiki/`) ingesting the 21-page COMPA build plan and the 14-slide Build Day deck with 34 cross-linked, cited pages, an index, an append-only log, a glossary and an open-questions page.
 - `AGENTS.md` as the single agent and contributor instruction file, including the hackathon fast path for the 2026-10-29 10:00 submission deadline; `CLAUDE.md` imports it.

@@ -42,7 +42,7 @@ Decided: the principles, the seven screens and their acceptance criteria, the `/
 
 Open (see [wiki/open-questions.md](wiki/open-questions.md)):
 
-- End-user language: the plan says UI and generated summaries are in Spanish (p. 12, p. 16); this repository's English-only rule covers code and documentation, and the product language is not yet recorded as a decision (#6).
+- End-user language: the plan says UI and generated summaries are in Spanish (p. 12, p. 16); this repository's English-only rule covers code and documentation, and the team decided on 2026-10-29 that transcription and generated summaries are Spanish (#6).
 - Visual identity: no palette, typography or logo is defined; "strong colors, huge typography" is the only direction (p. 6).
 - Recovery screen for handle + code is implied but not designed (#12).
 - Where the seed hide toggle and the leaderboard opt-out live in the UI (#7, #17).
