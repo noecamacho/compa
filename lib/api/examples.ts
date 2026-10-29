@@ -231,6 +231,16 @@ export const liveSnapshot: z.input<typeof S.LiveSnapshot> = {
   generatedAt: "2026-10-29T18:45:00.000Z",
 };
 
+const pairPerson = (id: string, name: string) => ({ id, name, photoUrl: null });
+
+export const liveRecent: z.input<typeof S.LiveRecent> = {
+  pairs: [
+    { id: ids.connection, a: pairPerson(ids.valeria, valeriaPublic.name), b: pairPerson(ids.rodrigo, rodrigo.name), kind: "new", at: "2026-10-29T18:44:00.000Z" },
+    { id: ids.connection2, a: pairPerson(ids.sofia, sofia.name), b: pairPerson(ids.paola, paola.name), kind: "new", at: "2026-10-29T18:43:00.000Z" },
+    { id: ids.connection3, a: pairPerson(ids.ximena, ximena.name), b: pairPerson(ids.carlos, carlos.name), kind: "reconnection", at: "2026-10-29T18:41:00.000Z" },
+  ],
+};
+
 const row = (rank: number, person: Card, points: number, connections: number): z.input<typeof S.LeaderboardRow> => ({
   rank,
   userId: person.id,

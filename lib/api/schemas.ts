@@ -350,6 +350,15 @@ export const LiveSnapshot = z
   })
   .meta({ id: "LiveSnapshot" });
 
+const LivePairPerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable() });
+
+// The few newest pairs for the /home live card, instead of the whole big-screen snapshot (conference-scale finding 5).
+export const LiveRecent = z
+  .object({
+    pairs: z.array(z.object({ id: uuid, a: LivePairPerson, b: LivePairPerson, kind: ConnectionKind, at: isoDate })),
+  })
+  .meta({ id: "LiveRecent" });
+
 export const LivePersonCard = z
   .object({ card: Card, points: z.int(), connections: z.int(), rank: z.int() })
   .meta({ id: "LivePersonCard" });
@@ -458,6 +467,7 @@ export type BadgeListT = z.infer<typeof BadgeList>;
 export type BadgeStatusT = z.infer<typeof BadgeStatus>;
 export type InvitesT = z.infer<typeof Invites>;
 export type LiveSnapshotT = z.infer<typeof LiveSnapshot>;
+export type LiveRecentT = z.infer<typeof LiveRecent>;
 export type LivePersonCardT = z.infer<typeof LivePersonCard>;
 export type EventDoorT = z.infer<typeof EventDoor>;
 export type DraftT = z.infer<typeof Draft>;
