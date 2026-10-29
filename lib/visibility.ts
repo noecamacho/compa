@@ -1,7 +1,7 @@
 // The single visibility filter for every view of another person (API spec §6, data model §4.5).
 import type { CardT } from "./api/schemas";
 import type { MonitoLook } from "./monito/look";
-import { LINK_KEYS, type Links, type Visibility, type VisibilitySettings } from "./profile-fields";
+import { LINK_KEYS, withDefaultVisibility, type Links, type Visibility, type VisibilitySettings } from "./profile-fields";
 
 // public: anonymous or not connected; connected: an accepted connection at any event; self: the owner.
 export type Relation = "public" | "connected" | "self";
@@ -37,7 +37,8 @@ const optionalField = <K extends string, V>(key: K, value: V | null | undefined,
   visible && value !== null && value !== undefined ? ({ [key]: value } as Record<K, V>) : {};
 
 // Never returns email, auth ids, LinkedIn claims or the admin flag: they are not in CardSource at all.
-export function toCard(owner: CardSource, relation: Relation): CardT {
+export function toCard(stored: CardSource, relation: Relation): CardT {
+  const owner = { ...stored, visibility: withDefaultVisibility(stored.visibility) };
   const links = visibleLinks(owner, relation);
   return {
     id: owner.id,

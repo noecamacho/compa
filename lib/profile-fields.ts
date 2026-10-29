@@ -19,3 +19,12 @@ export const DEFAULT_VISIBILITY: VisibilitySettings = {
   interests: "public",
   links: { linkedin: "connections", github: "connections", x: "connections", instagram: "connections", whatsapp: "connections", web: "connections" },
 };
+
+// What a stored row may hold at runtime: rows written before a key existed (e.g. `whatsapp` before migration 0001) lack it.
+export type StoredVisibility = Partial<Omit<VisibilitySettings, "links">> & { links?: Partial<Record<LinkKey, Visibility>> };
+
+export const withDefaultVisibility = (stored: StoredVisibility): VisibilitySettings => ({
+  ...DEFAULT_VISIBILITY,
+  ...stored,
+  links: { ...DEFAULT_VISIBILITY.links, ...stored.links },
+});

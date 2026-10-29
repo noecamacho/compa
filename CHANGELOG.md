@@ -6,6 +6,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Profiles stored before migration 0001 parse again: stored `visibility` is merged with the defaults in `/api/me`, cards and the visibility update.
 - Accept Chrome and Android voice notes: MediaRecorder webm files carry no duration, so the server now rejects only audio whose known length exceeds two minutes or that contains no audio track.
 - Require explicit screen consent before writing an event check-in; accept multipart transcription uploads with server-side size and two-minute duration limits.
 

@@ -8,6 +8,7 @@ import type * as R from "../api/routes";
 import type { MeT } from "../api/schemas";
 import { hasEnded, statusForViewer } from "../connection-status";
 import { mergeLinks } from "../links";
+import { withDefaultVisibility } from "../profile-fields";
 import { toCard } from "../visibility";
 import { earnedBadgeIds } from "./badges";
 import { latestInteraction } from "./connection-detail";
@@ -28,7 +29,7 @@ async function buildMe(user: UserRow): Promise<MeT> {
   return {
     ...card,
     email: user.email,
-    visibility: user.visibility,
+    visibility: withDefaultVisibility(user.visibility),
     nameEdited: user.nameEdited,
     photoEdited: user.photoEdited,
     isAdmin: user.isAdmin,
@@ -80,7 +81,7 @@ export async function patchMe({ user, body }: InputOf<typeof R.patchMe>): Result
 }
 
 export async function patchVisibility({ user, body }: InputOf<typeof R.patchVisibility>): ResultOf<typeof R.patchVisibility> {
-  const current = user.visibility;
+  const current = withDefaultVisibility(user.visibility);
   const visibility = {
     headline: body.headline ?? current.headline,
     company: body.company ?? current.company,
