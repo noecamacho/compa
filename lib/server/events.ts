@@ -40,6 +40,10 @@ const noTestMember = sql`not exists (select 1 from ${users} where ${users.id} in
 
 export const connectionsOfRealPeople = (event: Pick<EventRow, "isTest">) => (event.isTest ? undefined : noTestMember);
 
+// A6: public event reads (door, big screen) share a 1 s CDN cache, so a room of phones or several screens polling the
+// same event costs one function call per second, not one per request.
+export const LIVE_CACHE = { "Cache-Control": "public, s-maxage=1, stale-while-revalidate=1" };
+
 export const toEventBody = (event: EventRow, now = new Date()) => ({
   slug: event.slug,
   name: event.name,
@@ -81,7 +85,7 @@ export async function getEvent({ params }: InputOf<typeof R.getEvent>): ResultOf
     phase: phaseOf(event, now),
     counters: await doorCounters(event),
   };
-  return { body };
+  return { body, headers: LIVE_CACHE };
 }
 
 export type CheckInResult = { checkedInAt: Date; created: boolean };

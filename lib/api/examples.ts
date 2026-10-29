@@ -207,13 +207,13 @@ export const incomingDetail: z.input<typeof S.ConnectionDetail> = {
 export const liveSnapshot: z.input<typeof S.LiveSnapshot> = {
   event: { ...foundersDoor, isRunning: true },
   people: [
-    { id: ids.valeria, name: valeriaPublic.name, photoUrl: null, points: 1980 },
-    { id: ids.rodrigo, name: rodrigo.name, photoUrl: null, points: 1720 },
-    { id: ids.sofia, name: sofia.name, photoUrl: null, points: 1540 },
-    { id: ids.paola, name: paola.name, photoUrl: null, points: 1410 },
-    { id: ids.ximena, name: ximena.name, photoUrl: null, points: 1300 },
-    { id: ids.diego, name: diego.name, photoUrl: null, points: 1265 },
-    { id: ids.carlos, name: carlos.name, photoUrl: null, points: 980 },
+    { id: ids.valeria, name: valeriaPublic.name, photoUrl: null, points: 1980, connections: 24 },
+    { id: ids.rodrigo, name: rodrigo.name, photoUrl: null, points: 1720, connections: 20 },
+    { id: ids.sofia, name: sofia.name, photoUrl: null, points: 1540, connections: 18 },
+    { id: ids.paola, name: paola.name, photoUrl: null, points: 1410, connections: 16 },
+    { id: ids.ximena, name: ximena.name, photoUrl: null, points: 1300, connections: 15 },
+    { id: ids.diego, name: diego.name, photoUrl: null, points: 1265, connections: 15 },
+    { id: ids.carlos, name: carlos.name, photoUrl: null, points: 980, connections: 11 },
   ],
   connections: [
     { id: ids.connection, a: ids.valeria, b: ids.rodrigo, kind: "new", at: "2026-10-29T18:44:00.000Z" },

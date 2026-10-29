@@ -42,6 +42,8 @@ export const E = {
   invalidInput: spec(400, "invalid_input", "Some fields are invalid.", { name: ["Too small: expected string to have >=1 characters"] }),
   invalidAudio: spec(400, "invalid_audio", "The audio could not be read. Type the note instead."),
   unauthorized: spec(401, "unauthorized", "Sign in with LinkedIn to continue."),
+  // Supabase Auth could not answer (outage or overload): retry, the session is not lost (conference-scale finding 1).
+  authUnavailable: spec(503, "auth_unavailable", "Sign-in could not be checked right now. Retry in a moment."),
   forbidden: spec(403, "forbidden", "You cannot do this."),
   notAuthor: spec(403, "not_author", "Only the author of the summary can approve it."),
   notFound: spec(404, "not_found", "Not found."),

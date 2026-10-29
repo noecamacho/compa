@@ -12,12 +12,7 @@ export type BoardRow = { rank: number; id: string; name: string; points: number;
 
 // The leaderboard comes from the snapshot already on screen: people arrive ranked (points, connections, check-in).
 export function boardRows(snapshot: LiveSnapshotT): BoardRow[] {
-  const counts = new Map<string, number>();
-  for (const link of snapshot.connections) {
-    counts.set(link.a, (counts.get(link.a) ?? 0) + 1);
-    counts.set(link.b, (counts.get(link.b) ?? 0) + 1);
-  }
-  return snapshot.people.map((person, index) => ({ rank: index + 1, id: person.id, name: person.name, points: person.points, connections: counts.get(person.id) ?? 0 }));
+  return snapshot.people.map((person, index) => ({ rank: index + 1, id: person.id, name: person.name, points: person.points, connections: person.connections }));
 }
 
 const PODIUM = ["#FFD93D", "#D5DCE6", "#F2A766"];

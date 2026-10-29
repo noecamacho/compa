@@ -1,7 +1,7 @@
 import "server-only";
 import { and, count, desc, eq, lt, ne, or } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
-import { bonusPoints, connections, events, lifetimeScores, type ConnectionRow, type EventRow, type UserRow } from "../../db/schema";
+import { bonusPoints, connections, events, type ConnectionRow, type EventRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
 import { CAPS } from "../api/rate-limits";
 import type { InputOf, ResultOf } from "../api/route-spec";
@@ -15,6 +15,7 @@ import { ensureCheckedIn, isCheckedIn } from "./events";
 import { awardInvite } from "./invites";
 import { requireUnderCap } from "./rate-limit";
 import { cardFor, cardsFor, findCurrentEvent, findUserByHandle, pairCondition, usersByIds } from "./people";
+import { lifetimePointsOf } from "./scores";
 
 const eventRef = (event: EventRow) => ({ slug: event.slug, name: event.name });
 
@@ -278,11 +279,6 @@ function personHistory(person: CardT, items: MyConnection[], userId: string, now
   return { person, meetings, lastMetAt: meetings[0]?.at ?? now.toISOString(), totalPoints, type: personType(items), topics };
 }
 
-async function lifetimePoints(userId: string): Promise<number> {
-  const [row] = await getDb().select({ points: lifetimeScores.points }).from(lifetimeScores).where(eq(lifetimeScores.userId, userId));
-  return row?.points ?? 0;
-}
-
 export async function listConnections({ user }: InputOf<typeof R.listConnections>): ResultOf<typeof R.listConnections> {
   const now = new Date();
   const list = await myConnections(user.id);
@@ -300,7 +296,7 @@ export async function listConnections({ user }: InputOf<typeof R.listConnections
     });
   const accepted = list.filter(({ row }) => row.status === "accepted");
   const totals = {
-    points: await lifetimePoints(user.id),
+    points: await lifetimePointsOf(user.id),
     connections: accepted.length,
     people: new Set(accepted.map(({ row }) => otherPerson(row, user.id))).size,
   };

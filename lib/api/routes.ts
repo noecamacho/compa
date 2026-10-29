@@ -8,7 +8,7 @@ import { LIMITS } from "./rate-limits";
 import { NoBody, route, type AnyRouteSpec } from "./route-spec";
 import * as S from "./schemas";
 
-const WITH_USER = [E.unauthorized] as const;
+const WITH_USER = [E.unauthorized, E.authUnavailable] as const;
 // Admin routes answer 404 to everyone who is not a super admin, signed in or not (A11).
 const ADMIN = "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11).";
 const AUTOMATION = `${ADMIN} Also opens with the \`x-compa-automation\` header (TEST_AUTOMATION_SECRET) for test runners.`;
@@ -97,7 +97,7 @@ export const patchMe = route({
   body: S.PatchMeBody,
   bodyExample: { headline: "Cofounder", company: "Kuali", city: "Guadalajara, Jalisco", links: { instagram: "@diego.rmz" } },
   success: { status: 200, description: "The updated profile.", schema: S.Me, example: X.me },
-  errors: [E.invalidInput, E.unauthorized],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable],
 });
 
 export const patchVisibility = route({
@@ -111,7 +111,7 @@ export const patchVisibility = route({
   body: S.PatchVisibilityBody,
   bodyExample: { company: "connections", links: { x: "hidden" } },
   success: { status: 200, description: "The full visibility settings.", schema: S.VisibilitySettings, example: X.me.visibility },
-  errors: [E.invalidInput, E.unauthorized],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable],
 });
 
 export const listInterests = route({
@@ -141,7 +141,7 @@ export const getUser = route({
     example: X.valeriaProfile,
     examples: { stranger: { summary: "No connection yet", value: { card: X.valeriaPublic } } },
   },
-  errors: [E.unauthorized, E.userNotFound],
+  errors: [E.unauthorized, E.authUnavailable, E.userNotFound],
 });
 
 export const listAdminEvents = route({
@@ -409,7 +409,7 @@ export const getEvent = route({
   method: "get",
   path: "/api/e/{code}",
   summary: "Event door (event QR)",
-  description: `${CODE_GATED} Name, window and the two counters the door shows.`,
+  description: `${CODE_GATED} Name, window and the two counters the door shows; cached for at most 1 s (A6).`,
   tags: ["events"],
   auth: "public",
   params: S.EventCodeParams,
@@ -435,7 +435,7 @@ export const checkIn = route({
     schema: S.CheckIn,
     example: { event: X.foundersDoor, checkedInAt: "2026-10-29T17:02:31.000Z", alreadyCheckedIn: false },
   },
-  errors: [E.invalidInput, E.unauthorized, E.eventNotFound, E.eventNotRunning, E.testUserNotAllowed],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.eventNotFound, E.eventNotRunning, E.testUserNotAllowed],
 });
 
 export const createConnection = route({
@@ -456,7 +456,7 @@ export const createConnection = route({
     schema: S.ConnectionRequest,
     example: { connectionId: X.ids.connection, status: "pending", event: X.founders, to: X.valeriaPublic },
   },
-  errors: [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed, E.rateLimited, E.limitReached],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed, E.rateLimited, E.limitReached],
   rateLimit: [LIMITS.scanPerMinute],
 });
 
@@ -508,7 +508,7 @@ export const setKnew = route({
   body: S.KnewBody,
   bodyExample: { knew: true },
   success: { status: 200, description: "Saved.", schema: S.KnewResult, example: { connectionId: X.ids.connection, knew: true } },
-  errors: [E.invalidInput, E.unauthorized, E.forbidden, E.connectionNotFound, E.notPending],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.forbidden, E.connectionNotFound, E.notPending],
 });
 
 export const acceptConnection = route({
@@ -535,7 +535,7 @@ export const acceptConnection = route({
       },
     },
   },
-  errors: [E.invalidInput, E.unauthorized, E.forbidden, E.connectionNotFound, E.notPending, E.eventEnded],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.forbidden, E.connectionNotFound, E.notPending, E.eventEnded],
 });
 
 export const declineConnection = route({
@@ -547,7 +547,7 @@ export const declineConnection = route({
   auth: "user",
   params: S.IdParams,
   success: { status: 204, description: "Declined. The requester keeps seeing pending until the event ends.", schema: NoBody },
-  errors: [E.unauthorized, E.forbidden, E.connectionNotFound, E.notPending, E.eventEnded],
+  errors: [E.unauthorized, E.authUnavailable, E.forbidden, E.connectionNotFound, E.notPending, E.eventEnded],
 });
 
 export const liveSnapshot = route({
@@ -555,7 +555,7 @@ export const liveSnapshot = route({
   method: "get",
   path: "/api/e/{code}/live",
   summary: "Big screen snapshot",
-  description: `${CODE_GATED} Accepted connections only; cached for at most 1 s (A6).`,
+  description: `${CODE_GATED} Accepted connections only, the 1,000 most recent; counters count them all. People carry their event points and connection count. Cached for at most 1 s (A6).`,
   tags: ["live"],
   auth: "public",
   params: S.EventCodeParams,
@@ -617,7 +617,7 @@ export const transcribe = route({
     schema: S.Transcript,
     example: { text: "Hablé con Mateo sobre cómo migrar el panel de Vue a React y quedamos en compartir el repo." },
   },
-  errors: [E.invalidAudio, E.unauthorized, E.rateLimited, E.transcriptionFailed],
+  errors: [E.invalidAudio, E.unauthorized, E.authUnavailable, E.rateLimited, E.transcriptionFailed],
   rateLimit: [LIMITS.transcribePerMinute, LIMITS.transcribePerDay],
 });
 
@@ -647,7 +647,7 @@ export const draftSummary = route({
       },
     },
   },
-  errors: [E.invalidInput, E.unauthorized, E.notFound, E.connectionNotAccepted, E.rateLimited, E.limitReached, E.summaryFailed],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.notFound, E.connectionNotAccepted, E.rateLimited, E.limitReached, E.summaryFailed],
   rateLimit: [LIMITS.draftPerMinute],
 });
 
@@ -677,7 +677,7 @@ export const approveSummary = route({
       pointsAwarded: 15,
     },
   },
-  errors: [E.invalidInput, E.unauthorized, E.notAuthor, E.notFound, E.notSubstantive, E.alreadyApproved],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.notAuthor, E.notFound, E.notSubstantive, E.alreadyApproved],
 });
 
 export const getConnection = route({
@@ -696,7 +696,7 @@ export const getConnection = route({
     example: X.connectionDetail,
     examples: { incoming: { summary: "A pending request someone sent me", value: X.incomingDetail } },
   },
-  errors: [E.unauthorized, E.connectionNotFound],
+  errors: [E.unauthorized, E.authUnavailable, E.connectionNotFound],
 });
 
 export const listBadges = route({
@@ -732,7 +732,7 @@ export const claimInvite = route({
   auth: "user",
   params: S.CodeParams,
   success: { status: 200, description: "Linked to the inviter.", schema: S.ClaimedInvite, example: { code: X.invites.code, inviter: X.diego } },
-  errors: [E.unauthorized, E.notFound],
+  errors: [E.unauthorized, E.authUnavailable, E.notFound],
 });
 
 export const ROUTES: readonly AnyRouteSpec[] = [

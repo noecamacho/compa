@@ -21,7 +21,7 @@ async function buildMe(user: UserRow): Promise<MeT> {
   const current = await findCurrentEvent(user.id, now, db);
   const [names, scores, stats, badges] = await Promise.all([
     interestNamesFor([user.id], db),
-    scoresFor(user, current, db),
+    scoresFor(user, current),
     statsFor(user.id, db),
     earnedBadgeIds(user.id, db),
   ]);
@@ -166,7 +166,7 @@ export async function getUser({ user, params }: InputOf<typeof R.getUser>): Resu
   const [card, connection, scores, stats, badges, connected] = await Promise.all([
     cardFor(user.id, owner, db),
     relationAtCurrentEvent(user, owner, event, db),
-    scoresFor(owner, event, db),
+    scoresFor(owner, event),
     statsFor(owner.id, db),
     earnedBadgeIds(owner.id, db),
     connectedPeers(user.id, [owner.id], db),
