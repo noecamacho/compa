@@ -10,6 +10,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Changed
 
+- Vercel deploys are production-only and keep exactly one deployment: the workflow no longer deploys PR previews and deletes older deployments after each successful production deploy (captain decision).
 - Package manager and runtime is Bun instead of pnpm (team decision); Next.js, TypeScript, Supabase and Vercel unchanged. Commands are `bun run dev|lint|typecheck|build|seed`.
 - TypeScript is 6.0 instead of 7.0: typescript-eslint and the Next.js build checker do not support the TS 7 API yet. The seed command is `bun run db:seed`.
 - Transcription and AI summaries are in Spanish (team decision); code and docs stay English.
