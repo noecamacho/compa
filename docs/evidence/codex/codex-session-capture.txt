@@ -1,0 +1,78 @@
+WARNING: queued wakes pending - drain them with bin/fm-wake-drain.sh before anything else.
+  - **Sub agents: model-router.** Use the model-router skill to pick the model tier for every sub agent you spawn. Split independent survey or research work across parallel sub agents, and before you commit, have one separate sub agent check your result against the code. Every sub agent you
+  spawn gets this same stack: caveman, repomix, Serena, RTK, the coding skills, and model-router.
+  - **Supabase and Vercel: their plugins.** When the task touches Supabase (schema, migrations, SQL, auth, storage, RLS, Postgres performance) use the installed `supabase` plugin's skills (`supabase`, `supabase-postgres-best-practices`) and its MCP where appropriate. When it touches Vercel
+  (deployments, domains, env vars, logs, Next.js on Vercel) use the installed `vercel` plugin's skills and tools. Fall back to the CLIs only where the plugin does not cover the step.
+  - **Types at every boundary.** The captain cares that code knows exactly what enters, is processed, and is returned. Type every input, intermediate, and return; validate untrusted data (webhooks, third-party API responses, env, URL state) with a schema (zod in TypeScript projects) and
+  infer types from it; prefer the provider's official typed SDK or generated types over hand-written shapes; never add `any` or unchecked casts.
+  - **Vercel build minutes are budgeted (hard-restaurant).** The captain does not want Vercel CPU build time burned. Verify locally first - typecheck, lint, unit, integration, `next build` and the affected e2e specs - and push only when the branch is ready, in as few pushes as possible (no
+  push-to-see-CI loops). PR preview builds are off; staging builds from merged main, so a merge happens only when you are confident it is correct. Never trigger a Vercel build or redeploy by hand.
+  - **Browser and memory (Ubuntu PC).** For browser checks, Google Chrome may be closed on this machine: launch it when you need claude-in-chrome or a headed browser, and prefer headless Playwright for automated checks. Close every tab, browser, dev server and background process you are no
+  longer using, as soon as you are done with it - RAM is shared with other workers.
+  - **Heavy local jobs are serialized (Ubuntu PC).** A `next build` takes ~3.5 GB. Wrap every local production build and full e2e run in the shared lock so only one runs at a time across all workers: `hr-heavy bun run build` (same for `bun run test:e2e`, and `npm run build` in other
+  projects); `hr-heavy` (in ~/.local/bin) runs at most two heavy jobs machine-wide; a dev server or `next start` for screenshots counts as a heavy job too.
+
+
+• I’ll verify isolation, load the required skills, then capture Codex evidence and build five videos. Production stays read-only.
+
+• Ran pwd -P …
+  └ [local path]
+    [local path]
+    Switched to a new branch 'fm/compa-codex-videos-now'
+    + Show details
+
+• Explored
+  └ Read index.md, SKILL.md, SKILL.md (caveman skill), SKILL.md (compa-wiki skill)
+    + Show details
+
+• Failed (exit 1) date +%s …
+  └ If they agree to the companion, read the detailed guide before proceeding:
+    `skills/brainstorming/visual-companion.md`
+    cat: [local path] No such file or directory
+    + 529 lines (^t to expand)
+
+• Using caveman for status, compa-wiki for evidence records, ponytail for small changes. Five cuts: problem, QR solution, JSConf journey, live screen, organizer tools. Captions bilingual; staged examples labeled.
+
+• Ran chrome-devtools-axi --help …
+  └ ## Risks and rollback
+
+    <!-- What could break, how to notice it, how to roll back (usually: revert this PR). -->
+    + 232 lines (^t to expand)
+
+• Ran git pull origin main …
+  └ Installed marketplace root: [local path]
+    Added plugin `brag` from marketplace `brag`.
+    Installed plugin root: [local path]
+    + 19 lines (^t to expand)
+
+• Ran mkdir -p docs/evidence/codex …
+  └                total        used        free      shared  buff/cache   available
+    Mem:            30Gi        17Gi       1.2Gi       1.8Gi        13Gi        12Gi
+    Swap:           15Gi        12Gi       3.3Gi
+    + 374 lines (^t to expand)
+
+• Ran /usr/bin/import -window root docs/evidence/codex/codex-session-header.png …
+  └ When a line you want is not grounded, the fix is usually to quote what the
+    project does say, which is almost always stranger and better than the
+    invented version.
+    + 781 lines (^t to expand)
+
+• Ran CHROME_DEVTOOLS_AXI_SESSION=compa-videos chrome-devtools-axi open https://compa.lol
+  └ help[2]:
+      Run `chrome-devtools-axi click @g2:1_6` to click the "Sign in with LinkedIn" link
+      Use `chrome-devtools-axi eval <expr>` for JS expressions. For multi-statement code, pass a function: `eval "() => { ...; return result }"`
+    + 17 lines (^t to expand)
+
+• Ran date +%s …
+  └   "license": "MIT",
+      "keywords": ["video", "launch", "hyperframes", "skill"]
+    }
+    + 15 lines (^t to expand)
+
+                                                                                                                                       ↓ Back to bottom · esc
+
+› : Firstmate instruction waiting: list '[local path]'/*.msg and, in numeric order, read and act on each, then mv each handled file to '[local path]'/handled/.
+
+
+  GPT-6.1-Sol high · Context 12% used · weekly 100% left · [local worktree] · fm/compa-codex-videos-now
+  esc latest                                                                                                                                                                                                                                                               ⚠ 2 warnings · f2 to view
