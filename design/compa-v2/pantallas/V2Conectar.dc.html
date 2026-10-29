@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Compa V2 · Conectar</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFF6E5;color:#1E1B2E;font-family:Nunito,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#1E1B2E;text-decoration:none}a:hover{color:#C2412A}
+.d{font-family:Fredoka,Nunito,system-ui,sans-serif;font-weight:700}
+.muted{color:#6F6A7E}
+.card{background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:4px 4px 0 #1E1B2E;border-radius:22px;box-sizing:border-box}
+.av{display:flex;align-items:center;justify-content:center;border-radius:50%;font:700 12px/1 Fredoka,Nunito,sans-serif;color:#1E1B2E;flex-shrink:0;border:2.5px solid #1E1B2E;box-sizing:border-box}
+.ib{display:flex;align-items:center;justify-content:center;width:44px;height:44px;box-sizing:border-box;border-radius:14px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;color:#1E1B2E;cursor:pointer;padding:0;flex-shrink:0}
+.seg{height:40px;border:0;border-radius:11px;font:700 15px/1 Fredoka,Nunito,sans-serif;cursor:pointer}
+.row{display:flex;align-items:center;gap:12px;padding:10px 14px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;border-radius:18px;box-sizing:border-box}
+.cnr{position:absolute;width:34px;height:34px;box-sizing:border-box;border-color:#6BE4A3;border-style:solid;border-width:0}
+.inp{display:block;width:100%;height:48px;box-sizing:border-box;border-radius:14px;border:2.5px solid #1E1B2E;background:#FFFFFF;padding:0 14px 0 44px;font:700 15px Nunito,sans-serif;color:#1E1B2E;outline:none}
+.inp::placeholder{color:#6F6A7E}
+.inp:focus{box-shadow:0 0 0 4px #6BE4A3}
+.go{display:inline-flex;align-items:center;justify-content:center;height:34px;padding:0 12px;box-sizing:border-box;border-radius:11px;background:#6BE4A3;border:2.5px solid #1E1B2E;box-shadow:2px 2px 0 #1E1B2E;font:700 13px/1 Fredoka,sans-serif;color:#1E1B2E;white-space:nowrap;flex-shrink:0}
+svg{flex-shrink:0}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;box-sizing:border-box;padding:48px 18px 0;display:flex;flex-direction:column;gap:14px;background-color:#FFF6E5;background-image:radial-gradient(rgba(30,27,46,0.07) 1.2px,transparent 1.3px);background-size:22px 22px">
+
+  <!-- Encabezado -->
+  <div style="display:flex;align-items:center;justify-content:space-between;height:44px">
+    <h1 class="d" style="margin:0;font-size:28px;line-height:1.1">Conectar</h1>
+    <a href="V2Invitar.dc.html" style="display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;box-sizing:border-box;border-radius:11px;background:#FFF3BF;border:2.5px solid #1E1B2E;box-shadow:2px 2px 0 #1E1B2E;font:800 13px/1 Nunito,sans-serif;white-space:nowrap"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1E1B2E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>Invitar</a>
+  </div>
+
+  <!-- Modo -->
+  <div role="group" aria-label="Modo" style="display:grid;grid-template-columns:repeat(2, minmax(0, 1fr));gap:4px;padding:4px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;border-radius:16px">
+    <button class="seg" aria-pressed="{{ qrPressed }}" onClick="{{ toQr }}" style="{{ qrStyle }}">Mi QR</button>
+    <button class="seg" aria-pressed="{{ scanPressed }}" onClick="{{ toScan }}" style="{{ scanStyle }}">Escanear</button>
+  </div>
+
+  <!-- Mi QR -->
+  <sc-if value="{{ isQr }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+      <div class="card" style="display:flex;align-items:center;gap:12px;width:315px;padding:10px 14px;box-shadow:3px 3px 0 #1E1B2E;border-radius:18px">
+        <dc-import name="Avatar" who="DR" size="46" hint-size="46px,46px"></dc-import>
+        <span style="display:flex;flex-direction:column;flex:1;min-width:0">
+          <span class="d" style="font-size:18px;line-height:1.2">Diego Ramírez</span>
+          <span class="muted" style="font-size:13px;font-weight:700">Cofounder · Kuali · Guadalajara</span>
+        </span>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;align-items:center;padding:18px;border-radius:28px">
+        <svg role="img" aria-label="Código QR de Diego Ramírez" width="274" height="274" viewBox="0 0 21 21" shape-rendering="crispEdges">
+          <rect width="21" height="21" fill="#FFFFFF"/>
+          <g fill="#1E1B2E">
+            <path d="M0 0h7v7H0zM1 1v5h5V1z" fill-rule="evenodd"/><rect x="2" y="2" width="3" height="3"/>
+            <path d="M14 0h7v7h-7zM15 1v5h5V1z" fill-rule="evenodd"/><rect x="16" y="2" width="3" height="3"/>
+            <path d="M0 14h7v7H0zM1 15v5h5v-5z" fill-rule="evenodd"/><rect x="2" y="16" width="3" height="3"/>
+            <rect x="8" y="0" width="1" height="1"/><rect x="10" y="0" width="2" height="1"/><rect x="9" y="1" width="1" height="2"/><rect x="11" y="2" width="1" height="1"/><rect x="8" y="3" width="2" height="1"/><rect x="12" y="3" width="1" height="2"/><rect x="8" y="5" width="1" height="1"/><rect x="10" y="5" width="2" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="11" y="6" width="2" height="1"/>
+            <rect x="0" y="8" width="2" height="1"/><rect x="3" y="8" width="1" height="1"/><rect x="5" y="8" width="2" height="1"/><rect x="8" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="12" y="8" width="2" height="1"/><rect x="15" y="8" width="1" height="1"/><rect x="17" y="8" width="2" height="1"/><rect x="20" y="8" width="1" height="1"/>
+            <rect x="1" y="9" width="1" height="1"/><rect x="4" y="9" width="2" height="1"/><rect x="7" y="9" width="2" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="14" y="9" width="2" height="1"/><rect x="18" y="9" width="1" height="1"/>
+            <rect x="0" y="10" width="1" height="1"/><rect x="2" y="10" width="2" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="13" y="10" width="1" height="1"/><rect x="16" y="10" width="2" height="1"/><rect x="19" y="10" width="2" height="1"/>
+            <rect x="1" y="11" width="2" height="1"/><rect x="5" y="11" width="2" height="1"/><rect x="15" y="11" width="1" height="1"/><rect x="18" y="11" width="2" height="1"/>
+            <rect x="0" y="12" width="1" height="1"/><rect x="3" y="12" width="1" height="1"/><rect x="6" y="12" width="2" height="1"/><rect x="13" y="12" width="3" height="1"/><rect x="17" y="12" width="1" height="1"/><rect x="20" y="12" width="1" height="1"/>
+            <rect x="8" y="14" width="2" height="1"/><rect x="11" y="14" width="1" height="1"/><rect x="14" y="14" width="1" height="1"/><rect x="16" y="14" width="3" height="1"/>
+            <rect x="9" y="15" width="1" height="1"/><rect x="12" y="15" width="2" height="1"/><rect x="15" y="15" width="1" height="1"/><rect x="18" y="15" width="1" height="1"/><rect x="20" y="15" width="1" height="1"/>
+            <rect x="8" y="16" width="1" height="1"/><rect x="10" y="16" width="2" height="1"/><rect x="13" y="16" width="1" height="1"/><rect x="16" y="16" width="2" height="1"/><rect x="19" y="16" width="1" height="1"/>
+            <rect x="9" y="17" width="2" height="1"/><rect x="12" y="17" width="1" height="1"/><rect x="14" y="17" width="2" height="1"/><rect x="18" y="17" width="2" height="1"/>
+            <rect x="8" y="18" width="1" height="1"/><rect x="11" y="18" width="3" height="1"/><rect x="15" y="18" width="1" height="1"/><rect x="17" y="18" width="1" height="1"/><rect x="20" y="18" width="1" height="1"/>
+            <rect x="10" y="19" width="1" height="1"/><rect x="12" y="19" width="2" height="1"/><rect x="16" y="19" width="2" height="1"/><rect x="19" y="19" width="1" height="1"/>
+            <rect x="8" y="20" width="2" height="1"/><rect x="11" y="20" width="1" height="1"/><rect x="14" y="20" width="2" height="1"/><rect x="18" y="20" width="3" height="1"/>
+          </g>
+          <rect x="8.3" y="8.3" width="4.4" height="4.4" rx="1.1" fill="#6BE4A3" stroke="#1E1B2E" stroke-width="0.35"/>
+        </svg>
+      </div>
+      <span class="muted" style="font-size:13px;font-weight:700">Muéstralo para que te escaneen.</span>
+    </div>
+  </sc-if>
+
+  <!-- Escanear -->
+  <sc-if value="{{ isScan }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="position:relative;height:360px;box-sizing:border-box;border-radius:28px;background:#1E1B2E;border:2.5px solid #1E1B2E;box-shadow:4px 4px 0 #6F6A7E;overflow:hidden">
+        <span style="position:absolute;left:0;right:0;top:14px;text-align:center;font:800 12px/1 Nunito,sans-serif;color:#FFF6E5;letter-spacing:1.2px;text-transform:uppercase">Apunta a su QR</span>
+        <span class="cnr" style="left:72px;top:48px;border-left-width:4px;border-top-width:4px;border-top-left-radius:12px"></span>
+        <span class="cnr" style="right:72px;top:48px;border-right-width:4px;border-top-width:4px;border-top-right-radius:12px"></span>
+        <span class="cnr" style="left:72px;top:234px;border-left-width:4px;border-bottom-width:4px;border-bottom-left-radius:12px"></span>
+        <span class="cnr" style="right:72px;top:234px;border-right-width:4px;border-bottom-width:4px;border-bottom-right-radius:12px"></span>
+        <span aria-hidden="true" style="position:absolute;left:86px;right:86px;top:156px;height:4px;border-radius:2px;background:#6BE4A3"></span>
+        <div class="row" style="position:absolute;left:12px;right:12px;bottom:12px">
+          <dc-import name="Avatar" who="VO" size="42" hint-size="42px,42px"></dc-import>
+          <span style="display:flex;flex-direction:column;flex:1;min-width:0">
+            <span style="font-size:15px;font-weight:800">Valeria Ochoa</span>
+            <span class="muted" style="font-size:12px;font-weight:700">CTO · Tlali</span>
+          </span>
+          <a href="V2Registrar.dc.html" class="go">Conectar</a>
+        </div>
+      </div>
+      <div style="position:relative">
+        <label for="cBuscar" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Buscar por nombre</label>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6F6A7E" stroke-width="2.6" stroke-linecap="round" aria-hidden="true" style="position:absolute;left:14px;top:14px"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input id="cBuscar" class="inp" type="search" placeholder="¿No sale el QR? Busca por nombre">
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- Tab bar -->
+  <div style="position:absolute;left:50%;bottom:20px;transform:translateX(-50%)"><dc-import name="DockV2" activa="conectar" hint-size="327px,66px"></dc-import></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { mode: 'qr' };
+  }
+  renderVals() {
+    const m = this.state.mode;
+    const on = 'background:#1E1B2E;color:#FFF6E5';
+    const off = 'background:transparent;color:#1E1B2E';
+    return {
+      isQr: m === 'qr', isScan: m === 'scan',
+      qrStyle: m === 'qr' ? on : off, scanStyle: m === 'scan' ? on : off,
+      qrPressed: m === 'qr' ? 'true' : 'false', scanPressed: m === 'scan' ? 'true' : 'false',
+      toQr: () => this.setState({ mode: 'qr' }),
+      toScan: () => this.setState({ mode: 'scan' })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Avatar monito</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="display:block;position:relative;width:{{ W }}px;height:{{ H }}px;flex-shrink:0;font-family:Nunito,system-ui,sans-serif;color:#1E1B2E">
+  <sc-if value="{{ circle }}" hint-placeholder-val="{{ true }}">
+    <span style="position:absolute;inset:0;box-sizing:border-box;border-radius:50%;background:{{ bg }};border:2.5px solid #1E1B2E;box-shadow:{{ sh }};overflow:hidden;display:block">
+      <span style="position:absolute;left:{{ x }}px;top:{{ y }}px;width:{{ mw }}px;height:{{ mh }}px;display:block"><dc-import name="Monito" look="{{ look }}" px="{{ mpx }}" label="{{ label }}" hint-size="43px,54px"></dc-import></span>
+    </span>
+  </sc-if>
+  <sc-if value="{{ full }}" hint-placeholder-val="{{ false }}">
+    <dc-import name="Monito" look="{{ look }}" px="{{ mpx }}" label="{{ label }}" hint-size="128px,160px"></dc-import>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"who":{"editor":"select","default":"DR","options":["DR","VO","RP","ST","XS","CI","PN","AM","MG"]},"size":{"editor":"int","default":40,"min":20,"max":200},"px":{"editor":"int","default":0,"min":0,"max":24},"shadow":{"editor":"int","default":0,"min":0,"max":6},"$preview":{"width":40,"height":40}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const base = {
+      piel: '#F5C9A3', pelo: 'corto', peloColor: '#5A3825', ropa: 'lisa', camisa: '#6BE4A3',
+      pantalon: '#4A6FA5', tenis: '#FFFFFF', gorra: 'ninguna', gorraColor: '#FF6B4A', gorraAcento: '#FFFFFF',
+      cara: 'nada', extra: 'nada'
+    };
+    const L = (o) => Object.assign({}, base, o);
+    const gente = {
+      DR: { n: 'Diego Ramírez', bg: '#FF8FAB', look: L({ ropa: 'evento', camisa: '#6CC4FF', acento: '#FFD93D' }) },
+      VO: { n: 'Valeria Ochoa', bg: '#6CC4FF', look: L({ piel: '#E0A97F', pelo: 'largo', peloColor: '#2A2438', camisa: '#6CC4FF' }) },
+      RP: { n: 'Rodrigo Peña', bg: '#FFD93D', look: L({ piel: '#BF8360', pelo: 'rapado', peloColor: '#2A2438', cara: 'bigote', camisa: '#FFD93D' }) },
+      ST: { n: 'Sofía Treviño', bg: '#6BE4A3', look: L({ piel: '#FFE0C7', pelo: 'chongo', peloColor: '#D9664F', camisa: '#FF8FAB' }) },
+      XS: { n: 'Ximena Salcedo', bg: '#FF8FAB', look: L({ piel: '#94603F', pelo: 'rizado', peloColor: '#2A2438', camisa: '#FF6B4A', pantalon: '#2E2B40' }) },
+      CI: { n: 'Carlos Ibarra', bg: '#6CC4FF', look: L({ piel: '#6B4129', pelo: 'puntas', peloColor: '#E8B44A', camisa: '#FFFFFF', ropa: 'compa' }) },
+      PN: { n: 'Paola Núñez', bg: '#FFD93D', look: L({ pelo: 'fleco', peloColor: '#2A2438', cara: 'lentes', camisa: '#FFD93D' }) },
+      AM: { n: 'Andrea Mireles', bg: '#6BE4A3', look: L({ piel: '#E0A97F', pelo: 'largo', peloColor: '#9A6232', camisa: '#6BE4A3', ropa: 'rayas' }) },
+      MG: { n: 'Mauricio Garza', bg: '#FF8FAB', look: L({ piel: '#BF8360', peloColor: '#2A2438', gorra: 'gorra', gorraColor: '#6CC4FF', camisa: '#FF8FAB' }) }
+    };
+    const p = gente[this.props.who] || gente.DR;
+    const px = this.props.px || 0;
+    if (px > 0) {
+      return { full: true, circle: false, W: 16 * px, H: 20 * px, mpx: px, look: p.look, label: p.n, bg: p.bg, sh: 'none', x: 0, y: 0, mw: 0, mh: 0 };
+    }
+    const s = this.props.size || 40;
+    const mpx = Math.round((s / 15) * 10) / 10;
+    const mw = 16 * mpx, mh = 20 * mpx;
+    const sh = this.props.shadow ? this.props.shadow + 'px ' + this.props.shadow + 'px 0 #1E1B2E' : 'none';
+    return {
+      full: false, circle: true, W: s, H: s, mpx, mw, mh,
+      x: Math.round((s - 5 - mw) / 2), y: Math.round(s * 0.08 - 2.5),
+      look: p.look, label: p.n, bg: p.bg, sh
+    };
+  }
+}
+</script>
+</body>
+</html>

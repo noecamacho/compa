@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Compa V2 · Confirmación</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&amp;family=Nunito:wght@600;700;800&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#FFF6E5;color:#1E1B2E;font-family:Nunito,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:#1E1B2E;text-decoration:none}a:hover{color:#C2412A}
+.d{font-family:Fredoka,Nunito,system-ui,sans-serif;font-weight:700}
+.muted{color:#6F6A7E}
+.card{background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:4px 4px 0 #1E1B2E;border-radius:22px;box-sizing:border-box}
+.ib{display:flex;align-items:center;justify-content:center;width:44px;height:44px;box-sizing:border-box;border-radius:14px;background:#FFFFFF;border:2.5px solid #1E1B2E;box-shadow:3px 3px 0 #1E1B2E;color:#1E1B2E;cursor:pointer;padding:0;flex-shrink:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;height:54px;padding:0 20px;box-sizing:border-box;border-radius:16px;border:2.5px solid #1E1B2E;box-shadow:4px 4px 0 #1E1B2E;font:700 16px/1 Fredoka,Nunito,sans-serif;color:#1E1B2E;background:#FFFFFF;cursor:pointer;white-space:nowrap;width:100%}
+.lbl{font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:#6F6A7E}
+.red{display:flex;align-items:center;justify-content:center;height:48px;box-sizing:border-box;border-radius:14px;border:2.5px solid #1E1B2E;box-shadow:2px 2px 0 #1E1B2E;font:800 12px/1 Nunito,sans-serif;color:#1E1B2E;text-align:center;min-width:0}
+.tag{display:inline-flex;align-items:center;height:30px;padding:0 10px;box-sizing:border-box;border-radius:10px;border:2px solid #1E1B2E;background:#DDF1FF;font:800 12px/1 Nunito,sans-serif;white-space:nowrap}
+@keyframes pop{0%{transform:scale(0.4) rotate(-4deg);opacity:0}60%{transform:scale(1.12) rotate(-4deg);opacity:1}100%{transform:scale(1) rotate(-4deg);opacity:1}}
+@keyframes rise{0%{transform:translateY(14px);opacity:0}100%{transform:translateY(0);opacity:1}}
+.pop{animation:pop .6s cubic-bezier(.2,.9,.3,1.3) both}
+.rise{animation:rise .45s ease-out both}
+@media (prefers-reduced-motion: reduce){.pop,.rise{animation:none}}
+svg{flex-shrink:0}
+</style>
+</helmet>
+<div style="position:relative;width:390px;height:844px;overflow:hidden;box-sizing:border-box;padding:48px 18px 30px;display:flex;flex-direction:column;gap:14px;background-color:#FFF6E5;background-image:radial-gradient(rgba(30,27,46,0.07) 1.2px,transparent 1.3px);background-size:22px 22px">
+
+  <div style="display:flex;justify-content:flex-end">
+    <a href="V2Inicio.dc.html" aria-label="Cerrar" class="ib"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></a>
+  </div>
+
+  <!-- Momento -->
+  <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+    <div style="display:flex;align-items:center">
+      <span style="display:block;transform:rotate(-5deg)"><dc-import name="Avatar" who="DR" size="84" shadow="3" hint-size="84px,84px"></dc-import></span>
+      <span aria-hidden="true" style="position:relative;z-index:1;width:40px;height:40px;margin:0 -10px;box-sizing:border-box;border-radius:50%;background:#6CC4FF;border:2.5px solid #1E1B2E;display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E1B2E" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a8 8 0 0 1 13.7-5.3L20 8M20 4v4h-4M20 13a8 8 0 0 1-13.7 5.3L4 16M4 20v-4h4"/></svg></span>
+      <span style="display:block;transform:rotate(5deg)"><dc-import name="Avatar" who="VO" size="84" shadow="3" hint-size="84px,84px"></dc-import></span>
+    </div>
+    <span class="pop" style="display:inline-flex;align-items:center;gap:10px;height:62px;padding:0 22px;box-sizing:border-box;border-radius:18px;background:#FFD93D;border:3px solid #1E1B2E;box-shadow:4px 4px 0 #1E1B2E;font:700 38px/1 Fredoka,sans-serif;white-space:nowrap"><svg width="26" height="26" viewBox="0 0 24 24" fill="#1E1B2E" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>+35 pts</span>
+    <div class="rise" style="display:flex;flex-direction:column;align-items:center;gap:2px;animation-delay:.25s">
+      <h1 class="d" style="margin:0;font-size:24px;line-height:1.15">Reencuentro con Valeria</h1>
+      <span class="muted" style="font-size:13px;font-weight:700">+20 reencuentro · +15 por la nota</span>
+    </div>
+  </div>
+
+  <!-- De qué platicaron (lo saca la IA de la nota) -->
+  <a href="V2NotaVoz.dc.html" class="card rise" style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;animation-delay:.4s">
+    <span style="display:flex;align-items:center;justify-content:space-between"><span class="lbl">De qué platicaron</span><span class="muted" style="font-size:11px;font-weight:800">De tu nota · 0:38</span></span>
+    <span style="display:flex;gap:8px;flex-wrap:wrap"><span class="tag">Levantar capital</span><span class="tag">Proptech</span><span class="tag" style="background:#FFFFFF">Serie A</span></span>
+    <span style="font-size:14px;font-weight:700;line-height:1.45">Valeria está cerrando su serie A con un fondo de Monterrey y busca founders de proptech para el portafolio. Le contaste de Kuali y le interesó el modelo de cobro por obra. Quiere que la presentes con Andrea para hablar de inversión. Quedaron de verse la próxima semana en Guadalajara y te va a mandar el deck antes.</span>
+  </a>
+
+  <!-- Conecta con Valeria en sus redes -->
+  <div class="card rise" style="display:flex;flex-direction:column;gap:10px;padding:14px 16px;animation-delay:.55s;margin-top:auto">
+    <span style="display:flex;align-items:center;gap:10px"><dc-import name="Avatar" who="VO" size="32" hint-size="32px,32px"></dc-import><span style="display:flex;flex-direction:column;gap:1px;flex:1;min-width:0"><span class="lbl">Conecta con Valeria</span><span class="muted" style="font-size:12px;font-weight:700">Para seguir la plática</span></span></span>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <a href="#" class="red" aria-label="LinkedIn de Valeria" style="background:#DDF1FF"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E1B2E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="9" width="4" height="12"/><circle cx="5" cy="5" r="2"/><path d="M11 21v-7a3 3 0 0 1 6 0v7M11 9v12"/></svg></a>
+      <a href="#" class="red" aria-label="Instagram de Valeria" style="background:#FFE3EA"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E1B2E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg></a>
+      <a href="#" class="red" aria-label="WhatsApp de Valeria" style="background:#DDF8EA"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E1B2E" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a9 9 0 0 1-13.3 7.9L3 21l1.1-4.7A9 9 0 1 1 21 12z"/></svg></a>
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <a href="V2Inicio.dc.html" class="btn" style="background:#6BE4A3">Listo</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
