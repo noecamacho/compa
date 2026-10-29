@@ -67,10 +67,12 @@ test.describe("API contract, real mode", () => {
 
   test.describe("400 invalid_input for a malformed path param", () => {
     for (const spec of malformedParamRoutes) {
-      test(`${label(spec)} rejects ${rejectedParams(spec).join(", ")} @real`, async ({ request }) => {
+      // Signed in: auth is checked before params, so an anonymous caller meets 401 first.
+      test(`${label(spec)} rejects ${rejectedParams(spec).join(", ")} @real`, async ({ request, realUser }) => {
+        const headers = sessionHeaders(realUser.session.cookieHeader);
         for (const name of rejectedParams(spec)) {
           const path = pathFor(spec, paramsWith(spec, { [name]: MALFORMED_PARAMS[name] ?? "" }));
-          const body = await expectError(await call(request, spec, { path }), 400, E.invalidInput.code);
+          const body = await expectError(await call(request, spec, { path, headers }), 400, E.invalidInput.code);
           expect(Object.keys(body.error.fields ?? {})).toContain(name);
         }
       });

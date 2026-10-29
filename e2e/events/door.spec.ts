@@ -186,7 +186,7 @@ test.describe("door in real mode @real", () => {
     expect(response.status()).toBe(200);
     const body: unknown = await response.json();
     const door = EventDoor.parse(body);
-    expect(Object.keys(body as object).sort()).toEqual(["code", "counters", "endsAt", "isRunning", "name", "phase", "startsAt"]);
+    expect(Object.keys(body as object).sort()).toEqual(["code", "counters", "endsAt", "isRunning", "name", "phase", "startsAt", "timezone"]);
     expect(door).toMatchObject({ code: testEvent.accessCode, name: testEvent.name, isRunning: true, phase: "running" });
   });
 

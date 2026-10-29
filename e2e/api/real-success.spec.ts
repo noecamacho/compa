@@ -41,7 +41,9 @@ test.describe("real handlers match their documented success schema", () => {
       // The fixture already checked the user in: the repeat answers 200 with alreadyCheckedIn.
       { spec: R.checkIn, path: pathFor(R.checkIn, { code }), data: { screenConsent: true } },
     ];
-    for (const read of reads) await test.step(label(read.spec), () => expectDocumented(request, headers, read));
+    // Rankings are cached per instance for 3 s (wiki/conference-scale.md), so a fresh attendee's live card can 404 briefly;
+    // every read here is idempotent, so each retries until it settles.
+    for (const read of reads) await test.step(label(read.spec), () => expect(() => expectDocumented(request, headers, read)).toPass({ timeout: 10_000 }));
   });
 
   test("the super-admin console reads @real", async ({ request, realMode }) => {

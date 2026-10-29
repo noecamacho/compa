@@ -119,6 +119,8 @@ test.describe("invite in mock mode", () => {
 });
 
 const invitesOf = (who: SignedInUser) => call(who.page.request, "GET", "/api/invites/me", Invites);
+// Rankings are cached per server instance for 3 s (wiki/conference-scale.md), so points settle within a few seconds.
+const POINTS_POLL = { timeout: 8_000 };
 const pointsOf = async (who: SignedInUser) => (await call(who.page.request, "GET", "/api/me", Me)).scores?.event.points ?? 0;
 const claim = (who: SignedInUser, code: string) => call(who.page.request, "POST", `/api/invites/${code}/claim`, ClaimedInvite, {});
 
@@ -151,12 +153,12 @@ test.describe("invite in real mode", () => {
     const claimed = await claim(invitee, await openInvite(inviter));
     expect(claimed.inviter.handle).toBe(inviter.user.handle);
     await acceptedConnection(invitee, bruno);
-    expect(await pointsOf(inviter)).toBe(INVITE_POINTS.inviter);
-    expect(await pointsOf(invitee)).toBe(50 + INVITE_POINTS.invitee);
+    await expect.poll(() => pointsOf(inviter), POINTS_POLL).toBe(INVITE_POINTS.inviter);
+    await expect.poll(() => pointsOf(invitee), POINTS_POLL).toBe(50 + INVITE_POINTS.invitee);
 
     await acceptedConnection(carla, invitee);
-    expect(await pointsOf(inviter)).toBe(INVITE_POINTS.inviter);
-    expect(await pointsOf(invitee)).toBe(100 + INVITE_POINTS.invitee);
+    await expect.poll(() => pointsOf(inviter), POINTS_POLL).toBe(INVITE_POINTS.inviter);
+    await expect.poll(() => pointsOf(invitee), POINTS_POLL).toBe(100 + INVITE_POINTS.invitee);
     const invites = await invitesOf(inviter);
     expect(invites.invitees).toHaveLength(1);
     expect(invites.invitees[0]).toMatchObject({ person: { handle: invitee.user.handle }, points: INVITE_POINTS.inviter });
@@ -191,6 +193,6 @@ test.describe("invite in real mode", () => {
     await acceptedConnection(first, second);
     const invites = await invitesOf(inviter);
     expect(invites.invitees.map((invitee) => invitee.person.handle).sort()).toEqual([first.user.handle, second.user.handle].sort());
-    expect(await pointsOf(inviter)).toBe(2 * INVITE_POINTS.inviter);
+    await expect.poll(() => pointsOf(inviter), POINTS_POLL).toBe(2 * INVITE_POINTS.inviter);
   });
 });

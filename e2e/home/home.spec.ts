@@ -147,8 +147,11 @@ test.describe("home in real mode", () => {
     const [ana, bruno] = await people([{}, {}]);
     if (!ana || !bruno) throw new Error("test users not created");
     await acceptedConnection(ana, bruno);
-    await ana.page.goto("/home");
-    await expect(ana.page.getByRole("link", { name: /Vas en el #\d+ con 50 pts/ })).toHaveAttribute("href", "/ranking");
+    // Rankings are cached per server instance for 3 s (wiki/conference-scale.md): reload until the new points show.
+    await expect(async () => {
+      await ana.page.goto("/home");
+      await expect(ana.page.getByRole("link", { name: /Vas en el #\d+ con 50 pts/ })).toHaveAttribute("href", "/ranking", { timeout: 2_000 });
+    }).toPass({ timeout: 15_000 });
     await expect(ana.page.getByText(home.startHere)).toHaveCount(0);
     await expect(ana.page.getByRole("link", { name: new RegExp(home.connectHint) })).toBeVisible();
   });
