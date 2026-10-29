@@ -1040,7 +1040,7 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Errors | `invalid_input`, 401, 403 `forbidden`, 409 `slug_taken` |
 | Edge cases | Slug auto-fills from the name and is checked live; time zone (T-024) |
 | Status | UI Ready · API Ready · DB Ready |
-| E2E coverage | `e2e/admin/console.spec.ts` (@mock: new-event slug, list, QR tab) and `e2e/admin/api.spec.ts` (@real: create, `slug_taken`, non-admin 404) |
+| E2E coverage | `e2e/admin/console.spec.ts` (@mock: new-event slug, list, QR tab), `e2e/admin/poster.spec.ts` (@mock: QR promo poster link, logo, both languages, still and uncovered QR, reduced motion, unknown event 404) and `e2e/admin/api.spec.ts` (@real: create, `slug_taken`, non-admin 404) |
 | Tickets | [T-023](backlog.md#t-023) |
 
 <a id="f-56"></a>

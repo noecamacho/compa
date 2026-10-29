@@ -220,6 +220,10 @@ Approved decisions (A5, A6, M13, M16). The handoff has no big-screen mock.
 - **As built (Loom+):** the network is "El Telar" (a ring of pegs, threads between them), with a 30-minute pulse and mood line, a "Just now" feed of the newest pairs, the top 5 (shared places for ties), state cards for upcoming, empty and ended, a final podium after the close, an "Ends in N min" pill in the last ten minutes and a "Reconnecting… last update" pill. Rationale and screenshots: [docs/research/live-dataviz-decision.md](docs/research/live-dataviz-decision.md).
 - **Figma file:** [COMPA — App flows (V2)](https://www.figma.com/design/UEnpABAPbq7WJUfhfoYi46): foundations, components, every flow with happy, empty, error and edge states, and the prototype.
 
+### Admin QR poster
+
+`/admin/events/<slug>/poster` (`components/admin/QrPoster.tsx`, opened by "Show QR poster" on the event page): a bare full-screen promo for a projector, TV or phone, 360 px to 3840×2160. Logo, event name, the call to action in Spanish and English, and the join QR as large as the screen allows (`--qr`, beside the text in landscape, below it in portrait). Sizes, borders and shadows scale with `vmin`. **The QR never moves:** the motion (falling confetti behind the content, the `poster-halo` ring behind the QR card, the language cross-fade `--animate-poster-swap`, the monito ticker `--animate-marquee`) never covers, transforms or blurs it. With reduced motion the confetti is hidden and the two languages stack.
+
 ## Decided vs open
 
 Decided:

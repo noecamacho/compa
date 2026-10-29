@@ -6,6 +6,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- Admin QR promo poster: "Show QR poster" on the event page opens `/admin/events/<slug>/poster`, a full-screen stage for a projector, TV or phone with the COMPA logo, the event name, a large still join QR and "Make as many compas as you can and win a prize. Free!" cross-fading between Spanish and English, with confetti, a glowing ring around the QR and a monito ticker. Calm, static layout with reduced motion; full-screen button where the browser allows it.
 - Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
 
 ### Changed
