@@ -91,7 +91,7 @@ test.describe("connect: register screen (mock)", () => {
     await expect(page.getByRole("heading", { name: register.title })).toHaveCount(0);
   });
 
-  const ERRORS_WITH_COPY = [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed];
+  const ERRORS_WITH_COPY = [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.consentRequired, E.testUserNotAllowed];
   for (const error of ERRORS_WITH_COPY) {
     test(`${error.code} keeps the form and shows the error @mock`, async ({ page, mock }) => {
       await page.goto(`/connect/${valeriaPublic.handle}`);
@@ -166,21 +166,6 @@ test.describe("connect: register screen (real)", () => {
     await expect(page.getByText(errorCopy(E.selfConnection))).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/connect/${realUser.user.handle}$`));
     await expectError(await page.request.post("/api/connections", { data: { toHandle: realUser.user.handle, screenConsent: true } }), 409, "self_connection");
-  });
-
-  test("a target with no current event fails with not_at_event @real", async ({ page, realUser, realMode }) => {
-    const [loner] = await realMode.createTestUsers({ count: 1 });
-    if (!loner) throw new Error("test user not created");
-    try {
-      await skipTours(page.context());
-      expect(loner.id).not.toBe(realUser.user.id);
-      await page.goto(`/connect/${loner.handle}`);
-      await page.getByRole("button", { name: /^Confirmar/ }).click();
-      await expect(page.getByText(errorCopy(E.notAtEvent))).toBeVisible();
-      await expectError(await page.request.post("/api/connections", { data: { toHandle: loner.handle, screenConsent: true } }), 409, "not_at_event");
-    } finally {
-      await realMode.deleteTestUser(loner.id);
-    }
   });
 
   test("a scanner who is not checked in sees the notice; without consent the API refuses, with it they join @real", async ({ page, realMode, signIn, testUsers }) => {

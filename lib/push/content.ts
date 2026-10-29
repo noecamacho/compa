@@ -5,8 +5,8 @@ import { badgeLabel } from "../notifications/present";
 import type { Locale } from "../i18n";
 
 export type PushNotice =
-  | { kind: "request"; connectionId: string; personName: string; eventName: string }
-  | { kind: "accepted"; connectionId: string; personName: string; eventName: string }
+  | { kind: "request"; connectionId: string; personName: string; eventName: string | null }
+  | { kind: "accepted"; connectionId: string; personName: string; eventName: string | null }
   | { kind: "invitee_connected"; personId: string; personName: string }
   | { kind: "badge_earned"; badgeId: string; badgeName: string };
 

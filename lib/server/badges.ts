@@ -23,7 +23,8 @@ async function acceptedFor(userId: string, db: Executor): Promise<AcceptedRow[]>
       kind: connections.kind,
       topics: connections.topics,
       respondedAt: connections.respondedAt,
-      eventId: connections.eventId,
+      // From the inner join: connections outside an event never feed badges.
+      eventId: events.id,
       eventSlug: events.slug,
       startsAt: events.startsAt,
       endsAt: events.endsAt,

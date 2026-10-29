@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, gt, isNotNull, lte, sql } from "drizzle-orm";
+import { and, desc, eq, gt, isNotNull, isNull, lte, or, sql } from "drizzle-orm";
 import { getDb } from "../../db/client";
 import { connections, events, invites, userBadges, users } from "../../db/schema";
 import type { InputOf, ResultOf } from "../api/route-spec";
@@ -28,14 +28,15 @@ export async function listNotifications({ user }: InputOf<typeof R.listNotificat
     db
       .select({ connection: connections, eventName: events.name, person: users })
       .from(connections)
-      .innerJoin(events, eq(events.id, connections.eventId))
+      .leftJoin(events, eq(events.id, connections.eventId))
       .innerJoin(users, eq(users.id, connections.requesterId))
-      .where(and(eq(connections.addresseeId, user.id), eq(connections.status, "pending"), lte(events.startsAt, now), gt(events.endsAt, now)))
+      // A request outside an event never expires, so it stays until answered.
+      .where(and(eq(connections.addresseeId, user.id), eq(connections.status, "pending"), or(isNull(connections.eventId), and(lte(events.startsAt, now), gt(events.endsAt, now)))))
       .orderBy(desc(connections.createdAt)),
     db
       .select({ connection: connections, eventName: events.name, person: users })
       .from(connections)
-      .innerJoin(events, eq(events.id, connections.eventId))
+      .leftJoin(events, eq(events.id, connections.eventId))
       .innerJoin(users, eq(users.id, connections.addresseeId))
       .where(and(eq(connections.requesterId, user.id), eq(connections.status, "accepted")))
       .orderBy(desc(connections.respondedAt)),

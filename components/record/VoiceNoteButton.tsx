@@ -17,12 +17,13 @@ export type NoteState =
 
 const WAVE = [10, 18, 22, 14, 20, 12, 18, 22];
 
-type Props = { state: NoteState; onChange: (state: NoteState) => void };
+// `scores: false` outside an event, where the note pays nothing.
+type Props = { state: NoteState; onChange: (state: NoteState) => void; scores?: boolean };
 
 type Audio = { file: File; seconds: number };
 
 // The three note states of V2Registrar: not recorded / recording / saved. Audio goes to /api/transcribe.
-export function VoiceNoteButton({ state, onChange }: Props) {
+export function VoiceNoteButton({ state, onChange, scores = true }: Props) {
   const all = useCopy();
   const copy = all.register;
   const locale = useLocale();
@@ -130,7 +131,7 @@ export function VoiceNoteButton({ state, onChange }: Props) {
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
           <span className="text-[14px] font-extrabold">{copy.noteTitle}</span>
-          <Muted className="text-[12px] font-bold">{copy.noteHint}</Muted>
+          <Muted className="text-[12px] font-bold">{scores ? copy.noteHint : copy.noteHintNoPoints}</Muted>
         </span>
       </button>
       {state.error && <Muted className="text-[12px] font-extrabold">{state.error}</Muted>}

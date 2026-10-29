@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { canManageEvent, canManageUser } from "./api/admin-gate";
-import { canAttend, isSuperAdmin, visibleAtEvent } from "./roles";
+import { canAttend, canConnectOutsideEvent, isSuperAdmin, visibleAtEvent } from "./roles";
 
 const real = { isTest: false };
 const test_ = { isTest: true };
@@ -14,6 +14,12 @@ describe("roles (M20)", () => {
 });
 
 describe("is_test exclusion", () => {
+  test("outside an event, test users connect only with test users", () => {
+    expect(canConnectOutsideEvent(test_, test_)).toBe(true);
+    expect(canConnectOutsideEvent(real, real)).toBe(true);
+    expect(canConnectOutsideEvent(test_, real)).toBe(false);
+    expect(canConnectOutsideEvent(real, test_)).toBe(false);
+  });
   test("test users never join a real event; anyone joins a test event", () => {
     expect(canAttend(test_, real)).toBe(false);
     expect(canAttend(real, real)).toBe(true);

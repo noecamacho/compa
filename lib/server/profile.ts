@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, eq, inArray, isNull, or } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { connections, events, interests, userInterests, users, type EventRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
@@ -105,25 +105,25 @@ export async function listInterests(): ResultOf<typeof R.listInterests> {
   return { body: rows };
 }
 
+// The pair's connection where a scan would land now: the owner's current event, or outside any event when they are at none.
 async function relationAtCurrentEvent(viewer: UserRow, owner: UserRow, event: EventRow | undefined, db: Executor) {
-  if (!event) return undefined;
   const now = new Date();
   const [row] = await db
     .select()
     .from(connections)
-    .where(and(eq(connections.eventId, event.id), pairCondition(viewer.id, owner.id)))
+    .where(and(event ? eq(connections.eventId, event.id) : isNull(connections.eventId), pairCondition(viewer.id, owner.id)))
     .limit(1);
   if (!row) return undefined;
-  const status = statusForViewer({ ...row, viewerId: viewer.id, eventEnded: hasEnded(event, now) });
-  return { status, eventSlug: event.slug, ...(row.kind ? { kind: row.kind } : {}) };
+  const status = statusForViewer({ ...row, viewerId: viewer.id, eventEnded: hasEnded(event ?? null, now) });
+  return { status, eventSlug: event?.slug ?? null, ...(row.kind ? { kind: row.kind } : {}) };
 }
 
-// Accepted connections between the two, newest first, with their events.
+// Accepted connections between the two, oldest first, with their events (null outside one).
 async function pairHistory(viewer: UserRow, owner: UserRow, db: Executor) {
   return db
     .select({ row: connections, event: events })
     .from(connections)
-    .innerJoin(events, eq(events.id, connections.eventId))
+    .leftJoin(events, eq(events.id, connections.eventId))
     .where(and(eq(connections.status, "accepted"), pairCondition(viewer.id, owner.id)))
     .orderBy(connections.respondedAt);
 }
@@ -150,7 +150,7 @@ async function connectedExtras(viewer: UserRow, owner: UserRow, db: Executor) {
   return {
     relationship: {
       reconnections: history.filter(({ row }) => row.kind === "reconnection").length,
-      eventsTogether: new Set(history.map(({ event }) => event.id)).size,
+      eventsTogether: new Set(history.flatMap(({ event }) => (event ? [event.id] : []))).size,
       mutual,
     },
     lastInteraction:
@@ -174,5 +174,5 @@ export async function getUser({ user, params }: InputOf<typeof R.getUser>): Resu
     connectedPeers(user.id, [owner.id], db),
   ]);
   const extras = connected.has(owner.id) ? await connectedExtras(user, owner, db) : {};
-  return { body: { card, ...(connection ? { connection } : {}), scores, stats, badges, ...extras } };
+  return { body: { card, ...(connection ? { connection } : {}), atEvent: Boolean(event), scores, stats, badges, ...extras } };
 }

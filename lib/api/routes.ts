@@ -486,7 +486,7 @@ export const createConnection = route({
   path: "/api/connections",
   summary: "Request a connection (scan a personal QR)",
   description:
-    "Checks you in to the person's current event if needed (A1, needs `screenConsent: true`), then creates a pending request. If the pair already has a connection at that event, returns it with 200.",
+    "Checks you in to the person's current event if needed (A1, needs `screenConsent: true`), then creates a pending request. When the person is at no running event, the request is made outside any event (`event: null`): same pending → accept flow, no points, no event board, and test users may only connect with test users. If the pair already has a connection in that context (that event, or outside any event), returns it with 200.",
   tags: ["connections"],
   auth: "user",
   body: S.CreateConnectionBody,
@@ -494,11 +494,11 @@ export const createConnection = route({
   success: {
     status: 201,
     description: "Request sent.",
-    alsoStatus: { status: 200, description: "The pair already has a connection at this event." },
+    alsoStatus: { status: 200, description: "The pair already has a connection at this event, or outside any event." },
     schema: S.ConnectionRequest,
     example: { connectionId: X.ids.connection, status: "pending", event: X.founders, to: X.valeriaPublic },
   },
-  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed, E.rateLimited, E.limitReached],
+  errors: [E.invalidInput, E.unauthorized, E.authUnavailable, E.userNotFound, E.selfConnection, E.consentRequired, E.testUserNotAllowed, E.rateLimited, E.limitReached],
   rateLimit: [LIMITS.scanPerMinute],
 });
 
@@ -588,7 +588,7 @@ export const acceptConnection = route({
   path: "/api/connections/{id}/accept",
   summary: "Addressee: accept a request",
   description:
-    "`reconnection` (+20) when the pair connected at an earlier event or either person ticked `knew`; otherwise `new` (+50), to both (design handoff points table).",
+    "`reconnection` (+20) when the pair connected at an earlier event or outside an event, or either person ticked `knew`; otherwise `new` (+50), to both (design handoff points table). A request made outside an event keeps its kind but pays `points: 0`, even if either person has checked in to an event since, and awards no topics bonus, referral or badge.",
   tags: ["connections"],
   auth: "user",
   params: S.IdParams,
@@ -740,7 +740,7 @@ export const approveSummary = route({
   method: "post",
   path: "/api/interactions/{id}/approve",
   summary: "Approve a summary (+15 to the author)",
-  description: "Only the draft's author. One approved summary per connection; replay returns 409 (M18).",
+  description: "Only the draft's author. One approved summary per connection; replay returns 409 (M18). A note on a connection outside an event is saved with `pointsAwarded: 0`.",
   tags: ["summaries"],
   auth: "user",
   params: S.IdParams,

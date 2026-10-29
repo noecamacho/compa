@@ -6,7 +6,7 @@ import { E, fail } from "../api/errors";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { hasEnded, statusForViewer } from "../connection-status";
-import { SUMMARY_POINTS, topicsPointsFor } from "../points";
+import { topicsPointsFor } from "../points";
 import { cardFor, usersByIds } from "./people";
 
 // The latest draft or the approved note of a connection, approved first.
@@ -34,8 +34,9 @@ export const toInteractionSummary = (row: InteractionRow) => ({
 function pointsBreakdown(row: ConnectionRow, viewerId: string, note: InteractionRow | undefined) {
   const accepted = row.status === "accepted";
   const kind = accepted ? (row.points ?? 0) : 0;
-  const topics = accepted && row.requesterId === viewerId ? topicsPointsFor(row.topics) : 0;
-  const noteAward = note?.approvedAt && note.authorId === viewerId ? SUMMARY_POINTS : 0;
+  const topics = accepted && row.eventId !== null && row.requesterId === viewerId ? topicsPointsFor(row.topics) : 0;
+  // The stored award: 15 at an event, 0 outside one.
+  const noteAward = note?.approvedAt && note.authorId === viewerId ? (note.points ?? 0) : 0;
   return { kind, topics, note: noteAward, total: kind + topics + noteAward };
 }
 
@@ -44,10 +45,10 @@ export async function getConnection({ user, params }: InputOf<typeof R.getConnec
   const [found] = await db
     .select({ row: connections, event: events })
     .from(connections)
-    .innerJoin(events, eq(events.id, connections.eventId))
+    .leftJoin(events, eq(events.id, connections.eventId))
     .where(eq(connections.id, params.id));
   const loaded = found ?? fail(E.connectionNotFound);
-  const { row, event }: { row: ConnectionRow; event: EventRow } = loaded;
+  const { row, event }: { row: ConnectionRow; event: EventRow | null } = loaded;
   if (row.requesterId !== user.id && row.addresseeId !== user.id) return fail(E.connectionNotFound);
   const otherId = row.requesterId === user.id ? row.addresseeId : row.requesterId;
   const [other] = await usersByIds([otherId], db);
@@ -60,7 +61,7 @@ export async function getConnection({ user, params }: InputOf<typeof R.getConnec
       status,
       ...(row.kind ? { kind: row.kind } : {}),
       direction: row.requesterId === user.id ? "sent" : "received",
-      event: { slug: event.slug, name: event.name },
+      event: event ? { slug: event.slug, name: event.name } : null,
       other: card,
       topics: row.topics,
       points: pointsBreakdown(row, user.id, note),

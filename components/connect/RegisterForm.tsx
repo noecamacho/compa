@@ -13,6 +13,7 @@ import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { Tour } from "@/components/tour/Tour";
+import { OutsideEventTag } from "@/components/connections/OutsideEventTag";
 import { apiCall } from "@/lib/api/client";
 import { errorText } from "@/lib/api/error-text";
 import { ConnectionRequest, type UserProfileT } from "@/lib/api/schemas";
@@ -34,18 +35,20 @@ type Props = { profile: UserProfileT };
 // 05 Registrar: kind, topics (+5), optional voice note (+15), then the request is sent (two-step connection).
 export function RegisterForm({ profile }: Props) {
   const all = useCopy();
-  const { register: copy, tour } = all;
+  const { register: copy, tour, common } = all;
   const router = useRouter();
   const person = profile.card;
   // Connected tonight, or at any earlier event (the API sends `relationship` only for people already connected).
   const knew = profile.connection?.status === "accepted" || profile.connection?.kind === "reconnection" || profile.relationship !== undefined;
   const [kind, setKind] = useState<Kind>(knew ? "reconnection" : "new");
+  // The scanned person is at no running event: the request is made outside any event and pays nothing.
+  const outside = profile.atEvent === false;
   const [topics, setTopics] = useState<string[]>([]);
   const [note, setNote] = useState<NoteState>({ status: "idle" });
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const total = KIND[kind].points + (topics.length ? TOPICS_POINTS : 0) + (note.status === "ready" ? SUMMARY_POINTS : 0);
+  const total = outside ? 0 : KIND[kind].points + (topics.length ? TOPICS_POINTS : 0) + (note.status === "ready" ? SUMMARY_POINTS : 0);
 
   const toggleTopic = (topic: string) => {
     if (topics.includes(topic)) return setTopics(topics.filter((item) => item !== topic));
@@ -86,6 +89,11 @@ export function RegisterForm({ profile }: Props) {
           </Pill>
         )}
       </Card>
+      {outside && (
+        <span className="-mt-1 flex justify-center">
+          <OutsideEventTag label={common.outsideEvent} />
+        </span>
+      )}
 
       <div className="flex flex-col gap-2" data-tour="kind">
         <SectionLabel>{copy.typeLabel}</SectionLabel>
@@ -110,7 +118,7 @@ export function RegisterForm({ profile }: Props) {
                 </span>
                 <span className="flex flex-col">
                   <span className="text-[13px] font-extrabold">{option === "new" ? copy.newType : copy.reconnectionType}</span>
-                  <span className="text-[12px] font-bold">+{KIND[option].points} pts</span>
+                  {!outside && <span className="text-[12px] font-bold">+{KIND[option].points} pts</span>}
                 </span>
               </button>
             );
@@ -130,16 +138,16 @@ export function RegisterForm({ profile }: Props) {
       </div>
 
       <div data-tour="note">
-        <VoiceNoteButton state={note} onChange={setNote} />
+        <VoiceNoteButton state={note} onChange={setNote} scores={!outside} />
       </div>
 
       <div className="mt-auto flex flex-col gap-[10px] md:mt-4">
         {/* Confirming checks the scanner in, which records `screenConsent`; the notice must be visible first (M13). */}
-        <Muted className="text-center text-[12px] font-bold">{copy.screenNotice}</Muted>
+        <Muted className="text-center text-[12px] font-bold">{outside ? copy.outsideEventNotice : copy.screenNotice}</Muted>
         {error && <span role="alert" className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
         <div data-tour="confirm">
           <Button variant="primary" onClick={confirm} disabled={sending}>
-            {sending ? copy.sending : copy.confirm(total)}
+            {sending ? copy.sending : outside ? copy.confirmOutsideEvent : copy.confirm(total)}
           </Button>
         </div>
       </div>

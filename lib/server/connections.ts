@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, desc, eq, lt, ne, or } from "drizzle-orm";
+import { and, count, desc, eq, isNull, lt, ne, or } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { bonusPoints, connections, events, type ConnectionRow, type EventRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
@@ -8,6 +8,7 @@ import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import type { CardT } from "../api/schemas";
 import { hasEnded, isRunning, statusForViewer } from "../connection-status";
+import { canConnectOutsideEvent } from "../roles";
 import { decideKind, pointsFor, topicsPointsFor } from "../points";
 import { afterResponse } from "../after-response";
 import { broadcast, liveTopic, userTopic } from "../realtime";
@@ -19,7 +20,10 @@ import { requireUnderCap } from "./rate-limit";
 import { cardFor, cardsFor, findCurrentEvent, findUserByHandle, pairCondition, usersByIds } from "./people";
 import { lifetimePointsOf } from "./scores";
 
-const eventRef = (event: EventRow) => ({ slug: event.slug, name: event.name });
+// Null means the connection was made outside any event: no points, no event board (wiki/points-rules.md).
+const eventRef = (event: EventRow | null) => (event ? { slug: event.slug, name: event.name } : null);
+
+const atEvent = (eventId: string | null) => (eventId ? eq(connections.eventId, eventId) : isNull(connections.eventId));
 
 // ---- POST /api/connections (API spec §7.1) ----
 
@@ -34,72 +38,79 @@ async function checkInScanner(user: UserRow, event: EventRow, screenConsent: boo
   await ensureCheckedIn(user, event, true);
 }
 
-async function insertRequest(event: EventRow, requester: UserRow, addressee: UserRow, knew: boolean | undefined, topics: string[]) {
+function requireSameWorld(user: UserRow, target: UserRow): void {
+  if (!canConnectOutsideEvent(user, target)) fail(E.testUserNotAllowed, "Test users can only connect with test users outside an event.");
+}
+
+async function insertRequest(event: EventRow | null, requester: UserRow, addressee: UserRow, knew: boolean | undefined, topics: string[]) {
   const [row] = await getDb()
     .insert(connections)
-    .values({ eventId: event.id, requesterId: requester.id, addresseeId: addressee.id, requesterKnew: knew ?? null, topics })
+    .values({ eventId: event?.id ?? null, requesterId: requester.id, addresseeId: addressee.id, requesterKnew: knew ?? null, topics })
     .onConflictDoNothing()
     .returning();
   return row;
 }
 
-async function findPairAt(eventId: string, a: string, b: string): Promise<ConnectionRow | undefined> {
+async function findPairAt(eventId: string | null, a: string, b: string): Promise<ConnectionRow | undefined> {
   const [row] = await getDb()
     .select()
     .from(connections)
-    .where(and(eq(connections.eventId, eventId), pairCondition(a, b)))
+    .where(and(atEvent(eventId), pairCondition(a, b)))
     .limit(1);
   return row;
 }
 
-async function countSentAt(eventId: string, requesterId: string): Promise<number> {
+async function countSentAt(eventId: string | null, requesterId: string): Promise<number> {
   const [row] = await getDb()
     .select({ sent: count() })
     .from(connections)
-    .where(and(eq(connections.eventId, eventId), eq(connections.requesterId, requesterId)));
+    .where(and(atEvent(eventId), eq(connections.requesterId, requesterId)));
   return row?.sent ?? 0;
 }
 
-// A repeat scan of someone already requested stays idempotent even at the cap.
-async function requireUnderEventCap(event: EventRow, user: UserRow, target: UserRow): Promise<void> {
-  const sent = await countSentAt(event.id, user.id);
+// A repeat scan of someone already requested stays idempotent even at the cap. Requests outside an event share one
+// bucket of the same size.
+async function requireUnderEventCap(eventId: string | null, user: UserRow, target: UserRow): Promise<void> {
+  const sent = await countSentAt(eventId, user.id);
   if (sent < CAPS.requestsPerEvent) return;
-  if (await findPairAt(event.id, user.id, target.id)) return;
+  if (await findPairAt(eventId, user.id, target.id)) return;
   requireUnderCap(sent, CAPS.requestsPerEvent);
 }
 
 export async function createConnection({ user, body }: InputOf<typeof R.createConnection>): ResultOf<typeof R.createConnection> {
   const target = await requireTarget(user, body.toHandle);
   const now = new Date();
-  const event = (await findCurrentEvent(target.id, now)) ?? fail(E.notAtEvent);
-  await requireUnderEventCap(event, user, target);
-  await checkInScanner(user, event, body.screenConsent === true);
+  // The scanned person's running event wins (the scanner joins it); with none, the request is made outside any event.
+  const event = (await findCurrentEvent(target.id, now)) ?? null;
+  await requireUnderEventCap(event?.id ?? null, user, target);
+  if (event) await checkInScanner(user, event, body.screenConsent === true);
+  else requireSameWorld(user, target);
   const inserted = await insertRequest(event, user, target, body.knew, body.topics ?? []);
-  const row = inserted ?? (await findPairAt(event.id, user.id, target.id)) ?? fail(E.internal);
+  const row = inserted ?? (await findPairAt(event?.id ?? null, user.id, target.id)) ?? fail(E.internal);
   const to = await cardFor(user.id, target);
   const status = statusForViewer({ ...row, viewerId: user.id, eventEnded: hasEnded(event, now) });
   if (inserted) await announceRequest(inserted, user, event);
   return { status: inserted ? 201 : 200, body: { connectionId: row.id, status, event: eventRef(event), to } };
 }
 
-async function announceRequest(row: ConnectionRow, requester: UserRow, event: EventRow): Promise<void> {
+async function announceRequest(row: ConnectionRow, requester: UserRow, event: EventRow | null): Promise<void> {
   const from = await cardFor(null, requester);
   await notify({
     userId: row.addresseeId,
     message: { topic: userTopic(row.addresseeId), event: "request.received", payload: { connectionId: row.id, from, event: eventRef(event) } },
-    push: { kind: "request", connectionId: row.id, personName: from.name, eventName: event.name },
+    push: { kind: "request", connectionId: row.id, personName: from.name, eventName: event?.name ?? null },
   });
 }
 
 // ---- Shared guards for knew / accept / decline ----
 
-type Loaded = { row: ConnectionRow; event: EventRow };
+type Loaded = { row: ConnectionRow; event: EventRow | null };
 
 async function findConnection(id: string, db: Executor = getDb(), lock = false): Promise<Loaded | undefined> {
   const query = db
     .select({ row: connections, event: events })
     .from(connections)
-    .innerJoin(events, eq(events.id, connections.eventId))
+    .leftJoin(events, eq(events.id, connections.eventId))
     .where(eq(connections.id, id));
   const [found] = await (lock ? query.for("update", { of: connections }) : query);
   return found;
@@ -138,21 +149,19 @@ export async function setKnew({ user, params, body }: InputOf<typeof R.setKnew>)
 
 // ---- POST /api/connections/:id/accept (API spec §7.2) ----
 
-async function metAtEarlierEvent(tx: Executor, row: ConnectionRow, event: EventRow): Promise<boolean> {
-  const [earlier] = await tx
+// Met before: an accepted connection outside an event, or at another event that started earlier. Outside an event, any
+// other accepted connection of the pair counts (the kind is kept even though it pays nothing).
+async function metAtEarlierEvent(tx: Executor, row: ConnectionRow, event: EventRow | null): Promise<boolean> {
+  const earlier = event
+    ? or(isNull(connections.eventId), and(ne(connections.eventId, event.id), lt(events.startsAt, event.startsAt)))
+    : ne(connections.id, row.id);
+  const [found] = await tx
     .select({ id: connections.id })
     .from(connections)
-    .innerJoin(events, eq(events.id, connections.eventId))
-    .where(
-      and(
-        eq(connections.status, "accepted"),
-        ne(connections.eventId, row.eventId),
-        lt(events.startsAt, event.startsAt),
-        pairCondition(row.requesterId, row.addresseeId),
-      ),
-    )
+    .leftJoin(events, eq(events.id, connections.eventId))
+    .where(and(eq(connections.status, "accepted"), earlier, pairCondition(row.requesterId, row.addresseeId)))
     .limit(1);
-  return Boolean(earlier);
+  return Boolean(found);
 }
 
 async function acceptInTransaction(id: string, userId: string, knew: boolean | undefined) {
@@ -164,23 +173,24 @@ async function acceptInTransaction(id: string, userId: string, knew: boolean | u
     const kind = decideKind(facts);
     const [accepted] = await tx
       .update(connections)
-      .set({ status: "accepted", kind, points: pointsFor(kind), addresseeKnew, respondedAt: new Date() })
+      .set({ status: "accepted", kind, points: pointsFor(kind, loaded.event), addresseeKnew, respondedAt: new Date() })
       .where(and(eq(connections.id, id), eq(connections.status, "pending")))
       .returning();
     return { row: accepted ?? fail(E.notPending), event: loaded.event };
   });
 }
 
-async function announceAcceptance(row: ConnectionRow, event: EventRow, requester: UserRow, addressee: UserRow, extras: Notice[]): Promise<void> {
+async function announceAcceptance(row: ConnectionRow, event: EventRow | null, requester: UserRow, addressee: UserRow, extras: Notice[]): Promise<void> {
   const kind = row.kind ?? "new";
-  const points = row.points ?? pointsFor(kind);
+  const points = row.points ?? pointsFor(kind, event);
   const to = await cardFor(requester.id, addressee);
   const person = (u: UserRow) => ({ id: u.id, name: u.name, photoUrl: u.photoUrl });
   const accepted: Notice = {
     userId: requester.id,
     message: { topic: userTopic(requester.id), event: "request.accepted", payload: { connectionId: row.id, kind, points, to } },
-    push: { kind: "accepted", connectionId: row.id, personName: to.name, eventName: event.name },
+    push: { kind: "accepted", connectionId: row.id, personName: to.name, eventName: event?.name ?? null },
   };
+  if (!event) return notify(accepted, ...extras);
   await Promise.all([
     notify(accepted, ...extras),
     broadcast({
@@ -222,6 +232,8 @@ export async function acceptConnection({ user, params, body }: InputOf<typeof R.
   // The requester hears "accepted" first; invite and badge notices follow once the awards are stored.
   afterResponse("awards", async () => {
     await announceAcceptance(row, event, requester, user, []);
+    // Outside an event nothing is awarded: no topics bonus, no referral payout, no event badges.
+    if (!event) return;
     const extras = await awardExtras(row, event, requester, user).catch((error: unknown) => {
       console.error("awards failed", error);
       return [];
@@ -229,7 +241,7 @@ export async function acceptConnection({ user, params, body }: InputOf<typeof R.
     await notify(...extras);
   });
   const kind = row.kind ?? "new";
-  return { body: { connectionId: row.id, kind, points: row.points ?? pointsFor(kind), from } };
+  return { body: { connectionId: row.id, kind, points: row.points ?? pointsFor(kind, event), from } };
 }
 
 // ---- POST /api/connections/:id/decline (silent, §7.4) ----
@@ -247,13 +259,13 @@ export async function declineConnection({ user, params }: InputOf<typeof R.decli
 
 // ---- GET /api/connections (A7, §7.5) ----
 
-type MyConnection = { row: ConnectionRow; event: EventRow };
+type MyConnection = { row: ConnectionRow; event: EventRow | null };
 
 async function myConnections(userId: string): Promise<MyConnection[]> {
   return getDb()
     .select({ row: connections, event: events })
     .from(connections)
-    .innerJoin(events, eq(events.id, connections.eventId))
+    .leftJoin(events, eq(events.id, connections.eventId))
     .where(or(eq(connections.requesterId, userId), eq(connections.addresseeId, userId)))
     .orderBy(desc(connections.createdAt));
 }
@@ -274,7 +286,7 @@ function toMeeting({ row, event }: MyConnection, userId: string, now: Date) {
 }
 
 const isIncoming = ({ row, event }: MyConnection, userId: string, now: Date) =>
-  row.addresseeId === userId && row.status === "pending" && isRunning(event, now);
+  row.addresseeId === userId && row.status === "pending" && (event === null || isRunning(event, now));
 
 function groupByPerson(list: MyConnection[], userId: string): Map<string, MyConnection[]> {
   const groups = new Map<string, MyConnection[]>();

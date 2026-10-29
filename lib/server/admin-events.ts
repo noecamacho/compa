@@ -41,9 +41,10 @@ export async function requireManagedEvent(admin: UserRow, slug: string): Promise
   return event;
 }
 
-async function countBy(eventIds: string[], build: (ids: string[]) => Promise<{ eventId: string; n: number }[]>) {
+// Connections outside an event have no event id; the `inArray` filters already leave them out.
+async function countBy(eventIds: string[], build: (ids: string[]) => Promise<{ eventId: string | null; n: number }[]>) {
   if (eventIds.length === 0) return new Map<string, number>();
-  return new Map((await build(eventIds)).map((row) => [row.eventId, row.n]));
+  return new Map((await build(eventIds)).flatMap((row) => (row.eventId ? [[row.eventId, row.n] as const] : [])));
 }
 
 export async function eventCounts(eventIds: string[]): Promise<Map<string, EventCountsT>> {

@@ -94,11 +94,11 @@ export async function draftSummary({ user, body }: InputOf<typeof R.draftSummary
 
 // ---- POST /api/interactions/:id/approve (M18) ----
 
-async function requireOwnDraft(id: string, userId: string): Promise<InteractionRow> {
+async function requireOwnDraft(id: string, userId: string) {
   const [row] = await getDb().select().from(interactions).where(eq(interactions.id, id)).limit(1);
   const draft = row ?? fail(E.notFound);
-  await requireAcceptedMembership(draft.connectionId, userId);
-  return draft.authorId === userId ? draft : fail(E.notAuthor);
+  const { event } = await requireAcceptedMembership(draft.connectionId, userId);
+  return draft.authorId === userId ? { draft, event } : fail(E.notAuthor);
 }
 
 async function hasApprovedSummary(connectionId: string): Promise<boolean> {
@@ -112,7 +112,7 @@ async function hasApprovedSummary(connectionId: string): Promise<boolean> {
 
 type ApproveInput = InputOf<typeof R.approveSummary>["body"];
 
-async function markApproved(draft: InteractionRow, body: ApproveInput): Promise<InteractionRow> {
+async function markApproved(draft: InteractionRow, body: ApproveInput, points: number): Promise<InteractionRow> {
   try {
     const [row] = await getDb()
       .update(interactions)
@@ -122,7 +122,7 @@ async function markApproved(draft: InteractionRow, body: ApproveInput): Promise<
         nextSteps: body.nextSteps,
         ...(body.title !== undefined ? { title: body.title } : {}),
         ...(body.pendingAction !== undefined ? { pendingAction: body.pendingAction } : {}),
-        points: SUMMARY_POINTS,
+        points,
         approvedAt: new Date(),
       })
       .where(and(eq(interactions.id, draft.id), isNull(interactions.approvedAt)))
@@ -135,14 +135,17 @@ async function markApproved(draft: InteractionRow, body: ApproveInput): Promise<
 }
 
 export async function approveSummary({ user, params, body }: InputOf<typeof R.approveSummary>): ResultOf<typeof R.approveSummary> {
-  const draft = await requireOwnDraft(params.id, user.id);
+  const { draft, event } = await requireOwnDraft(params.id, user.id);
   if (await hasApprovedSummary(draft.connectionId)) return fail(E.alreadyApproved);
   if (!draft.substantive) return fail(E.notSubstantive);
-  const row = await markApproved(draft, body);
-  const { event } = await requireAcceptedMembership(row.connectionId, user.id);
-  // Off the response path: badges read every connection the author has (conference-scale finding 13).
-  afterResponse("awards", async () => notify(...badgeNotices(user.id, await awardBadges(user, event, row.id))));
-  await broadcast({ topic: liveTopic(event.accessCode), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } });
+  // A note on a connection outside an event is kept but pays nothing, and no event board hears of it.
+  const points = event ? SUMMARY_POINTS : 0;
+  const row = await markApproved(draft, body, points);
+  if (event) {
+    // Off the response path: badges read every connection the author has (conference-scale finding 13).
+    afterResponse("awards", async () => notify(...badgeNotices(user.id, await awardBadges(user, event, row.id))));
+    await broadcast({ topic: liveTopic(event.accessCode), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } });
+  }
   const interaction = {
     id: row.id,
     connectionId: row.connectionId,
@@ -151,8 +154,8 @@ export async function approveSummary({ user, params, body }: InputOf<typeof R.ap
     nextSteps: row.nextSteps,
     title: row.title ?? undefined,
     pendingAction: row.pendingAction,
-    points: SUMMARY_POINTS,
+    points,
     approvedAt: (row.approvedAt ?? new Date()).toISOString(),
   };
-  return { body: { interaction, pointsAwarded: SUMMARY_POINTS } };
+  return { body: { interaction, pointsAwarded: points } };
 }

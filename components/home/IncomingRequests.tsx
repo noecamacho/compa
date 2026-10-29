@@ -6,6 +6,7 @@ import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Muted } from "@/components/ui/Text";
+import { OutsideEventTag } from "@/components/connections/OutsideEventTag";
 import { useLiveNotifications, useUserEvent } from "@/components/notifications/LiveNotifications";
 import { apiCall } from "@/lib/api/client";
 import { ConnectionList, type ConnectionListT } from "@/lib/api/schemas";
@@ -57,7 +58,7 @@ export function AlertsBell({ initial, locale }: { initial: number; locale: Local
 // One card per pending request, newest first (V2Solicitud entry point; README "Avisos").
 export function IncomingRequests({ initial }: { initial: Incoming }) {
   const incoming = useIncomingRequests(initial);
-  const { tour } = useCopy();
+  const { tour, common } = useCopy();
   if (incoming.length === 0) return null;
   return (
     <div className="flex flex-col gap-[10px] md:grid md:grid-cols-2">
@@ -76,6 +77,11 @@ export function IncomingRequests({ initial }: { initial: Incoming }) {
           <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
             <span className="font-display text-[16px] leading-[1.15] font-bold">{tour.incoming.title(firstName(request.from.name))}</span>
             <Muted className="text-[12px] font-bold">{tour.incoming.hint}</Muted>
+            {request.event === null && (
+              <span className="mt-1">
+                <OutsideEventTag label={common.outsideEventShort} />
+              </span>
+            )}
           </span>
           <span className="inline-flex h-[34px] items-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold border-ink shadow-hard-2">{tour.incoming.view}</span>
         </Card>

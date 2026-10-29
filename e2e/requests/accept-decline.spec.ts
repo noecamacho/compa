@@ -235,12 +235,12 @@ test.describe("requests: accept and decline (real)", () => {
       const hoursSinceTestStart = (Date.now() - Date.parse(await admin.startsAt(testEvent.slug))) / 3_600_000;
       const earlier = await admin.create([ana.user, bruno.user], Math.ceil(hoursSinceTestStart) + 24);
       const first = await sendRequest(ana.page.request, bruno.user.handle);
-      expect(first.body.event.slug).toBe(earlier.slug);
+      expect(first.body.event?.slug).toBe(earlier.slug);
       expect(await (await accept(bruno.page.request, first.body.connectionId)).json()).toMatchObject({ kind: "new", points: 50 });
       await admin.end(earlier.slug);
 
       const second = await sendRequest(ana.page.request, bruno.user.handle);
-      expect(second.body.event.slug).toBe(testEvent.slug);
+      expect(second.body.event?.slug).toBe(testEvent.slug);
       expect(second.status).toBe(201);
       expect(await (await accept(bruno.page.request, second.body.connectionId)).json()).toMatchObject({ kind: "reconnection", points: 20 });
       expect((await listOf(ana.page.request)).totals).toMatchObject({ points: 70, connections: 2, people: 1 });
@@ -255,7 +255,7 @@ test.describe("requests: accept and decline (real)", () => {
     try {
       const event = await admin.create([ana.user, bruno.user]);
       const { body: sent } = await sendRequest(ana.page.request, bruno.user.handle);
-      expect(sent.event.slug).toBe(event.slug);
+      expect(sent.event?.slug).toBe(event.slug);
       await bruno.page.goto(`/requests/${sent.connectionId}`);
       await expect(acceptButton(bruno.page)).toBeVisible();
       await admin.end(event.slug);

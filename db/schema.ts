@@ -191,9 +191,14 @@ export const connections = pgTable(
   "connections",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    eventId: uuid("event_id").notNull(),
-    requesterId: uuid("requester_id").notNull(),
-    addresseeId: uuid("addressee_id").notNull(),
+    // Null for a connection made outside an event: it pays no points and no event board sees it (wiki/points-rules.md).
+    eventId: uuid("event_id"),
+    requesterId: uuid("requester_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    addresseeId: uuid("addressee_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
     status: connectionStatus("status").notNull().default("pending"),
     requesterKnew: boolean("requester_knew"),
     addresseeKnew: boolean("addressee_knew"),
@@ -222,14 +227,18 @@ export const connections = pgTable(
     ),
     check(
       "connections_points_follow_kind_check",
-      // V2 design points table: 50 new, 20 reconnection (lib/points.ts).
-      sql`${t.kind} is null or (${t.kind} = 'new' and ${t.points} = 50) or (${t.kind} = 'reconnection' and ${t.points} = 20)`,
+      // V2 design points table: 50 new, 20 reconnection (lib/points.ts); outside an event always 0.
+      sql`${t.kind} is null or (${t.eventId} is null and ${t.points} = 0) or (${t.eventId} is not null and ((${t.kind} = 'new' and ${t.points} = 50) or (${t.kind} = 'reconnection' and ${t.points} = 20)))`,
     ),
     uniqueIndex("connections_pair_per_event_uq").on(
       t.eventId,
       sql`least(${t.requesterId}, ${t.addresseeId})`,
       sql`greatest(${t.requesterId}, ${t.addresseeId})`,
     ),
+    // Nulls are distinct in the index above, so the one connection outside an event per pair needs its own.
+    uniqueIndex("connections_pair_eventless_uq")
+      .on(sql`least(${t.requesterId}, ${t.addresseeId})`, sql`greatest(${t.requesterId}, ${t.addresseeId})`)
+      .where(sql`event_id is null`),
     index("connections_requester_idx").on(t.requesterId),
     index("connections_addressee_idx").on(t.addresseeId),
     index("connections_event_status_idx").on(t.eventId, t.status),
@@ -379,11 +388,11 @@ export const eventScores = pgView("event_scores", {
   with awards as (
     select c.event_id, p.user_id, c.points, 1 as is_connection
     from connections c cross join lateral (values (c.requester_id), (c.addressee_id)) as p (user_id)
-    where c.status = 'accepted'
+    where c.status = 'accepted' and c.event_id is not null
     union all
     select c.event_id, i.author_id as user_id, i.points, 0
     from interactions i join connections c on c.id = i.connection_id
-    where i.approved_at is not null
+    where i.approved_at is not null and c.event_id is not null
     union all
     select b.event_id, b.user_id, b.points, 0
     from bonus_points b

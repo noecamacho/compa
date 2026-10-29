@@ -8,7 +8,7 @@ type LivePersonRef = { id: string; name: string; photoUrl: string | null };
 type EventRefT = { slug: string; name: string };
 
 export type BroadcastMessage =
-  | { topic: `user:${string}`; event: "request.received"; payload: { connectionId: string; from: CardT; event: EventRefT } }
+  | { topic: `user:${string}`; event: "request.received"; payload: { connectionId: string; from: CardT; event: EventRefT | null } }
   | { topic: `user:${string}`; event: "request.accepted"; payload: { connectionId: string; kind: ConnectionKindT; points: number; to: CardT } }
   | { topic: `user:${string}`; event: "invitee.connected"; payload: { invitee: CardT } }
   | { topic: `user:${string}`; event: "badge.earned"; payload: { badgeId: BadgeId; badgeName: string } }
