@@ -18,7 +18,7 @@ export function Pill({ children, tone = "white", rotate = 0, kind = "display", h
   const radius = kind === "display" ? 9 : 11;
   return (
     <span
-      className={`box-border inline-flex items-center justify-center gap-[5px] px-[10px] text-ink whitespace-nowrap border-ink ${font} ${shadow ? "shadow-hard-2" : ""} ${className ?? ""}`}
+      className={`box-border inline-flex items-center justify-center gap-1.5 px-[10px] leading-none select-none text-ink whitespace-nowrap border-ink ${font} ${shadow ? "shadow-hard-2" : ""} ${className ?? ""}`}
       style={{
         height: height ?? (kind === "display" ? 28 : 32),
         borderRadius: radius,
