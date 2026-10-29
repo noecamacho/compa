@@ -172,6 +172,10 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Landing, event door, join, not found and live reviewed at 390/834/1440 (live 1280/1920) in both locales; LinkedIn sign-in is the landing's single primary action (`app/page.tsx`, `components/brand/LinkedInMark.tsx`), event entry screens share one frame (`components/event/layout.ts`). DESIGN.md breakpoints unchanged.
 
+## [2026-10-29] query | Does sign-in keep the deep link?
+
+- T-011: yes. `proxy.ts` sets `x-pathname`; the `(app)` and onboarding layouts redirect signed-out visitors to `/auth/linkedin?next=<path>` via `signInForRequest` (`lib/server/session.ts`); `safeNext` moved to `lib/safe-next.ts` unchanged (`docs/flows/backlog.md` T-011).
+
 ## [2026-10-29] query | How does the attendee app adapt to tablet and desktop?
 
 - `components/ui/Screen.tsx` has two widths (`wide` 390/834/1120, `focus` 390/640/680); from 834 dashboard screens switch to two columns, from 1024 the dock is a left rail (`DockRail`) and `--rail` offsets the content. 390 stays pixel-identical. Summary in `DESIGN.md` "Responsive breakpoints".
