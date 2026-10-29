@@ -155,7 +155,7 @@ async function announceAcceptance(row: ConnectionRow, event: EventRow, requester
   await broadcast(
     { topic: userTopic(requester.id), event: "request.accepted", payload: { connectionId: row.id, kind, points, to } },
     {
-      topic: liveTopic(event.slug),
+      topic: liveTopic(event.accessCode),
       event: "connection.accepted",
       payload: { id: row.id, a: person(requester), b: person(addressee), kind, at: (row.respondedAt ?? new Date()).toISOString() },
     },

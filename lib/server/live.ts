@@ -6,7 +6,7 @@ import { E, fail } from "../api/errors";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { isRunning } from "../connection-status";
-import { requireEvent } from "./events";
+import { requireEventByCode } from "./events";
 import { cardFor } from "./people";
 
 // A6: the big screen is public; a 1 s shared cache absorbs many screens polling the same event.
@@ -35,7 +35,7 @@ async function acceptedConnections(event: EventRow) {
 }
 
 export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): ResultOf<typeof R.liveSnapshot> {
-  const event = await requireEvent(params.slug);
+  const event = await requireEventByCode(params.code);
   const now = new Date();
   const [attendees, accepted] = await Promise.all([rankedAttendees(event), acceptedConnections(event)]);
   const people = attendees.map(({ user, points }) => ({ id: user.id, name: user.name, photoUrl: user.photoUrl, points }));
@@ -49,7 +49,7 @@ export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): 
   const reconnections = links.filter((link) => link.kind === "reconnection").length;
   const counters = { checkedIn: people.length, connections: links.length, newCount: links.length - reconnections, reconnections };
   const body = {
-    event: { slug: event.slug, name: event.name, isRunning: isRunning(event, now) },
+    event: { code: event.accessCode, name: event.name, isRunning: isRunning(event, now) },
     people,
     connections: links,
     counters,
@@ -59,7 +59,7 @@ export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): 
 }
 
 export async function livePerson({ params }: InputOf<typeof R.livePerson>): ResultOf<typeof R.livePerson> {
-  const event = await requireEvent(params.slug);
+  const event = await requireEventByCode(params.code);
   const ranked = await rankedAttendees(event);
   const index = ranked.findIndex((entry) => entry.user.id === params.userId);
   const entry = ranked[index] ?? fail(E.attendeeNotFound);
@@ -68,7 +68,7 @@ export async function livePerson({ params }: InputOf<typeof R.livePerson>): Resu
 }
 
 export async function leaderboard({ params, query }: InputOf<typeof R.leaderboard>): ResultOf<typeof R.leaderboard> {
-  const event = await requireEvent(params.slug);
+  const event = await requireEventByCode(params.code);
   const ranked = await rankedAttendees(event);
   const rows = ranked.slice(0, query.limit).map(({ user, points, connections }, index) => ({
     rank: index + 1,

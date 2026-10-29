@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, Event, Invites, LiveSnapshot, Me } from "@/lib/api/schemas";
+import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
 import { home } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
@@ -15,15 +15,31 @@ import type { MonitoLook } from "@/lib/monito/look";
 
 type Props = { searchParams: Promise<{ demo?: string }> };
 
+type Live = { snapshot: LiveSnapshotT; event: EventDoorT };
+
+// The live card needs the current event; its code comes from /api/me (API spec A10).
+async function loadLive(code: string | undefined): Promise<Live | null> {
+  if (!code) return null;
+  const [snapshot, event] = await Promise.all([apiGet(`/api/e/${code}/live`, LiveSnapshot), apiGet(`/api/e/${code}`, EventDoor)]);
+  return { snapshot, event };
+}
+
+function NoEventCard() {
+  return (
+    <Card tone="sky-soft" className="flex flex-col gap-1 px-4 py-[14px]">
+      <span className="font-display text-[20px] leading-[1.1] font-bold">{home.noEventTitle}</span>
+      <span className="text-[13px] font-extrabold">{home.noEventHint}</span>
+    </Card>
+  );
+}
+
 // 03 Inicio and 03b InicioVacio: one page, the empty branch when the person has no connections yet.
 export default async function HomePage({ searchParams }: Props) {
   const { demo } = await searchParams;
   // `?demo=empty` previews the first-night state in mock mode.
   const me = await apiGet("/api/me", Me, demo === "empty" ? { mockExample: "empty" } : {});
-  const slug = me.currentEvent?.slug ?? "founders-fest";
-  const [snapshot, event, list, invites] = await Promise.all([
-    apiGet(`/api/events/${slug}/live`, LiveSnapshot),
-    apiGet(`/api/events/${slug}`, Event),
+  const [live, list, invites] = await Promise.all([
+    loadLive(me.currentEvent?.code),
     apiGet("/api/connections", ConnectionList),
     apiGet("/api/invites/me", Invites),
   ]);
@@ -50,7 +66,7 @@ export default async function HomePage({ searchParams }: Props) {
         </IconButton>
       </div>
 
-      <LiveCard snapshot={snapshot} me={me} endsAt={event.endsAt} looks={looks} empty={empty} />
+      {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard />}
 
       <Card href="/connect" tone="mint" className="relative flex items-center gap-[14px] px-4 py-[14px]">
         {empty && (

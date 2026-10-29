@@ -22,7 +22,7 @@ async function buildMe(user: UserRow): Promise<MeT> {
     nameEdited: user.nameEdited,
     photoEdited: user.photoEdited,
     isAdmin: user.isAdmin,
-    currentEvent: current ? { slug: current.slug, name: current.name } : null,
+    currentEvent: current ? { code: current.accessCode, name: current.name } : null,
   };
 }
 

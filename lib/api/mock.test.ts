@@ -74,19 +74,19 @@ describe("defineRoute", () => {
   });
 
   test("invalid path params are 400 invalid_input with fields", async () => {
-    const handler = async () => ({ body: { rows: [] } });
-    const response = await defineRoute(routes.leaderboard, handler)(new Request("http://localhost/x?limit=500"), {
-      params: Promise.resolve({ slug: "Not A Slug" }),
+    const handler = async () => ({ status: 204 });
+    const response = await defineRoute(routes.livePerson, handler)(new Request("http://localhost/x"), {
+      params: Promise.resolve({ code: "k7m2p9xq4t", userId: "not-a-uuid" }),
     });
     expect(response.status).toBe(400);
     const body = (await response.json()) as { error: { code: string; fields: Record<string, string[]> } };
     expect(body.error.code).toBe("invalid_input");
-    expect(Object.keys(body.error.fields)).toContain("slug");
+    expect(Object.keys(body.error.fields)).toContain("userId");
   });
 
   test("a public handler gets parsed params and query", async () => {
     const route = defineRoute(routes.leaderboard, async ({ query }) => ({ body: { rows: [] }, headers: { "x-limit": `${query.limit}` } }));
-    const response = await route(new Request("http://localhost/x"), { params: Promise.resolve({ slug: "founders-fest" }) });
+    const response = await route(new Request("http://localhost/x"), { params: Promise.resolve({ code: "k7m2p9xq4t" }) });
     expect(response.status).toBe(200);
     expect(response.headers.get("x-limit")).toBe("20");
   });
