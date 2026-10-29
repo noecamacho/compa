@@ -24,13 +24,9 @@ async function loadBoards(code: string | undefined): Promise<[LeaderboardT, Lead
 export default async function RankingPage() {
   const me = await apiGet("/api/me", Me);
   const [[event, lifetime], list] = await Promise.all([loadBoards(me.currentEvent?.code), apiGetSafe("/api/connections", ConnectionList)]);
-  // Monito looks and handles come from my connections; strangers on the podium show the default monito.
+  // Monito looks come from my connections; strangers on the podium show the default monito.
   const looks: Record<string, MonitoLook | undefined> = { [me.id]: me.avatar };
-  const handles: Record<string, string> = { [me.id]: me.handle };
-  for (const entry of list?.people ?? []) {
-    looks[entry.person.id] = entry.person.avatar;
-    handles[entry.person.id] = entry.person.handle;
-  }
+  for (const entry of list?.people ?? []) looks[entry.person.id] = entry.person.avatar;
   return (
     <Screen gap={12} className="pb-6">
       <Header
@@ -44,7 +40,7 @@ export default async function RankingPage() {
           </Pill>
         }
       />
-      <RankingView me={me} boards={{ event, lifetime }} looks={looks} handles={handles} />
+      <RankingView me={me} boards={{ event, lifetime }} looks={looks} />
     </Screen>
   );
 }

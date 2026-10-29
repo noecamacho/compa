@@ -214,6 +214,7 @@ export const liveSnapshot: z.input<typeof S.LiveSnapshot> = {
 const row = (rank: number, person: Card, points: number, connections: number): z.input<typeof S.LeaderboardRow> => ({
   rank,
   userId: person.id,
+  handle: person.handle,
   name: person.name,
   photoUrl: null,
   points,

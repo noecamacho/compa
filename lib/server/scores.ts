@@ -9,12 +9,12 @@ export type Scores = { event: Standing; lifetime: Standing };
 const points = sql<number>`coalesce(${eventScores.points}, 0)`.mapWith(Number);
 const connectionCount = sql<number>`coalesce(${eventScores.connections}, 0)`.mapWith(Number);
 
-export type Ranked = { userId: string; name: string; photoUrl: string | null; points: number; connections: number };
+export type Ranked = { userId: string; handle: string; name: string; photoUrl: string | null; points: number; connections: number };
 
 // Checked-in attendees in leaderboard order: points, connections, earliest check-in (data model §4.4).
 export async function rankedAtEvent(event: EventRow, db: Executor = getDb()): Promise<Ranked[]> {
   const rows = await db
-    .select({ userId: users.id, name: users.name, photoUrl: users.photoUrl, points, connections: connectionCount })
+    .select({ userId: users.id, handle: users.handle, name: users.name, photoUrl: users.photoUrl, points, connections: connectionCount })
     .from(eventAttendees)
     .innerJoin(users, eq(users.id, eventAttendees.userId))
     .leftJoin(eventScores, and(eq(eventScores.eventId, eventAttendees.eventId), eq(eventScores.userId, eventAttendees.userId)))
@@ -29,7 +29,7 @@ const lifetimeConnections = sql<number>`coalesce(${lifetimeScores.connections}, 
 // Everyone with points, all events, best first.
 export async function rankedLifetime(db: Executor = getDb()): Promise<Ranked[]> {
   return db
-    .select({ userId: users.id, name: users.name, photoUrl: users.photoUrl, points: lifetimePoints, connections: lifetimeConnections })
+    .select({ userId: users.id, handle: users.handle, name: users.name, photoUrl: users.photoUrl, points: lifetimePoints, connections: lifetimeConnections })
     .from(lifetimeScores)
     .innerJoin(users, eq(users.id, lifetimeScores.userId))
     .orderBy(desc(lifetimePoints), desc(lifetimeConnections), asc(users.createdAt));

@@ -340,6 +340,7 @@ export const LeaderboardRow = z
   .object({
     rank: z.int(),
     userId: uuid,
+    handle,
     name: z.string(),
     photoUrl: z.string().nullable(),
     points: z.int(),

@@ -87,7 +87,9 @@ async function myStanding(ranked: Ranked[]) {
 
 export async function leaderboard({ params, query }: InputOf<typeof R.leaderboard>): ResultOf<typeof R.leaderboard> {
   const event = await requireEventByCode(params.code);
-  const ranked = query.scope === "lifetime" ? await rankedLifetime() : await rankedAtEvent(event);
+  const attendees = query.scope === "lifetime" ? await rankedLifetime() : await rankedAtEvent(event);
+  // Only people with points are on the board: a checked-in person with 0 points has no rank (standingOf) and no podium place.
+  const ranked = attendees.filter((entry) => entry.points > 0);
   const rows = ranked.slice(0, query.limit).map(toRow);
   const me = await myStanding(ranked);
   return { body: me ? { rows, me } : { rows }, headers: me ? undefined : LIVE_CACHE };
