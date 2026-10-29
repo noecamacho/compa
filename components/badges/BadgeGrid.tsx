@@ -11,27 +11,31 @@ import { Badge, type BadgeState } from "./Badge";
 
 type Filter = "all" | "earned" | "pending";
 
+// One badge as the grid shows it. Mine carry the date and progress; another person's only whether they earned it.
+export type BadgeView = Pick<BadgeStatusT, "id" | "earnedAt" | "progress"> & { earned: boolean };
+
 // The API sends Spanish earnedNote/progress labels; the screen builds both from the raw values so they follow the locale.
-const subtitle = (status: BadgeStatusT, all: Dictionary): string => {
+const subtitle = (status: BadgeView, all: Dictionary): string => {
   const { badges: copy, badgeProgress } = all;
-  if (status.earnedAt) return badgeProgress.earnedOn(new Date(status.earnedAt));
-  if (isSecret(status.id) || !status.progress) return copy.secret;
+  if (status.earned) return status.earnedAt ? badgeProgress.earnedOn(new Date(status.earnedAt)) : "";
+  if (isSecret(status.id)) return copy.secret;
+  if (!status.progress) return "";
   return copy.progress(status.progress.current, status.progress.total, badgeProgress.labels[status.id] ?? "");
 };
 
-const badgeState = (status: BadgeStatusT): BadgeState => {
-  if (status.earnedAt) return "earned";
+const badgeState = (status: BadgeView): BadgeState => {
+  if (status.earned) return "earned";
   return isSecret(status.id) ? "locked" : "pending";
 };
 
-type Props = { badges: BadgeStatusT[] };
+type Props = { badges: BadgeView[] };
 
 // 10 Insignias: the 20 in a showcase of 3 columns (phone), 4 (tablet) or 5 (desktop); secret ones show no hint.
 export function BadgeGrid({ badges }: Props) {
   const all = useCopy();
   const { badges: copy, badgeNames: names } = all;
   const [filter, setFilter] = useState<Filter>("all");
-  const shown = badges.filter((status) => filter === "all" || (filter === "earned" ? Boolean(status.earnedAt) : !status.earnedAt));
+  const shown = badges.filter((status) => filter === "all" || (filter === "earned" ? status.earned : !status.earned));
   return (
     <>
       <div className="md:max-w-[480px]">
@@ -49,8 +53,7 @@ export function BadgeGrid({ badges }: Props) {
       {/* Keyed by filter so the tiles rise again, staggered, when the filter changes. */}
       <div key={filter} className="mx-[-4px] mt-[-4px] grid flex-1 auto-rows-min grid-cols-3 gap-3 px-1 pt-1 pb-[30px] md:grid-cols-4 lg:grid-cols-5 lg:gap-4">
         {shown.map((status, index) => {
-          const earned = Boolean(status.earnedAt);
-          const showBar = !earned && status.progress && !isSecret(status.id);
+          const showBar = !status.earned && status.progress && !isSecret(status.id);
           return (
             <div
               key={status.id}
