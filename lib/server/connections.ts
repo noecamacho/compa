@@ -264,6 +264,9 @@ async function lifetimePoints(userId: string): Promise<number> {
   return row?.points ?? 0;
 }
 
+// People I actually connected with: a declined or still-pending request is not a connection (07 Conexiones).
+const hasAccepted = (items: MyConnection[]) => items.some(({ row }) => row.status === "accepted");
+
 export async function listConnections({ user }: InputOf<typeof R.listConnections>): ResultOf<typeof R.listConnections> {
   const now = new Date();
   const list = await myConnections(user.id);
@@ -271,7 +274,7 @@ export async function listConnections({ user }: InputOf<typeof R.listConnections
   const cards = await cardsFor(user.id, await usersByIds([...groups.keys()]));
   const people = [...groups].flatMap(([id, items]) => {
     const card = cards.get(id);
-    return card ? [personHistory(card, items, user.id, now)] : [];
+    return card && hasAccepted(items) ? [personHistory(card, items, user.id, now)] : [];
   });
   const incoming = list
     .filter((item) => isIncoming(item, user.id, now))
