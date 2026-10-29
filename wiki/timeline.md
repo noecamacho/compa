@@ -17,6 +17,10 @@ Caption in the source: "Three gates order the night: scaffold, full flow and fre
 | — | **Gate 3:** feature freeze, 45 min before closing | |
 | freeze – close | Demo ready | Backup video, README with the agent workflow, submission and pitch rehearsed twice |
 
+## Decided deadline (captain, 2026-10-28)
+
+Submission of the MVP, `README.md` and a demonstration video is due before 10:00 on 2026-10-29. Feature freeze at 09:00; the last hour is README, video and submission. The relative phases above still order the work; see the fast path in [AGENTS.md](../AGENTS.md).
+
 ## Closing-time warning (p. 16)
 
 Confirm the closing time now. The event page says 7 p.m. at the top and 9 p.m. in the details. If it is 7 p.m., the plan shrinks to P0 without @tag or recording, with seed data and a recorded demo. Tracked in [open-questions](open-questions.md) and [risks](risks.md).

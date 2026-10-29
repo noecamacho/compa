@@ -9,6 +9,17 @@ The single instruction file for every agent and contributor. `CLAUDE.md` imports
 3. Load the `caveman` skill for chat and status, the `ponytail` skill before changing code, and the project skill `compa-wiki` for the checklist. Use Serena for symbol-level reads and edits, repomix for whole-repo context (`docs/agent-tooling.md`).
 4. Everything is in English: files, code, identifiers, comments, commit messages, PR text, wiki pages. The product is called **COMPA**; the former name in the source PDF appears only in `wiki/glossary.md` and `wiki/sources/build-plan.md`.
 
+## 1b. Hackathon fast path (active until 2026-10-29 10:00 local time)
+
+The MVP, a `README.md` and a demonstration video must be submitted before 10:00 on 2026-10-29 (captain decision, 2026-10-28 19:30). Speed wins; the rules below replace nothing, they shorten it.
+
+- Work the plan's four lanes in parallel on separate branches and worktrees (`wiki/team-and-prs.md`): scaffold first (PR #0), then profile+QR, connections+points, summaries, live+seeds.
+- Do not wait for Jira. Use `COMPA-<TBD>` and the task names from `docs/jira/compa-bootstrap-ticket.md` as the ticket reference.
+- PRs stay small and land fast: one-line answers in the PR template are fine, "N/A" is fine with a word of why; the checklists still get ticked honestly. A 10-second GIF or a sentence of manual verification counts as testing.
+- Review within 10 minutes by one other agent or person; `main` stays deployable; revert first, fix later.
+- Scope order is the plan's: P0 never cut, then P2 goes first, recording, then @tag (`wiki/mvp-scope.md`). Feature freeze at 09:00; the last hour is README, video and submission (`wiki/delivery-checklist.md`).
+- Wiki updates during the fast path: one line in `wiki/log.md` per PR that changes knowledge; `wiki/index.md` only when a page is added.
+
 ## 2. The wiki (Karpathy's LLM Wiki pattern)
 
 Three layers:

@@ -7,7 +7,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Added
 
 - LLM wiki (`raw/`, `wiki/`) ingesting the 21-page COMPA build plan with 32 cross-linked, page-cited pages, an index, an append-only log, a glossary and an open-questions page.
-- `AGENTS.md` as the single agent and contributor instruction file; `CLAUDE.md` imports it.
+- `AGENTS.md` as the single agent and contributor instruction file, including the hackathon fast path for the 2026-10-29 10:00 submission deadline; `CLAUDE.md` imports it.
 - `ARCHITECTURE.md` and `DESIGN.md` derived from the plan, with decided versus open items.
 - `docs/engineering-standards.md`: SOLID, KISS, DRY, no nesting, clean code with TypeScript examples.
 - `docs/git-workflow.md`: Conventional Commits, Semantic Versioning, branch naming, hooks and attribution rules.

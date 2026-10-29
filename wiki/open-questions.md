@@ -4,7 +4,7 @@ Contradictions, gaps and ambiguities found while ingesting the build plan. Nothi
 
 | # | Question | Where it comes from |
 | --- | --- | --- |
-| 1 | **Closing time.** The event page says 7 p.m. at the top and 9 p.m. in the details. If 7 p.m., scope shrinks to P0 without @tag or recording, with seed data and a recorded demo. | p. 16, p. 20 |
+| 1 | **Closing time.** The event page says 7 p.m. at the top and 9 p.m. in the details. If 7 p.m., scope shrinks to P0 without @tag or recording, with seed data and a recorded demo. **Decided 2026-10-28:** the submission deadline is 10:00 on 2026-10-29 for the MVP, `README.md` and a demo video (captain); the cut order still applies, see [timeline](timeline.md). | p. 16, p. 20 |
 | 2 | **Domain.** The QR encodes `https://<domain>/c/<handle>`; the short domain is not chosen. | p. 5, p. 8, p. 20 |
 | 3 | **OpenAI model names.** Not fixed; to be confirmed in the console and set in `OPENAI_STT_MODEL` and `OPENAI_TEXT_MODEL`. | p. 12 |
 | 4 | **Topics vocabulary.** "About 40 topics" with a partial list; the full list that `lib/topics.ts` and the JSON schema enum need is not in the plan. | p. 7, p. 12 |
