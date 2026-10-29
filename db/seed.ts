@@ -40,11 +40,13 @@ async function seedDemoEvent(db: Database): Promise<void> {
   }
   const now = Date.now();
   const window = { startsAt: new Date(now - HOUR_MS), endsAt: new Date(now + 12 * HOUR_MS) };
-  await db
+  const [row] = await db
     .insert(events)
     .values({ ...DEMO_EVENT, ...window, createdBy: owner.id })
-    .onConflictDoUpdate({ target: events.slug, set: window });
-  console.log(`demo: event ${DEMO_EVENT.slug} runs until ${window.endsAt.toISOString()} (owner ${owner.handle})`);
+    .onConflictDoUpdate({ target: events.slug, set: window })
+    .returning({ accessCode: events.accessCode });
+  // The door path is what the event QR encodes (M19); it is printed for the operator, never committed.
+  console.log(`demo: event ${DEMO_EVENT.slug} runs until ${window.endsAt.toISOString()} (owner ${owner.handle}), door /e/${row?.accessCode}`);
 }
 
 async function main(): Promise<void> {

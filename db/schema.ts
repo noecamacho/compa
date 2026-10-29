@@ -1,4 +1,4 @@
-// Data model spec: docs/specs/2026-10-29-data-model.md §3 (decisions M1–M18) and API spec §2 (`users.handle`).
+// Data model spec: docs/specs/2026-10-29-data-model.md §3 (decisions M1–M19) and API spec §2 (`users.handle`).
 import { sql } from "drizzle-orm";
 import {
   boolean,
@@ -17,6 +17,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { generateAccessCode } from "../lib/access-code";
 import { DEFAULT_VISIBILITY, VISIBILITY_LEVELS, type Links, type VisibilitySettings } from "../lib/profile-fields";
 import { authUsers } from "./auth-schema";
 
@@ -84,6 +85,8 @@ export const events = pgTable(
   {
     id: uuid("id").primaryKey().defaultRandom(),
     slug: text("slug").notNull().unique(),
+    // The event QR encodes /e/<access_code>; the slug stays for admins only (M19).
+    accessCode: text("access_code").notNull().unique().$defaultFn(generateAccessCode),
     name: text("name").notNull(),
     startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
     endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
@@ -92,7 +95,10 @@ export const events = pgTable(
       .references(() => users.id),
     createdAt: createdAt(),
   },
-  (t) => [check("events_window_check", sql`${t.endsAt} > ${t.startsAt}`)],
+  (t) => [
+    check("events_window_check", sql`${t.endsAt} > ${t.startsAt}`),
+    check("events_access_code_check", sql`${t.accessCode} ~ '^[a-z0-9]{8,32}$'`),
+  ],
 ).enableRLS();
 
 export const eventAttendees = pgTable(
