@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Icon } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Screen } from "@/components/ui/Screen";
 import { Segmented } from "@/components/ui/Segmented";
@@ -46,7 +46,7 @@ export function ConnectTabs({ me, qrSvg }: Props) {
       {tab === "qr" ? (
         <div className="flex flex-col items-center gap-3">
           <Card size="sm" className="flex w-[315px] items-center gap-3 px-[14px] py-[10px]">
-            <Avatar person={{ name: me.name, look: me.avatar }} size={46} />
+            <Avatar person={avatarOf(me)} size={46} />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="font-display text-[18px] leading-[1.2] font-bold">{me.name}</span>
               <Muted className="text-[13px] font-bold">{[me.headline, me.company, me.city?.split(",")[0]].filter(Boolean).join(" · ")}</Muted>

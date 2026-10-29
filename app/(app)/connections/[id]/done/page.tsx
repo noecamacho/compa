@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Icon, type IconName } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Chip";
@@ -50,13 +50,13 @@ export default async function ConfirmationPage({ params }: Props) {
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center">
           <span className="block" style={{ transform: "rotate(-5deg)" }}>
-            <Avatar person={{ name: me.name, look: me.avatar }} size={84} shadow={3} />
+            <Avatar person={avatarOf(me)} size={84} shadow={3} />
           </span>
           <span aria-hidden="true" className="relative z-10 mx-[-10px] flex h-10 w-10 items-center justify-center rounded-full bg-sky border-ink">
             <Icon name={detail.kind === "new" ? "userPlus" : "refresh"} size={18} strokeWidth={2.8} />
           </span>
           <span className="block" style={{ transform: "rotate(5deg)" }}>
-            <Avatar person={{ name: other.name, look: other.avatar }} size={84} shadow={3} />
+            <Avatar person={avatarOf(other)} size={84} shadow={3} />
           </span>
         </div>
         <span className="animate-pop inline-flex h-[62px] items-center gap-[10px] rounded-[18px] bg-sun px-[22px] font-display text-[38px] font-bold whitespace-nowrap shadow-hard-4" style={{ border: "3px solid #1E1B2E" }}>
@@ -88,7 +88,7 @@ export default async function ConfirmationPage({ params }: Props) {
 
       <Card className="animate-rise mt-auto flex flex-col gap-[10px] px-4 py-[14px]" style={{ animationDelay: ".55s" }}>
         <span className="flex items-center gap-[10px]">
-          <Avatar person={{ name: other.name, look: other.avatar }} size={32} />
+          <Avatar person={avatarOf(other)} size={32} />
           <span className="flex min-w-0 flex-1 flex-col gap-[1px]">
             <SectionLabel>{copy.connectWith(first(other.name))}</SectionLabel>
             <Muted className="text-[12px] font-bold">{pending ? copy.pendingNote : copy.keepTalking}</Muted>

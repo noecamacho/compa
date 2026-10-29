@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { RequestActions } from "@/components/connections/RequestActions";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Chip";
 import { Header } from "@/components/ui/Header";
@@ -41,13 +41,13 @@ export default async function RequestPage({ params }: Props) {
       <div className="mt-[6px] flex flex-col items-center gap-3">
         <div className="flex items-center">
           <span className="animate-wiggle block">
-            <Avatar person={{ name: other.name, look: other.avatar }} size={92} shadow={3} />
+            <Avatar person={avatarOf(other)} size={92} shadow={3} />
           </span>
           <span aria-hidden="true" className="relative z-10 mx-[-10px] flex h-10 w-10 items-center justify-center rounded-full bg-sun font-display text-[20px] font-bold border-ink">
             ?
           </span>
           <span className="block opacity-55" style={{ transform: "rotate(5deg)" }}>
-            <Avatar person={{ name: me.name, look: me.avatar }} size={92} shadow={3} />
+            <Avatar person={avatarOf(me)} size={92} shadow={3} />
           </span>
         </div>
         <div className="animate-rise flex flex-col items-center gap-1 text-center" style={{ animationDelay: ".2s" }}>
@@ -58,7 +58,7 @@ export default async function RequestPage({ params }: Props) {
 
       <Card className="animate-rise flex flex-col gap-3 px-4 py-[14px]" style={{ animationDelay: ".35s" }}>
         <div className="flex items-center gap-3">
-          <Avatar person={{ name: other.name, look: other.avatar }} size={46} />
+          <Avatar person={avatarOf(other)} size={46} />
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="font-display text-[18px] leading-[1.2] font-bold">{other.name}</span>
             <Muted className="text-[13px] font-bold">{[other.headline, other.company, other.city?.split(",")[0]].filter(Boolean).join(" · ")}</Muted>
@@ -82,7 +82,7 @@ export default async function RequestPage({ params }: Props) {
             <span className="flex items-center">
               {mutual.slice(0, 3).map((person, index) => (
                 <span key={person.id} className="block" style={{ marginLeft: index ? -7 : 0 }}>
-                  <Avatar person={{ name: person.name, look: person.avatar }} size={26} />
+                  <Avatar person={avatarOf(person)} size={26} />
                 </span>
               ))}
             </span>

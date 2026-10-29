@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
 import { Icon } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { MyLinkToggles } from "@/components/profile/MyLinkToggles";
 import { Card } from "@/components/ui/Card";
 import { IconLink } from "@/components/ui/IconButton";
@@ -32,7 +32,7 @@ export default async function MePage() {
 
       <Link href="/onboarding/monito?from=me" aria-label={copy.changeMonito} className="mt-[-4px] flex items-center gap-4">
         <span className="flex h-[140px] w-[132px] shrink-0 items-end justify-center rounded-card bg-sky-soft pb-[6px] border-ink shadow-hard-4">
-          <Avatar person={{ name: me.name, look: me.avatar }} px={6} />
+          <Avatar person={avatarOf(me)} px={6} />
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-2">
           <span className="font-display text-[26px] leading-[1.05] font-bold">{me.name}</span>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Icon } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Muted } from "@/components/ui/Text";
 import { apiCall } from "@/lib/api/client";
 import { UserProfile, type CardT } from "@/lib/api/schemas";
@@ -95,7 +95,7 @@ export function ScanPanel() {
         <span aria-hidden="true" className="absolute top-[156px] right-[86px] left-[86px] h-1 rounded-[2px] bg-mint" />
         {found && (
           <div className="absolute right-3 bottom-3 left-3 flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3">
-            <Avatar person={{ name: found.name, look: found.avatar }} size={42} />
+            <Avatar person={avatarOf(found)} size={42} />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="text-[15px] font-extrabold">{found.name}</span>
               <Muted className="text-[12px] font-bold">{[found.headline, found.company].filter(Boolean).join(" · ")}</Muted>
