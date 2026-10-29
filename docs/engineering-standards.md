@@ -146,6 +146,19 @@ const Env = z.object({ OPENAI_STT_MODEL: z.string().min(1), OPENAI_TEXT_MODEL: z
 export const env = Env.parse(process.env);
 ```
 
+## Testing
+
+Every change ships with tests that prove the behavior it touches.
+
+- **Unit tests** (`bun test`, next to the code as `*.test.ts`) for pure logic: points, visibility, parsing, mapping.
+- **Playwright e2e** (preferred for anything a user can do) under `e2e/<area>/<flow>.spec.ts`. Each spec confirms the user flows from `docs/flows/catalog.md` that the change affects:
+  - the happy path end to end;
+  - every edge case listed for the flow (double scan, self-scan, event ended, already connected…);
+  - every error state, each with the UI message the user sees (inject errors with mock mode: `x-compa-mock: 1` plus `x-compa-mock-error: <code>`);
+  - viewports 390, 834 and 1440; locales `es` and `en`; `prefers-reduced-motion`.
+- Real-mode specs use a seeded test event and a test session created with the service role, never a live LinkedIn login.
+- A PR is not done while its e2e specs fail or are skipped without a written reason in the PR.
+
 ## English only
 
 All code, identifiers, comments, documentation, commit messages and PR text are in English. Product copy shown to end users is a product decision tracked in `wiki/open-questions.md` (#6) and is kept in dedicated copy files, never inline in logic.
