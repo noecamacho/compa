@@ -7,8 +7,9 @@ import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { ButtonLink } from "@/components/ui/Button";
 import { Segmented } from "@/components/ui/Segmented";
 import { Muted, ProgressBar } from "@/components/ui/Text";
+import { Tour } from "@/components/tour/Tour";
 import type { LeaderboardScopeT, LeaderboardT, MeT } from "@/lib/api/schemas";
-import { ranking as copy } from "@/lib/copy/es";
+import { ranking as copy, tour } from "@/lib/copy/es";
 import { firstName, formatPoints } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
 
@@ -71,16 +72,18 @@ export function RankingView({ me, boards, looks, handles }: Props) {
   const sub = scope === "event" ? copy.tonightSub : copy.inEvents(me.stats?.events ?? 0);
   return (
     <>
-      <Segmented
-        label={copy.scopeLabel}
-        value={scope}
-        onChange={setScope}
-        height={34}
-        options={[
-          { value: "event", label: copy.tonight },
-          { value: "lifetime", label: copy.allYear },
-        ]}
-      />
+      <div data-tour="scope">
+        <Segmented
+          label={copy.scopeLabel}
+          value={scope}
+          onChange={setScope}
+          height={34}
+          options={[
+            { value: "event", label: copy.tonight },
+            { value: "lifetime", label: copy.allYear },
+          ]}
+        />
+      </div>
       <div className="relative grid h-[372px] grid-cols-3 items-end gap-2 px-1">
         {CONFETTI.map((piece, index) => (
           <span
@@ -96,7 +99,7 @@ export function RankingView({ me, boards, looks, handles }: Props) {
       </div>
       <span aria-hidden="true" className="mx-1 mt-[-12px] block h-0" style={{ borderTop: "3px solid #1E1B2E" }} />
 
-      <div className="mt-[2px] flex flex-col gap-[10px] rounded-[20px] bg-gum-soft px-[14px] py-3 shadow-hard-4" style={{ border: "3px solid #1E1B2E" }}>
+      <div data-tour="you" className="mt-[2px] flex flex-col gap-[10px] rounded-[20px] bg-gum-soft px-[14px] py-3 shadow-hard-4" style={{ border: "3px solid #1E1B2E" }}>
         <div className="flex items-center gap-3">
           <Avatar person={avatarOf(me)} size={50} />
           <span className="flex min-w-0 flex-1 flex-col">
@@ -133,6 +136,7 @@ export function RankingView({ me, boards, looks, handles }: Props) {
           {copy.connectNow}
         </ButtonLink>
       </div>
+      <Tour id="ranking" steps={tour.ranking} />
     </>
   );
 }

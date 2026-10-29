@@ -112,6 +112,10 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Captain decision: only through the unguessable access code in the event QR, `compa.lol/e/<code>` (data model M19, API spec A10). Public event routes moved to `/api/e/{code}/…` with one indistinguishable 404 for any wrong code; slugs are admin-only; admins rotate codes with `POST /api/admin/events/{slug}/rotate-code`. `compa.lol` is a landing page with no sign-up; Spanish for `es*` languages, English otherwise. Migration `0003_event_access_code` backfills existing events. Resolves open question #2 (domain) and annotates #6 (language).
 
+## [2026-10-29] ingest | Guided onboarding and request inbox
+
+- Added the spotlight tour (`components/tour/Tour.tsx`): the screen dims except one element and a card explains it, step by step, once per screen (home, connect, register, profile, ranking) and again from "Guía rápida" in the profile or `?tour=1`. Home now shows incoming requests as cards and polls `GET /api/connections` every 3 s (bell links to the newest); the confirmation screen refreshes when a pending request is answered; `/u/[handle]` keeps the handle through LinkedIn sign-in; `/` forwards a signed-in person to `/home`; home renders outside an event. Closes gap-analysis U1, U7, U10, U15 and U16.
+
 ## [2026-10-29] query | Does a profile show the LinkedIn photo or the monito?
 
 - Captain decision: the LinkedIn photo by default, the monito by choice. Branch `fix/COMPA-TBD-photo-default-v2` adds `users.avatar_mode` (migration `0003_avatar_mode`), copies the photo to the Storage bucket `avatars` at sign-in, and makes Home and Ranking tolerate failed secondary calls. Status: `docs/backend-gap-analysis.md` §0.

@@ -4,7 +4,7 @@ import { Avatar } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import type { LiveSnapshotT, MeT } from "@/lib/api/schemas";
-import { common, home } from "@/lib/copy/es";
+import { common, home, tour } from "@/lib/copy/es";
 import { formatHour, formatPoints } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
 
@@ -30,6 +30,21 @@ function pairsFrom(snapshot: LiveSnapshotT, looks: Map<string, MonitoLook | unde
 }
 
 const first = (name: string) => name.split(" ")[0] ?? name;
+
+// Shown instead of the live card when the person is not checked in anywhere (gap analysis U7).
+export function OutsideEventCard() {
+  return (
+    <Card tone="sky-soft" className="flex items-center gap-[14px] px-4 py-[14px]">
+      <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-button bg-white border-ink shadow-hard-2" style={{ transform: "rotate(-5deg)" }}>
+        <Icon name="calendar" size={28} />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col gap-[4px]">
+        <span className="font-display text-[19px] leading-[1.1] font-bold">{tour.outsideEvent.title}</span>
+        <span className="text-[13px] leading-[1.35] font-bold text-muted">{tour.outsideEvent.body}</span>
+      </span>
+    </Card>
+  );
+}
 
 type Props = { snapshot: LiveSnapshotT; me: MeT; endsAt: string; looks: Map<string, MonitoLook | undefined>; empty: boolean };
 
