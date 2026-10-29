@@ -32,6 +32,6 @@ The project is ready when the full flow works in production from two different p
 - Scan a personal QR from inside the app on an iPhone (Safari) and in Firefox, not only Chrome on Android
 - If the access code was rotated anyway, reopen the live link from the admin event page
 - Unplug the projector's network for 30 s: the pill shows the age of the data and the board recovers on its own
-
+- Production `DATABASE_URL` uses the transaction pooler (port 6543; the app warns on 5432); watch Database → connections and function durations at doors-open
 
 The "public repository with a license" item conflicts with the current private repository; see [open-questions](open-questions.md). Related: [timeline](timeline.md), [demo-script](demo-script.md).
