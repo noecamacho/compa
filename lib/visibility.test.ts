@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { DEFAULT_VISIBILITY } from "./profile-fields";
-import { canSee, relationOf, toCard, type CardSource } from "./visibility";
+import { canSee, relationOf, toCard, withDefaultVisibility, type CardSource } from "./visibility";
 
 const owner: CardSource = {
   id: "owner",
@@ -42,6 +42,7 @@ describe("toCard", () => {
       handle: "lucia-fernandez",
       name: "Lucía Fernández",
       photoUrl: "https://example.com/lucia.jpg",
+      avatarMode: "photo",
       headline: "CTO en Tramita",
       city: "Guadalajara",
       links: { github: "https://github.com/lucia" },
@@ -72,6 +73,21 @@ describe("toCard", () => {
     const card = toCard(bare, "public");
     expect(card).not.toHaveProperty("headline");
     expect(card).not.toHaveProperty("links");
+  });
+});
+
+describe("avatar mode and old rows", () => {
+  test("the photo is the default, the monito when chosen or when there is no photo", () => {
+    expect(toCard(owner, "public").avatarMode).toBe("photo");
+    expect(toCard({ ...owner, avatarMode: "monito" }, "public").avatarMode).toBe("monito");
+    expect(toCard({ ...owner, photoUrl: null, avatarMode: "photo" }, "public").avatarMode).toBe("monito");
+  });
+
+  test("visibility stored before whatsapp existed still applies the default", () => {
+    const oldLinks = Object.fromEntries(Object.entries(DEFAULT_VISIBILITY.links).filter(([key]) => key !== "whatsapp"));
+    const old = { ...owner, links: { whatsapp: "https://wa.me/1" }, visibility: { ...DEFAULT_VISIBILITY, links: oldLinks } as never };
+    expect(toCard(old, "connected").links).toEqual({ whatsapp: "https://wa.me/1" });
+    expect(withDefaultVisibility(old.visibility).links.whatsapp).toBe("connections");
   });
 });
 
