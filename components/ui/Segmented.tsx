@@ -1,5 +1,7 @@
 "use client";
 
+import { HIT_AREA } from "./hit-area";
+
 type Option<T extends string> = { value: T; label: string };
 
 type Props<T extends string> = {
@@ -43,7 +45,7 @@ export function Segmented<T extends string>({ options, value, onChange, label, h
             type="button"
             aria-pressed={on}
             onClick={() => onChange(option.value)}
-            className="relative z-[1] cursor-pointer rounded-chip border-0 bg-transparent font-display font-bold"
+            className={`${HIT_AREA} z-[1] cursor-pointer rounded-chip border-0 bg-transparent font-display font-bold`}
             style={{
               height,
               fontSize: height >= 40 ? 15 : 14,
