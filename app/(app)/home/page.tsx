@@ -53,10 +53,11 @@ export default async function HomePage({ searchParams }: Props) {
   ]);
   const { home, tour } = copyFor(locale);
   const list = listOrNull ?? NO_CONNECTIONS;
-  const empty = demo === "empty" || list.totals.connections === 0;
+  const demoEmpty = demo === "empty";
+  const empty = demoEmpty || list.totals.connections === 0;
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
-  // A first-night person (no connections yet) still sees requests to them; only the demo preview hides them.
-  const incoming = demo === "empty" ? [] : list.incoming;
+  // Only the mock preview blanks real data; a first-night person (no connections yet) still sees requests and invitees.
+  const incoming = demoEmpty ? [] : list.incoming;
   return (
     <Screen dock>
       <StickyBar className="flex items-center justify-between">
@@ -105,7 +106,7 @@ export default async function HomePage({ searchParams }: Props) {
 
           {invites && (
             <div data-tour="invite">
-              <InviteCard invites={empty ? { ...invites, invitees: [] } : invites} />
+              <InviteCard invites={demoEmpty ? { ...invites, invitees: [] } : invites} />
             </div>
           )}
         </div>
