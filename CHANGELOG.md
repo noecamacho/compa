@@ -6,6 +6,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- Sign out on the profile screen (`/me`), with a confirm step that warns you need your event's QR to get back in.
 - Email sign-in on the event door: people without LinkedIn enter their email and get a one-time link (Supabase magic link) that creates the account or signs them in. New route `POST /api/auth/email`. Requires the Supabase Email provider enabled and `/auth/callback` in the redirect allow list.
 
 ### Security

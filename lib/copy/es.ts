@@ -207,6 +207,10 @@ export const me = {
   ranking: "Ranking",
   myMonito: "Mi monito",
   change: "Cambiar",
+  signOut: "Cerrar sesión",
+  signOutWarning: "Para volver a entrar necesitarás el QR de tu evento.",
+  signOutCancel: "Cancelar",
+  signOutConfirm: "Sí, cerrar sesión",
   pointsRank: (points: string, rank: number | null) => (rank ? `${points} pts · #${rank}` : `${points} pts`),
 };
 

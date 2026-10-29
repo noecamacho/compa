@@ -5,6 +5,7 @@ import { BadgeShelf } from "@/components/badges/BadgeShelf";
 import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { MyLinkToggles } from "@/components/profile/MyLinkToggles";
+import { SignOutButton } from "@/components/profile/SignOutButton";
 import { Card } from "@/components/ui/Card";
 import { IconLink } from "@/components/ui/IconButton";
 import { Pill } from "@/components/ui/Pill";
@@ -87,6 +88,8 @@ export default async function MePage() {
           <Icon name="chevronRight" size={18} strokeWidth={3} />
         </Link>
       </Card>
+
+      <SignOutButton />
       <Suspense>
         <Tour id="me" steps={tour.me} />
       </Suspense>
