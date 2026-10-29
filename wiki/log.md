@@ -179,3 +179,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | How does the attendee app adapt to tablet and desktop?
 
 - `components/ui/Screen.tsx` has two widths (`wide` 390/834/1120, `focus` 390/640/680); from 834 dashboard screens switch to two columns, from 1024 the dock is a left rail (`DockRail`) and `--rail` offsets the content. 390 stays pixel-identical. Summary in `DESIGN.md` "Responsive breakpoints".
+
+## [2026-10-29] change | Landing hero in Three.js
+
+- The landing hero (`components/landing/Crowd.tsx`) now plays a looping Three.js connection story (`components/landing/hero-scene.ts`, timeline in `lib/landing/hero-timeline.ts`); the SVG crowd remains the SSR, reduced-motion and no-WebGL fallback.

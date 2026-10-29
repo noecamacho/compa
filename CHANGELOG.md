@@ -15,6 +15,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- Landing hero: a Three.js vignette plays the COMPA story on a small event floor. Pixel-art monitos walk up to each other, one scans the other's QR, speech bubbles show the topic, a mint thread joins them (sky for a reencuentro), and "+50" or "+20 reencuentro" pops with confetti. Threads build up into a network and then fade. The camera follows the mouse, and hovering or tapping a monito makes it jump and say "¡Hola!" / "Hi!". The SVG crowd stays as the server render and the fallback for reduced motion and missing WebGL.
 - Admin console, responsive pass: tables from 768 px and stacked cards on a phone, sticky primary actions, a two-column event page with the QR and actions beside the details, a live preview on the new-event form, inline field validation with a kept draft, consequence dialogs (bottom sheet on a phone) for rotate, end, archive, remove attendee and delete test user, and loading and error states.
 
 - Attendee app is responsive at 390, 834 and 1440: the 390 layout is unchanged; from 834 Home, Me, profiles, Ranking and the monito builder use two columns, Connections and Badges use wider grids, and one-task screens center at reading width; from 1024 the dock becomes a left rail (with the Admin link for super admins). New loading skeleton and error screen with retry, a real empty state on Connections, and 44 px tap areas on chips, toggles and swatches.
