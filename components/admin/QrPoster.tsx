@@ -121,7 +121,7 @@ const confettiStyle = (piece: ConfettiPiece): CSSProperties =>
 
 function Confetti() {
   return (
-    <div aria-hidden="true" className="pointer-events-none absolute inset-0 motion-reduce:hidden">
+    <div aria-hidden="true" className="pointer-events-none absolute inset-0 opacity-70 motion-reduce:hidden">
       {CONFETTI.map((piece) => (
         <span key={piece.left} className="animate-fall absolute top-0 block" style={confettiStyle(piece)} />
       ))}

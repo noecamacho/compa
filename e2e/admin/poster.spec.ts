@@ -39,7 +39,7 @@ function qrState(qr: Locator) {
   });
 }
 
-const runningAnimations = (page: Page) => page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === "running").length);
+const runningAnimations = (page: Page) => page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === "running" && document.querySelector("main")?.contains((animation.effect as KeyframeEffect | null)?.target ?? null)).length);
 
 test.describe("admin QR poster", () => {
   test("the event page opens the poster in a new tab @mock", async ({ page }, testInfo) => {
@@ -63,7 +63,9 @@ test.describe("admin QR poster", () => {
     await expect(page.getByRole("img", { name: "compa", exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { level: 1, name: adminEvent.name })).toBeVisible();
     await expect(page.getByRole("link", { name: copy.ui.poster.back })).toHaveAttribute("href", EVENT_PAGE);
-    await expect(page.getByRole("button", { name: copy.ui.poster.fullscreen })).toBeVisible();
+    // The button only renders where the Fullscreen API exists (not iPhone Safari).
+    const canFullscreen = await page.evaluate(() => Boolean(document.fullscreenEnabled));
+    await expect(page.getByRole("button", { name: copy.ui.poster.fullscreen })).toHaveCount(canFullscreen ? 1 : 0);
 
     const lines = { es: page.locator('main p[lang="es"]'), en: page.locator('main p[lang="en"]') };
     for (const lang of ["es", "en"] as const) {
