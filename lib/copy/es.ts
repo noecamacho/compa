@@ -12,6 +12,7 @@ export const common = {
   seeAll: "ver todas",
   of: "de",
   you: "Tú",
+  rateLimited: "Vas muy rápido. Espera un momento y vuelve a intentarlo.",
 };
 
 // Main navigation: the bottom dock on phones and tablets, the left rail from 1024 (DockV2, Figma "Dock layout=rail").

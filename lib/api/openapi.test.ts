@@ -74,3 +74,13 @@ describe("OpenAPI document", () => {
     expect(JSON.stringify(accept)).toContain("event_ended");
   });
 });
+
+describe("rate limits (T-036)", () => {
+  test("scan, transcribe and draft document 429 rate_limited with Retry-After", () => {
+    for (const path of ["/api/connections", "/api/transcribe", "/api/interactions/draft"]) {
+      const response = document.paths?.[path]?.post?.responses?.["429"];
+      expect(response && "headers" in response ? response.headers : undefined).toHaveProperty("Retry-After");
+      expect(response?.description).toBe("rate_limited");
+    }
+  });
+});

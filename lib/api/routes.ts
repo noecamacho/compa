@@ -4,6 +4,7 @@ import * as AX from "./admin-examples";
 import * as A from "./admin-schemas";
 import * as X from "./examples";
 import { E } from "./errors";
+import { LIMITS } from "./rate-limits";
 import { NoBody, route, type AnyRouteSpec } from "./route-spec";
 import * as S from "./schemas";
 
@@ -455,7 +456,9 @@ export const createConnection = route({
     schema: S.ConnectionRequest,
     example: { connectionId: X.ids.connection, status: "pending", event: X.founders, to: X.valeriaPublic },
   },
-  errors: [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed],
+  errors: [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed, E.rateLimited],
+  // The per-event cap (LIMITS.scanPerEvent) needs the resolved event, so createConnection checks it.
+  rateLimit: [LIMITS.scanPerMinute],
 });
 
 export const listConnections = route({
@@ -615,7 +618,8 @@ export const transcribe = route({
     schema: S.Transcript,
     example: { text: "Hablé con Mateo sobre cómo migrar el panel de Vue a React y quedamos en compartir el repo." },
   },
-  errors: [E.invalidAudio, E.unauthorized, E.transcriptionFailed],
+  errors: [E.invalidAudio, E.unauthorized, E.rateLimited, E.transcriptionFailed],
+  rateLimit: [LIMITS.transcribePerMinute, LIMITS.transcribePerDay],
 });
 
 export const draftSummary = route({
@@ -644,7 +648,8 @@ export const draftSummary = route({
       },
     },
   },
-  errors: [E.invalidInput, E.unauthorized, E.notFound, E.connectionNotAccepted, E.summaryFailed],
+  errors: [E.invalidInput, E.unauthorized, E.notFound, E.connectionNotAccepted, E.rateLimited, E.summaryFailed],
+  rateLimit: [LIMITS.draftPerMinute, { ...LIMITS.draftPerConnection, scope: (body) => body.connectionId }],
 });
 
 export const approveSummary = route({

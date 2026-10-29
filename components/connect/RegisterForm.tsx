@@ -13,7 +13,7 @@ import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { Tour } from "@/components/tour/Tour";
-import { apiCall } from "@/lib/api/client";
+import { apiCall, errorText } from "@/lib/api/client";
 import { ConnectionRequest, type UserProfileT } from "@/lib/api/schemas";
 import { register as copy, tour } from "@/lib/copy/es";
 import { CONNECTION_POINTS, SUMMARY_POINTS, TOPICS_POINTS } from "@/lib/points";
@@ -61,7 +61,7 @@ export function RegisterForm({ profile }: Props) {
       if (note.status === "ready") rememberNote(result.connectionId, note);
       router.push(`/connections/${result.connectionId}/done`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(errorText(caught));
       setSending(false);
     }
   }

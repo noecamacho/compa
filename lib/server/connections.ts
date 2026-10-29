@@ -3,6 +3,7 @@ import { and, desc, eq, lt, ne, or } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { bonusPoints, connections, events, lifetimeScores, type ConnectionRow, type EventRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
+import { LIMITS } from "../api/rate-limits";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import type { CardT } from "../api/schemas";
@@ -12,6 +13,7 @@ import { broadcast, liveTopic, userTopic } from "../realtime";
 import { awardBadges } from "./badges";
 import { ensureCheckedIn, isCheckedIn } from "./events";
 import { awardInvite } from "./invites";
+import { enforceRateLimits } from "./rate-limit";
 import { cardFor, cardsFor, findCurrentEvent, findUserByHandle, pairCondition, usersByIds } from "./people";
 
 const eventRef = (event: EventRow) => ({ slug: event.slug, name: event.name });
@@ -51,6 +53,7 @@ export async function createConnection({ user, body }: InputOf<typeof R.createCo
   const target = await requireTarget(user, body.toHandle);
   const now = new Date();
   const event = (await findCurrentEvent(target.id, now)) ?? fail(E.notAtEvent);
+  await enforceRateLimits(user.id, [{ rule: LIMITS.scanPerEvent, scope: event.id }]);
   await checkInScanner(user, event, body.screenConsent === true);
   const inserted = await insertRequest(event, user, target, body.knew, body.topics ?? []);
   const row = inserted ?? (await findPairAt(event.id, user.id, target.id)) ?? fail(E.internal);
