@@ -4,13 +4,14 @@ import { Button, ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Screen } from "@/components/ui/Screen";
 import { Muted } from "@/components/ui/Text";
-import { screenState as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 
 type Props = { error: Error & { digest?: string }; retry: () => void };
 
 // Any page outside the signed-in app (landing, event door, sign-in) that failed: say so and offer a retry.
 // The digest matches the server log line, so a person can quote it to the organizers.
 export default function RootError({ error, retry }: Props) {
+  const copy = useCopy().screenState;
   return (
     <Screen width="focus" className="justify-center">
       <Card className="flex flex-col items-center gap-3 px-5 py-6 text-center">
