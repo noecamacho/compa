@@ -10,8 +10,10 @@ Business rules live on the server, never on the client: points, idempotency and 
 | Reconnection accepted | +20 | both people | `connections.points` |
 | Topics marked while registering | +5 | the scanner | `bonus_points` (`reason = topics`, `ref_id` = connection) |
 | Voice note approved | +15 | the author | `interactions.points` |
-| Invited friend's first accepted connection | +100 / +50 | inviter / invitee | `bonus_points` (`invite_inviter`, `invite_invitee`) |
+| Invited friend's first accepted connection **at the invite's event** | +100 / +50 | inviter / invitee | `bonus_points` (`invite_inviter`, `invite_invitee`) |
 | Three invited friends connected | golden cap | inviter's monito | `users.golden_cap_at`, `users.avatar` |
+
+Invites are always tied to an event (captain decision, 2026-10-29): `invites.event_id` is the inviter's current event when the link is made, the friend lands at that event's door, and `awardInvite` pays only when the accepted connection belongs to that same event. A connection at another event pays nothing. Rows from before this rule keep their inviter's latest event (migration `0012`); an inviter who never checked in leaves a row with no event, which cannot be claimed (`409 invite_needs_event`) or paid. The golden cap still counts paid invites from every event.
 
 "Accept a request: +20 for each" from the handoff README is not awarded separately; it is the reconnection line ([open-questions](open-questions.md) #28).
 

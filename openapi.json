@@ -10633,7 +10633,10 @@
                   "event": {
                     "code": "k7m2p9xq4t",
                     "name": "Founders Fest GDL",
-                    "isRunning": true
+                    "isRunning": true,
+                    "phase": "running",
+                    "startsAt": "2026-10-29T16:00:00.000Z",
+                    "endsAt": "2026-10-30T04:00:00.000Z"
                   },
                   "people": [
                     {
@@ -13478,6 +13481,7 @@
       "get": {
         "operationId": "myInvites",
         "summary": "My invite link and invitees",
+        "description": "The link is tied to the event the person is checked in to; outside an event `link` is null and no invite is created.",
         "tags": [
           "profile"
         ],
@@ -13503,50 +13507,102 @@
         ],
         "responses": {
           "200": {
-            "description": "Code, link and progress to the golden cap.",
+            "description": "Event-scoped link (or null) and progress to the golden cap.",
             "content": {
               "application/json": {
-                "example": {
-                  "code": "diego-r",
-                  "url": "https://compa.lol/i/diego-r",
-                  "invitees": [
-                    {
-                      "person": {
-                        "id": "d4e5f6a7-b8c9-4d0e-9f2a-3b4c5d6e7f00",
-                        "handle": "andrea-mireles",
-                        "name": "Andrea Mireles",
-                        "photoUrl": null,
-                        "avatar": {
-                          "skin": "#E0A97F",
-                          "hair": "long",
-                          "hairColor": "#9A6232",
-                          "outfit": "stripes",
-                          "shirt": "#6BE4A3",
-                          "pants": "#4A6FA5",
-                          "shoes": "#FFFFFF",
-                          "hat": "none",
-                          "hatColor": "#FF6B4A",
-                          "hatAccent": "#FFFFFF",
-                          "face": "none",
-                          "beard": false,
-                          "extra": "none"
-                        },
-                        "headline": "Partner",
-                        "company": "Angel Ventures",
-                        "city": "Guadalajara",
-                        "interests": [
-                          "Startups"
-                        ]
-                      },
-                      "firstConnectionAt": "2026-10-29T17:30:00.000Z",
-                      "points": 100
-                    }
-                  ],
-                  "target": 3,
-                  "goldenCap": false
-                },
                 "schema": {
                   "$ref": "#/components/schemas/Invites"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Default",
+                    "value": {
+                      "link": {
+                        "code": "diego-r",
+                        "url": "https://compa.lol/i/diego-r",
+                        "event": {
+                          "code": "k7m2p9xq4t",
+                          "name": "Founders Fest GDL"
+                        }
+                      },
+                      "invitees": [
+                        {
+                          "person": {
+                            "id": "d4e5f6a7-b8c9-4d0e-9f2a-3b4c5d6e7f00",
+                            "handle": "andrea-mireles",
+                            "name": "Andrea Mireles",
+                            "photoUrl": null,
+                            "avatar": {
+                              "skin": "#E0A97F",
+                              "hair": "long",
+                              "hairColor": "#9A6232",
+                              "outfit": "stripes",
+                              "shirt": "#6BE4A3",
+                              "pants": "#4A6FA5",
+                              "shoes": "#FFFFFF",
+                              "hat": "none",
+                              "hatColor": "#FF6B4A",
+                              "hatAccent": "#FFFFFF",
+                              "face": "none",
+                              "beard": false,
+                              "extra": "none"
+                            },
+                            "headline": "Partner",
+                            "company": "Angel Ventures",
+                            "city": "Guadalajara",
+                            "interests": [
+                              "Startups"
+                            ]
+                          },
+                          "firstConnectionAt": "2026-10-29T17:30:00.000Z",
+                          "points": 100
+                        }
+                      ],
+                      "target": 3,
+                      "goldenCap": false
+                    }
+                  },
+                  "noEvent": {
+                    "summary": "Not checked in to an event: no link",
+                    "value": {
+                      "link": null,
+                      "invitees": [
+                        {
+                          "person": {
+                            "id": "d4e5f6a7-b8c9-4d0e-9f2a-3b4c5d6e7f00",
+                            "handle": "andrea-mireles",
+                            "name": "Andrea Mireles",
+                            "photoUrl": null,
+                            "avatar": {
+                              "skin": "#E0A97F",
+                              "hair": "long",
+                              "hairColor": "#9A6232",
+                              "outfit": "stripes",
+                              "shirt": "#6BE4A3",
+                              "pants": "#4A6FA5",
+                              "shoes": "#FFFFFF",
+                              "hat": "none",
+                              "hatColor": "#FF6B4A",
+                              "hatAccent": "#FFFFFF",
+                              "face": "none",
+                              "beard": false,
+                              "extra": "none"
+                            },
+                            "headline": "Partner",
+                            "company": "Angel Ventures",
+                            "city": "Guadalajara",
+                            "interests": [
+                              "Startups"
+                            ]
+                          },
+                          "firstConnectionAt": "2026-10-29T17:30:00.000Z",
+                          "points": 100
+                        }
+                      ],
+                      "target": 3,
+                      "goldenCap": false
+                    }
+                  }
                 }
               }
             }
@@ -13674,7 +13730,7 @@
       "post": {
         "operationId": "claimInvite",
         "summary": "Join through a friend's invite",
-        "description": "Called once after sign-in; the inviter earns +100 and you +50 when your first connection is accepted.",
+        "description": "Called once after sign-in. The invite belongs to one event: the inviter earns +100 and you +50 when your first connection at that event is accepted. An invite without an event, or for an event that is over, is refused.",
         "tags": [
           "profile"
         ],
@@ -13743,6 +13799,10 @@
                       "Product",
                       "AI Products"
                     ]
+                  },
+                  "event": {
+                    "code": "k7m2p9xq4t",
+                    "name": "Founders Fest GDL"
                   }
                 },
                 "schema": {
@@ -13860,6 +13920,74 @@
                       "error": {
                         "code": "not_found",
                         "message": "Not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "invite_needs_event, event_not_running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invite_needs_event",
+                            "event_not_running"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invite_needs_event": {
+                    "summary": "This invite is not tied to an event, so it cannot be used.",
+                    "value": {
+                      "error": {
+                        "code": "invite_needs_event",
+                        "message": "This invite is not tied to an event, so it cannot be used."
+                      }
+                    }
+                  },
+                  "event_not_running": {
+                    "summary": "The event is not running right now.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_running",
+                        "message": "The event is not running right now."
                       }
                     }
                   }
@@ -16846,12 +16974,34 @@
               },
               "isRunning": {
                 "type": "boolean"
+              },
+              "phase": {
+                "type": "string",
+                "enum": [
+                  "upcoming",
+                  "running",
+                  "ended"
+                ],
+                "description": "Where now falls in the event window."
+              },
+              "startsAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "endsAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
               }
             },
             "required": [
               "code",
               "name",
-              "isRunning"
+              "isRunning",
+              "phase",
+              "startsAt",
+              "endsAt"
             ],
             "additionalProperties": false
           },
@@ -16932,7 +17082,8 @@
                 "at"
               ],
               "additionalProperties": false
-            }
+            },
+            "description": "Accepted connections, oldest first; at most the newest 1,000 (the counters count all)."
           },
           "counters": {
             "type": "object",
@@ -17706,12 +17857,15 @@
       "Invites": {
         "type": "object",
         "properties": {
-          "code": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string",
-            "format": "uri"
+          "link": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InviteLink"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "invitees": {
             "type": "array",
@@ -17729,11 +17883,44 @@
           }
         },
         "required": [
-          "code",
-          "url",
+          "link",
           "invitees",
           "target",
           "goldenCap"
+        ],
+        "additionalProperties": false
+      },
+      "InviteLink": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "event": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "name"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "code",
+          "url",
+          "event"
         ],
         "additionalProperties": false
       },
@@ -17776,11 +17963,28 @@
           },
           "inviter": {
             "$ref": "#/components/schemas/Card"
+          },
+          "event": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "code",
+              "name"
+            ],
+            "additionalProperties": false
           }
         },
         "required": [
           "code",
-          "inviter"
+          "inviter",
+          "event"
         ],
         "additionalProperties": false
       },

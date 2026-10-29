@@ -302,11 +302,18 @@ export const Invitee = z
   .object({ person: Card, firstConnectionAt: isoDate.nullable(), points: z.int() })
   .meta({ id: "Invitee" });
 
+// The shareable link exists only while the person is checked in to an event, and it always names that event.
+export const InviteLink = z
+  .object({ code: z.string(), url: z.url(), event: z.object({ code: z.string(), name: z.string() }) })
+  .meta({ id: "InviteLink" });
+
 export const Invites = z
-  .object({ code: z.string(), url: z.url(), invitees: z.array(Invitee), target: z.int(), goldenCap: z.boolean() })
+  .object({ link: InviteLink.nullable(), invitees: z.array(Invitee), target: z.int(), goldenCap: z.boolean() })
   .meta({ id: "Invites" });
 
-export const ClaimedInvite = z.object({ code: z.string(), inviter: Card }).meta({ id: "ClaimedInvite" });
+export const ClaimedInvite = z
+  .object({ code: z.string(), inviter: Card, event: z.object({ code: z.string(), name: z.string() }) })
+  .meta({ id: "ClaimedInvite" });
 
 export const ConnectionList = z
   .object({

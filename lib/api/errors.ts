@@ -58,6 +58,7 @@ export const E = {
   notTestEvent: spec(409, "not_test_event", "Test users can only be checked in to a test event."),
   testUserNotFound: spec(404, "test_user_not_found", "No test user with that id."),
   cannotDeleteSelf: spec(409, "cannot_delete_self", "You cannot delete the account you are signed in with."),
+  inviteNeedsEvent: spec(409, "invite_needs_event", "This invite is not tied to an event, so it cannot be used."),
   eventNotRunning: spec(409, "event_not_running", "The event is not running right now."),
   selfConnection: spec(409, "self_connection", "You cannot connect with yourself."),
   notAtEvent: spec(409, "not_at_event", "That person is not at an event right now."),

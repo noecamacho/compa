@@ -800,9 +800,16 @@ export const myInvites = route({
   method: "get",
   path: "/api/invites/me",
   summary: "My invite link and invitees",
+  description: "The link is tied to the event the person is checked in to; outside an event `link` is null and no invite is created.",
   tags: ["profile"],
   auth: "user",
-  success: { status: 200, description: "Code, link and progress to the golden cap.", schema: S.Invites, example: X.invites },
+  success: {
+    status: 200,
+    description: "Event-scoped link (or null) and progress to the golden cap.",
+    schema: S.Invites,
+    example: X.invites,
+    examples: { noEvent: { summary: "Not checked in to an event: no link", value: { ...X.invites, link: null } } },
+  },
   errors: WITH_USER,
 });
 
@@ -811,12 +818,12 @@ export const claimInvite = route({
   method: "post",
   path: "/api/invites/{code}/claim",
   summary: "Join through a friend's invite",
-  description: "Called once after sign-in; the inviter earns +100 and you +50 when your first connection is accepted.",
+  description: "Called once after sign-in. The invite belongs to one event: the inviter earns +100 and you +50 when your first connection at that event is accepted. An invite without an event, or for an event that is over, is refused.",
   tags: ["profile"],
   auth: "user",
   params: S.CodeParams,
-  success: { status: 200, description: "Linked to the inviter.", schema: S.ClaimedInvite, example: { code: X.invites.code, inviter: X.diego } },
-  errors: [E.unauthorized, E.authUnavailable, E.notFound],
+  success: { status: 200, description: "Linked to the inviter.", schema: S.ClaimedInvite, example: { code: "diego-r", inviter: X.diego, event: X.foundersDoor } },
+  errors: [E.unauthorized, E.authUnavailable, E.notFound, E.inviteNeedsEvent, E.eventNotRunning],
 });
 
 export const ROUTES: readonly AnyRouteSpec[] = [

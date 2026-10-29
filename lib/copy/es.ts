@@ -63,6 +63,7 @@ export const apiErrors = {
     not_pending: "Esta solicitud ya fue respondida.",
     event_ended: "El evento terminó y la solicitud expiró.",
     event_not_running: "El evento no está activo en este momento.",
+    invite_needs_event: "Esta invitación no está ligada a un evento y ya no sirve. Pide a tu amigo un enlace nuevo desde su evento.",
     self_connection: "No puedes conectar contigo.",
     not_at_event: "Esa persona no está en un evento ahora.",
     connection_not_accepted: "La otra persona aún no acepta la conexión.",
@@ -429,6 +430,9 @@ export const invite = {
   friendSlot: (n: number) => `Amigo ${n}`,
   cap: "Gorra",
   link: "Tu enlace",
+  forEvent: (name: string) => `Invitación para ${name}`,
+  noEventTitle: "Invita desde un evento",
+  noEvent: "Las invitaciones van ligadas a un evento: entra al tuyo escaneando su QR y podrás invitar a tus amigos a esa puerta.",
   copy: "Copiar",
   copied: "Copiado",
   whatsapp: "WhatsApp",
@@ -436,7 +440,7 @@ export const invite = {
   more: "Más",
   footer: ["Tu amigo entra con LinkedIn, igual que tú.", "Cuando haga su primera conexión, te llega el +100."],
   showQr: "Mostrar mi QR de invitación",
-  shareText: (url: string) => `Vente a Compa, conectamos en el evento y nos quedamos con las redes: ${url}`,
+  shareText: (url: string, eventName: string) => `Vente a ${eventName} en Compa, conectamos en el evento y nos quedamos con las redes: ${url}`,
   pointsEach: "+100 pts",
 };
 
@@ -604,7 +608,7 @@ export const tour = {
   home: [
     { target: "live", title: "Esto es lo que pasa en el evento", body: "Cuántas conexiones van esta noche, quiénes se acaban de conectar y en qué lugar vas tú. Toca la fila de abajo para ver el ranking completo." },
     { target: "connect", title: "Aquí conectas con la gente", body: "Es el botón principal. Muestra tu QR para que te escaneen, o escanea el de la otra persona. Cada conexión nueva vale +50 pts; un reencuentro, +20." },
-    { target: "invite", title: "Invita a tus amigos", body: "Comparte tu enlace. Cada amigo que entre y haga su primera conexión te da +100 pts, y con tres ganas la gorra dorada para tu monito." },
+    { target: "invite", title: "Invita a tus amigos", body: "Desde tu evento, comparte tu enlace. Cada amigo que entre y haga su primera conexión te da +100 pts, y con tres ganas la gorra dorada para tu monito." },
     { target: "dock", title: "Tu barra de siempre", body: "Inicio, Conectar (tu QR), tus Conexiones con lo que platicaron, y tu Perfil con puntos, insignias y las redes que compartes." },
   ],
   connect: [

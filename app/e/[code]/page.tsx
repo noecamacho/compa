@@ -15,16 +15,17 @@ import { currentMe } from "@/lib/server/current-event";
 import { loadEventDoor } from "@/lib/server/event-door";
 import { requestLocale } from "@/lib/server/locale";
 
-type Props = { params: Promise<{ code: string }> };
+type Props = { params: Promise<{ code: string }>; searchParams: Promise<{ invite?: string }> };
 
 type DoorCopy = Dictionary["door"];
 
-const joinPath = (code: string) => `${eventPath(code)}/join`;
+// An invite code rides along to the join step, which claims it once the person is signed in.
+const joinPath = (code: string, invite?: string) => `${eventPath(code)}/join${invite ? `?invite=${encodeURIComponent(invite)}` : ""}`;
 
 // Visitors sign in first and come back to the consent step; signed-in people go straight to it. Mock mode has no LinkedIn.
-function entryHref(code: string, signedIn: boolean): string {
-  if (signedIn || process.env.API_MODE === "mock") return joinPath(code);
-  return `/auth/linkedin?next=${encodeURIComponent(joinPath(code))}`;
+function entryHref(code: string, signedIn: boolean, invite?: string): string {
+  if (signedIn || process.env.API_MODE === "mock") return joinPath(code, invite);
+  return `/auth/linkedin?next=${encodeURIComponent(joinPath(code, invite))}`;
 }
 
 function Counter({ value, label, tone, locale }: { value: number; label: string; tone: Tone; locale: Locale }) {
@@ -45,8 +46,8 @@ function ClosedNotice({ event, copy, locale }: { event: EventDoorT; copy: DoorCo
 }
 
 // The event door (API spec A10): reached only through the event QR, /e/<code>.
-export default async function EventDoorPage({ params }: Props) {
-  const { code } = await params;
+export default async function EventDoorPage({ params, searchParams }: Props) {
+  const [{ code }, { invite }] = await Promise.all([params, searchParams]);
   const [event, locale, me] = await Promise.all([loadEventDoor(code), requestLocale(), currentMe()]);
   if (!event) notFound();
   // Already inside: straight to the app. Mock mode (everyone is Diego, checked in) keeps the door visible for the demo.
@@ -81,13 +82,13 @@ export default async function EventDoorPage({ params }: Props) {
           <div className="flex flex-col gap-3">
             {event.isRunning && (
               <>
-                <ButtonLink href={entryHref(event.code, signedIn)} variant={signedIn ? "primary" : "linkedin"} height={60} className="gap-3 text-[18px]">
+                <ButtonLink href={entryHref(event.code, signedIn, invite)} variant={signedIn ? "primary" : "linkedin"} height={60} className="gap-3 text-[18px]">
                   {!signedIn && <LinkedInMark size={22} />}
                   {signedIn ? copy.ctaSignedIn : copy.cta}
                   {signedIn && <Icon name="chevronRight" size={20} strokeWidth={3} />}
                 </ButtonLink>
                 {!signedIn && <span className="text-center text-[13px] leading-[1.4] font-extrabold text-muted">{copy.note}</span>}
-                {!signedIn && <EmailSignIn next={joinPath(event.code)} mock={process.env.API_MODE === "mock"} locale={locale} />}
+                {!signedIn && <EmailSignIn next={joinPath(event.code, invite)} mock={process.env.API_MODE === "mock"} locale={locale} />}
               </>
             )}
             <a

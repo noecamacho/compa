@@ -327,13 +327,16 @@ export const invites = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     code: text("code").notNull().unique(),
+    // An invite always belongs to the event its inviter was checked in to; null only on rows made before invites were
+    // event-scoped, which cannot be claimed or paid (migration 0012 backfills what it can).
+    eventId: uuid("event_id").references(() => events.id, { onDelete: "set null" }),
     inviteeId: uuid("invitee_id")
       .unique()
       .references(() => users.id, { onDelete: "set null" }),
     firstConnectionAt: timestamp("first_connection_at", { withTimezone: true }),
     createdAt: createdAt(),
   },
-  (t) => [check("invites_code_check", sql`${t.code} ~ '^[a-z0-9-]{2,40}$'`), index("invites_inviter_idx").on(t.inviterId)],
+  (t) => [check("invites_code_check", sql`${t.code} ~ '^[a-z0-9-]{2,40}$'`), index("invites_inviter_idx").on(t.inviterId), index("invites_inviter_event_idx").on(t.inviterId, t.eventId)],
 ).enableRLS();
 
 // One Web Push subscription per browser (T-080). The endpoint is unique: a device that signs in as someone else moves

@@ -514,6 +514,7 @@ export const apiErrors: typeof es.apiErrors = {
     not_pending: "This request was already answered.",
     event_ended: "The event ended, so the request expired.",
     event_not_running: "The event isn't active right now.",
+    invite_needs_event: "This invite isn't tied to an event, so it no longer works. Ask your friend for a new link from their event.",
     self_connection: "You can't connect with yourself.",
     not_at_event: "That person isn't at an event right now.",
     connection_not_accepted: "The other person hasn't accepted the connection yet.",
@@ -853,6 +854,9 @@ export const invite: typeof es.invite = {
   friendSlot: (n) => `Friend ${n}`,
   cap: "Cap",
   link: "Your link",
+  forEvent: (name) => `Invite to ${name}`,
+  noEventTitle: "Invite from an event",
+  noEvent: "Invites are tied to an event: scan your event's QR to go in, then invite your friends to that door.",
   copy: "Copy",
   copied: "Copied",
   whatsapp: "WhatsApp",
@@ -860,7 +864,7 @@ export const invite: typeof es.invite = {
   more: "More",
   footer: ["Your friend signs in with LinkedIn, just like you.", "When they make their first connection, you get the +100."],
   showQr: "Show my invite QR",
-  shareText: (url) => `Come join me on Compa: we connect at the event and keep each other's socials: ${url}`,
+  shareText: (url, eventName) => `Come join me at ${eventName} on Compa: we connect at the event and keep each other's socials: ${url}`,
   pointsEach: "+100 pts",
 };
 
@@ -917,7 +921,7 @@ export const tour: typeof es.tour = {
   home: [
     { target: "live", title: "This is what's happening at the event", body: "How many connections tonight, who just connected and where you stand. Tap the row below to see the full leaderboard." },
     { target: "connect", title: "Connect with people here", body: "It's the main button. Show your QR to be scanned, or scan the other person's. Every new connection is worth +50 pts; a reconnection, +20." },
-    { target: "invite", title: "Invite your friends", body: "Share your link. Every friend who joins and makes a first connection gives you +100 pts, and with three you earn the golden cap for your monito." },
+    { target: "invite", title: "Invite your friends", body: "From your event, share your link. Every friend who joins and makes a first connection gives you +100 pts, and with three you earn the golden cap for your monito." },
     { target: "dock", title: "Your bar, always there", body: "Home, Connect (your QR), your Connections with what you talked about, and your Profile with points, badges and the socials you share." },
   ],
   connect: [

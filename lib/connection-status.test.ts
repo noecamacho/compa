@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { hasEnded, isRunning, statusForViewer } from "./connection-status";
+import { hasEnded, isJoinable, isRunning, statusForViewer } from "./connection-status";
 
 const base = { requesterId: "requester", eventEnded: false };
 
@@ -26,4 +26,12 @@ test("event window", () => {
   expect(isRunning(event, new Date("2026-10-29T18:00:00Z"))).toBe(true);
   expect(isRunning(event, new Date("2026-10-29T22:00:00Z"))).toBe(false);
   expect(hasEnded(event, new Date("2026-10-29T22:00:00Z"))).toBe(true);
+});
+
+test("an invite can be claimed for a live event until it is over", () => {
+  const window = { startsAt: new Date("2026-10-29T16:00:00Z"), endsAt: new Date("2026-10-29T22:00:00Z") };
+  expect(isJoinable({ ...window, status: "live" }, new Date("2026-10-29T15:00:00Z"))).toBe(true);
+  expect(isJoinable({ ...window, status: "live" }, new Date("2026-10-29T18:00:00Z"))).toBe(true);
+  expect(isJoinable({ ...window, status: "live" }, new Date("2026-10-29T22:00:00Z"))).toBe(false);
+  for (const status of ["draft", "ended", "archived"] as const) expect(isJoinable({ ...window, status }, new Date("2026-10-29T18:00:00Z"))).toBe(false);
 });
