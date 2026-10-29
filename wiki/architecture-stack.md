@@ -41,7 +41,7 @@ Measured on a local stack (Supavisor capped at 200 clients, two `next start` ins
 
 | Concern | How the app behaves now | Where |
 | --- | --- | --- |
-| Client polling | One shared poller: one call in flight, paused in a hidden tab, exponential backoff to 30 s, ±20 % jitter, 8 s abort. `/home` polls requests every 5 s and the bell every 10 s (about 18 calls per minute per phone instead of 40) | `lib/use-poll.ts` |
+| Client polling | One shared poller: one call in flight, paused in a hidden tab, exponential backoff to 30 s, ±20 % jitter, 8 s abort. `/home` requests and the bell poll every 30 s while the private Realtime channel is joined, every 3 s without it (about 3 calls a minute per phone instead of 40) | `lib/use-poll.ts` |
 | Page data | Server Components run the route handler in-process instead of fetching their own API over HTTP; one `/api/me` per render. `/home` reads the event door and the three newest pairs (`GET /api/e/{code}/live/recent`), never the full big-screen snapshot | `lib/api/server-fetch.ts`, `lib/server/in-process-routes.ts` |
 | Database pool | Per instance: `max` 5, idle sockets closed after 20 s, connect timeout 5 s; warns when `DATABASE_URL` is the session pooler (5432) | `db/connect.ts` |
 | Side effects | Realtime broadcasts, badge awards and the accept extras run after the response (`after()`); invite points are paid in one transaction | `lib/after-response.ts`, `lib/realtime.ts` |

@@ -532,7 +532,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 - **Acceptance:**
   - The bell links to the first incoming request, or to the notifications list once T-080 exists.
   - `/connections` shows incoming requests on top (A7).
-  - `GET /api/connections` is polled every 5 s while the tab is visible (conference-scale finding 3) (API spec §8 fallback). Polling pauses on `visibilitychange`.
+  - `GET /api/connections` is polled every 3 s while the tab is visible (every 30 s once Realtime is joined; conference-scale finding 3) (API spec §8 fallback). Polling pauses on `visibilitychange`.
 - **Edge cases:** a request that expires while it is displayed, so `/requests/[id]` gets `event_ended`. Several requests at once. Polling backs off on errors.
 - **Do not touch:** Realtime broadcasts on the server.
 
