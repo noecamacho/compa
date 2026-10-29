@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
+import { ButtonLink } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
 import { Chip } from "@/components/ui/Chip";
 import { Muted } from "@/components/ui/Text";
 import type { PersonHistoryT } from "@/lib/api/schemas";
@@ -30,8 +32,26 @@ const typeOf = (entry: PersonHistoryT): PersonType => entry.type ?? (entry.meeti
 
 type Props = { people: PersonHistoryT[] };
 
+// No connections at all: say what will appear here and point to the one action that fills it.
+function EmptyConnections() {
+  return (
+    <Card tone="gum-soft" className="animate-fade-in flex flex-col items-center gap-3 px-5 py-6 text-center md:mx-auto md:w-full md:max-w-[480px]">
+      <span className="flex h-14 w-14 items-center justify-center rounded-button bg-white border-ink shadow-hard-2" style={{ transform: "rotate(-5deg)" }}>
+        <Icon name="people" size={28} />
+      </span>
+      <span className="font-display text-[22px] leading-[1.1] font-bold">{copy.emptyTitle}</span>
+      <Muted className="text-[14px] leading-[1.4] font-bold">{copy.empty}</Muted>
+      <ButtonLink href="/connect" variant="primary" height={50}>
+        <Icon name="qr" size={18} />
+        {copy.emptyCta}
+      </ButtonLink>
+    </Card>
+  );
+}
+
 export function ConnectionList({ people }: Props) {
   const [filter, setFilter] = useState<Filter>("all");
+  if (people.length === 0) return <EmptyConnections />;
   const shown = people.filter((entry) => filter === "all" || typeOf(entry) === filter);
   return (
     <>
@@ -43,8 +63,9 @@ export function ConnectionList({ people }: Props) {
         ))}
       </div>
       {/* Keyed by filter so the rows rise again, staggered, every time the list changes. */}
-      <div key={filter} className="flex flex-col gap-[10px]">
-        {shown.length === 0 && <Muted className="animate-fade-in text-center text-[13px] font-bold">{copy.empty}</Muted>}
+      {/* Phone: one column. Tablet: two. Desktop: three. */}
+      <div key={filter} className="flex flex-col gap-[10px] md:grid md:grid-cols-2 md:gap-3 lg:grid-cols-3">
+        {shown.length === 0 && <Muted className="animate-fade-in text-center text-[13px] font-bold md:col-span-full">{copy.emptyFiltered}</Muted>}
         {shown.map((entry, index) => {
           const type = typeOf(entry);
           return (

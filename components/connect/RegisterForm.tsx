@@ -67,7 +67,7 @@ export function RegisterForm({ profile }: Props) {
   }
 
   return (
-    <Screen gap={16}>
+    <Screen gap={16} width="focus">
       <Header back="/connect?tab=scan" title={copy.title} />
       <Card className="flex items-center gap-[14px] px-[14px] py-3">
         <Avatar person={avatarOf(person)} size={56} />
@@ -129,7 +129,7 @@ export function RegisterForm({ profile }: Props) {
         <VoiceNoteButton state={note} onChange={setNote} />
       </div>
 
-      <div className="mt-auto flex flex-col gap-[10px]">
+      <div className="mt-auto flex flex-col gap-[10px] md:mt-4">
         {/* Confirming checks the scanner in, which records `screenConsent`; the notice must be visible first (M13). */}
         <Muted className="text-center text-[12px] font-bold">{copy.screenNotice}</Muted>
         {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
