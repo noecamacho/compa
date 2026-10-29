@@ -202,3 +202,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] ingest | Event-day deploy safety and observability
 
 - New page [event-day-runbook](event-day-runbook.md): deploy freeze, Instant Rollback, signals to watch. The deploy workflow now keeps the 10 newest READY production deployments instead of deleting all others; added `app/error.tsx`, `app/global-error.tsx`, `instrumentation.ts` (`onRequestError`), JSON error logs with request ids in `defineRoute`, and `GET /api/health`.
+
+## [2026-10-29] query | How do I write and run Playwright e2e specs?
+
+- T-000 harness shipped: `playwright.config.ts` (viewport × locale projects), fixtures in `e2e/fixtures/` (mock, realUser, testEvent, twoUsers), `e2e/smoke.spec.ts` and `.github/workflows/e2e.yml`. Tags `@mock`, `@real`, `@prod` pick what runs where. Method in `docs/flows/README.md` "E2E tests"; real mode in `docs/testing/real-mode.md`.

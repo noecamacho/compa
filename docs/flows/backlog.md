@@ -61,7 +61,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | infra | **P0** | scaffold | — | M |
-- **State:** Helpers ready on `feat/COMPA-TBD-super-admin-test-harness`: `lib/testing/real-mode.ts` (test users and sessions over HTTP with `x-compa-automation`), `e2e/fixtures/real-mode.ts` and a skeleton spec; the `realUser` and `testEvent` fixtures map onto them (`docs/testing/real-mode.md`). Playwright itself is not installed yet.
+- **State:** Done. `@playwright/test`, `playwright.config.ts`, the fixtures in `e2e/fixtures/`, `e2e/smoke.spec.ts`, the test-only `compa-mock-error` cookie and `.github/workflows/e2e.yml`. WebKit runs in CI; real-mode specs run once the captain configures the test project (`docs/flows/README.md` "E2E tests").
 
 - **E2E:** `e2e/smoke.spec.ts` is the first spec. Scenarios: in mock mode the landing renders, a mocked `/api/me` renders `/home`, and `x-compa-mock-error: not_pending` on accept shows the error state. One real-mode test signs in the seeded user and opens `/me`.
 - **Files:** `package.json` (`@playwright/test` as a dev dependency, plus the scripts `e2e` = `bunx playwright test` and `e2e:install` = `bunx playwright install --with-deps chromium webkit`), new `playwright.config.ts`, `e2e/fixtures/*.ts`, `e2e/smoke.spec.ts`, new `.github/workflows/e2e.yml`, `.gitignore` (`playwright-report/`, `test-results/`), `.env.example` (variable names only).
