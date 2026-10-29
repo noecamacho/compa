@@ -32,3 +32,4 @@ repomix-output.*
 .claude/settings.local.json
 .serena/cache/
 .serena/project.local.yml
+tsconfig.tsbuildinfo
