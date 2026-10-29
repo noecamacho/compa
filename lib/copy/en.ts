@@ -66,7 +66,6 @@ export const live: typeof es.live = {
   rank: "rank",
   close: "Show leaderboard",
   loading: "Loading…",
-  noWebgl: "This browser can't draw the network. The numbers stay live.",
   stale: "Reconnecting…",
   staleFor: (seconds: number) => `Reconnecting… data from ${seconds} s ago`,
   codeChanged: "The event code changed. Open the new screen link from Admin.",
@@ -95,6 +94,7 @@ export const live: typeof es.live = {
   endedBody: (people: string, links: string) => `${people} people wove ${links} connections. Thanks for coming.`,
   podium: "Final podium",
   tie: "tie",
+  vizNames: { loom: "Loom", orbit: "Orbit", race: "Race", wave: "Pulse" },
 };
 
 export const eventNotFound: typeof es.eventNotFound = {

@@ -8,11 +8,12 @@ import { copyFor, formatNumber, type Dictionary } from "@/lib/copy";
 import { browserLocale, type Locale } from "@/lib/i18n";
 import { boardRows, closingMinutes, moodOf } from "@/lib/live/live-model";
 import { Feed, Podium, Pulse, StateCard, stateCardFor } from "./LiveActivity";
-import type { LoomData } from "./loom-scene";
 import { LeaderboardPanel, PersonPanel } from "./LivePanels";
 import { useLiveSnapshot } from "./useLiveSnapshot";
 
-const Loom = dynamic(() => import("./Loom"), { ssr: false });
+
+// Canvas and WebGL only, and it picks a view from the URL and session: never rendered on the server.
+const LiveStage = dynamic(() => import("./LiveStage"), { ssr: false });
 
 type LiveCopy = Dictionary["live"];
 
@@ -85,9 +86,7 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
   const copy = copyFor(locale).live;
   const { snapshot, stale, gone, staleForS } = useLiveSnapshot(code, initial);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [unavailable, setUnavailable] = useState(false);
   const rows = useMemo(() => boardRows(snapshot), [snapshot]);
-  const data: LoomData = useMemo(() => ({ people: snapshot.people, links: snapshot.connections }), [snapshot]);
   const selected = selectedId && rows.some((row) => row.id === selectedId) ? selectedId : null;
   const mood = moodOf(snapshot);
   const card = stateCardFor(mood, snapshot, locale);
@@ -125,11 +124,7 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
 
       <div className="grid min-h-0 gap-4 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_clamp(340px,28vw,520px)] lg:gap-[1.5vw]">
         <section className="relative aspect-square w-full sm:aspect-[4/3] lg:aspect-auto lg:h-full" aria-label={copy.vizLabel}>
-          {unavailable ? (
-            <p className="absolute inset-0 m-0 flex items-center justify-center p-6 text-center text-[16px] font-extrabold text-muted">{copy.noWebgl}</p>
-          ) : (
-            <Loom data={data} selectedId={selected} label={copy.vizLabel} onSelect={setSelectedId} onUnavailable={() => setUnavailable(true)} />
-          )}
+          <LiveStage snapshot={snapshot} selectedId={selected} label={copy.vizLabel} onSelect={setSelectedId} locale={locale} />
           {card && !selected && <StateCard {...card} />}
           {stale && (
             <span role="status" className="absolute top-2 right-2" data-testid="live-stale">

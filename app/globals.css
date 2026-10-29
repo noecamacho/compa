@@ -55,6 +55,19 @@
   --ease-spring: cubic-bezier(0.34, 1.3, 0.5, 1);
   --ease-out-soft: cubic-bezier(0.2, 0.8, 0.3, 1);
 
+  /* Live stage: cross-fade between visualizations and the rotation progress bar. */
+  @keyframes viz-in {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes viz-out {
+    from { opacity: 1; transform: scale(1); }
+    to { opacity: 0; transform: scale(1.03); }
+  }
+  @keyframes viz-progress {
+    from { width: 0; }
+    to { width: 100%; }
+  }
   @keyframes rise {
     from { transform: translateY(14px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }

@@ -525,7 +525,6 @@ export const live = {
   rank: "lugar",
   close: "Ver ranking",
   loading: "Cargando…",
-  noWebgl: "Este navegador no puede dibujar la red. Los números siguen en vivo.",
   stale: "Reconectando…",
   staleFor: (seconds: number) => `Reconectando… datos de hace ${seconds} s`,
   codeChanged: "El código del evento cambió. Abre el nuevo enlace de pantalla desde Admin.",
@@ -554,6 +553,7 @@ export const live = {
   endedBody: (people: string, links: string) => `${people} personas tejieron ${links} conexiones. Gracias por venir.`,
   podium: "Podio final",
   tie: "empate",
+  vizNames: { loom: "Telar", orbit: "Órbita", race: "Carrera", wave: "Pulso" },
 };
 
 // Unknown or rotated event code: says nothing about whether the event exists.

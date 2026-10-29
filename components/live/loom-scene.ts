@@ -5,6 +5,7 @@
 // draw calls stay flat however many people and connections the room has (docs/research/live-dataviz.md).
 import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
+import { LoomAmbient } from "./loom-ambient";
 
 export type LoomPerson = { id: string; points: number };
 export type LoomLink = { id: string; a: string; b: string; kind: "new" | "reconnection" };
@@ -119,6 +120,7 @@ export class LoomScene {
   private last = 0;
   private seeded = false;
   private needsRender = true;
+  private ambient: LoomAmbient | null = null;
 
   constructor(
     private readonly host: HTMLElement,
@@ -138,6 +140,8 @@ export class LoomScene {
     this.loom.add(this.selectedPeg);
     this.scene.add(this.loom);
     this.addPlate();
+    // Reduced motion keeps the loom still: no dust, no beads.
+    if (!reducedMotion) this.ambient = new LoomAmbient(this.loom, this.pegGeometry);
     this.resize();
     this.last = performance.now();
     this.frame = requestAnimationFrame(this.tick);
@@ -294,6 +298,7 @@ export class LoomScene {
       if (merged) this.weave.push(new THREE.Mesh(merged, this.threadMaterials[kind]));
     }
     for (const object of this.weave) this.loom.add(object);
+    this.ambient?.setThreads(this.links, (link) => this.curveFor(link));
     this.weaveDirty = false;
     this.needsRender = true;
   }
@@ -345,6 +350,7 @@ export class LoomScene {
     this.last = now;
     if (!this.reducedMotion) {
       this.loom.rotation.z += dt * SPIN_PER_SECOND;
+      this.ambient?.step(dt);
       this.needsRender = true;
     }
     for (const [id, thread] of this.fresh) this.advance(id, thread, now, dt);
@@ -375,6 +381,7 @@ export class LoomScene {
 
   dispose(): void {
     cancelAnimationFrame(this.frame);
+    this.ambient?.dispose();
     for (const [id, thread] of this.fresh) this.dropFresh(id, thread);
     for (const object of this.weave) disposeObject(object);
     this.pegMesh?.dispose();

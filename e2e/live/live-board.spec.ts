@@ -5,15 +5,18 @@
 // so the spec runs once, in the live-1920-en project.
 import type { Page, Route } from "@playwright/test";
 import path from "node:path";
+import { VIZ_IDS, type VizId } from "../../lib/live/rotation";
 import { FRAME_MS, SCENARIOS, scenarioFrames, type ScenarioName } from "../../lib/testing/live-scenarios";
 import { expect, test } from "../fixtures";
 
 const LIVE_PATH = "/e/k7m2p9xq4t/live";
+// The board's own scenarios pin the loom; the visualization tests below pick each view.
+const LOOM = "?viz=loom";
 const POLL = "**/api/e/*/live";
 const inLocale = (locale: "es-MX" | "en-US") => ({ locale, extraHTTPHeaders: { "Accept-Language": locale } });
 const VIEWPORTS = { phone: { width: 390, height: 844 }, tablet: { width: 834, height: 1112 }, laptop: { width: 1440, height: 900 }, screen: { width: 1920, height: 1080 } } as const;
 
-type Serve = { fail?: (poll: number) => boolean; frames?: ReturnType<typeof scenarioFrames> };
+type Serve = { fail?: (poll: number) => boolean; frames?: ReturnType<typeof scenarioFrames>; query?: string };
 
 // Answers the board's polls in order; after the last frame it keeps answering with the last one, a poll later each
 // time, like a live server in a quiet room (a repeated `generatedAt` would read as a stuck snapshot).
@@ -34,7 +37,7 @@ async function serveScenario(page: Page, name: ScenarioName, options: Serve = {}
 
 async function openBoard(page: Page, name: ScenarioName, polls = 1, options: Serve = {}) {
   const seen = await serveScenario(page, name, options);
-  await page.goto(LIVE_PATH);
+  await page.goto(`${LIVE_PATH}${options.query ?? LOOM}`);
   await expect.poll(() => seen.length, { timeout: 15_000 * polls }).toBeGreaterThanOrEqual(polls);
   // Let React commit the last answered frame.
   await page.waitForTimeout(400);
@@ -282,6 +285,104 @@ for (const locale of ["es-MX", "en-US"] as const) {
     }
   });
 }
+
+// Two captures of the stage 700 ms apart: different bytes mean something moved.
+async function stageMoves(page: Page): Promise<boolean> {
+  const stage = page.getByTestId("live-stage");
+  const before = await stage.screenshot({ animations: "allow" });
+  await page.waitForTimeout(700);
+  const after = await stage.screenshot({ animations: "allow" });
+  return !before.equals(after);
+}
+
+const viewIn = (page: Page, id: VizId) => page.locator(`[data-testid="live-stage"][data-current="${id}"] [data-viz="${id}"]`);
+
+test.describe("live visualizations @live @mock", () => {
+  test.use({ viewport: VIEWPORTS.screen, ...inLocale("en-US") });
+
+  for (const id of VIZ_IDS) {
+    for (const name of ["zero", "rush", "ended", "thousands"] as const satisfies readonly ScenarioName[]) {
+      test(`${id} in ${name}: shows, keeps moving, fits`, async ({ page }) => {
+        await openBoard(page, name, 2, { query: `?viz=${id}` });
+        await expect(viewIn(page, id)).toBeVisible();
+        await expect(page.getByTestId("live-viz-indicator")).toHaveCount(0);
+        expect(await stageMoves(page)).toBe(true);
+        await expectNoHorizontalScroll(page);
+        await shot(page, `viz-${id}-${name}-1920`);
+      });
+    }
+  }
+
+  for (const name of ["longNames", "missingPhotos", "trickle"] as const satisfies readonly ScenarioName[]) {
+    test(`race in ${name}: names and photos hold up`, async ({ page }) => {
+      await openBoard(page, name, 2, { query: "?viz=race" });
+      await expect(viewIn(page, "race")).toBeVisible();
+      await expectNoHorizontalScroll(page);
+      const broken = await page.locator("img").evaluateAll((images) => images.filter((image) => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth === 0).length);
+      expect(broken).toBe(0);
+      await shot(page, `viz-race-${name}-1920`);
+    });
+  }
+
+  test("network loss keeps the view moving under the reconnecting pill", async ({ page }) => {
+    await openBoard(page, "trickle", 3, { query: "?viz=orbit", fail: (poll) => poll >= 1 });
+    await expect(page.getByTestId("live-stale")).toBeVisible();
+    expect(await stageMoves(page)).toBe(true);
+  });
+
+  test("rotates to the next view on its timer, with the indicator", async ({ page }) => {
+    await openBoard(page, "trickle", 1, { query: "?rotate=5" });
+    const stage = page.getByTestId("live-stage");
+    await expect(page.getByTestId("live-viz-indicator")).toBeVisible();
+    const first = await stage.getAttribute("data-current");
+    await expect.poll(() => stage.getAttribute("data-current"), { timeout: 12_000 }).not.toBe(first);
+  });
+
+  test("a reload starts on a different view than the one on screen", async ({ page }) => {
+    await openBoard(page, "trickle", 1, { query: "?rotate=0" });
+    const stage = page.getByTestId("live-stage");
+    for (let reload = 0; reload < 3; reload++) {
+      const before = await stage.getAttribute("data-current");
+      await page.reload();
+      await expect(stage).toHaveAttribute("data-current", /.+/);
+      expect(await stage.getAttribute("data-current")).not.toBe(before);
+    }
+  });
+
+  test("a bad viz or rotate value falls back to rotating views", async ({ page }) => {
+    await openBoard(page, "trickle", 1, { query: "?viz=nope&rotate=abc" });
+    await expect(page.getByTestId("live-viz-indicator")).toBeVisible();
+  });
+
+  test("tapping a race row opens the person card", async ({ page }) => {
+    await openBoard(page, "trickle", 1, { query: "?viz=race" });
+    await viewIn(page, "race").getByRole("button").first().click();
+    await expect(page.getByTestId("live-person")).toBeVisible();
+  });
+
+  for (const id of VIZ_IDS) {
+    test(`${id} fits a phone`, async ({ page }) => {
+      await page.setViewportSize(VIEWPORTS.phone);
+      await openBoard(page, "rush", 2, { query: `?viz=${id}` });
+      await expect(viewIn(page, id)).toBeVisible();
+      await expectNoHorizontalScroll(page);
+      await shot(page, `viz-${id}-rush-390`);
+    });
+  }
+});
+
+test.describe("live visualizations, reduced motion @live @mock", () => {
+  test.use({ viewport: VIEWPORTS.laptop, ...inLocale("en-US"), reducedMotion: "reduce" });
+
+  for (const id of VIZ_IDS) {
+    test(`${id} holds still`, async ({ page }) => {
+      await openBoard(page, "trickle", 1, { query: `?viz=${id}` });
+      await expect(viewIn(page, id)).toBeVisible();
+      await page.waitForTimeout(800);
+      expect(await stageMoves(page)).toBe(false);
+    });
+  }
+});
 
 test("every scenario frame passes the snapshot schema", async () => {
   const { LiveSnapshot } = await import("../../lib/api/schemas");
