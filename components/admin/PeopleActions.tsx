@@ -21,17 +21,16 @@ type ProviderProps = { locale: Locale; adminHandle: string; children: ReactNode 
 export function PeopleActionsProvider({ locale, adminHandle, children }: ProviderProps) {
   const copy = copyFor(locale).admin;
   const router = useRouter();
-  const { busy, error, notice, run, dialog, setNotice, setError } = useAdminAction(copy.tests.failed);
+  const { busy, error, notice, run, dialog, announce, dismiss } = useAdminAction(copy.tests.failed);
 
   // Clipboard needs a secure context and permission (edge case 35); say so instead of failing silently.
   async function copyText(text: string) {
-    setNotice(null);
-    setError(null);
+    dismiss();
     try {
       await navigator.clipboard.writeText(text);
-      setNotice(copy.people.copied);
+      announce(copy.people.copied);
     } catch {
-      setError(copy.people.copyFailed);
+      announce(copy.people.copyFailed, "error");
     }
   }
 

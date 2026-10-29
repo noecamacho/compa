@@ -23,7 +23,7 @@ type Props = {
   onSignIn: (user: TestUserT) => void;
   onDelete: (user: TestUserT) => void;
   // Resolves with the users that were deleted, so the selection can drop them.
-  onDeleteMany: (users: TestUserT[]) => Promise<TestUserT[]>;
+  onDeleteMany: (users: TestUserT[]) => Promise<boolean>;
 };
 
 // Bulk selection is a desktop affordance (lg+, spec §5.5). Event and created need list-column room that a 1280 px
@@ -47,8 +47,8 @@ export function TestUserTable({ copy, locale, users, meId, now, busy, onSignIn, 
   const createdOf = (user: TestUserT) => relative(locale, user.createdAt, new Date(now));
 
   async function deleteSelected() {
-    const deleted = await onDeleteMany(selected);
-    setPicked((ids) => ids.filter((id) => !deleted.some((user) => user.id === id)));
+    // Deleted rows leave the selection on their own after the refresh; failed ones stay picked for a retry.
+    await onDeleteMany(selected);
   }
 
   const selectAll = (

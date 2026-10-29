@@ -57,8 +57,7 @@ export function TestUsersPanel({ locale, users, testEvents, me, now, handlePrefi
   const removeMany = (picked: TestUserT[]) =>
     runMany(picked, deleteOne, {
       confirm: { title: tests.bulkDeleteTitle(picked.length), body: tests.bulkDeleteBody(picked.map((user) => user.name)), confirmLabel: tests.deleteN(picked.length), cancelLabel: copy.ui.cancel, danger: true },
-      done: (ok) => tests.bulkDone(ok.length),
-      failed: (failed) => tests.bulkFailed(failed.map((user) => user.name)),
+      summary: (failed) => (failed.length ? tests.bulkFailed(failed.map((user) => user.name)) : tests.bulkDone(picked.length)),
     });
 
   return (
