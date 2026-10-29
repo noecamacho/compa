@@ -20,9 +20,9 @@ For the front end of `/connection/[id]/summary` ([screens/summary](../../wiki/sc
 2. Recording → `POST /api/transcribe` → the text lands in the note field. The text field is **always visible**.
 3. `POST /api/interactions/draft` with the note → an editable summary, topics and next steps.
 4. The user edits.
-5. `POST /api/interactions/:id/approve` with the edited values → both people see the summary. Summaries award **no points**: points come only from connections (data model M3, [summaries spec](../specs/2026-10-29-summaries.md)).
+5. `POST /api/interactions/:id/approve` with the edited values → `SUMMARY_POINTS` (+25) to both people; both see the summary (data model M18, API spec A9).
 
-Summaries exist only for **accepted** connections (data model M6). Hide the summary entry point while a connection is pending.
+Summaries exist only for **accepted** connections (data model M6, M18). Hide the summary entry point while a connection is pending.
 
 ## 1. `POST /api/transcribe`
 
@@ -113,7 +113,8 @@ Success `200` (the `interaction` shape is **proposed**; the plan only names it):
     "topics": ["React", "Vue"],
     "nextSteps": ["Luis comparte el repo con Ana"],
     "approvedAt": "2026-10-29T08:15:00.000Z"
-  }
+  },
+  "pointsAwarded": 25
 }
 ```
 
@@ -126,7 +127,7 @@ Success `200` (the `interaction` shape is **proposed**; the plan only names it):
 | 409 | `not_substantive` | Block approval: "El resumen no describe una conversación real. Cuéntanos de qué hablaron." Let the user edit the note and draft again. |
 | 409 | `already_approved` | This connection already has an approved summary (one per connection). Show it read-only; do not retry. |
 
-Replay is safe: a second approve returns 409 and never creates a second approved summary. Disable the button while the request runs.
+Replay is safe: a second approve returns 409 and never awards points twice. Disable the button while the request runs.
 
 ## Using `lib/audio/recorder.ts`
 
@@ -203,6 +204,7 @@ export const mocks = {
         nextSteps: ["Luis comparte el repo con Ana"],
         approvedAt: "2026-10-29T08:15:00.000Z",
       },
+      pointsAwarded: 25,
     },
   },
   approveNotSubstantive: {
