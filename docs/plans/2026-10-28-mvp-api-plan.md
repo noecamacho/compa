@@ -2,6 +2,8 @@
 
 Ticket: `COMPA-<TBD>` · Date: 2026-10-28 ~00:00 (night before the 2026-10-29 10:00 submission; feature freeze 09:00) · Status: draft for captain review · Team: 3 people (L = lead/backend, U = UI, I = AI + live data).
 
+> **Superseded in part (2026-10-29):** the data model (§2 D3–D13, §5, §8) is replaced by [`docs/specs/2026-10-29-data-model.md`](../specs/2026-10-29-data-model.md): LinkedIn-only sign-in, multi-event, confirmed connections scoring 20 (new) or 10 (reconnection). The API sections will be revised in the API spec.
+
 This plan reconciles the captain's request ("sign up with LinkedIn, import their profile, choose what to display, track connections, feed the viz") with the repository's binding rules (`AGENTS.md` §4, `ARCHITECTURE.md`, `wiki/*`). Existing facts cite plan pages (`p. N`) or wiki pages; external facts cite URLs in §3 and are marked verified or assumption.
 
 ## 1. Summary
