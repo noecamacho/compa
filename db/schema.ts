@@ -143,7 +143,8 @@ export const connections = pgTable(
     ),
     check(
       "connections_points_follow_kind_check",
-      sql`${t.kind} is null or (${t.kind} = 'new' and ${t.points} = 20) or (${t.kind} = 'reconnection' and ${t.points} = 10)`,
+      // V2 design points table: 50 new, 20 reconnection (lib/points.ts).
+      sql`${t.kind} is null or (${t.kind} = 'new' and ${t.points} = 50) or (${t.kind} = 'reconnection' and ${t.points} = 20)`,
     ),
     uniqueIndex("connections_pair_per_event_uq").on(
       t.eventId,

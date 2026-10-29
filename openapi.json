@@ -275,45 +275,164 @@
             "description": "The signed-in person.",
             "content": {
               "application/json": {
-                "example": {
-                  "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
-                  "handle": "lucia-fernandez",
-                  "name": "Lucía Fernández",
-                  "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHlucia/profile-displayphoto-shrink_200_200/0/1730000000000",
-                  "headline": "CTO en Tramita · IA para la administración pública",
-                  "company": "Tramita",
-                  "interests": [
-                    "AI Products",
-                    "LLMs",
-                    "Startups"
-                  ],
-                  "links": {
-                    "linkedin": "https://www.linkedin.com/in/lucia-fernandez",
-                    "x": "https://x.com/luciafdz"
-                  },
-                  "email": "lucia@tramita.es",
-                  "visibility": {
-                    "headline": "public",
-                    "company": "public",
-                    "interests": "public",
-                    "links": {
-                      "linkedin": "connections",
-                      "github": "connections",
-                      "x": "hidden",
-                      "instagram": "connections",
-                      "web": "connections"
-                    }
-                  },
-                  "nameEdited": false,
-                  "photoEdited": false,
-                  "isAdmin": false,
-                  "currentEvent": {
-                    "slug": "founders-fest",
-                    "name": "Founders Fest Guadalajara 2026"
-                  }
-                },
                 "schema": {
                   "$ref": "#/components/schemas/Me"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Default",
+                    "value": {
+                      "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                      "handle": "diego-ramirez",
+                      "name": "Diego Ramírez",
+                      "photoUrl": null,
+                      "avatar": {
+                        "skin": "#F5C9A3",
+                        "hair": "short",
+                        "hairColor": "#5A3825",
+                        "outfit": "event",
+                        "shirt": "#6CC4FF",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none",
+                        "accent": "#FFD93D"
+                      },
+                      "headline": "Cofounder",
+                      "company": "Kuali",
+                      "city": "Guadalajara, Jalisco",
+                      "interests": [
+                        "Startups",
+                        "Product",
+                        "AI Products"
+                      ],
+                      "links": {
+                        "linkedin": "https://www.linkedin.com/in/diegoramirez",
+                        "instagram": "https://www.instagram.com/diego.rmz"
+                      },
+                      "email": "diego@kuali.mx",
+                      "visibility": {
+                        "headline": "public",
+                        "company": "public",
+                        "interests": "public",
+                        "links": {
+                          "linkedin": "connections",
+                          "github": "connections",
+                          "x": "hidden",
+                          "instagram": "connections",
+                          "whatsapp": "hidden",
+                          "web": "connections"
+                        }
+                      },
+                      "nameEdited": false,
+                      "photoEdited": false,
+                      "isAdmin": false,
+                      "currentEvent": {
+                        "slug": "founders-fest",
+                        "name": "Founders Fest GDL"
+                      },
+                      "stats": {
+                        "newConnections": 42,
+                        "reconnections": 16,
+                        "events": 7
+                      },
+                      "scores": {
+                        "event": {
+                          "rank": 6,
+                          "points": 1265
+                        },
+                        "lifetime": {
+                          "rank": 14,
+                          "points": 5110
+                        }
+                      },
+                      "badges": [
+                        "apreton",
+                        "tresdetres",
+                        "ff2026",
+                        "madrugador",
+                        "og"
+                      ]
+                    }
+                  },
+                  "empty": {
+                    "summary": "First night, no connections yet",
+                    "value": {
+                      "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                      "handle": "diego-ramirez",
+                      "name": "Diego Ramírez",
+                      "photoUrl": null,
+                      "avatar": {
+                        "skin": "#F5C9A3",
+                        "hair": "short",
+                        "hairColor": "#5A3825",
+                        "outfit": "event",
+                        "shirt": "#6CC4FF",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none",
+                        "accent": "#FFD93D"
+                      },
+                      "headline": "Cofounder",
+                      "company": "Kuali",
+                      "city": "Guadalajara, Jalisco",
+                      "interests": [
+                        "Startups",
+                        "Product",
+                        "AI Products"
+                      ],
+                      "links": {
+                        "linkedin": "https://www.linkedin.com/in/diegoramirez",
+                        "instagram": "https://www.instagram.com/diego.rmz"
+                      },
+                      "email": "diego@kuali.mx",
+                      "visibility": {
+                        "headline": "public",
+                        "company": "public",
+                        "interests": "public",
+                        "links": {
+                          "linkedin": "connections",
+                          "github": "connections",
+                          "x": "hidden",
+                          "instagram": "connections",
+                          "whatsapp": "hidden",
+                          "web": "connections"
+                        }
+                      },
+                      "nameEdited": false,
+                      "photoEdited": false,
+                      "isAdmin": false,
+                      "currentEvent": {
+                        "slug": "founders-fest",
+                        "name": "Founders Fest GDL"
+                      },
+                      "stats": {
+                        "newConnections": 0,
+                        "reconnections": 0,
+                        "events": 1
+                      },
+                      "scores": {
+                        "event": {
+                          "rank": null,
+                          "points": 0
+                        },
+                        "lifetime": {
+                          "rank": null,
+                          "points": 0
+                        }
+                      },
+                      "badges": []
+                    }
+                  }
                 }
               }
             }
@@ -410,14 +529,12 @@
           "content": {
             "application/json": {
               "example": {
-                "headline": "CTO en Tramita",
+                "headline": "Cofounder",
+                "company": "Kuali",
+                "city": "Guadalajara, Jalisco",
                 "links": {
-                  "github": "@luciafdz"
-                },
-                "interestIds": [
-                  29,
-                  39
-                ]
+                  "instagram": "@diego.rmz"
+                }
               },
               "schema": {
                 "$ref": "#/components/schemas/PatchMeBody"
@@ -432,21 +549,38 @@
               "application/json": {
                 "example": {
                   "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
-                  "handle": "lucia-fernandez",
-                  "name": "Lucía Fernández",
-                  "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHlucia/profile-displayphoto-shrink_200_200/0/1730000000000",
-                  "headline": "CTO en Tramita · IA para la administración pública",
-                  "company": "Tramita",
+                  "handle": "diego-ramirez",
+                  "name": "Diego Ramírez",
+                  "photoUrl": null,
+                  "avatar": {
+                    "skin": "#F5C9A3",
+                    "hair": "short",
+                    "hairColor": "#5A3825",
+                    "outfit": "event",
+                    "shirt": "#6CC4FF",
+                    "pants": "#4A6FA5",
+                    "shoes": "#FFFFFF",
+                    "hat": "none",
+                    "hatColor": "#FF6B4A",
+                    "hatAccent": "#FFFFFF",
+                    "face": "none",
+                    "beard": false,
+                    "extra": "none",
+                    "accent": "#FFD93D"
+                  },
+                  "headline": "Cofounder",
+                  "company": "Kuali",
+                  "city": "Guadalajara, Jalisco",
                   "interests": [
-                    "AI Products",
-                    "LLMs",
-                    "Startups"
+                    "Startups",
+                    "Product",
+                    "AI Products"
                   ],
                   "links": {
-                    "linkedin": "https://www.linkedin.com/in/lucia-fernandez",
-                    "x": "https://x.com/luciafdz"
+                    "linkedin": "https://www.linkedin.com/in/diegoramirez",
+                    "instagram": "https://www.instagram.com/diego.rmz"
                   },
-                  "email": "lucia@tramita.es",
+                  "email": "diego@kuali.mx",
                   "visibility": {
                     "headline": "public",
                     "company": "public",
@@ -456,6 +590,7 @@
                       "github": "connections",
                       "x": "hidden",
                       "instagram": "connections",
+                      "whatsapp": "hidden",
                       "web": "connections"
                     }
                   },
@@ -464,8 +599,30 @@
                   "isAdmin": false,
                   "currentEvent": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Guadalajara 2026"
-                  }
+                    "name": "Founders Fest GDL"
+                  },
+                  "stats": {
+                    "newConnections": 42,
+                    "reconnections": 16,
+                    "events": 7
+                  },
+                  "scores": {
+                    "event": {
+                      "rank": 6,
+                      "points": 1265
+                    },
+                    "lifetime": {
+                      "rank": 14,
+                      "points": 5110
+                    }
+                  },
+                  "badges": [
+                    "apreton",
+                    "tresdetres",
+                    "ff2026",
+                    "madrugador",
+                    "og"
+                  ]
                 },
                 "schema": {
                   "$ref": "#/components/schemas/Me"
@@ -655,6 +812,7 @@
                     "github": "connections",
                     "x": "hidden",
                     "instagram": "connections",
+                    "whatsapp": "hidden",
                     "web": "connections"
                   }
                 },
@@ -901,25 +1059,163 @@
                     "value": {
                       "card": {
                         "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                        "handle": "mateo-garcia",
-                        "name": "Mateo García",
-                        "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                        "headline": "Frontend lead en Cabify",
-                        "company": "Cabify",
+                        "handle": "valeria-ochoa",
+                        "name": "Valeria Ochoa",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#E0A97F",
+                          "hair": "long",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#6CC4FF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CTO",
+                        "company": "Tlali",
+                        "city": "Monterrey",
                         "interests": [
-                          "React",
-                          "Next.js",
-                          "Web Performance"
+                          "Startups",
+                          "Architecture",
+                          "Agents"
                         ],
                         "links": {
-                          "linkedin": "https://www.linkedin.com/in/mateo-garcia",
-                          "github": "https://github.com/mateogarcia"
+                          "linkedin": "https://www.linkedin.com/in/valeria-ochoa",
+                          "instagram": "https://www.instagram.com/valeria.ochoa",
+                          "whatsapp": "https://wa.me/528112345678"
                         }
                       },
                       "connection": {
                         "status": "accepted",
                         "kind": "reconnection",
                         "eventSlug": "founders-fest"
+                      },
+                      "scores": {
+                        "event": {
+                          "rank": 1,
+                          "points": 1980
+                        },
+                        "lifetime": {
+                          "rank": 2,
+                          "points": 8870
+                        }
+                      },
+                      "stats": {
+                        "newConnections": 42,
+                        "reconnections": 16,
+                        "events": 7
+                      },
+                      "badges": [
+                        "rey",
+                        "tresdetres",
+                        "speaker",
+                        "maraton",
+                        "ff2026"
+                      ],
+                      "relationship": {
+                        "reconnections": 3,
+                        "eventsTogether": 3,
+                        "mutual": [
+                          {
+                            "id": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
+                            "handle": "rodrigo-pena",
+                            "name": "Rodrigo Peña",
+                            "photoUrl": null,
+                            "avatar": {
+                              "skin": "#BF8360",
+                              "hair": "shaved",
+                              "hairColor": "#2A2438",
+                              "outfit": "plain",
+                              "shirt": "#FFD93D",
+                              "pants": "#4A6FA5",
+                              "shoes": "#FFFFFF",
+                              "hat": "none",
+                              "hatColor": "#FF6B4A",
+                              "hatAccent": "#FFFFFF",
+                              "face": "mustache",
+                              "beard": false,
+                              "extra": "none"
+                            },
+                            "headline": "CEO",
+                            "company": "Pagalo",
+                            "city": "Guadalajara",
+                            "interests": [
+                              "Startups",
+                              "APIs"
+                            ]
+                          },
+                          {
+                            "id": "9b2c1d0e-4f5a-4b6c-8d7e-1f2a3b4c5d66",
+                            "handle": "sofia-trevino",
+                            "name": "Sofía Treviño",
+                            "photoUrl": null,
+                            "avatar": {
+                              "skin": "#FFE0C7",
+                              "hair": "bun",
+                              "hairColor": "#D9664F",
+                              "outfit": "plain",
+                              "shirt": "#FF8FAB",
+                              "pants": "#4A6FA5",
+                              "shoes": "#FFFFFF",
+                              "hat": "none",
+                              "hatColor": "#FF6B4A",
+                              "hatAccent": "#FFFFFF",
+                              "face": "none",
+                              "beard": false,
+                              "extra": "none"
+                            },
+                            "headline": "Head of Product",
+                            "company": "Nido",
+                            "city": "Ciudad de México",
+                            "interests": [
+                              "Product",
+                              "AI Products"
+                            ]
+                          },
+                          {
+                            "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c77",
+                            "handle": "ximena-salcedo",
+                            "name": "Ximena Salcedo",
+                            "photoUrl": null,
+                            "avatar": {
+                              "skin": "#94603F",
+                              "hair": "curly",
+                              "hairColor": "#2A2438",
+                              "outfit": "plain",
+                              "shirt": "#FF6B4A",
+                              "pants": "#2E2B40",
+                              "shoes": "#FFFFFF",
+                              "hat": "none",
+                              "hatColor": "#FF6B4A",
+                              "hatAccent": "#FFFFFF",
+                              "face": "none",
+                              "beard": false,
+                              "extra": "none"
+                            },
+                            "headline": "CMO",
+                            "company": "Rutea",
+                            "city": "Guadalajara",
+                            "interests": [
+                              "Product",
+                              "Community"
+                            ]
+                          }
+                        ]
+                      },
+                      "lastInteraction": {
+                        "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
+                        "title": "Serie A",
+                        "topics": [
+                          "Levantar capital",
+                          "Proptech"
+                        ],
+                        "at": "2026-10-29T18:15:00.000Z"
                       }
                     }
                   },
@@ -928,15 +1224,31 @@
                     "value": {
                       "card": {
                         "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                        "handle": "mateo-garcia",
-                        "name": "Mateo García",
-                        "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                        "headline": "Frontend lead en Cabify",
-                        "company": "Cabify",
+                        "handle": "valeria-ochoa",
+                        "name": "Valeria Ochoa",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#E0A97F",
+                          "hair": "long",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#6CC4FF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CTO",
+                        "company": "Tlali",
+                        "city": "Monterrey",
                         "interests": [
-                          "React",
-                          "Next.js",
-                          "Web Performance"
+                          "Startups",
+                          "Architecture",
+                          "Agents"
                         ]
                       }
                     }
@@ -1096,10 +1408,10 @@
           "content": {
             "application/json": {
               "example": {
-                "name": "Founders Fest Guadalajara 2026",
+                "name": "Founders Fest GDL",
                 "slug": "founders-fest",
                 "startsAt": "2026-10-29T16:00:00.000Z",
-                "endsAt": "2026-10-29T22:00:00.000Z"
+                "endsAt": "2026-10-30T04:00:00.000Z"
               },
               "schema": {
                 "$ref": "#/components/schemas/CreateEventBody"
@@ -1115,9 +1427,9 @@
                 "example": {
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Guadalajara 2026",
+                    "name": "Founders Fest GDL",
                     "startsAt": "2026-10-29T16:00:00.000Z",
-                    "endsAt": "2026-10-29T22:00:00.000Z",
+                    "endsAt": "2026-10-30T04:00:00.000Z",
                     "isRunning": true,
                     "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55"
                   }
@@ -1407,9 +1719,9 @@
               "application/json": {
                 "example": {
                   "slug": "founders-fest",
-                  "name": "Founders Fest Guadalajara 2026",
+                  "name": "Founders Fest GDL",
                   "startsAt": "2026-10-29T16:00:00.000Z",
-                  "endsAt": "2026-10-29T22:00:00.000Z",
+                  "endsAt": "2026-10-30T04:00:00.000Z",
                   "isRunning": true
                 },
                 "schema": {
@@ -1537,7 +1849,7 @@
                 "example": {
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Guadalajara 2026"
+                    "name": "Founders Fest GDL"
                   },
                   "checkedInAt": "2026-10-29T17:02:31.000Z",
                   "alreadyCheckedIn": false
@@ -1555,7 +1867,7 @@
                 "example": {
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Guadalajara 2026"
+                    "name": "Founders Fest GDL"
                   },
                   "checkedInAt": "2026-10-29T17:02:31.000Z",
                   "alreadyCheckedIn": false
@@ -1839,9 +2151,13 @@
           "content": {
             "application/json": {
               "example": {
-                "toHandle": "mateo-garcia",
-                "knew": false,
-                "screenConsent": true
+                "toHandle": "valeria-ochoa",
+                "knew": true,
+                "screenConsent": true,
+                "topics": [
+                  "Levantar capital",
+                  "Proptech"
+                ]
               },
               "schema": {
                 "$ref": "#/components/schemas/CreateConnectionBody"
@@ -1859,19 +2175,35 @@
                   "status": "pending",
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Guadalajara 2026"
+                    "name": "Founders Fest GDL"
                   },
                   "to": {
                     "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                    "handle": "mateo-garcia",
-                    "name": "Mateo García",
-                    "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                    "headline": "Frontend lead en Cabify",
-                    "company": "Cabify",
+                    "handle": "valeria-ochoa",
+                    "name": "Valeria Ochoa",
+                    "photoUrl": null,
+                    "avatar": {
+                      "skin": "#E0A97F",
+                      "hair": "long",
+                      "hairColor": "#2A2438",
+                      "outfit": "plain",
+                      "shirt": "#6CC4FF",
+                      "pants": "#4A6FA5",
+                      "shoes": "#FFFFFF",
+                      "hat": "none",
+                      "hatColor": "#FF6B4A",
+                      "hatAccent": "#FFFFFF",
+                      "face": "none",
+                      "beard": false,
+                      "extra": "none"
+                    },
+                    "headline": "CTO",
+                    "company": "Tlali",
+                    "city": "Monterrey",
                     "interests": [
-                      "React",
-                      "Next.js",
-                      "Web Performance"
+                      "Startups",
+                      "Architecture",
+                      "Agents"
                     ]
                   }
                 },
@@ -1890,19 +2222,35 @@
                   "status": "pending",
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Guadalajara 2026"
+                    "name": "Founders Fest GDL"
                   },
                   "to": {
                     "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                    "handle": "mateo-garcia",
-                    "name": "Mateo García",
-                    "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                    "headline": "Frontend lead en Cabify",
-                    "company": "Cabify",
+                    "handle": "valeria-ochoa",
+                    "name": "Valeria Ochoa",
+                    "photoUrl": null,
+                    "avatar": {
+                      "skin": "#E0A97F",
+                      "hair": "long",
+                      "hairColor": "#2A2438",
+                      "outfit": "plain",
+                      "shirt": "#6CC4FF",
+                      "pants": "#4A6FA5",
+                      "shoes": "#FFFFFF",
+                      "hat": "none",
+                      "hatColor": "#FF6B4A",
+                      "hatAccent": "#FFFFFF",
+                      "face": "none",
+                      "beard": false,
+                      "extra": "none"
+                    },
+                    "headline": "CTO",
+                    "company": "Tlali",
+                    "city": "Monterrey",
                     "interests": [
-                      "React",
-                      "Next.js",
-                      "Web Performance"
+                      "Startups",
+                      "Architecture",
+                      "Agents"
                     ]
                   }
                 },
@@ -2208,19 +2556,36 @@
                     {
                       "connectionId": "2f1e0d9c-8b7a-4f6e-ad3c-2b1a0f9e8d7c",
                       "from": {
-                        "id": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
-                        "handle": "sofia-martin",
-                        "name": "Sofía Martín",
+                        "id": "c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e99",
+                        "handle": "paola-nunez",
+                        "name": "Paola Núñez",
                         "photoUrl": null,
-                        "headline": "Fundadora de Huerta Labs",
+                        "avatar": {
+                          "skin": "#F5C9A3",
+                          "hair": "bangs",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#FFD93D",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "glasses",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "Investor",
+                        "company": "Dalus Capital",
+                        "city": "Monterrey",
                         "interests": [
                           "Startups",
-                          "Product"
+                          "Data"
                         ]
                       },
                       "event": {
                         "slug": "founders-fest",
-                        "name": "Founders Fest Guadalajara 2026"
+                        "name": "Founders Fest GDL"
                       },
                       "createdAt": "2026-10-29T18:42:10.000Z"
                     }
@@ -2229,19 +2594,36 @@
                     {
                       "person": {
                         "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                        "handle": "mateo-garcia",
-                        "name": "Mateo García",
-                        "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                        "headline": "Frontend lead en Cabify",
-                        "company": "Cabify",
+                        "handle": "valeria-ochoa",
+                        "name": "Valeria Ochoa",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#E0A97F",
+                          "hair": "long",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#6CC4FF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CTO",
+                        "company": "Tlali",
+                        "city": "Monterrey",
                         "interests": [
-                          "React",
-                          "Next.js",
-                          "Web Performance"
+                          "Startups",
+                          "Architecture",
+                          "Agents"
                         ],
                         "links": {
-                          "linkedin": "https://www.linkedin.com/in/mateo-garcia",
-                          "github": "https://github.com/mateogarcia"
+                          "linkedin": "https://www.linkedin.com/in/valeria-ochoa",
+                          "instagram": "https://www.instagram.com/valeria.ochoa",
+                          "whatsapp": "https://wa.me/528112345678"
                         }
                       },
                       "meetings": [
@@ -2249,35 +2631,244 @@
                           "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
                           "event": {
                             "slug": "founders-fest",
-                            "name": "Founders Fest Guadalajara 2026"
+                            "name": "Founders Fest GDL"
                           },
                           "status": "accepted",
                           "direction": "sent",
                           "kind": "reconnection",
-                          "points": 10,
+                          "points": 20,
                           "at": "2026-10-29T18:15:00.000Z"
                         },
                         {
                           "connectionId": "1e0d9c8b-7a6f-4e5d-9c2b-1a0f9e8d7c6b",
                           "event": {
-                            "slug": "gdl-js-septiembre",
-                            "name": "GDL JS Septiembre"
+                            "slug": "gdl-founders-septiembre",
+                            "name": "Founders Meetup Septiembre"
                           },
                           "status": "accepted",
                           "direction": "received",
                           "kind": "new",
-                          "points": 20,
+                          "points": 50,
                           "at": "2026-09-18T19:30:00.000Z"
                         }
                       ],
                       "lastMetAt": "2026-10-29T18:15:00.000Z",
-                      "totalPoints": 30
+                      "totalPoints": 70,
+                      "type": "reconnection",
+                      "topics": [
+                        "Levantar capital",
+                        "Proptech"
+                      ]
+                    },
+                    {
+                      "person": {
+                        "id": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
+                        "handle": "rodrigo-pena",
+                        "name": "Rodrigo Peña",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#BF8360",
+                          "hair": "shaved",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#FFD93D",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "mustache",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CEO",
+                        "company": "Pagalo",
+                        "city": "Guadalajara",
+                        "interests": [
+                          "Startups",
+                          "APIs"
+                        ]
+                      },
+                      "meetings": [
+                        {
+                          "connectionId": "3a2b1c0d-9e8f-4a7b-8c6d-5e4f3a2b1c0d",
+                          "event": {
+                            "slug": "founders-fest",
+                            "name": "Founders Fest GDL"
+                          },
+                          "status": "accepted",
+                          "direction": "sent",
+                          "kind": "new",
+                          "points": 50,
+                          "at": "2026-10-29T17:50:00.000Z"
+                        }
+                      ],
+                      "lastMetAt": "2026-10-29T17:50:00.000Z",
+                      "totalPoints": 50,
+                      "type": "new",
+                      "topics": [
+                        "Fintech",
+                        "Ventas B2B"
+                      ]
+                    },
+                    {
+                      "person": {
+                        "id": "9b2c1d0e-4f5a-4b6c-8d7e-1f2a3b4c5d66",
+                        "handle": "sofia-trevino",
+                        "name": "Sofía Treviño",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#FFE0C7",
+                          "hair": "bun",
+                          "hairColor": "#D9664F",
+                          "outfit": "plain",
+                          "shirt": "#FF8FAB",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "Head of Product",
+                        "company": "Nido",
+                        "city": "Ciudad de México",
+                        "interests": [
+                          "Product",
+                          "AI Products"
+                        ]
+                      },
+                      "meetings": [
+                        {
+                          "connectionId": "4b3c2d1e-0f9a-4b8c-9d7e-6f5a4b3c2d1e",
+                          "event": {
+                            "slug": "founders-fest",
+                            "name": "Founders Fest GDL"
+                          },
+                          "status": "accepted",
+                          "direction": "received",
+                          "kind": "new",
+                          "points": 50,
+                          "at": "2026-10-29T17:20:00.000Z"
+                        }
+                      ],
+                      "lastMetAt": "2026-10-29T17:20:00.000Z",
+                      "totalPoints": 50,
+                      "type": "new",
+                      "topics": [
+                        "Producto",
+                        "IA"
+                      ]
+                    },
+                    {
+                      "person": {
+                        "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c77",
+                        "handle": "ximena-salcedo",
+                        "name": "Ximena Salcedo",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#94603F",
+                          "hair": "curly",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#FF6B4A",
+                          "pants": "#2E2B40",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CMO",
+                        "company": "Rutea",
+                        "city": "Guadalajara",
+                        "interests": [
+                          "Product",
+                          "Community"
+                        ]
+                      },
+                      "meetings": [
+                        {
+                          "connectionId": "5c4d3e2f-1a0b-4c9d-8e8f-7a6b5c4d3e2f",
+                          "event": {
+                            "slug": "founders-fest",
+                            "name": "Founders Fest GDL"
+                          },
+                          "status": "accepted",
+                          "direction": "sent",
+                          "kind": "reconnection",
+                          "points": 20,
+                          "at": "2026-10-29T17:05:00.000Z"
+                        }
+                      ],
+                      "lastMetAt": "2026-10-29T17:05:00.000Z",
+                      "totalPoints": 20,
+                      "type": "friend",
+                      "topics": [
+                        "Marketing",
+                        "Go to market"
+                      ]
+                    },
+                    {
+                      "person": {
+                        "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d88",
+                        "handle": "carlos-ibarra",
+                        "name": "Carlos Ibarra",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#6B4129",
+                          "hair": "spiky",
+                          "hairColor": "#E8B44A",
+                          "outfit": "compa",
+                          "shirt": "#FFFFFF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "Founder",
+                        "company": "Volta",
+                        "city": "Querétaro",
+                        "interests": [
+                          "Startups",
+                          "Mobile"
+                        ]
+                      },
+                      "meetings": [
+                        {
+                          "connectionId": "6d5e4f3a-2b1c-4d0e-9f9a-8b7c6d5e4f3a",
+                          "event": {
+                            "slug": "founders-fest",
+                            "name": "Founders Fest GDL"
+                          },
+                          "status": "accepted",
+                          "direction": "sent",
+                          "kind": "reconnection",
+                          "points": 20,
+                          "at": "2026-10-29T16:40:00.000Z"
+                        }
+                      ],
+                      "lastMetAt": "2026-10-29T16:40:00.000Z",
+                      "totalPoints": 20,
+                      "type": "reconnection",
+                      "topics": [
+                        "Levantar capital",
+                        "Hardware"
+                      ]
                     }
                   ],
                   "totals": {
-                    "points": 55,
-                    "connections": 2,
-                    "people": 1
+                    "points": 1265,
+                    "connections": 6,
+                    "people": 5
                   }
                 },
                 "schema": {
@@ -2714,7 +3305,7 @@
       "post": {
         "operationId": "acceptConnection",
         "summary": "Addressee: accept a request",
-        "description": "`reconnection` (+10) when the pair connected at an earlier event or either person ticked `knew`; otherwise `new` (+20), to both (M3, M4).",
+        "description": "`reconnection` (+20) when the pair connected at an earlier event or either person ticked `knew`; otherwise `new` (+50), to both (design handoff points table).",
         "tags": [
           "connections"
         ],
@@ -2775,22 +3366,39 @@
                     "value": {
                       "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
                       "kind": "new",
-                      "points": 20,
+                      "points": 50,
                       "from": {
                         "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                        "handle": "mateo-garcia",
-                        "name": "Mateo García",
-                        "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                        "headline": "Frontend lead en Cabify",
-                        "company": "Cabify",
+                        "handle": "valeria-ochoa",
+                        "name": "Valeria Ochoa",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#E0A97F",
+                          "hair": "long",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#6CC4FF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CTO",
+                        "company": "Tlali",
+                        "city": "Monterrey",
                         "interests": [
-                          "React",
-                          "Next.js",
-                          "Web Performance"
+                          "Startups",
+                          "Architecture",
+                          "Agents"
                         ],
                         "links": {
-                          "linkedin": "https://www.linkedin.com/in/mateo-garcia",
-                          "github": "https://github.com/mateogarcia"
+                          "linkedin": "https://www.linkedin.com/in/valeria-ochoa",
+                          "instagram": "https://www.instagram.com/valeria.ochoa",
+                          "whatsapp": "https://wa.me/528112345678"
                         }
                       }
                     }
@@ -2800,22 +3408,39 @@
                     "value": {
                       "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
                       "kind": "reconnection",
-                      "points": 10,
+                      "points": 20,
                       "from": {
                         "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                        "handle": "mateo-garcia",
-                        "name": "Mateo García",
-                        "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                        "headline": "Frontend lead en Cabify",
-                        "company": "Cabify",
+                        "handle": "valeria-ochoa",
+                        "name": "Valeria Ochoa",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#E0A97F",
+                          "hair": "long",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#6CC4FF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CTO",
+                        "company": "Tlali",
+                        "city": "Monterrey",
                         "interests": [
-                          "React",
-                          "Next.js",
-                          "Web Performance"
+                          "Startups",
+                          "Architecture",
+                          "Agents"
                         ],
                         "links": {
-                          "linkedin": "https://www.linkedin.com/in/mateo-garcia",
-                          "github": "https://github.com/mateogarcia"
+                          "linkedin": "https://www.linkedin.com/in/valeria-ochoa",
+                          "instagram": "https://www.instagram.com/valeria.ochoa",
+                          "whatsapp": "https://wa.me/528112345678"
                         }
                       }
                     }
@@ -3459,50 +4084,81 @@
                 "example": {
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Guadalajara 2026",
+                    "name": "Founders Fest GDL",
                     "isRunning": true
                   },
                   "people": [
                     {
-                      "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
-                      "name": "Lucía Fernández",
-                      "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHlucia/profile-displayphoto-shrink_200_200/0/1730000000000",
-                      "points": 45
-                    },
-                    {
                       "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                      "name": "Mateo García",
-                      "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                      "points": 30
+                      "name": "Valeria Ochoa",
+                      "photoUrl": null,
+                      "points": 1980
                     },
                     {
                       "id": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
-                      "name": "Sofía Martín",
+                      "name": "Rodrigo Peña",
                       "photoUrl": null,
-                      "points": 20
+                      "points": 1720
+                    },
+                    {
+                      "id": "9b2c1d0e-4f5a-4b6c-8d7e-1f2a3b4c5d66",
+                      "name": "Sofía Treviño",
+                      "photoUrl": null,
+                      "points": 1540
+                    },
+                    {
+                      "id": "c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e99",
+                      "name": "Paola Núñez",
+                      "photoUrl": null,
+                      "points": 1410
+                    },
+                    {
+                      "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c77",
+                      "name": "Ximena Salcedo",
+                      "photoUrl": null,
+                      "points": 1300
+                    },
+                    {
+                      "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                      "name": "Diego Ramírez",
+                      "photoUrl": null,
+                      "points": 1265
+                    },
+                    {
+                      "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d88",
+                      "name": "Carlos Ibarra",
+                      "photoUrl": null,
+                      "points": 980
                     }
                   ],
                   "connections": [
                     {
                       "id": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
-                      "a": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
-                      "b": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                      "kind": "reconnection",
-                      "at": "2026-10-29T18:15:00.000Z"
-                    },
-                    {
-                      "id": "1e0d9c8b-7a6f-4e5d-9c2b-1a0f9e8d7c6b",
                       "a": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
                       "b": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
                       "kind": "new",
-                      "at": "2026-10-29T18:31:00.000Z"
+                      "at": "2026-10-29T18:44:00.000Z"
+                    },
+                    {
+                      "id": "1e0d9c8b-7a6f-4e5d-9c2b-1a0f9e8d7c6b",
+                      "a": "9b2c1d0e-4f5a-4b6c-8d7e-1f2a3b4c5d66",
+                      "b": "c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e99",
+                      "kind": "new",
+                      "at": "2026-10-29T18:43:00.000Z"
+                    },
+                    {
+                      "id": "2f1e0d9c-8b7a-4f6e-ad3c-2b1a0f9e8d7c",
+                      "a": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c77",
+                      "b": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d88",
+                      "kind": "reconnection",
+                      "at": "2026-10-29T18:41:00.000Z"
                     }
                   ],
                   "counters": {
-                    "checkedIn": 3,
-                    "connections": 2,
-                    "newCount": 1,
-                    "reconnections": 1
+                    "checkedIn": 340,
+                    "connections": 218,
+                    "newCount": 160,
+                    "reconnections": 58
                   },
                   "generatedAt": "2026-10-29T18:45:00.000Z"
                 },
@@ -3624,20 +4280,36 @@
                 "example": {
                   "card": {
                     "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                    "handle": "mateo-garcia",
-                    "name": "Mateo García",
-                    "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                    "headline": "Frontend lead en Cabify",
-                    "company": "Cabify",
+                    "handle": "valeria-ochoa",
+                    "name": "Valeria Ochoa",
+                    "photoUrl": null,
+                    "avatar": {
+                      "skin": "#E0A97F",
+                      "hair": "long",
+                      "hairColor": "#2A2438",
+                      "outfit": "plain",
+                      "shirt": "#6CC4FF",
+                      "pants": "#4A6FA5",
+                      "shoes": "#FFFFFF",
+                      "hat": "none",
+                      "hatColor": "#FF6B4A",
+                      "hatAccent": "#FFFFFF",
+                      "face": "none",
+                      "beard": false,
+                      "extra": "none"
+                    },
+                    "headline": "CTO",
+                    "company": "Tlali",
+                    "city": "Monterrey",
                     "interests": [
-                      "React",
-                      "Next.js",
-                      "Web Performance"
+                      "Startups",
+                      "Architecture",
+                      "Agents"
                     ]
                   },
-                  "points": 30,
-                  "connections": 2,
-                  "rank": 2
+                  "points": 1980,
+                  "connections": 24,
+                  "rank": 1
                 },
                 "schema": {
                   "$ref": "#/components/schemas/LivePersonCard"
@@ -3747,6 +4419,14 @@
             }
           },
           {
+            "in": "query",
+            "name": "scope",
+            "schema": {
+              "default": "event",
+              "$ref": "#/components/schemas/LeaderboardScope"
+            }
+          },
+          {
             "$ref": "#/components/parameters/mockMockHeader"
           },
           {
@@ -3761,39 +4441,151 @@
         ],
         "responses": {
           "200": {
-            "description": "Ranked rows.",
+            "description": "Ranked rows, plus `me` when signed in (V2Ranking).",
             "content": {
               "application/json": {
-                "example": {
-                  "rows": [
-                    {
-                      "rank": 1,
-                      "userId": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
-                      "name": "Lucía Fernández",
-                      "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHlucia/profile-displayphoto-shrink_200_200/0/1730000000000",
-                      "points": 45,
-                      "connections": 1
-                    },
-                    {
-                      "rank": 2,
-                      "userId": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
-                      "name": "Mateo García",
-                      "photoUrl": "https://media.licdn.com/dms/image/v2/D4D03AQHmateo/profile-displayphoto-shrink_200_200/0/1730000000000",
-                      "points": 30,
-                      "connections": 2
-                    },
-                    {
-                      "rank": 3,
-                      "userId": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
-                      "name": "Sofía Martín",
-                      "photoUrl": null,
-                      "points": 20,
-                      "connections": 1
-                    }
-                  ]
-                },
                 "schema": {
                   "$ref": "#/components/schemas/Leaderboard"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Default",
+                    "value": {
+                      "rows": [
+                        {
+                          "rank": 1,
+                          "userId": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
+                          "name": "Valeria Ochoa",
+                          "photoUrl": null,
+                          "points": 1980,
+                          "connections": 24
+                        },
+                        {
+                          "rank": 2,
+                          "userId": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
+                          "name": "Rodrigo Peña",
+                          "photoUrl": null,
+                          "points": 1720,
+                          "connections": 20
+                        },
+                        {
+                          "rank": 3,
+                          "userId": "9b2c1d0e-4f5a-4b6c-8d7e-1f2a3b4c5d66",
+                          "name": "Sofía Treviño",
+                          "photoUrl": null,
+                          "points": 1540,
+                          "connections": 18
+                        },
+                        {
+                          "rank": 4,
+                          "userId": "c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e99",
+                          "name": "Paola Núñez",
+                          "photoUrl": null,
+                          "points": 1410,
+                          "connections": 16
+                        },
+                        {
+                          "rank": 5,
+                          "userId": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c77",
+                          "name": "Ximena Salcedo",
+                          "photoUrl": null,
+                          "points": 1300,
+                          "connections": 15
+                        },
+                        {
+                          "rank": 6,
+                          "userId": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                          "name": "Diego Ramírez",
+                          "photoUrl": null,
+                          "points": 1265,
+                          "connections": 15
+                        },
+                        {
+                          "rank": 7,
+                          "userId": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d88",
+                          "name": "Carlos Ibarra",
+                          "photoUrl": null,
+                          "points": 980,
+                          "connections": 11
+                        }
+                      ],
+                      "me": {
+                        "rank": 6,
+                        "points": 1265,
+                        "above": {
+                          "rank": 5,
+                          "userId": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c77",
+                          "name": "Ximena Salcedo",
+                          "photoUrl": null,
+                          "points": 1300,
+                          "connections": 15
+                        },
+                        "gap": 35,
+                        "tip": "Una conexión nueva (+50) y la pasas."
+                      }
+                    }
+                  },
+                  "lifetime": {
+                    "summary": "scope=lifetime: all events",
+                    "value": {
+                      "rows": [
+                        {
+                          "rank": 1,
+                          "userId": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
+                          "name": "Rodrigo Peña",
+                          "photoUrl": null,
+                          "points": 9410,
+                          "connections": 120
+                        },
+                        {
+                          "rank": 2,
+                          "userId": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
+                          "name": "Valeria Ochoa",
+                          "photoUrl": null,
+                          "points": 8870,
+                          "connections": 104
+                        },
+                        {
+                          "rank": 3,
+                          "userId": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d88",
+                          "name": "Carlos Ibarra",
+                          "photoUrl": null,
+                          "points": 7920,
+                          "connections": 96
+                        },
+                        {
+                          "rank": 13,
+                          "userId": "c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e99",
+                          "name": "Paola Núñez",
+                          "photoUrl": null,
+                          "points": 5350,
+                          "connections": 60
+                        },
+                        {
+                          "rank": 14,
+                          "userId": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                          "name": "Diego Ramírez",
+                          "photoUrl": null,
+                          "points": 5110,
+                          "connections": 58
+                        }
+                      ],
+                      "me": {
+                        "rank": 14,
+                        "points": 5110,
+                        "above": {
+                          "rank": 13,
+                          "userId": "c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e99",
+                          "name": "Paola Núñez",
+                          "photoUrl": null,
+                          "points": 5350,
+                          "connections": 60
+                        },
+                        "gap": 240,
+                        "tip": "Un evento más con 5 conexiones y la pasas."
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -4185,7 +4977,7 @@
             "application/json": {
               "example": {
                 "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
-                "text": "Hablamos de pasar el panel de Vue a React, me pasa su repo de Next."
+                "text": "Valeria está cerrando su serie A y quiere que la presente con Andrea."
               },
               "schema": {
                 "$ref": "#/components/schemas/DraftBody"
@@ -4206,28 +4998,32 @@
                     "summary": "Default",
                     "value": {
                       "interactionId": "5b8f2c1e-3a4d-4e6f-9b0a-1c2d3e4f5a6b",
-                      "summary": "Lucía y Mateo hablaron sobre migrar el panel de Tramita de Vue a React. Mateo compartirá su repositorio de ejemplo con Next.js.",
+                      "summary": "Valeria está cerrando su serie A con un fondo de Monterrey y busca founders de proptech. Quiere que Diego la presente con Andrea para hablar de inversión.",
                       "topics": [
-                        "React",
-                        "Vue",
-                        "Next.js"
+                        "Startups",
+                        "Product"
                       ],
                       "nextSteps": [
-                        "Mateo comparte el repo con Lucía"
+                        "Presentar a Valeria con Andrea",
+                        "Verse la próxima semana en Guadalajara"
                       ],
                       "substantive": true,
-                      "fallback": false
+                      "fallback": false,
+                      "title": "Valeria levanta serie A y quiere conocer inversionistas de proptech",
+                      "pendingAction": "Presentar a Valeria con Andrea"
                     }
                   },
                   "fallback": {
                     "summary": "The AI failed; the text is kept verbatim",
                     "value": {
                       "interactionId": "5b8f2c1e-3a4d-4e6f-9b0a-1c2d3e4f5a6b",
-                      "summary": "Hablamos de pasar el panel de Vue a React, me pasa su repo de Next.",
+                      "summary": "Valeria está cerrando su serie A y quiere que la presente con Andrea.",
                       "topics": [],
                       "nextSteps": [],
                       "substantive": true,
-                      "fallback": true
+                      "fallback": true,
+                      "title": "Valeria levanta serie A y quiere conocer inversionistas de proptech",
+                      "pendingAction": "Presentar a Valeria con Andrea"
                     }
                   },
                   "notSubstantive": {
@@ -4238,7 +5034,9 @@
                       "topics": [],
                       "nextSteps": [],
                       "substantive": false,
-                      "fallback": false
+                      "fallback": false,
+                      "title": "Valeria levanta serie A y quiere conocer inversionistas de proptech",
+                      "pendingAction": "Presentar a Valeria con Andrea"
                     }
                   }
                 }
@@ -4546,7 +5344,7 @@
     "/api/interactions/{id}/approve": {
       "post": {
         "operationId": "approveSummary",
-        "summary": "Approve a summary (+25 to both)",
+        "summary": "Approve a summary (+15 to the author)",
         "description": "Only the draft's author. One approved summary per connection; replay returns 409 (M18).",
         "tags": [
           "summaries"
@@ -4586,15 +5384,17 @@
           "content": {
             "application/json": {
               "example": {
-                "summary": "Lucía y Mateo hablaron sobre migrar el panel de Tramita de Vue a React. Mateo compartirá su repositorio de ejemplo con Next.js.",
+                "summary": "Valeria está cerrando su serie A con un fondo de Monterrey y busca founders de proptech. Quiere que Diego la presente con Andrea para hablar de inversión.",
                 "topics": [
-                  "React",
-                  "Vue",
-                  "Next.js"
+                  "Startups",
+                  "Product"
                 ],
                 "nextSteps": [
-                  "Mateo comparte el repo con Lucía"
-                ]
+                  "Presentar a Valeria con Andrea",
+                  "Verse la próxima semana en Guadalajara"
+                ],
+                "title": "Valeria levanta serie A y quiere conocer inversionistas de proptech",
+                "pendingAction": "Presentar a Valeria con Andrea"
               },
               "schema": {
                 "$ref": "#/components/schemas/ApproveBody"
@@ -4611,19 +5411,21 @@
                   "interaction": {
                     "id": "5b8f2c1e-3a4d-4e6f-9b0a-1c2d3e4f5a6b",
                     "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
-                    "summary": "Lucía y Mateo hablaron sobre migrar el panel de Tramita de Vue a React. Mateo compartirá su repositorio de ejemplo con Next.js.",
+                    "summary": "Valeria está cerrando su serie A con un fondo de Monterrey y busca founders de proptech. Quiere que Diego la presente con Andrea para hablar de inversión.",
                     "topics": [
-                      "React",
-                      "Vue",
-                      "Next.js"
+                      "Startups",
+                      "Product"
                     ],
                     "nextSteps": [
-                      "Mateo comparte el repo con Lucía"
+                      "Presentar a Valeria con Andrea",
+                      "Verse la próxima semana en Guadalajara"
                     ],
-                    "points": 25,
+                    "title": "Valeria levanta serie A y quiere conocer inversionistas de proptech",
+                    "pendingAction": "Presentar a Valeria con Andrea",
+                    "points": 15,
                     "approvedAt": "2026-10-29T18:20:00.000Z"
                   },
-                  "pointsAwarded": 25
+                  "pointsAwarded": 15
                 },
                 "schema": {
                   "$ref": "#/components/schemas/Approved"
@@ -4938,6 +5740,911 @@
           }
         }
       }
+    },
+    "/api/connections/{id}": {
+      "get": {
+        "operationId": "getConnection",
+        "summary": "One connection as I see it",
+        "description": "Points breakdown, topics and the voice-note summary (V2Confirmacion, V2Solicitud, V2NotaVoz). Members only.",
+        "tags": [
+          "connections"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The connection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionDetail"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Default",
+                    "value": {
+                      "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
+                      "status": "accepted",
+                      "kind": "reconnection",
+                      "direction": "sent",
+                      "event": {
+                        "slug": "founders-fest",
+                        "name": "Founders Fest GDL"
+                      },
+                      "other": {
+                        "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
+                        "handle": "valeria-ochoa",
+                        "name": "Valeria Ochoa",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#E0A97F",
+                          "hair": "long",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#6CC4FF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CTO",
+                        "company": "Tlali",
+                        "city": "Monterrey",
+                        "interests": [
+                          "Startups",
+                          "Architecture",
+                          "Agents"
+                        ],
+                        "links": {
+                          "linkedin": "https://www.linkedin.com/in/valeria-ochoa",
+                          "instagram": "https://www.instagram.com/valeria.ochoa",
+                          "whatsapp": "https://wa.me/528112345678"
+                        }
+                      },
+                      "topics": [
+                        "Levantar capital",
+                        "Proptech"
+                      ],
+                      "points": {
+                        "kind": 20,
+                        "topics": 0,
+                        "note": 15,
+                        "total": 35
+                      },
+                      "interaction": {
+                        "id": "5b8f2c1e-3a4d-4e6f-9b0a-1c2d3e4f5a6b",
+                        "title": "Valeria levanta serie A y quiere conocer inversionistas de proptech",
+                        "summary": "Valeria está cerrando su serie A con un fondo de Monterrey y busca founders de proptech para el portafolio. Le contaste de Kuali y le interesó el modelo de cobro por obra. Quiere que la presentes con Andrea para hablar de inversión. Quedaron de verse la próxima semana en Guadalajara y te va a mandar el deck antes.",
+                        "bullets": [
+                          "Está cerrando una serie A de 3 millones para Tlali.",
+                          "Le interesa que la presentes con Andrea Mireles.",
+                          "Quedaron de verse la próxima semana."
+                        ],
+                        "topics": [
+                          "Levantar capital",
+                          "Proptech",
+                          "Serie A"
+                        ],
+                        "pendingAction": "Presentar a Valeria con Andrea",
+                        "durationSec": 38,
+                        "approvedAt": null
+                      },
+                      "at": "2026-10-29T18:15:00.000Z"
+                    }
+                  },
+                  "incoming": {
+                    "summary": "A pending request someone sent me",
+                    "value": {
+                      "connectionId": "2f1e0d9c-8b7a-4f6e-ad3c-2b1a0f9e8d7c",
+                      "status": "pending",
+                      "direction": "received",
+                      "event": {
+                        "slug": "founders-fest",
+                        "name": "Founders Fest GDL"
+                      },
+                      "other": {
+                        "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                        "handle": "diego-ramirez",
+                        "name": "Diego Ramírez",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#F5C9A3",
+                          "hair": "short",
+                          "hairColor": "#5A3825",
+                          "outfit": "event",
+                          "shirt": "#6CC4FF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none",
+                          "accent": "#FFD93D"
+                        },
+                        "headline": "Cofounder",
+                        "company": "Kuali",
+                        "city": "Guadalajara, Jalisco",
+                        "interests": [
+                          "Levantar capital",
+                          "Proptech",
+                          "Contratar"
+                        ]
+                      },
+                      "topics": [],
+                      "points": {
+                        "kind": 0,
+                        "topics": 0,
+                        "note": 0,
+                        "total": 0
+                      },
+                      "interaction": null,
+                      "at": "2026-10-29T18:42:10.000Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "connection_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "connection_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "connection_not_found": {
+                    "summary": "No connection with that id for you.",
+                    "value": {
+                      "error": {
+                        "code": "connection_not_found",
+                        "message": "No connection with that id for you."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/badges": {
+      "get": {
+        "operationId": "listBadges",
+        "summary": "My badges",
+        "description": "The 20 badges with earned date or progress; secret ones carry no progress (V2Insignias).",
+        "tags": [
+          "profile"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog with my status.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "badges": [
+                    {
+                      "id": "apreton",
+                      "earnedAt": "2026-10-29T18:15:00.000Z",
+                      "earnedNote": "Tu primera conexión",
+                      "progress": null
+                    },
+                    {
+                      "id": "tresdetres",
+                      "earnedAt": "2026-10-29T18:15:00.000Z",
+                      "earnedNote": "Con Valeria",
+                      "progress": null
+                    },
+                    {
+                      "id": "ff2026",
+                      "earnedAt": "2026-10-29T18:15:00.000Z",
+                      "earnedNote": "28 oct 2026",
+                      "progress": null
+                    },
+                    {
+                      "id": "madrugador",
+                      "earnedAt": "2026-10-29T18:15:00.000Z",
+                      "earnedNote": "Hoy, 17:04",
+                      "progress": null
+                    },
+                    {
+                      "id": "og",
+                      "earnedAt": "2026-10-29T18:15:00.000Z",
+                      "earnedNote": "De los primeros 100",
+                      "progress": null
+                    },
+                    {
+                      "id": "iman",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 7,
+                        "total": 10,
+                        "label": "te escanearon"
+                      }
+                    },
+                    {
+                      "id": "maraton",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 9,
+                        "total": 15,
+                        "label": "en una noche"
+                      }
+                    },
+                    {
+                      "id": "puente",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 2,
+                        "total": 3,
+                        "label": "presentaciones"
+                      }
+                    },
+                    {
+                      "id": "cuatro",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 3,
+                        "total": 4,
+                        "label": "eventos seguidos"
+                      }
+                    },
+                    {
+                      "id": "cierre",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 0,
+                        "total": 1,
+                        "label": "Conecta al final del evento"
+                      }
+                    },
+                    {
+                      "id": "duo",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 1,
+                        "total": 3,
+                        "label": "eventos con alguien"
+                      }
+                    },
+                    {
+                      "id": "conector100",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 42,
+                        "total": 100,
+                        "label": "conexiones"
+                      }
+                    },
+                    {
+                      "id": "trotamundos",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 2,
+                        "total": 4,
+                        "label": "ciudades"
+                      }
+                    },
+                    {
+                      "id": "curioso",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 2,
+                        "total": 10,
+                        "label": "temas distintos"
+                      }
+                    },
+                    {
+                      "id": "memoria",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 6,
+                        "total": 20,
+                        "label": "notas de voz"
+                      }
+                    },
+                    {
+                      "id": "quinientos",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": {
+                        "current": 218,
+                        "total": 500,
+                        "label": "del evento"
+                      }
+                    },
+                    {
+                      "id": "rey",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": null
+                    },
+                    {
+                      "id": "speaker",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": null
+                    },
+                    {
+                      "id": "noctambulo",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": null
+                    },
+                    {
+                      "id": "cazatalentos",
+                      "earnedAt": null,
+                      "earnedNote": null,
+                      "progress": null
+                    }
+                  ],
+                  "earned": 5,
+                  "total": 20
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/BadgeList"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invites/me": {
+      "get": {
+        "operationId": "myInvites",
+        "summary": "My invite link and invitees",
+        "tags": [
+          "profile"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Code, link and progress to the golden cap.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "diego-r",
+                  "url": "https://compa.lol/i/diego-r",
+                  "invitees": [
+                    {
+                      "person": {
+                        "id": "d4e5f6a7-b8c9-4d0e-9f2a-3b4c5d6e7f00",
+                        "handle": "andrea-mireles",
+                        "name": "Andrea Mireles",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#E0A97F",
+                          "hair": "long",
+                          "hairColor": "#9A6232",
+                          "outfit": "stripes",
+                          "shirt": "#6BE4A3",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "Partner",
+                        "company": "Angel Ventures",
+                        "city": "Guadalajara",
+                        "interests": [
+                          "Startups"
+                        ]
+                      },
+                      "firstConnectionAt": "2026-10-29T17:30:00.000Z",
+                      "points": 100
+                    }
+                  ],
+                  "target": 3,
+                  "goldenCap": false
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Invites"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/invites/{code}/claim": {
+      "post": {
+        "operationId": "claimInvite",
+        "summary": "Join through a friend's invite",
+        "description": "Called once after sign-in; the inviter earns +100 and you +50 when your first connection is accepted.",
+        "tags": [
+          "profile"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "code",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,40}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Linked to the inviter.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "diego-r",
+                  "inviter": {
+                    "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                    "handle": "diego-ramirez",
+                    "name": "Diego Ramírez",
+                    "photoUrl": null,
+                    "avatar": {
+                      "skin": "#F5C9A3",
+                      "hair": "short",
+                      "hairColor": "#5A3825",
+                      "outfit": "event",
+                      "shirt": "#6CC4FF",
+                      "pants": "#4A6FA5",
+                      "shoes": "#FFFFFF",
+                      "hat": "none",
+                      "hatColor": "#FF6B4A",
+                      "hatAccent": "#FFFFFF",
+                      "face": "none",
+                      "beard": false,
+                      "extra": "none",
+                      "accent": "#FFD93D"
+                    },
+                    "headline": "Cofounder",
+                    "company": "Kuali",
+                    "city": "Guadalajara, Jalisco",
+                    "interests": [
+                      "Startups",
+                      "Product",
+                      "AI Products"
+                    ]
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/ClaimedInvite"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4984,6 +6691,20 @@
               }
             ]
           },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/MonitoLook"
+          },
           "links": {
             "description": "`@user` or a URL; an empty string removes the link.",
             "type": "object",
@@ -5006,6 +6727,120 @@
           }
         }
       },
+      "MonitoLook": {
+        "type": "object",
+        "properties": {
+          "skin": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "hair": {
+            "type": "string",
+            "enum": [
+              "short",
+              "bangs",
+              "spiky",
+              "long",
+              "bun",
+              "curly",
+              "shaved"
+            ]
+          },
+          "hairColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "outfit": {
+            "type": "string",
+            "enum": [
+              "plain",
+              "stripes",
+              "compa",
+              "hoodie",
+              "event",
+              "suit"
+            ]
+          },
+          "shirt": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "pants": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "shoes": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "hat": {
+            "type": "string",
+            "enum": [
+              "none",
+              "cap",
+              "beanie",
+              "crown"
+            ]
+          },
+          "hatColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "hatAccent": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "face": {
+            "type": "string",
+            "enum": [
+              "none",
+              "glasses",
+              "sunglasses",
+              "mustache"
+            ]
+          },
+          "beard": {
+            "type": "boolean"
+          },
+          "extra": {
+            "type": "string",
+            "enum": [
+              "none",
+              "badge",
+              "medal",
+              "cape"
+            ]
+          },
+          "accent": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "capeColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "lanyardColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          }
+        },
+        "required": [
+          "skin",
+          "hair",
+          "hairColor",
+          "outfit",
+          "shirt",
+          "pants",
+          "shoes",
+          "hat",
+          "hatColor",
+          "hatAccent",
+          "face",
+          "beard",
+          "extra"
+        ],
+        "description": "The person's pixel-art monito (design/compa-v2/README.md)."
+      },
       "LinkKey": {
         "type": "string",
         "enum": [
@@ -5013,6 +6848,7 @@
           "github",
           "x",
           "instagram",
+          "whatsapp",
           "web"
         ]
       },
@@ -5102,6 +6938,16 @@
           "screenConsent": {
             "type": "boolean",
             "const": true
+          },
+          "topics": {
+            "description": "What they talked about, picked by the scanner (+5).",
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40
+            }
           }
         },
         "required": [
@@ -5126,6 +6972,13 @@
             "type": "boolean"
           }
         }
+      },
+      "LeaderboardScope": {
+        "type": "string",
+        "enum": [
+          "event",
+          "lifetime"
+        ]
       },
       "TranscribeBody": {
         "type": "object",
@@ -5225,6 +7078,21 @@
               "minLength": 1,
               "maxLength": 200
             }
+          },
+          "title": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "pendingAction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5254,10 +7122,16 @@
               "null"
             ]
           },
+          "avatar": {
+            "$ref": "#/components/schemas/MonitoLookOutput"
+          },
           "headline": {
             "type": "string"
           },
           "company": {
+            "type": "string"
+          },
+          "city": {
             "type": "string"
           },
           "interests": {
@@ -5296,6 +7170,19 @@
                 "type": "null"
               }
             ]
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ProfileStats"
+          },
+          "scores": {
+            "$ref": "#/components/schemas/Scores"
+          },
+          "badges": {
+            "description": "Earned badges, most recent first.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BadgeId"
+            }
           }
         },
         "required": [
@@ -5348,6 +7235,9 @@
               "instagram": {
                 "$ref": "#/components/schemas/Visibility"
               },
+              "whatsapp": {
+                "$ref": "#/components/schemas/Visibility"
+              },
               "web": {
                 "$ref": "#/components/schemas/Visibility"
               }
@@ -5357,6 +7247,7 @@
               "github",
               "x",
               "instagram",
+              "whatsapp",
               "web"
             ],
             "additionalProperties": false
@@ -5386,6 +7277,101 @@
           "name"
         ],
         "additionalProperties": false
+      },
+      "ProfileStats": {
+        "type": "object",
+        "properties": {
+          "newConnections": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "reconnections": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "events": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "newConnections",
+          "reconnections",
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "Scores": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/Standing"
+          },
+          "lifetime": {
+            "$ref": "#/components/schemas/Standing"
+          }
+        },
+        "required": [
+          "event",
+          "lifetime"
+        ],
+        "additionalProperties": false
+      },
+      "Standing": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "points": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "rank",
+          "points"
+        ],
+        "additionalProperties": false,
+        "description": "Points and position; rank is null when the person has no points yet."
+      },
+      "BadgeId": {
+        "type": "string",
+        "enum": [
+          "apreton",
+          "madrugador",
+          "cierre",
+          "iman",
+          "maraton",
+          "tresdetres",
+          "puente",
+          "duo",
+          "ff2026",
+          "og",
+          "rey",
+          "speaker",
+          "noctambulo",
+          "cazatalentos",
+          "conector100",
+          "trotamundos",
+          "curioso",
+          "memoria",
+          "quinientos",
+          "cuatro"
+        ]
       },
       "Interest": {
         "type": "object",
@@ -5435,6 +7421,31 @@
               "eventSlug"
             ],
             "additionalProperties": false
+          },
+          "scores": {
+            "$ref": "#/components/schemas/Scores"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/ProfileStats"
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BadgeId"
+            }
+          },
+          "relationship": {
+            "$ref": "#/components/schemas/Relationship"
+          },
+          "lastInteraction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LastInteraction"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -5463,10 +7474,16 @@
               "null"
             ]
           },
+          "avatar": {
+            "$ref": "#/components/schemas/MonitoLookOutput"
+          },
           "headline": {
             "type": "string"
           },
           "company": {
+            "type": "string"
+          },
+          "city": {
             "type": "string"
           },
           "interests": {
@@ -5503,6 +7520,65 @@
           "new",
           "reconnection"
         ]
+      },
+      "Relationship": {
+        "type": "object",
+        "properties": {
+          "reconnections": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "eventsTogether": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "mutual": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Card"
+            }
+          }
+        },
+        "required": [
+          "reconnections",
+          "eventsTogether",
+          "mutual"
+        ],
+        "additionalProperties": false,
+        "description": "The viewer and this person: how often they met and whom they both know."
+      },
+      "LastInteraction": {
+        "type": "object",
+        "properties": {
+          "connectionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "connectionId",
+          "title",
+          "topics",
+          "at"
+        ],
+        "additionalProperties": false
       },
       "CreatedEvent": {
         "type": "object",
@@ -5731,6 +7807,15 @@
             "type": "integer",
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
+          },
+          "type": {
+            "$ref": "#/components/schemas/PersonType"
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
@@ -5784,6 +7869,14 @@
           "at"
         ],
         "additionalProperties": false
+      },
+      "PersonType": {
+        "type": "string",
+        "enum": [
+          "new",
+          "reconnection",
+          "friend"
+        ]
       },
       "KnewResult": {
         "type": "object",
@@ -6013,6 +8106,9 @@
             "items": {
               "$ref": "#/components/schemas/LeaderboardRow"
             }
+          },
+          "me": {
+            "$ref": "#/components/schemas/LeaderboardMe"
           }
         },
         "required": [
@@ -6060,6 +8156,58 @@
           "photoUrl",
           "points",
           "connections"
+        ],
+        "additionalProperties": false
+      },
+      "LeaderboardMe": {
+        "type": "object",
+        "properties": {
+          "rank": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "points": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "above": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LeaderboardRow"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gap": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Points needed to pass the row above; 0 when first."
+          },
+          "tip": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "rank",
+          "points",
+          "above",
+          "gap",
+          "tip"
         ],
         "additionalProperties": false
       },
@@ -6148,6 +8296,17 @@
           },
           "fallback": {
             "type": "boolean"
+          },
+          "title": {
+            "description": "One-line title (V2NotaVoz).",
+            "type": "string"
+          },
+          "pendingAction": {
+            "description": "A follow-up the AI detected, e.g. an introduction to make.",
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -6267,6 +8426,463 @@
           "pointsAwarded"
         ],
         "additionalProperties": false
+      },
+      "ConnectionDetail": {
+        "type": "object",
+        "properties": {
+          "connectionId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "status": {
+            "$ref": "#/components/schemas/ConnectionStatusForMe"
+          },
+          "kind": {
+            "$ref": "#/components/schemas/ConnectionKind"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "sent",
+              "received"
+            ]
+          },
+          "event": {
+            "$ref": "#/components/schemas/EventRef"
+          },
+          "other": {
+            "$ref": "#/components/schemas/Card"
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "points": {
+            "$ref": "#/components/schemas/PointsBreakdown"
+          },
+          "interaction": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InteractionSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "at": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "connectionId",
+          "status",
+          "direction",
+          "event",
+          "other",
+          "topics",
+          "points",
+          "interaction",
+          "at"
+        ],
+        "additionalProperties": false
+      },
+      "PointsBreakdown": {
+        "type": "object",
+        "properties": {
+          "kind": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "topics": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "note": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "kind",
+          "topics",
+          "note",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "InteractionSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "title": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "bullets": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "topics": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "pendingAction": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "durationSec": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "approvedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "summary",
+          "bullets",
+          "topics",
+          "pendingAction",
+          "durationSec",
+          "approvedAt"
+        ],
+        "additionalProperties": false
+      },
+      "BadgeList": {
+        "type": "object",
+        "properties": {
+          "badges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BadgeStatus"
+            }
+          },
+          "earned": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "badges",
+          "earned",
+          "total"
+        ],
+        "additionalProperties": false
+      },
+      "BadgeStatus": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/BadgeId"
+          },
+          "earnedAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "earnedNote": {
+            "description": "How it was earned, e.g. 'Con Valeria'.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "progress": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BadgeProgress"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "earnedAt",
+          "earnedNote",
+          "progress"
+        ],
+        "additionalProperties": false
+      },
+      "BadgeProgress": {
+        "type": "object",
+        "properties": {
+          "current": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "current",
+          "total",
+          "label"
+        ],
+        "additionalProperties": false
+      },
+      "Invites": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "invitees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Invitee"
+            }
+          },
+          "target": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "goldenCap": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "url",
+          "invitees",
+          "target",
+          "goldenCap"
+        ],
+        "additionalProperties": false
+      },
+      "Invitee": {
+        "type": "object",
+        "properties": {
+          "person": {
+            "$ref": "#/components/schemas/Card"
+          },
+          "firstConnectionAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "points": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "person",
+          "firstConnectionAt",
+          "points"
+        ],
+        "additionalProperties": false
+      },
+      "ClaimedInvite": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "inviter": {
+            "$ref": "#/components/schemas/Card"
+          }
+        },
+        "required": [
+          "code",
+          "inviter"
+        ],
+        "additionalProperties": false
+      },
+      "MonitoLookOutput": {
+        "type": "object",
+        "properties": {
+          "skin": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "hair": {
+            "type": "string",
+            "enum": [
+              "short",
+              "bangs",
+              "spiky",
+              "long",
+              "bun",
+              "curly",
+              "shaved"
+            ]
+          },
+          "hairColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "outfit": {
+            "type": "string",
+            "enum": [
+              "plain",
+              "stripes",
+              "compa",
+              "hoodie",
+              "event",
+              "suit"
+            ]
+          },
+          "shirt": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "pants": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "shoes": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "hat": {
+            "type": "string",
+            "enum": [
+              "none",
+              "cap",
+              "beanie",
+              "crown"
+            ]
+          },
+          "hatColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "hatAccent": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "face": {
+            "type": "string",
+            "enum": [
+              "none",
+              "glasses",
+              "sunglasses",
+              "mustache"
+            ]
+          },
+          "beard": {
+            "type": "boolean"
+          },
+          "extra": {
+            "type": "string",
+            "enum": [
+              "none",
+              "badge",
+              "medal",
+              "cape"
+            ]
+          },
+          "accent": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "capeColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          },
+          "lanyardColor": {
+            "type": "string",
+            "pattern": "^#[0-9A-Fa-f]{6}$"
+          }
+        },
+        "required": [
+          "skin",
+          "hair",
+          "hairColor",
+          "outfit",
+          "shirt",
+          "pants",
+          "shoes",
+          "hat",
+          "hatColor",
+          "hatAccent",
+          "face",
+          "beard",
+          "extra"
+        ],
+        "additionalProperties": false,
+        "description": "The person's pixel-art monito (design/compa-v2/README.md)."
       }
     },
     "parameters": {

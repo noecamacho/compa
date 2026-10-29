@@ -1,12 +1,20 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
-type Props = { children: ReactNode; className?: string };
+type Props = { children: ReactNode; className?: string; style?: CSSProperties };
 
 // Section label: 11 px, 800, uppercase, tracking 1.6 (README).
-export const SectionLabel = ({ children, className }: Props) => <span className={`label-caps ${className ?? ""}`}>{children}</span>;
+export const SectionLabel = ({ children, className, style }: Props) => (
+  <span className={`label-caps ${className ?? ""}`} style={style}>
+    {children}
+  </span>
+);
 
 // Secondary grey text.
-export const Muted = ({ children, className }: Props) => <span className={`text-muted ${className ?? ""}`}>{children}</span>;
+export const Muted = ({ children, className, style }: Props) => (
+  <span className={`text-muted ${className ?? ""}`} style={style}>
+    {children}
+  </span>
+);
 
 type StatProps = { value: ReactNode; label: string; size?: number };
 
