@@ -1,5 +1,5 @@
 // Example data for the OpenAPI document and for mock mode (one source of truth).
-// Spanish context: a founders event in Madrid. All ids are valid v4 UUIDs.
+// Spanish context: a founders event in Guadalajara. All ids are valid v4 UUIDs.
 import type { z } from "zod";
 import type * as S from "./schemas";
 
@@ -16,8 +16,8 @@ export const ids = {
   interaction: "5b8f2c1e-3a4d-4e6f-9b0a-1c2d3e4f5a6b",
 } as const;
 
-export const founders = { slug: "founders-fest", name: "Founders Fest Madrid 2026" } as const;
-const meetup = { slug: "madrid-js-septiembre", name: "MadridJS Septiembre" } as const;
+export const founders = { slug: "founders-fest", name: "Founders Fest Guadalajara 2026" } as const;
+const meetup = { slug: "gdl-js-septiembre", name: "GDL JS Septiembre" } as const;
 
 type Card = z.input<typeof S.Card>;
 

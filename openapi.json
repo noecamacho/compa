@@ -309,7 +309,7 @@
                   "isAdmin": false,
                   "currentEvent": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Madrid 2026"
+                    "name": "Founders Fest Guadalajara 2026"
                   }
                 },
                 "schema": {
@@ -464,7 +464,7 @@
                   "isAdmin": false,
                   "currentEvent": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Madrid 2026"
+                    "name": "Founders Fest Guadalajara 2026"
                   }
                 },
                 "schema": {
@@ -1096,7 +1096,7 @@
           "content": {
             "application/json": {
               "example": {
-                "name": "Founders Fest Madrid 2026",
+                "name": "Founders Fest Guadalajara 2026",
                 "slug": "founders-fest",
                 "startsAt": "2026-10-29T16:00:00.000Z",
                 "endsAt": "2026-10-29T22:00:00.000Z"
@@ -1115,7 +1115,7 @@
                 "example": {
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Madrid 2026",
+                    "name": "Founders Fest Guadalajara 2026",
                     "startsAt": "2026-10-29T16:00:00.000Z",
                     "endsAt": "2026-10-29T22:00:00.000Z",
                     "isRunning": true,
@@ -1407,7 +1407,7 @@
               "application/json": {
                 "example": {
                   "slug": "founders-fest",
-                  "name": "Founders Fest Madrid 2026",
+                  "name": "Founders Fest Guadalajara 2026",
                   "startsAt": "2026-10-29T16:00:00.000Z",
                   "endsAt": "2026-10-29T22:00:00.000Z",
                   "isRunning": true
@@ -1537,7 +1537,7 @@
                 "example": {
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Madrid 2026"
+                    "name": "Founders Fest Guadalajara 2026"
                   },
                   "checkedInAt": "2026-10-29T17:02:31.000Z",
                   "alreadyCheckedIn": false
@@ -1555,7 +1555,7 @@
                 "example": {
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Madrid 2026"
+                    "name": "Founders Fest Guadalajara 2026"
                   },
                   "checkedInAt": "2026-10-29T17:02:31.000Z",
                   "alreadyCheckedIn": false
@@ -1859,7 +1859,7 @@
                   "status": "pending",
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Madrid 2026"
+                    "name": "Founders Fest Guadalajara 2026"
                   },
                   "to": {
                     "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
@@ -1890,7 +1890,7 @@
                   "status": "pending",
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Madrid 2026"
+                    "name": "Founders Fest Guadalajara 2026"
                   },
                   "to": {
                     "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
@@ -2220,7 +2220,7 @@
                       },
                       "event": {
                         "slug": "founders-fest",
-                        "name": "Founders Fest Madrid 2026"
+                        "name": "Founders Fest Guadalajara 2026"
                       },
                       "createdAt": "2026-10-29T18:42:10.000Z"
                     }
@@ -2249,7 +2249,7 @@
                           "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
                           "event": {
                             "slug": "founders-fest",
-                            "name": "Founders Fest Madrid 2026"
+                            "name": "Founders Fest Guadalajara 2026"
                           },
                           "status": "accepted",
                           "direction": "sent",
@@ -2260,8 +2260,8 @@
                         {
                           "connectionId": "1e0d9c8b-7a6f-4e5d-9c2b-1a0f9e8d7c6b",
                           "event": {
-                            "slug": "madrid-js-septiembre",
-                            "name": "MadridJS Septiembre"
+                            "slug": "gdl-js-septiembre",
+                            "name": "GDL JS Septiembre"
                           },
                           "status": "accepted",
                           "direction": "received",
@@ -3459,7 +3459,7 @@
                 "example": {
                   "event": {
                     "slug": "founders-fest",
-                    "name": "Founders Fest Madrid 2026",
+                    "name": "Founders Fest Guadalajara 2026",
                     "isRunning": true
                   },
                   "people": [
