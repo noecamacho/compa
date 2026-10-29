@@ -217,6 +217,17 @@ async function sessionByMagicLink(email: string): Promise<Session> {
   return verified.error ? null : verified.data.session;
 }
 
+// Parallel sign-ins as one user (agents sharing the seeded test admin) overwrite each other's magic-link token. Retry
+// with jitter before the password fallback: resetting the password signs that user out everywhere else.
+async function sessionByMagicLinkRetrying(email: string, attempts = 3): Promise<Session> {
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    const session = await sessionByMagicLink(email);
+    if (session) return session;
+    await new Promise((resolve) => setTimeout(resolve, 50 + Math.random() * 200 * attempt));
+  }
+  return null;
+}
+
 // Fallback: a fresh random password, used once and never stored.
 async function sessionByOneTimePassword(target: UserRow, email: string): Promise<Session> {
   const password = `${crypto.randomUUID()}${crypto.randomUUID()}`;
@@ -230,7 +241,7 @@ async function sessionByOneTimePassword(target: UserRow, email: string): Promise
 export async function createTestSession({ params }: InputOf<typeof R.createTestSession>): ResultOf<typeof R.createTestSession> {
   const target = requireTestTarget(await findUser(params.id));
   const email = target.email ?? testEmailFor(target.handle);
-  const session = (await sessionByMagicLink(email)) ?? (await sessionByOneTimePassword(target, email));
+  const session = (await sessionByMagicLinkRetrying(email)) ?? (await sessionByOneTimePassword(target, email));
   if (!session) return fail(E.sessionFailed);
   const expiresAt = session.expires_at ? new Date(session.expires_at * 1000).toISOString() : null;
   return { body: { user: { id: target.id, handle: target.handle, name: target.name }, expiresAt } };

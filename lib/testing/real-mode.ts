@@ -22,6 +22,8 @@ export class RealModeError extends Error {
   }
 }
 
+const SIGN_IN_ATTEMPTS = 3;
+
 const SAME_SITE = { lax: "Lax", strict: "Strict", none: "None" } as const;
 
 // One `Set-Cookie` header → a cookie a browser context (or a Cookie header) can carry.
@@ -57,6 +59,17 @@ export function realModeClient({ baseUrl, secret, fetch: doFetch = fetch }: Opti
     throw new RealModeError(response.status, path, error?.error?.code ?? "unknown");
   }
 
+  // Parallel sign-ins as one user (the shared test admin) race its magic-link token, and the loser gets 502 session_failed.
+  async function sendRetrying502(method: string, path: string): Promise<Response> {
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return await send(method, path);
+      } catch (error) {
+        if (!(error instanceof RealModeError) || error.status !== 502 || attempt >= SIGN_IN_ATTEMPTS) throw error;
+      }
+    }
+  }
+
   const parsed = async <T extends z.ZodType>(response: Response, schema: T): Promise<z.output<T>> => schema.parse(await response.json());
 
   return {
@@ -72,7 +85,7 @@ export function realModeClient({ baseUrl, secret, fetch: doFetch = fetch }: Opti
     },
     // The session lives only in the response cookies; hand them to a browser context or send them as `Cookie`.
     async signInAs(user: TestUserT): Promise<TestSessionCookies> {
-      const response = await send("POST", `/api/admin/test-users/${user.id}/session`);
+      const response = await sendRetrying502("POST", `/api/admin/test-users/${user.id}/session`);
       await parsed(response, TestSession);
       const cookies = liveCookies(response.headers);
       return { user, cookies, cookieHeader: cookieHeaderOf(cookies) };
