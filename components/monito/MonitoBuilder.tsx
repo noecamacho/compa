@@ -15,6 +15,7 @@ import { AvatarMode, Me, type AvatarModeT, type MeT } from "@/lib/api/schemas";
 import { monito as copy } from "@/lib/copy/es";
 import { forgetDraft, recallDraft, rememberDraft } from "@/lib/draft-store";
 import {
+  DEFAULT_BUILDER,
   EXTRA_OPTIONS,
   HAIR_COLOR_OPTIONS,
   HAIR_OPTIONS,
@@ -40,7 +41,7 @@ function Swatch({ hex, name, checked, onPick }: SwatchProps) {
       aria-checked={checked}
       aria-label={name}
       onClick={onPick}
-      className="h-8 w-8 shrink-0 cursor-pointer rounded-full p-0 border-ink transition-[box-shadow,transform] duration-200 active:scale-90"
+      className="hit-44 h-8 w-8 shrink-0 cursor-pointer rounded-full p-0 border-ink transition-[box-shadow,transform] duration-200 active:scale-90"
       style={{ background: hex, boxShadow: checked ? "0 0 0 3px #FFFFFF, 0 0 0 5px #1E1B2E" : "0 0 0 0 #FFFFFF, 0 0 0 0 #1E1B2E" }}
     />
   );
@@ -55,7 +56,7 @@ function OptionChip({ label, on, onClick, role }: OptionChipProps) {
       type="button"
       {...state}
       onClick={onClick}
-      className="h-8 cursor-pointer rounded-[10px] px-[11px] font-body text-[12px] font-extrabold whitespace-nowrap border-ink transition-[background-color,color,transform] duration-200 active:scale-95"
+      className="hit-44 h-8 cursor-pointer rounded-[10px] px-[11px] font-body text-[12px] font-extrabold whitespace-nowrap border-ink transition-[background-color,color,transform] duration-200 active:scale-95"
       style={{ background: on ? "#1E1B2E" : "#FFFFFF", color: on ? "#FFF6E5" : "#1E1B2E" }}
     >
       {label}
@@ -121,7 +122,8 @@ export function MonitoBuilder(props: Props) {
 function Builder({ me, next, back, onboarding, draft, restored }: Props & { draft: DraftT | null; restored: boolean }) {
   const router = useRouter();
   const base = me.avatar;
-  const [state, setState] = useState<BuilderState>(() => draft?.state ?? (base ? builderFromLook(base) : randomBuilder()));
+  // The server render and hydration must agree, so the random first look is drawn only in the browser mount.
+  const [state, setState] = useState<BuilderState>(() => draft?.state ?? (base ? builderFromLook(base) : restored ? randomBuilder() : DEFAULT_BUILDER));
   const [mode, setMode] = useState<AvatarModeT>(() => draft?.mode ?? initialMode(me));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -131,7 +133,7 @@ function Builder({ me, next, back, onboarding, draft, restored }: Props & { draf
     if (restored) rememberDraft(DRAFT, me.id, { state, mode });
   }, [restored, me.id, state, mode]);
   const usePhoto = mode === "photo" && Boolean(me.photoUrl);
-  const toggleExtra = (key: (typeof EXTRA_OPTIONS)[number]) => setState({ ...state, extras: { ...state.extras, [key]: !state.extras[key] } });
+  const toggleExtra = (key: (typeof EXTRA_OPTIONS)[number]) => setState((prev) => ({ ...prev, extras: { ...prev.extras, [key]: !prev.extras[key] } }));
 
   async function save() {
     setSaving(true);
