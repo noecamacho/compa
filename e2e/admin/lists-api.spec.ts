@@ -42,6 +42,8 @@ test.describe("admin list APIs @real", () => {
   test.skip(!process.env.TEST_AUTOMATION_SECRET, "real mode needs TEST_AUTOMATION_SECRET");
   // One worker, in order: the stats deltas and the shared fixtures must not race the file's own tests.
   test.describe.configure({ mode: "default", timeout: 180_000 });
+  // API-level: the viewport and locale do not matter, and parallel projects would race on the stats deltas.
+  test.beforeAll(({}, testInfo) => test.skip(testInfo.project.name !== "desktop-1440-en", "API checks run in one project"));
 
   let harness: RealModeClient;
   let api: AdminApi;
