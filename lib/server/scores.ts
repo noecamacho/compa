@@ -10,7 +10,7 @@ export type Scores = { event: Standing; lifetime: Standing };
 const points = sql<number>`coalesce(${eventScores.points}, 0)`.mapWith(Number);
 const connectionCount = sql<number>`coalesce(${eventScores.connections}, 0)`.mapWith(Number);
 
-export type Ranked = { userId: string; name: string; photoUrl: string | null; points: number; connections: number };
+export type Ranked = { userId: string; handle: string; name: string; photoUrl: string | null; points: number; connections: number };
 
 // Rankings read every score of an event (or of everyone), so many phones asking at once share one result per
 // instance for a few seconds instead of each scanning all connections (conference-scale finding 2).
@@ -35,7 +35,7 @@ export function rankedAtEvent(event: EventRow): Promise<Ranked[]> {
 
 async function loadRankedAtEvent(event: EventRow): Promise<Ranked[]> {
   const rows = await getDb()
-    .select({ userId: users.id, name: users.name, photoUrl: users.photoUrl, points, connections: connectionCount })
+    .select({ userId: users.id, handle: users.handle, name: users.name, photoUrl: users.photoUrl, points, connections: connectionCount })
     .from(eventAttendees)
     .innerJoin(users, eq(users.id, eventAttendees.userId))
     .leftJoin(eventScores, and(eq(eventScores.eventId, eventAttendees.eventId), eq(eventScores.userId, eventAttendees.userId)))
@@ -55,12 +55,15 @@ export function rankedLifetime({ includeTest }: { includeTest: boolean }): Promi
 // async: a drizzle query re-runs on every `then`, a shared result must be a settled Promise.
 async function loadRankedLifetime(includeTest: boolean): Promise<Ranked[]> {
   return getDb()
-    .select({ userId: users.id, name: users.name, photoUrl: users.photoUrl, points: lifetimePoints, connections: lifetimeConnections })
+    .select({ userId: users.id, handle: users.handle, name: users.name, photoUrl: users.photoUrl, points: lifetimePoints, connections: lifetimeConnections })
     .from(lifetimeScores)
     .innerJoin(users, eq(users.id, lifetimeScores.userId))
     .where(includeTest ? undefined : eq(users.isTest, false))
     .orderBy(desc(lifetimePoints), desc(lifetimeConnections), asc(users.createdAt));
 }
+
+// A checked-in person with 0 points has no rank (standingOf), so the board and its podium list only people with points.
+export const onBoard = (ranked: Ranked[]): Ranked[] => ranked.filter((entry) => entry.points > 0);
 
 // People without points have no rank (they are not on the board yet).
 export function standingOf(ranked: Ranked[], userId: string): Standing {
