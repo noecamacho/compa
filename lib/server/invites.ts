@@ -11,16 +11,28 @@ import { cardsFor, isUniqueViolation } from "./people";
 import { requestOrigin } from "./site";
 
 
+const latestInvite = async (user: UserRow, db: Executor): Promise<InviteRow | undefined> =>
+  (await db.select().from(invites).where(eq(invites.inviterId, user.id)).orderBy(desc(invites.createdAt)).limit(1))[0];
+
+const insertInvite = async (user: UserRow, code: string, db: Executor): Promise<InviteRow | undefined> =>
+  (await db.insert(invites).values({ inviterId: user.id, code }).onConflictDoNothing().returning())[0];
+
 // One open invite per inviter, created on first use; its code is the inviter's handle.
+// Two concurrent first loads race on the same code: the loser reads the winner's row instead of failing with 23505.
 async function ownInvite(user: UserRow, db: Executor): Promise<InviteRow> {
-  const [existing] = await db.select().from(invites).where(eq(invites.inviterId, user.id)).orderBy(desc(invites.createdAt)).limit(1);
+  const existing = await latestInvite(user, db);
   if (existing && existing.inviteeId === null) return existing;
-  const [created] = await db.insert(invites).values({ inviterId: user.id, code: codeFor(user, existing) }).returning();
-  return created ?? fail(E.internal);
+  const created = await insertInvite(user, codeFor(user, existing), db);
+  if (created) return created;
+  const raced = await latestInvite(user, db);
+  if (raced && raced.inviteeId === null) return raced;
+  // The code belongs to someone else (a handle that changed hands): fall back to a suffixed one.
+  return (await insertInvite(user, suffixedCode(user), db)) ?? fail(E.internal);
 }
 
-// The first invite uses the handle; later ones add a counter so every code stays unique.
-const codeFor = (user: UserRow, previous: InviteRow | undefined) => (previous ? `${user.handle}-${Date.now().toString(36).slice(-4)}` : user.handle);
+// The first invite uses the handle; later ones add a random suffix so every code stays unique.
+const suffixedCode = (user: UserRow) => `${user.handle}-${crypto.randomUUID().slice(0, 6)}`;
+const codeFor = (user: UserRow, previous: InviteRow | undefined) => (previous ? suffixedCode(user) : user.handle);
 
 export async function myInvites({ user }: InputOf<typeof R.myInvites>): ResultOf<typeof R.myInvites> {
   const db = getDb();
@@ -44,8 +56,8 @@ export async function claimInvite({ user, params }: InputOf<typeof R.claimInvite
   const [inviter] = await db.select().from(users).where(eq(users.id, invite.inviterId)).limit(1);
   if (!inviter) return fail(E.notFound);
   try {
-    // An invitee is linked once; a second claim (any code) is ignored by the unique invitee constraint.
-    await db.update(invites).set({ inviteeId: user.id }).where(eq(invites.id, invite.id));
+    // An invitee is linked once (unique invitee) and an invite links one person: a later claim never overwrites the first.
+    await db.update(invites).set({ inviteeId: user.id }).where(and(eq(invites.id, invite.id), isNull(invites.inviteeId)));
   } catch (error) {
     if (!isUniqueViolation(error)) throw error;
   }
