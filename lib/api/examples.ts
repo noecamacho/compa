@@ -71,6 +71,7 @@ export const me: z.input<typeof S.Me> = {
   isAdmin: false,
   role: "user",
   isTest: false,
+  showAccessories: true,
   currentEvent: foundersDoor,
   stats: { newConnections: 42, reconnections: 16, events: 7 },
   scores: { event: { rank: 6, points: 1265 }, lifetime: { rank: 14, points: 5110 } },

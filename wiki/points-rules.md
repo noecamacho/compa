@@ -10,10 +10,19 @@ Business rules live on the server, never on the client: points, idempotency and 
 | Reconnection accepted | +20 | both people | `connections.points` |
 | Topics marked while registering | +5 | the scanner | `bonus_points` (`reason = topics`, `ref_id` = connection) |
 | Voice note approved | +15 | the author | `interactions.points` |
-| Invited friend's first accepted connection **at the invite's event** | +100 / +50 | inviter / invitee | `bonus_points` (`invite_inviter`, `invite_invitee`) |
-| Three invited friends connected | golden cap | inviter's monito | `users.golden_cap_at`, `users.avatar` |
+| A friend joins through my referral code **while I am checked in to an event** | +100 | inviter, on that event | `bonus_points` (`invite_inviter`, `ref_id` = invite row), `invites.inviter_points` |
+| A friend joins through my referral code while I am outside an event | 0 | — | `invites.inviter_points = 0`, `invites.event_id` null |
+| The referred friend's first accepted connection, at any event | +50 | invitee | `bonus_points` (`invite_invitee`) |
+| Three friends joined through my code, in or out of events | golden cap | inviter: worn on the monito and over the photo | `users.golden_cap_at`; shown unless `users.show_accessories` is false |
 
-Invites are always tied to an event (captain decision, 2026-10-29): `invites.event_id` is the inviter's current event when the link is made, the friend lands at that event's door, and `awardInvite` pays only when the accepted connection belongs to that same event. A connection at another event pays nothing. Rows from before this rule keep their inviter's latest event (migration `0012`); an inviter who never checked in leaves a row with no event, which cannot be claimed (`409 invite_needs_event`) or paid. The golden cap still counts paid invites from every event.
+### Referral codes (captain decision, 2026-10-29)
+
+Supersedes the event-scoped invites of PR #73. Everyone always has a referral code: their handle, shared as `/i/<handle>`. While the inviter is at an event the link lands the friend at that event's door; otherwise it goes through sign-in to onboarding. Either way `POST /api/invites/{code}/claim` records one `invites` row per friend (`code` null, unique `invitee_id`) and, in the same transaction, pays the inviter +100 on the event they are checked in to **at that moment** (`findCurrentEvent`); outside an event it pays nothing, and `/invite` says so before the share buttons ("Estás fuera de un evento: tus invitaciones cuentan para la gorra dorada, pero no suman puntos"). Inside one it says "+100 pts en <event>". The pure rules are `referralPointsFor` and `unlocksGoldenCap` in `lib/points.ts`.
+
+- Only people new to COMPA count: a person who has already checked in to an event gets `409 referral_not_new` (anti-farming, [open-questions](open-questions.md) #48).
+- Idempotent: a repeated or concurrent claim hits the unique invitee and pays nothing more; the golden cap is set once (`golden_cap_at is null` guard).
+- The golden cap counts every claimed row of the inviter, whether it paid points or not. It is no longer written into `users.avatar`; it is applied at render time (`lib/monito/accessories.ts`), so hiding it works. Looks saved before migration `0013` keep the cap they were given.
+- Old links keep working: a code from before (`<handle>` or `<handle>-<suffix>` in `invites.code`) still names its inviter. An old claimed row whose friend had not connected yet keeps its promise: +100 at the friend's first connection at that link's event. Migration `0013` sets `inviter_points = 100` on old rows that already paid.
 
 "Accept a request: +20 for each" from the handoff README is not awarded separately; it is the reconnection line ([open-questions](open-questions.md) #28).
 

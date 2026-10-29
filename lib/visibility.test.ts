@@ -96,3 +96,15 @@ test("relationOf", () => {
   expect(relationOf("viewer", "owner", true)).toBe("connected");
   expect(relationOf(null, "owner", false)).toBe("public");
 });
+
+describe("toCard accessories", () => {
+  const capped = { ...owner, goldenCapAt: new Date("2026-10-29T18:00:00Z") };
+  test("an earned golden cap travels on every card, for every viewer", () => {
+    expect(toCard(capped, "public").accessories).toEqual(["golden_cap"]);
+    expect(toCard({ ...capped, showAccessories: true }, "self").accessories).toEqual(["golden_cap"]);
+  });
+  test("hidden or not earned: no accessories at all", () => {
+    expect(toCard({ ...capped, showAccessories: false }, "public")).not.toHaveProperty("accessories");
+    expect(toCard(owner, "public")).not.toHaveProperty("accessories");
+  });
+});

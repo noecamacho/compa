@@ -581,6 +581,7 @@
                       "isAdmin": false,
                       "role": "user",
                       "isTest": false,
+                      "showAccessories": true,
                       "currentEvent": {
                         "code": "k7m2p9xq4t",
                         "name": "Founders Fest GDL"
@@ -663,6 +664,7 @@
                       "isAdmin": false,
                       "role": "user",
                       "isTest": false,
+                      "showAccessories": true,
                       "currentEvent": {
                         "code": "k7m2p9xq4t",
                         "name": "Founders Fest GDL"
@@ -739,6 +741,7 @@
                       "isAdmin": true,
                       "role": "super_admin",
                       "isTest": false,
+                      "showAccessories": true,
                       "currentEvent": {
                         "code": "k7m2p9xq4t",
                         "name": "Founders Fest GDL"
@@ -991,6 +994,7 @@
                   "isAdmin": false,
                   "role": "user",
                   "isTest": false,
+                  "showAccessories": true,
                   "currentEvent": {
                     "code": "k7m2p9xq4t",
                     "name": "Founders Fest GDL"
@@ -13480,8 +13484,8 @@
     "/api/invites/me": {
       "get": {
         "operationId": "myInvites",
-        "summary": "My invite link and invitees",
-        "description": "The link is tied to the event the person is checked in to; outside an event `link` is null and no invite is created.",
+        "summary": "My referral code and invitees",
+        "description": "Everyone always has a referral code (their handle). `link.event` is the event they are checked in to: a friend joining now pays +100 there; when it is null a friend still counts toward the golden cap but pays no points.",
         "tags": [
           "profile"
         ],
@@ -13507,7 +13511,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Event-scoped link (or null) and progress to the golden cap.",
+            "description": "The referral link, the event a friend joining now would pay on (or null), and progress to the golden cap.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13563,9 +13567,13 @@
                     }
                   },
                   "noEvent": {
-                    "summary": "Not checked in to an event: no link",
+                    "summary": "Not checked in to an event: the code works but pays no points",
                     "value": {
-                      "link": null,
+                      "link": {
+                        "code": "diego-r",
+                        "url": "https://compa.lol/i/diego-r",
+                        "event": null
+                      },
                       "invitees": [
                         {
                           "person": {
@@ -13729,8 +13737,8 @@
     "/api/invites/{code}/claim": {
       "post": {
         "operationId": "claimInvite",
-        "summary": "Join through a friend's invite",
-        "description": "Called once after sign-in. The invite belongs to one event: the inviter earns +100 and you +50 when your first connection at that event is accepted. An invite without an event, or for an event that is over, is refused.",
+        "summary": "Join through a friend's referral code",
+        "description": "Called once after sign-in by someone new to COMPA. The inviter earns +100 on the event they are checked in to at that moment (none outside an event) and the friend counts toward their golden cap; you earn +50 at your first accepted connection. A second claim changes nothing. `event` is the inviter's current event, or null.",
         "tags": [
           "profile"
         ],
@@ -13928,7 +13936,7 @@
             }
           },
           "409": {
-            "description": "invite_needs_event, event_not_running",
+            "description": "referral_not_new",
             "content": {
               "application/json": {
                 "schema": {
@@ -13940,8 +13948,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
-                            "invite_needs_event",
-                            "event_not_running"
+                            "referral_not_new"
                           ]
                         },
                         "message": {
@@ -13973,21 +13980,12 @@
                   "additionalProperties": false
                 },
                 "examples": {
-                  "invite_needs_event": {
-                    "summary": "This invite is not tied to an event, so it cannot be used.",
+                  "referral_not_new": {
+                    "summary": "A referral code counts only for someone new to COMPA; you have already been at an event.",
                     "value": {
                       "error": {
-                        "code": "invite_needs_event",
-                        "message": "This invite is not tied to an event, so it cannot be used."
-                      }
-                    }
-                  },
-                  "event_not_running": {
-                    "summary": "The event is not running right now.",
-                    "value": {
-                      "error": {
-                        "code": "event_not_running",
-                        "message": "The event is not running right now."
+                        "code": "referral_not_new",
+                        "message": "A referral code counts only for someone new to COMPA; you have already been at an event."
                       }
                     }
                   }
@@ -14117,6 +14115,9 @@
           },
           "avatarMode": {
             "$ref": "#/components/schemas/AvatarMode"
+          },
+          "showAccessories": {
+            "type": "boolean"
           },
           "links": {
             "description": "A handle (`@user`), for WhatsApp a phone number with country code, or a URL of that network; an empty string removes the link. A value that fails these rules returns 400.",
@@ -15103,6 +15104,13 @@
           "avatarMode": {
             "$ref": "#/components/schemas/AvatarMode"
           },
+          "accessories": {
+            "description": "Accessories the person wears; absent when none or hidden.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Accessory"
+            }
+          },
           "headline": {
             "type": "string"
           },
@@ -15147,6 +15155,10 @@
             "type": "boolean",
             "description": "A synthetic real-mode test user (docs/testing/real-mode.md)."
           },
+          "showAccessories": {
+            "type": "boolean",
+            "description": "Whether earned accessories are worn; `accessories` lists them when true."
+          },
           "currentEvent": {
             "anyOf": [
               {
@@ -15184,9 +15196,17 @@
           "isAdmin",
           "role",
           "isTest",
+          "showAccessories",
           "currentEvent"
         ],
         "additionalProperties": false
+      },
+      "Accessory": {
+        "type": "string",
+        "enum": [
+          "golden_cap"
+        ],
+        "description": "Earned through a badge; worn on the monito and drawn over the photo (the stored photo never changes)."
       },
       "Links": {
         "type": "object",
@@ -15427,6 +15447,13 @@
           },
           "avatarMode": {
             "$ref": "#/components/schemas/AvatarMode"
+          },
+          "accessories": {
+            "description": "Accessories the person wears; absent when none or hidden.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Accessory"
+            }
           },
           "headline": {
             "type": "string"
@@ -17024,6 +17051,13 @@
                     "null"
                   ]
                 },
+                "accessories": {
+                  "description": "Accessories the person wears; absent when none or hidden.",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Accessory"
+                  }
+                },
                 "points": {
                   "type": "integer",
                   "minimum": -9007199254740991,
@@ -17161,6 +17195,13 @@
                         "string",
                         "null"
                       ]
+                    },
+                    "accessories": {
+                      "description": "Accessories the person wears; absent when none or hidden.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Accessory"
+                      }
                     }
                   },
                   "required": [
@@ -17186,6 +17227,13 @@
                         "string",
                         "null"
                       ]
+                    },
+                    "accessories": {
+                      "description": "Accessories the person wears; absent when none or hidden.",
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Accessory"
+                      }
                     }
                   },
                   "required": [
@@ -17293,6 +17341,13 @@
               "string",
               "null"
             ]
+          },
+          "accessories": {
+            "description": "Accessories the person wears; absent when none or hidden.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Accessory"
+            }
           },
           "points": {
             "type": "integer",
@@ -17858,14 +17913,7 @@
         "type": "object",
         "properties": {
           "link": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/InviteLink"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            "$ref": "#/components/schemas/InviteLink"
           },
           "invitees": {
             "type": "array",
@@ -17901,20 +17949,27 @@
             "format": "uri"
           },
           "event": {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "string"
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "name"
+                ],
+                "additionalProperties": false
               },
-              "name": {
-                "type": "string"
+              {
+                "type": "null"
               }
-            },
-            "required": [
-              "code",
-              "name"
-            ],
-            "additionalProperties": false
+            ]
           }
         },
         "required": [
@@ -17945,7 +18000,8 @@
           "points": {
             "type": "integer",
             "minimum": -9007199254740991,
-            "maximum": 9007199254740991
+            "maximum": 9007199254740991,
+            "description": "What the inviter earned for this friend: 100 inside an event, 0 outside."
           }
         },
         "required": [
@@ -17965,20 +18021,27 @@
             "$ref": "#/components/schemas/Card"
           },
           "event": {
-            "type": "object",
-            "properties": {
-              "code": {
-                "type": "string"
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "name"
+                ],
+                "additionalProperties": false
               },
-              "name": {
-                "type": "string"
+              {
+                "type": "null"
               }
-            },
-            "required": [
-              "code",
-              "name"
-            ],
-            "additionalProperties": false
+            ]
           }
         },
         "required": [

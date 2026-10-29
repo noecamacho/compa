@@ -37,7 +37,7 @@ The README "Flujo" lists 16 screens plus the dock. The routes are **built** unde
 | 09 | `V2MiPerfil` | `/me` | My monito (tap to change), name, job title, city, points and rank; badge shelf; numbers (new, reconnections, events); 4 network toggles with handle or "oculto"; links to Ranking and Mi monito; QR and edit at the top | `Avatar`, `BadgeShelf`, `StatGrid`, `IconButton`, `Card`, `Dock` | `GET /api/me`, `PATCH /api/me/visibility`, `GET /api/connections` (totals) | monito → 02b; badges → 10; Ranking → 11; edit → 02; QR → 04 |
 | 10 | `V2Insignias` | `/me/badges` (`?of=[handle]` for others) | The 20 badges with a filter Todas / Ganadas / Por ganar, progress bar, "N a punto · N secretas", secrets without hints | `Badge` (`earned` / `locked`), `ProgressBar`, `Chip` | badge state per user (missing) | back → 09 |
 | 11 | `V2Ranking` | `/ranking` (in-page toggle) | Podium of 3 with confetti, scope toggle Esta noche / Todo el año, "Tú" card with the gap to the next person, the row above you, Conectar ahora | `Avatar`, `Segmented`, `ProgressBar`, `Card` | `GET /api/e/{code}/leaderboard`; all-year ranking (missing) | people → 08; back → 03; Conectar ahora → 04 |
-| 12 | `V2Invitar` | `/invite` | Reward (golden cap for 3 friends), 4 progress slots, invite link with Copiar, share to WhatsApp / Instagram / Más, Mostrar mi QR de invitación | `Monito` (`GOLDEN_CAP`), `Avatar`, `Button` | invites (missing) | back → 03; QR → 04 |
+| 12 | `V2Invitar` | `/invite` | Reward (golden cap for 3 friends; once earned, my picture wearing it and a wear/hide switch), 4 progress slots, referral link with "+100 pts en <event>" or the no-points notice, Copiar, share to WhatsApp / Instagram / Más, Mostrar mi QR de invitación | `Monito` (`GOLDEN_CAP`), `Avatar` with `AccessoryOverlay`, `Button` | invites | back → 03; QR → 04 |
 | — | `DockV2` | layout of 03, 03b, 04, 07, 09 | Pill of 327×66 with Inicio, Conectar, Conexiones and Perfil; the color "drop" travels to the active tab (sky, mint, gum, sun) | `Dock`, `Screen dock` | — | `/home`, `/connect`, `/connections`, `/me` |
 
 Surfaces that the specs require but the handoff does not draw:
@@ -48,7 +48,7 @@ Surfaces that the specs require but the handoff does not draw:
 | Event door and check-in | `/e/[code]` and `/e/[code]/join` (built, API spec A10) | M9, M13, M19, `GET /api/e/{code}`, `POST /api/e/{code}/check-in` | Must show the notice "your name and photo will appear on the event screen" before `screenConsent: true` |
 | Big screen | `/e/[code]/live` (built, API spec A10) | A5, A6 | See [Big screen](#big-screen-live) |
 | Admin console | `/admin`, `/admin/events/new`, `/admin/events/[slug]`, `/admin/people`, `/admin/test-users` (built, API spec A11) | M20, `/api/admin/*` | Super admins only, 404 for everyone else; KPI strip, paged and sortable tables with bulk actions, tabbed event detail; sidebar, rail or bottom tabs by width (see Responsive breakpoints); entry points only for super admins |
-| Invite link | `/i/[code]` (built) | V2 `V2Invitar` | Sends to LinkedIn with `next=/onboarding/profile?invite=<code>`; the claim route is mock only |
+| Referral link | `/i/[handle]` (built) | V2 `V2Invitar` | To the door of the inviter's current event, or to LinkedIn with `next=/onboarding/profile?invite=<code>` outside one; the join step or onboarding claims it ([points-rules](wiki/points-rules.md)) |
 
 ## Responsive breakpoints (captain decision, 2026-10-29)
 

@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/icons";
 import { useCopy } from "@/components/LocaleProvider";
 import { HIT_AREA } from "@/components/ui/hit-area";
 
-type Props = { url: string; eventName: string };
+type Props = { url: string; eventName: string | null };
 
 const VIA: { key: "whatsapp" | "instagram" | "more"; color: string; icon: IconName }[] = [
   { key: "whatsapp", color: "#DDF8EA", icon: "whatsapp" },

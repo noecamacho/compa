@@ -7,10 +7,17 @@ export const CONNECTION_POINTS: Record<ConnectionKindT, number> = { new: 50, rec
 export const TOPICS_POINTS = 5;
 // To the author of a voice note when its summary is approved.
 export const SUMMARY_POINTS = 15;
-// When an invited friend's first connection is accepted.
+// Referral code (captain decision, 2026-10-29): +100 to the inviter when a friend joins, on the event the inviter is
+// checked in to at that moment; +50 to the friend at their first accepted connection.
 export const INVITE_POINTS = { inviter: 100, invitee: 50 } as const;
-// Golden cap for the monito after this many invited friends connect.
+// Golden cap after this many friends joined through the referral code, inside an event or not.
 export const GOLDEN_CAP_INVITES = 3;
+
+// Outside an event a referral still counts toward the golden cap, but pays nothing.
+export const referralPointsFor = (inviterEvent: { id: string } | null | undefined): number => (inviterEvent ? INVITE_POINTS.inviter : 0);
+
+// Unlocked once, the first time the count reaches the target; never again after that.
+export const unlocksGoldenCap = (goldenCapAt: Date | null, referrals: number): boolean => goldenCapAt === null && referrals >= GOLDEN_CAP_INVITES;
 
 export type KindFacts = {
   // The pair has an accepted connection at another event that started earlier.

@@ -1,6 +1,7 @@
 // The single visibility filter for every view of another person (API spec §6, data model §4.5).
 import type { CardT } from "./api/schemas";
 import { effectiveAvatarMode, type AvatarMode } from "./avatar-mode";
+import { accessoriesOf } from "./monito/accessories";
 import type { MonitoLook } from "./monito/look";
 import { DEFAULT_VISIBILITY, LINK_KEYS, type Links, type Visibility, type VisibilitySettings } from "./profile-fields";
 
@@ -14,6 +15,9 @@ export type CardSource = {
   photoUrl: string | null;
   avatar: MonitoLook | null;
   avatarMode?: AvatarMode | null;
+  // Optional so sources without them (the profile preview) still build a card; absent means no accessories.
+  goldenCapAt?: Date | null;
+  showAccessories?: boolean;
   headline: string | null;
   company: string | null;
   city: string | null;
@@ -49,6 +53,7 @@ const optionalField = <K extends string, V>(key: K, value: V | null | undefined,
 export function toCard(stored: CardSource, relation: Relation): CardT {
   const owner = { ...stored, visibility: withDefaultVisibility(stored.visibility) };
   const links = visibleLinks(owner, relation);
+  const accessories = accessoriesOf({ goldenCapAt: owner.goldenCapAt ?? null, showAccessories: owner.showAccessories ?? true });
   return {
     id: owner.id,
     handle: owner.handle,
@@ -57,6 +62,7 @@ export function toCard(stored: CardSource, relation: Relation): CardT {
     avatarMode: effectiveAvatarMode(owner.avatarMode, owner.photoUrl),
     // The monito and the city are public like the name and photo (design handoff).
     ...optionalField("avatar", owner.avatar, true),
+    ...optionalField("accessories", accessories, accessories.length > 0),
     ...optionalField("headline", owner.headline, canSee(owner.visibility.headline, relation)),
     ...optionalField("company", owner.company, canSee(owner.visibility.company, relation)),
     ...optionalField("city", owner.city, true),

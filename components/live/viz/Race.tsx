@@ -120,7 +120,7 @@ function RaceRow({ row, ratio, selected, reduced, avatar, gain, liRef, barRef, o
           {row.rank}
         </span>
         <span className="shrink-0">
-          <Avatar person={{ name: row.name, photoUrl: row.photoUrl }} size={avatar} />
+          <Avatar person={{ name: row.name, photoUrl: row.photoUrl, accessories: row.accessories }} size={avatar} />
         </span>
         <span className="min-w-0 shrink-0 basis-[22%] truncate font-display font-bold">{row.name}</span>
         <span className="flex min-w-0 flex-1 items-center">

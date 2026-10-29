@@ -4,6 +4,7 @@ import "zod-openapi";
 import { z } from "zod";
 import { AVATAR_MODES } from "../avatar-mode";
 import { BADGE_IDS } from "../badges/catalog";
+import { ACCESSORIES } from "../monito/accessories";
 import { MonitoLook } from "../monito/look";
 import { LOCALES } from "../i18n";
 import { LINK_KEYS, VISIBILITY_LEVELS } from "../profile-fields";
@@ -49,6 +50,10 @@ export const CurrentEvent = z.object({ code: accessCode, name: z.string() }).met
 
 export const Avatar = MonitoLook.meta({ id: "MonitoLook", description: "The person's pixel-art monito (design/compa-v2/README.md)." });
 export const BadgeId = z.enum(BADGE_IDS).meta({ id: "BadgeId" });
+export const AccessoryId = z
+  .enum(ACCESSORIES)
+  .meta({ id: "Accessory", description: "Earned through a badge; worn on the monito and drawn over the photo (the stored photo never changes)." });
+const accessories = z.array(AccessoryId).optional().meta({ description: "Accessories the person wears; absent when none or hidden." });
 export const AvatarMode = z
   .enum(AVATAR_MODES)
   .meta({ id: "AvatarMode", description: "Which picture to show; always `monito` when there is no photo." });
@@ -62,6 +67,7 @@ export const Card = z
     photoUrl: z.string().nullable(),
     avatar: Avatar.optional(),
     avatarMode: AvatarMode.optional(),
+    accessories,
     headline: z.string().optional(),
     company: z.string().optional(),
     city: z.string().optional(),
@@ -92,6 +98,7 @@ export const Me = Card.extend({
   isAdmin: z.boolean().meta({ description: "Deprecated: `role === \"super_admin\"`." }),
   role: UserRole,
   isTest: z.boolean().meta({ description: "A synthetic real-mode test user (docs/testing/real-mode.md)." }),
+  showAccessories: z.boolean().meta({ description: "Whether earned accessories are worn; `accessories` lists them when true." }),
   currentEvent: CurrentEvent.nullable().meta({ description: "The event you are checked in to right now (A2), or null." }),
   stats: ProfileStats.optional(),
   scores: Scores.optional(),
@@ -139,6 +146,7 @@ export const PatchMeBody = z
     city: optionalText(80),
     avatar: Avatar.optional(),
     avatarMode: AvatarMode.optional(),
+    showAccessories: z.boolean().optional(),
     links: z
       .partialRecord(LinkKey, z.string().trim().max(200))
       .optional()
@@ -299,20 +307,20 @@ export const BadgeStatus = z
 export const BadgeList = z.object({ badges: z.array(BadgeStatus), earned: z.int(), total: z.int() }).meta({ id: "BadgeList" });
 
 export const Invitee = z
-  .object({ person: Card, firstConnectionAt: isoDate.nullable(), points: z.int() })
+  .object({ person: Card, firstConnectionAt: isoDate.nullable(), points: z.int().meta({ description: "What the inviter earned for this friend: 100 inside an event, 0 outside." }) })
   .meta({ id: "Invitee" });
 
-// The shareable link exists only while the person is checked in to an event, and it always names that event.
+// Everyone's referral link; `event` is where a friend joining now would pay the inviter +100, or null for no points.
 export const InviteLink = z
-  .object({ code: z.string(), url: z.url(), event: z.object({ code: z.string(), name: z.string() }) })
+  .object({ code: z.string(), url: z.url(), event: z.object({ code: z.string(), name: z.string() }).nullable() })
   .meta({ id: "InviteLink" });
 
 export const Invites = z
-  .object({ link: InviteLink.nullable(), invitees: z.array(Invitee), target: z.int(), goldenCap: z.boolean() })
+  .object({ link: InviteLink, invitees: z.array(Invitee), target: z.int(), goldenCap: z.boolean() })
   .meta({ id: "Invites" });
 
 export const ClaimedInvite = z
-  .object({ code: z.string(), inviter: Card, event: z.object({ code: z.string(), name: z.string() }) })
+  .object({ code: z.string(), inviter: Card, event: z.object({ code: z.string(), name: z.string() }).nullable() })
   .meta({ id: "ClaimedInvite" });
 
 export const ConnectionList = z
@@ -347,7 +355,7 @@ export const PushSubscriptionBody = z
 export const PushUnsubscribeBody = z.object({ endpoint: z.url().max(2048) }).meta({ id: "PushUnsubscribeBody" });
 
 // `connections` is the person's accepted count at the event; the `connections` list below holds only the most recent links.
-const LivePerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable(), points: z.int(), connections: z.int() });
+const LivePerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable(), accessories, points: z.int(), connections: z.int() });
 const LiveConnection = z.object({ id: uuid, a: uuid, b: uuid, kind: ConnectionKind, at: isoDate });
 
 export const LiveSnapshot = z
@@ -365,7 +373,7 @@ export const LiveSnapshot = z
   })
   .meta({ id: "LiveSnapshot" });
 
-const LivePairPerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable() });
+const LivePairPerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable(), accessories });
 
 // The few newest pairs for the /home live card, instead of the whole big-screen snapshot (conference-scale finding 5).
 export const LiveRecent = z
@@ -385,6 +393,7 @@ export const LeaderboardRow = z
     handle,
     name: z.string(),
     photoUrl: z.string().nullable(),
+    accessories,
     points: z.int(),
     connections: z.int(),
   })

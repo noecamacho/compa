@@ -44,7 +44,7 @@ function Column({ row, place, look, delay }: { row: Row | undefined; place: 1 | 
           <circle cx="22" cy="24" r="3" fill="#FF6B4A" stroke="#1E1B2E" strokeWidth="1.5" />
         </svg>
       )}
-      <Avatar person={{ name: row.name, look }} px={block.px} />
+      <Avatar person={{ name: row.name, look, accessories: row.accessories }} px={block.px} />
       <span className="font-display font-bold" style={{ fontSize: place === 1 ? 18 : 16 }}>
         {firstName(row.name)}
       </span>
@@ -133,7 +133,7 @@ export function RankingView({ me, boards, looks }: Props) {
         {mine?.above && (
           <Link href={`/people/${mine.above.handle}`} className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable">
             <span className="w-[30px] font-display text-[15px] font-bold text-muted">#{mine.above.rank}</span>
-            <Avatar person={{ name: mine.above.name, look: looks[mine.above.userId] }} size={30} />
+            <Avatar person={{ name: mine.above.name, look: looks[mine.above.userId], accessories: mine.above.accessories }} size={30} />
             <span className="flex-1 truncate text-[14px] font-extrabold">{mine.above.name}</span>
             <Muted className="text-[13px] font-extrabold">{formatPoints(locale, mine.above.points)}</Muted>
           </Link>

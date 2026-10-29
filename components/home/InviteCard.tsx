@@ -15,7 +15,7 @@ type Props = { invites: InvitesT };
 // "Invita 3 y gana la gorra dorada" with three progress circles (V2Inicio).
 export function InviteCard({ invites }: Props) {
   const { home } = useCopy();
-  const done = invites.invitees.filter((invitee) => invitee.firstConnectionAt).length;
+  const done = Math.min(invites.invitees.length, invites.target);
   const left = Math.max(0, invites.target - done);
   return (
     <Card href="/invite" tone="sun-soft" className="flex items-center gap-3 px-[14px] py-3">
@@ -24,7 +24,7 @@ export function InviteCard({ invites }: Props) {
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-[5px]">
         <span className="font-display text-[19px] leading-[1.1] font-bold">{home.inviteTitle}</span>
-        <span className="text-[13px] font-extrabold">{home.invitePoints}</span>
+        <span className="text-[13px] font-extrabold">{invites.link.event ? home.invitePoints(invites.link.event.name) : home.inviteNoPoints}</span>
         <span className="flex items-center gap-[6px]" aria-label={home.inviteProgress(done, invites.target)}>
           {Array.from({ length: invites.target }, (_, index) => {
             const filled = index < done;

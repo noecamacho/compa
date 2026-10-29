@@ -150,7 +150,7 @@ export function useUserEvent(listener: Listener): void {
 
 function ToastIcon({ item }: { item: NotificationT }) {
   if (item.kind === "badge_earned") return <Icon name="trophy" size={24} />;
-  return <Avatar person={{ name: item.person.name, look: item.person.avatar }} size={36} />;
+  return <Avatar person={{ name: item.person.name, look: item.person.avatar, accessories: item.person.accessories }} size={36} />;
 }
 
 function NotificationToast({ item, locale, onClose }: { item: NotificationT; locale: Locale; onClose: () => void }) {

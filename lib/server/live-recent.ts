@@ -4,6 +4,7 @@ import { getDb } from "../../db/client";
 import { connections } from "../../db/schema";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
+import { accessoriesOf } from "../monito/accessories";
 import { connectionsOfRealPeople, requireEventByCode } from "./events";
 import { usersByIds } from "./people";
 
@@ -23,7 +24,7 @@ export async function liveRecent({ params }: InputOf<typeof R.liveRecent>): Resu
   const people = new Map((await usersByIds(rows.flatMap((row) => [row.requesterId, row.addresseeId]))).map((user) => [user.id, user]));
   const person = (id: string) => {
     const user = people.get(id);
-    return user ? { id, name: user.name, photoUrl: user.photoUrl } : null;
+    return user ? { id, name: user.name, photoUrl: user.photoUrl, accessories: accessoriesOf(user) } : null;
   };
   const pairs = rows.flatMap((row) => {
     const a = person(row.requesterId);

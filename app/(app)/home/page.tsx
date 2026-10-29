@@ -98,7 +98,7 @@ export default async function HomePage({ searchParams }: Props) {
             </Card>
           </div>
 
-          {invites?.link && (
+          {invites && (
             <div data-tour="invite">
               <InviteCard invites={demoEmpty ? { ...invites, invitees: [] } : invites} />
             </div>

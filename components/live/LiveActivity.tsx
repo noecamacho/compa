@@ -149,7 +149,7 @@ export function Podium({ rows, locale, onSelect }: { rows: BoardRow[]; locale: L
           return (
             <li key={row.id} className={`flex min-w-0 animate-podium flex-col items-center gap-1 ${step.order}`}>
               <button type="button" onClick={() => onSelect(row.id)} className="flex min-w-0 cursor-pointer flex-col items-center gap-1 text-ink">
-                <Avatar person={{ name: row.name, photoUrl: row.photoUrl }} size={44} shadow={2} />
+                <Avatar person={{ name: row.name, photoUrl: row.photoUrl, accessories: row.accessories }} size={44} shadow={2} />
                 <span className="line-clamp-2 w-full text-center font-display text-[14px] leading-tight font-bold break-words lg:text-[clamp(14px,1vw,24px)]">{row.name}</span>
                 <span className="text-[12px] font-extrabold tabular-nums lg:text-[clamp(12px,0.85vw,20px)]">
                   {formatNumber(locale, row.points)} {copy.points}

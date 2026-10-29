@@ -260,9 +260,16 @@ export function fills(look: MonitoLook): Record<Layer, string> {
 
 export type MonitoLayer = { layer: Layer; d: string; fill: string };
 
+// Only the hat, on an empty grid: the same pixels the monito wears, to draw over a photo (lib/monito/accessories.ts).
+function hatGrid(look: MonitoLook): Grid {
+  const g: Grid = Array.from({ length: GRID_HEIGHT }, () => new Array<Cell>(GRID_WIDTH).fill("."));
+  paintHat(painter(g), look.hat);
+  return g;
+}
+
 // Layers in paint order, ready for <path d fill />; empty layers are skipped.
-export function monitoLayers(look: MonitoLook): MonitoLayer[] {
-  const d = paths(grid(look));
+export function monitoLayers(look: MonitoLook, only: "all" | "hat" = "all"): MonitoLayer[] {
+  const d = paths(only === "hat" ? hatGrid(look) : grid(look));
   const f = fills(look);
   return LAYER_ORDER.filter((layer) => d[layer]).map((layer) => ({ layer, d: d[layer], fill: f[layer] }));
 }

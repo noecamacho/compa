@@ -43,7 +43,7 @@ export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): 
   const event = await requireEventByCode(params.code);
   const now = new Date();
   const [ranked, recent, totals] = await Promise.all([rankedAtEvent(event), recentLinks(event), linkCounters(event)]);
-  const people = ranked.map(({ userId, name, photoUrl, points, connections }) => ({ id: userId, name, photoUrl, points, connections }));
+  const people = ranked.map(({ userId, name, photoUrl, accessories, points, connections }) => ({ id: userId, name, photoUrl, accessories, points, connections }));
   const shown = new Set(people.map((person) => person.id));
   // An edge to someone left off the screen (a test user at a real event, M20, or a removed attendee) is left off too.
   const links = recent
