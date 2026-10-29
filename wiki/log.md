@@ -139,3 +139,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Why did shared links point to localhost?
 
 - The invite link, the personal QR (`/u/<handle>`) and the live join QR fell back to `http://localhost:3000` because `NEXT_PUBLIC_SITE_URL` was unset in Vercel. Set it to `https://compa.lol` and replaced the fallbacks with `requestOrigin()` (configured URL, else the request host, never localhost).
+
+## [2026-10-29] query | Can people sign in from compa.lol?
+
+- Captain decision: yes. The landing offers "Entrar con LinkedIn" for sign-up and sign-in (then `/home`); events stay exclusive because joining needs the QR link. API spec A10a records the amendment; the sign-out warning no longer says the QR is needed to come back.
