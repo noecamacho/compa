@@ -79,6 +79,7 @@ No application code, dependencies or CI exist yet; the Jira Epic tracks that bui
 | `ARCHITECTURE.md`, `DESIGN.md` | System and product design derived from the plan, decided versus open |
 | `CHANGELOG.md` | Keep a Changelog, Semantic Versioning |
 | `docs/engineering-standards.md` | Coding rules with examples |
+| `docs/testing/real-mode.md` | Testing against the real database with test users (no LinkedIn) |
 | `docs/git-workflow.md` | Commits, branches, versioning, hooks, attribution |
 | `docs/agent-tooling.md` | caveman, ponytail, Serena, repomix, hooks, install methods |
 | `docs/jira/compa-bootstrap-ticket.md` | The Epic draft |

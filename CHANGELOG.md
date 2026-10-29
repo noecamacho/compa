@@ -8,10 +8,15 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 - Monito builder: a "Soy" row with Hombre, Mujer and Otro (Mujer draws a skirt and suggests long hair), stored in the look; building a monito is now required before using the app, also when signing in with a LinkedIn photo.
 - Onboarding asks for job title and company (required) and city (optional), since LinkedIn shares only name, photo and email; anyone missing them is sent to the profile step first, and the step says so.
+- Super-admin console at `/admin` (390, 834 and 1440, Spanish and English): list, create and edit events (description, venue, address, city, country, website, IANA time zone, schedule, status, test flag), the join QR and link, rotate code, end now, archive; attendees with counts, check-in on someone's behalf (consent recorded as admin-assigned), organizers per event; people search. New `/api/admin/*` routes (API spec A11). `GET /api/me` returns `role` and `isTest`.
+- Real-mode test harness: synthetic test users (`users.is_test`, no LinkedIn) with generated profiles, `POST /api/admin/test-users/{id}/session` to sign in as one, the `x-compa-automation` header for test runners (`TEST_AUTOMATION_SECRET`), the seeded test event Codex Conf 2026 (`SEED_TEST_EVENT=1`), and `docs/testing/real-mode.md`.
+
 - Sign out on the profile screen (`/me`), with a confirm step that warns you need your event's QR to get back in.
 - Email sign-in on the event door: people without LinkedIn enter their email and get a one-time link (Supabase magic link) that creates the account or signs them in. New route `POST /api/auth/email`. Requires the Supabase Email provider enabled and `/auth/callback` in the redirect allow list.
 
 ### Security
+
+- Admin pages and routes answer `404` to anyone who is not a super admin (`users.role`, migration `0005_super_admin_test_harness`, which backfills the three captains and any `is_admin` user), and the per-request mock header no longer opens them outside a mock deployment. Test users never join or show at a real event.
 
 - Events are reachable only through an unguessable access code in the event QR (`compa.lol/e/<code>`). Public event routes moved from `/api/events/{slug}/…` to `/api/e/{code}/…` and answer any wrong code with the same `404 event_not_found`; the old slug routes are removed. Admins rotate a code with `POST /api/admin/events/{slug}/rotate-code`. Migration `0003_event_access_code` adds and backfills `events.access_code` (must be applied to production).
 
@@ -26,6 +31,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Changed
 
+- On phones the top row (avatar, greeting and bell on Home; back and title elsewhere) stays pinned while scrolling, the dock respects the iPhone safe area, and overscroll no longer drags them. Home, incoming requests and the live person card now show the LinkedIn photo or the monito the person chose.
 - The landing page offers "Entrar con LinkedIn" (sign-up and sign-in) so people can reach their events without rescanning; joining an event still needs its QR.
 - Database migrations apply automatically on every production deploy: the workflow deploys with a remote Vercel build whose build command runs `db:migrate:deploy` before `next build`.
 - `GET /api/me` returns `currentEvent: { code, name }`; the home and ranking screens reach the live data through it and show an "out of an event" state when it is null. Onboarding copy no longer promises title, company or city from LinkedIn (only name, photo and email come from it).

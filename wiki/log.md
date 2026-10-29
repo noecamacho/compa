@@ -146,4 +146,10 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 ## [2026-10-29] query | Must every attendee finish onboarding, and can the monito show gender?
 
+- Team decision (Sebastián): yes. The (app) layout sends anyone without a saved look to 02b and back (`MonitoGate`, `?next=`); onboarding moved to its own `(onboarding)` route group. The look gains an optional `body` (Hombre / Mujer / Otro), drawn as a skirt for Mujer; it lives in `users.avatar` jsonb, so no migration and no separate gender field. Recorded in [DESIGN.md](../DESIGN.md) 02b and `docs/flows/catalog.md` F-08.
+
+## [2026-10-29] query | How do super admins and real-mode tests work?
+
+- Captain requirement implemented on `feat/COMPA-TBD-super-admin-test-harness`: `users.role` and `/admin` (404 for everyone else), editable event details, organizers, and the real-mode test harness (test users, sign-in-as, automation header, Codex Conf 2026 seed). Specs: data model M20, API spec A11; method in `docs/testing/real-mode.md`. OQ #52 and #56 updated, #57 added.
+
 - Team decision (Sebastián): yes. LinkedIn OIDC shares only name, photo and email, so 02 asks for job title and company (required) and city (optional); the (app) layout sends anyone missing them to 02, then anyone without a saved look to 02b, and back (`OnboardingGate`, `pendingOnboarding`, `?next=`); open question #33 resolved; onboarding moved to its own `(onboarding)` route group. The look gains an optional `body` (Hombre / Mujer / Otro), drawn as a skirt for Mujer; it lives in `users.avatar` jsonb, so no migration and no separate gender field. Recorded in [DESIGN.md](../DESIGN.md) 02b and `docs/flows/catalog.md` F-08.

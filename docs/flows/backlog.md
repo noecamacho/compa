@@ -61,6 +61,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | infra | **P0** | scaffold | — | M |
+- **State:** Helpers ready on `feat/COMPA-TBD-super-admin-test-harness`: `lib/testing/real-mode.ts` (test users and sessions over HTTP with `x-compa-automation`), `e2e/fixtures/real-mode.ts` and a skeleton spec; the `realUser` and `testEvent` fixtures map onto them (`docs/testing/real-mode.md`). Playwright itself is not installed yet.
 
 - **E2E:** `e2e/smoke.spec.ts` is the first spec. Scenarios: in mock mode the landing renders, a mocked `/api/me` renders `/home`, and `x-compa-mock-error: not_pending` on accept shows the error state. One real-mode test signs in the seeded user and opens `/me`.
 - **Files:** `package.json` (`@playwright/test` as a dev dependency, plus the scripts `e2e` = `bunx playwright test` and `e2e:install` = `bunx playwright install --with-deps chromium webkit`), new `playwright.config.ts`, `e2e/fixtures/*.ts`, `e2e/smoke.spec.ts`, new `.github/workflows/e2e.yml`, `.gitignore` (`playwright-report/`, `test-results/`), `.env.example` (variable names only).
@@ -396,6 +397,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | backend | P1 | live+seeds | T-000, T-020 | S |
+- **State:** UI added on `feat/COMPA-TBD-super-admin-test-harness`: "Rotate code" on `/admin/events/<slug>` warns that printed QR codes stop working.
 
 - **E2E:** `e2e/admin/events.spec.ts`. Scenarios: rotate → old code door 404, new code works; non-admin gets 403.
 - **Branch:** `app/api/admin/events/[slug]/rotate-code/route.ts`.
@@ -407,6 +409,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | backend+ui | P1 | live+seeds | T-000, T-020, T-022, OQ #56 | L |
+- **State:** Ready on `feat/COMPA-TBD-super-admin-test-harness` (2026-10-29), pending review. `/admin`, `/admin/events/new`, `/admin/events/<slug>` and the `GET`/`PATCH /api/admin/events…`, `…/end`, `…/archive`, attendee and organizer routes. Captain change: non-super-admins get **404**, not 403 (API spec A11). Archive is `events.status = 'archived'`, not `archived_at`. E2E spec still to write once T-000 lands.
 
 - **E2E:** `e2e/admin/events.spec.ts`. Scenarios: create, edit window, end now (pending request then shows expired), archive; validation errors; non-admin 403.
 - **Files:**
@@ -431,6 +434,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | db+backend+ui | P1 | live+seeds | T-000, OQ #22 | M |
+- **State:** Partial on `feat/COMPA-TBD-super-admin-test-harness`: `events.timezone` (IANA, default `America/Mexico_City`) and an event schedule exist and the admin console types times in the event zone. Attendee screens and `Me.currentEvent` do not use it yet.
 
 - **E2E:** `e2e/events/window.spec.ts`. Scenarios: end time shows in the event time zone with `timezoneId` set to another zone; before-start check-in behaves per OQ #22.
 - **Files:** `db/schema.ts` (`events.time_zone text not null default 'America/Mexico_City'`), a migration, `lib/format.ts` (hard-codes `es-MX`), `lib/server/events.ts`, `Me.currentEvent` (add `endsAt` and `timeZone`).
@@ -481,6 +485,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | backend+db | P2 | live+seeds | T-000, OQ #17 | M |
+- **State:** Partial on `feat/COMPA-TBD-super-admin-test-harness`: `users.is_test` and `events.is_test` keep test people off real events' live screen, counters and leaderboards (data model M20). No admin toggle for seeds yet.
 
 - **E2E:** `e2e/live/big-screen.spec.ts`. Scenarios: seed toggle hides seed people and their edges; leaderboard excludes seeds.
 - **Acceptance:** `users.is_seed` (or a seed event) is excluded from production leaderboards. An admin toggle hides seeds on the big screen (plan p. 13, p. 18).
@@ -491,6 +496,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | backend | P2 | live+seeds | T-000 | S |
+- **State:** Superseded in part on `feat/COMPA-TBD-super-admin-test-harness`: migration 0005 promotes the three captains to `super_admin`; `SEED_ADMIN_HANDLE` now sets `role`. No env allowlist.
 
 - **E2E:** `e2e/admin/events.spec.ts`. Scenarios: an allowlisted test user is admin after sign-in; others are not.
 - **Acceptance:** an env allowlist (`ADMIN_LINKEDIN_SUBS`, names only in `.env.example`) promotes matching users at sign-in. Today `SEED_ADMIN_HANDLE` needs `bun run db:seed` with DB credentials. Every promotion is logged.

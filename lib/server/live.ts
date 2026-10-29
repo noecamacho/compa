@@ -8,7 +8,7 @@ import type * as R from "../api/routes";
 import { isRunning } from "../connection-status";
 import { rankingTips } from "../copy/es";
 import { currentUserOrNull } from "./auth";
-import { requireEventByCode } from "./events";
+import { realPeopleOnly, requireEventByCode } from "./events";
 import { cardFor } from "./people";
 import { rankedAtEvent, rankedLifetime, type Ranked } from "./scores";
 
@@ -25,7 +25,7 @@ async function rankedAttendees(event: EventRow) {
     .from(eventAttendees)
     .innerJoin(users, eq(users.id, eventAttendees.userId))
     .leftJoin(eventScores, and(eq(eventScores.eventId, eventAttendees.eventId), eq(eventScores.userId, eventAttendees.userId)))
-    .where(eq(eventAttendees.eventId, event.id))
+    .where(and(eq(eventAttendees.eventId, event.id), realPeopleOnly(event)))
     .orderBy(desc(points), desc(connectionCount), asc(eventAttendees.checkedInAt));
 }
 
@@ -42,7 +42,10 @@ export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): 
   const now = new Date();
   const [attendees, accepted] = await Promise.all([rankedAttendees(event), acceptedConnections(event)]);
   const people = attendees.map(({ user, points }) => ({ id: user.id, name: user.name, photoUrl: user.photoUrl, points }));
-  const links = accepted.map((row) => ({
+  const shown = new Set(people.map((person) => person.id));
+  // An edge to someone left off the screen (a test user at a real event, M20) is left off too.
+  const visible = accepted.filter((row) => shown.has(row.requesterId) && shown.has(row.addresseeId));
+  const links = visible.map((row) => ({
     id: row.id,
     a: row.requesterId,
     b: row.addresseeId,
@@ -87,7 +90,7 @@ async function myStanding(ranked: Ranked[]) {
 
 export async function leaderboard({ params, query }: InputOf<typeof R.leaderboard>): ResultOf<typeof R.leaderboard> {
   const event = await requireEventByCode(params.code);
-  const ranked = query.scope === "lifetime" ? await rankedLifetime() : await rankedAtEvent(event);
+  const ranked = query.scope === "lifetime" ? await rankedLifetime({ includeTest: event.isTest }) : await rankedAtEvent(event);
   const rows = ranked.slice(0, query.limit).map(toRow);
   const me = await myStanding(ranked);
   return { body: me ? { rows, me } : { rows }, headers: me ? undefined : LIVE_CACHE };
