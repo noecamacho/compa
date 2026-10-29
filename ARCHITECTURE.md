@@ -30,7 +30,7 @@ Each entry: context, decision, consequences, source.
 
 ### ADR-001 One Next.js app serves phone and `/live`
 - Context: hackathon, four people, one night (p. 13, p. 15).
-- Decision: Next.js App Router + TypeScript + Tailwind, one repo, one deploy on Vercel (p. 8).
+- Decision: Next.js App Router + TypeScript + Tailwind, one repo, one deploy on Vercel (p. 8). Bun is the package manager and runtime (team decision 2026-10-28; the plan said pnpm): `bun install`, `bun run <script>`, lockfile `bun.lock`.
 - Consequences: route handlers are the only backend; `/live` is a page of the same app.
 
 ### ADR-002 Supabase Postgres + Realtime for data and live updates
