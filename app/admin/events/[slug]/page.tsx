@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
-import { AdminShell, AdminTitle } from "@/components/admin/AdminShell";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { EventActions } from "@/components/admin/EventActions";
 import { EventForm } from "@/components/admin/EventForm";
 import { EventPeople } from "@/components/admin/EventPeople";
@@ -10,7 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { AdminAttendeeList, AdminEventBody, OrganizerList } from "@/lib/api/admin-schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
-import { adminCopy } from "@/lib/server/admin-page";
+import { adminCopy, requireAdminPage } from "@/lib/server/admin-page";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -21,7 +21,8 @@ export default async function AdminEventPage({ params }: Props) {
   const found = await apiGetOrNull(path, AdminEventBody);
   if (!found) notFound();
   const { event } = found;
-  const [{ locale, copy }, people, organizers, qrSvg] = await Promise.all([
+  const [admin, { locale, copy }, people, organizers, qrSvg] = await Promise.all([
+    requireAdminPage(),
     adminCopy(),
     apiGet(`${path}/attendees`, AdminAttendeeList),
     apiGet(`${path}/organizers`, OrganizerList),
@@ -29,20 +30,14 @@ export default async function AdminEventPage({ params }: Props) {
   ]);
   const ended = event.status === "ended" || event.status === "archived";
   return (
-    <AdminShell copy={copy} active="events">
-      <Link href="/admin" className="-mb-2 flex min-h-11 items-center self-start text-[14px] font-extrabold underline">
-        ← {copy.events.title}
-      </Link>
-      <AdminTitle
-        right={
-          <span className="flex gap-2">
-            <StatusPill status={event.status} copy={copy} />
-            {event.isTest && <TestPill label={copy.events.test} />}
-          </span>
-        }
-      >
-        {event.name}
-      </AdminTitle>
+    <AdminShell copy={copy} locale={locale} admin={admin} active="events" title={event.name}>
+      <span className="-mt-2 flex flex-wrap items-center gap-2 md:-mt-3">
+        <Link href="/admin" className="mr-2 flex min-h-11 items-center text-[14px] font-extrabold underline">
+          ← {copy.events.title}
+        </Link>
+        <StatusPill status={event.status} copy={copy} />
+        {event.isTest && <TestPill label={copy.events.test} />}
+      </span>
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
         <Card className="lg:col-start-1">
           <StatGrid>

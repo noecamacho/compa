@@ -1,12 +1,11 @@
-import { AdminShell, AdminTitle } from "@/components/admin/AdminShell";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { EventForm } from "@/components/admin/EventForm";
-import { adminCopy } from "@/lib/server/admin-page";
+import { adminCopy, requireAdminPage } from "@/lib/server/admin-page";
 
 export default async function NewEventPage() {
-  const { locale, copy } = await adminCopy();
+  const [admin, { locale, copy }] = await Promise.all([requireAdminPage(), adminCopy()]);
   return (
-    <AdminShell copy={copy} active="events">
-      <AdminTitle>{copy.form.createTitle}</AdminTitle>
+    <AdminShell copy={copy} locale={locale} admin={admin} active="events" title={copy.form.createTitle} width="form">
       <EventForm locale={locale} />
     </AdminShell>
   );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AdminShell, AdminTitle } from "@/components/admin/AdminShell";
+import { AdminShell } from "@/components/admin/AdminShell";
 import { CardList, Cell, DataTable, EmptyState, FilterTabs, Row } from "@/components/admin/AdminParts";
 import { TestPill } from "@/components/admin/StatusPill";
 import { Button } from "@/components/ui/Button";
@@ -8,7 +8,7 @@ import { Pill } from "@/components/ui/Pill";
 import { Muted } from "@/components/ui/Text";
 import { AdminUserList, UserSearchQuery, type AdminUserT } from "@/lib/api/admin-schemas";
 import { apiGet } from "@/lib/api/server-fetch";
-import { adminCopy } from "@/lib/server/admin-page";
+import { adminCopy, requireAdminPage } from "@/lib/server/admin-page";
 import type { Dictionary } from "@/lib/copy";
 
 type Props = { searchParams: Promise<{ q?: string; test?: string }> };
@@ -34,10 +34,9 @@ function UserBadges({ user, copy }: { user: AdminUserT; copy: Dictionary["admin"
 export default async function AdminPeoplePage({ searchParams }: Props) {
   const query = UserSearchQuery.parse(await searchParams);
   const params = new URLSearchParams({ test: query.test, limit: "50", ...(query.q ? { q: query.q } : {}) });
-  const [{ copy }, list] = await Promise.all([adminCopy(), apiGet(`/api/admin/users?${params}`, AdminUserList)]);
+  const [admin, { locale, copy }, list] = await Promise.all([requireAdminPage(), adminCopy(), apiGet(`/api/admin/users?${params}`, AdminUserList)]);
   return (
-    <AdminShell copy={copy} active="people">
-      <AdminTitle>{copy.people.title}</AdminTitle>
+    <AdminShell copy={copy} locale={locale} admin={admin} active="people" title={copy.people.title}>
       <form method="get" role="search" className="flex flex-col gap-3 md:flex-row md:items-end">
         <div className="flex min-w-0 flex-col gap-[5px] md:flex-1">
           <label htmlFor="people-q" className="text-[13px] font-extrabold md:text-[12px]">
@@ -81,7 +80,11 @@ export default async function AdminPeoplePage({ searchParams }: Props) {
       )}
       {list.users.length > 0 && (
         <>
-          <DataTable label={copy.people.title} columns={[copy.ui.colPerson, copy.ui.colContact, copy.ui.colProfile]}>
+          <DataTable label={copy.people.title} columns={[
+              { key: "person", label: copy.ui.colPerson },
+              { key: "contact", label: copy.ui.colContact },
+              { key: "profile", label: copy.ui.colProfile },
+            ]}>
             {list.users.map((user) => (
               <Row key={user.id}>
                 <Cell>
@@ -90,9 +93,15 @@ export default async function AdminPeoplePage({ searchParams }: Props) {
                     <UserBadges user={user} copy={copy} />
                   </span>
                 </Cell>
-                <Cell className="break-all text-muted">
-                  @{user.handle}
-                  {user.email && <span className="block">{user.email}</span>}
+                <Cell className="max-w-[320px] text-muted">
+                  <span className="block truncate" title={`@${user.handle}`}>
+                    @{user.handle}
+                  </span>
+                  {user.email && (
+                    <span className="block truncate" title={user.email}>
+                      {user.email}
+                    </span>
+                  )}
                 </Cell>
                 <Cell className="text-muted">{profileOf(user)}</Cell>
               </Row>
@@ -106,10 +115,14 @@ export default async function AdminPeoplePage({ searchParams }: Props) {
                     <span className="font-display text-[17px] font-bold">{user.name}</span>
                     <UserBadges user={user} copy={copy} />
                   </span>
-                  <Muted className="text-[13px] font-bold break-all">
+                  <Muted className="truncate text-[13px] font-bold" title={`@${user.handle}`}>
                     @{user.handle}
-                    {user.email ? ` · ${user.email}` : ""}
                   </Muted>
+                  {user.email && (
+                    <Muted className="truncate text-[13px] font-bold" title={user.email}>
+                      {user.email}
+                    </Muted>
+                  )}
                   <Muted className="text-[13px] font-bold">{profileOf(user)}</Muted>
                 </Card>
               </li>

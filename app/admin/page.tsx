@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { AdminShell, AdminTitle } from "@/components/admin/AdminShell";
-import { CardList, Cell, DataTable, EmptyState, FilterTabs, MobileActionBar, Row } from "@/components/admin/AdminParts";
+import { AdminShell } from "@/components/admin/AdminShell";
+import { CardList, Cell, DataTable, EmptyState, FilterTabs, Row } from "@/components/admin/AdminParts";
 import { StatusPill, TestPill } from "@/components/admin/StatusPill";
 import { Card } from "@/components/ui/Card";
 import { ButtonLink } from "@/components/ui/Button";
@@ -8,7 +8,8 @@ import { Muted } from "@/components/ui/Text";
 import { AdminEventList, type AdminEventT } from "@/lib/api/admin-schemas";
 import { apiGet } from "@/lib/api/server-fetch";
 import { formatTime, type Dictionary } from "@/lib/copy";
-import { adminCopy } from "@/lib/server/admin-page";
+import { Icon } from "@/components/icons";
+import { adminCopy, requireAdminPage } from "@/lib/server/admin-page";
 
 type Props = { searchParams: Promise<{ archived?: string }> };
 
@@ -33,15 +34,16 @@ function EventBadges({ event, copy }: { event: AdminEventT; copy: Dictionary["ad
 export default async function AdminEventsPage({ searchParams }: Props) {
   const { archived } = await searchParams;
   const showArchived = archived === "1";
-  const [{ locale, copy }, list] = await Promise.all([adminCopy(), apiGet(`/api/admin/events?archived=${showArchived ? 1 : 0}`, AdminEventList)]);
+  const [admin, { locale, copy }, list] = await Promise.all([requireAdminPage(), adminCopy(), apiGet(`/api/admin/events?archived=${showArchived ? 1 : 0}`, AdminEventList)]);
   const create = (
-    <ButtonLink href="/admin/events/new" variant="primary" height={46} className="w-auto!">
-      {copy.events.create}
+    <ButtonLink href="/admin/events/new" variant="primary" height={44} className="w-auto! px-4 text-[15px]">
+      <Icon name="plus" size={18} />
+      {/* Icon-only on the smallest phones so the top-bar title keeps room; the label stays for screen readers. */}
+      <span className="max-[400px]:sr-only">{copy.events.create}</span>
     </ButtonLink>
   );
   return (
-    <AdminShell copy={copy} active="events">
-      <AdminTitle right={<span className="hidden md:block">{create}</span>}>{copy.events.title}</AdminTitle>
+    <AdminShell copy={copy} locale={locale} admin={admin} active="events" title={copy.events.title} primary={create}>
       <FilterTabs
         label={copy.events.title}
         active={showArchived ? "archived" : "active"}
@@ -58,7 +60,12 @@ export default async function AdminEventsPage({ searchParams }: Props) {
       )}
       {list.events.length > 0 && (
         <>
-          <DataTable label={copy.events.title} columns={[copy.ui.colEvent, copy.ui.colStatus, copy.ui.colWhen, copy.ui.colPeople]}>
+          <DataTable label={copy.events.title} columns={[
+              { key: "event", label: copy.ui.colEvent },
+              { key: "status", label: copy.ui.colStatus },
+              { key: "when", label: copy.ui.colWhen },
+              { key: "people", label: copy.ui.colPeople },
+            ]}>
             {list.events.map((event) => (
               <Row key={event.id}>
                 <Cell className="font-display text-[17px] leading-[1.2] font-bold">
@@ -91,11 +98,6 @@ export default async function AdminEventsPage({ searchParams }: Props) {
           </CardList>
         </>
       )}
-      <MobileActionBar>
-        <ButtonLink href="/admin/events/new" variant="primary" height={50}>
-          {copy.events.create}
-        </ButtonLink>
-      </MobileActionBar>
     </AdminShell>
   );
 }
