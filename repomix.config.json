@@ -1,0 +1,20 @@
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "output": {
+    "filePath": "repomix-output.md",
+    "style": "markdown"
+  },
+  "ignore": {
+    "useGitignore": true,
+    "customPatterns": [
+      "raw/**",
+      "node_modules/**",
+      ".next/**",
+      "out/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      "repomix-output.*"
+    ]
+  }
+}

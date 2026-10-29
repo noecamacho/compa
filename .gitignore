@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Next.js and build output
+.next/
+out/
+dist/
+build/
+coverage/
+
+# Environment and deploy
+.env
+.env.*
+!.env.example
+.vercel/
+supabase/.temp/
+
+# Logs and OS files
+*.log
+.DS_Store
+
+# repomix packs are never committed
+repomix-output.*
+
+# Agent-local state (personal paths, caches, credentials)
+.claude/settings.local.json
+.serena/cache/
+.serena/project.local.yml
