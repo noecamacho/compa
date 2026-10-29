@@ -1,14 +1,21 @@
 # API quickstart
 
-For the UI lane and agents. The contract is `openapi.json` at the repository root (regenerate with `bun run openapi`); the source of truth is `lib/api/routes.ts` and `lib/api/schemas.ts`. Specs: `docs/specs/2026-10-29-api.md` and `2026-10-29-data-model.md` (branch `docs/COMPA-TBD-mvp-api-plan`).
+For the UI lane and agents. The contract is `openapi.json` at the repository root (regenerate with `bun run openapi`); the source of truth is `lib/api/routes.ts` and `lib/api/schemas.ts`. Specs: `docs/specs/2026-10-29-api.md` and `docs/specs/2026-10-29-data-model.md`.
 
 ## Base URL and docs
 
 | What | Where |
 | --- | --- |
-| Base URL | `https://<deployment>.vercel.app` (placeholder until the coordinator deploys), or `http://localhost:3000` with `bun run dev` |
+| Base URL | Production `https://compa.lol`; every PR gets a preview URL commented by the Vercel workflow; local `http://localhost:3000` with `bun run dev` |
 | OpenAPI 3.1 | `GET /api/openapi.json` or `openapi.json` in the repo |
 | Human docs | `GET /api/docs` (Scalar) |
+
+## Environment variables
+
+- **Vercel is the only place env values live** (captain decision, 2026-10-29). The captain adds and rotates every secret (`OPENAI_API_KEY`, Supabase keys, LinkedIn credentials); ask the captain when a value is missing.
+- Variable names, never values, are listed in `.env.example`. Never commit a value, paste one in a PR, issue or doc, or add one as a GitHub secret.
+- Local development: `vercel env pull .env.local` (needs access to the Vercel team) or ask the captain; `.env.local` is gitignored.
+- The only GitHub secrets are the three the deploy workflow needs: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
 
 ## Mock mode
 

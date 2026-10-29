@@ -64,3 +64,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Why were teammates' deploys blocked?
 
 - Vercel Pro blocks native git deploys whose commit author is not on the Vercel team. Deploys now run from GitHub Actions with the owner's token (repo secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`); `vercel.json` sets `git.deploymentEnabled: false`. Production is `https://compa.lol`.
+
+## [2026-10-29] query | Where do environment variables live?
+
+- Captain decision: Vercel is the single place for env values, and the captain adds and rotates the secrets. `.env.example` lists names only; the only GitHub secrets are the three deploy-workflow ones. Recorded in `docs/api-quickstart.md`.
