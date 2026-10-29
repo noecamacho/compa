@@ -1,0 +1,18 @@
+# Changelog
+
+All notable changes to COMPA are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html). Commit types map to versions as described in `docs/git-workflow.md`.
+
+## [Unreleased]
+
+### Added
+
+- LLM wiki (`raw/`, `wiki/`) ingesting the 21-page COMPA build plan and the 14-slide Build Day deck with 34 cross-linked, cited pages, an index, an append-only log, a glossary and an open-questions page.
+- `AGENTS.md` as the single agent and contributor instruction file, including the hackathon fast path for the 2026-10-29 10:00 submission deadline; `CLAUDE.md` imports it.
+- `ARCHITECTURE.md` and `DESIGN.md` derived from the plan, with decided versus open items.
+- `docs/engineering-standards.md`: SOLID, KISS, DRY, no nesting, clean code with TypeScript examples.
+- `docs/git-workflow.md`: Conventional Commits, Semantic Versioning, branch naming, hooks and attribution rules.
+- `docs/agent-tooling.md`: caveman, ponytail, Serena and repomix usage and verified install methods.
+- `docs/jira/compa-bootstrap-ticket.md`: the COMPA Epic draft with per-phase tasks and acceptance criteria.
+- `.github/PULL_REQUEST_TEMPLATE.md` that every PR must use.
+- Git hooks in `.githooks/` (`commit-msg`, `pre-commit`, `pre-push`), `scripts/setup.sh`, the shared checker `scripts/check-commit-message.sh`, agent hook configs in `.claude/settings.json` and `.codex/hooks.json` (commit rules and no pushes to `main`), and tests in `tests/hooks/`.
+- `repomix.config.json`, `.serena/project.yml` and `.gitignore`.

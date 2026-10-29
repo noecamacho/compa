@@ -1,0 +1,17 @@
+#!/bin/sh
+# Refuses direct pushes to main and runs the hook tests before any push.
+# Git passes "<local ref> <local sha> <remote ref> <remote sha>" lines on stdin.
+set -u
+ROOT=$(git rev-parse --show-toplevel)
+
+fail() {
+  printf 'pre-push rejected: %s\n' "$1" >&2
+  exit 1
+}
+
+refs=$(cat)
+pushes_main=$(printf '%s\n' "$refs" | grep -c ' refs/heads/main ' || true)
+[ "${ALLOW_MAIN_PUSH:-0}" = "1" ] || [ "$pushes_main" -eq 0 ] || fail "direct pushes to main are not allowed; open a PR (ALLOW_MAIN_PUSH=1 only for a deliberate bootstrap push)"
+command -v jq >/dev/null 2>&1 || fail "jq is required by the hook tests; install it (brew install jq) or run scripts/setup.sh"
+"$ROOT/tests/hooks/run.sh" >/dev/null || fail "tests/hooks/run.sh failed; run it to see which case broke"
+exit 0
