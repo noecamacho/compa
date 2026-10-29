@@ -36,6 +36,7 @@ describe("errorText", () => {
     expect(errorText(new ApiClientError(401, "unauthorized", "Sign in with LinkedIn to continue."))).toBe(apiErrors.signedOut);
     expect(errorText(new ApiClientError(429, "rate_limited", "slow down"))).toBe(common.rateLimited);
     expect(errorText(new ApiClientError(503, "unknown", "Service Unavailable"))).toBe(apiErrors.server);
+    expect(errorText(new ApiClientError(503, "auth_unavailable", "Sign-in could not be checked right now."))).toBe(apiErrors.codes.auth_unavailable);
     expect(errorText(new Error("boom"))).toBe(apiErrors.generic);
   });
 

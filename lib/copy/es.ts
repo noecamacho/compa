@@ -43,6 +43,7 @@ export const apiErrors = {
     offline: "Estás sin internet. Conéctate y vuelve a intentarlo.",
     timeout: "La red está muy lenta y no respondió. Inténtalo otra vez.",
     network_error: "No pudimos conectar con Compa. Revisa tu internet e inténtalo otra vez.",
+    auth_unavailable: "No pudimos revisar tu sesión en este momento. Inténtalo otra vez en un momento.",
     invalid_input: "Revisa los datos e inténtalo otra vez.",
     handle_taken: "Alguien ya usa ese nombre de usuario. Prueba otro.",
     not_pending: "Esta solicitud ya fue respondida.",
