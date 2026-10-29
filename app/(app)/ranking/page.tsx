@@ -7,20 +7,22 @@ import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
 import { common, ranking as copy } from "@/lib/copy/es";
 import type { MonitoLook } from "@/lib/monito/look";
 
-const EMPTY_BOARD: LeaderboardT = { rows: [] };
+const NO_BOARD: LeaderboardT = { rows: [] };
 
-// Outside an event (or before it is seeded) the ranking renders empty instead of crashing (gap analysis P0-4).
-async function boardFor(slug: string | null, scope: "event" | "lifetime"): Promise<LeaderboardT> {
-  if (!slug) return EMPTY_BOARD;
-  const options = scope === "lifetime" ? { mockExample: "lifetime" } : {};
-  return (await apiGetOrNull(`/api/events/${slug}/leaderboard?scope=${scope}`, Leaderboard, options)) ?? EMPTY_BOARD;
+// Boards are reached through the current event's access code (API spec A10); out of an event they are empty.
+async function loadBoards(code: string | undefined): Promise<[LeaderboardT, LeaderboardT]> {
+  if (!code) return [NO_BOARD, NO_BOARD];
+  const [event, lifetime] = await Promise.all([
+    apiGetOrNull(`/api/e/${code}/leaderboard?scope=event`, Leaderboard),
+    apiGetOrNull(`/api/e/${code}/leaderboard?scope=lifetime`, Leaderboard, { mockExample: "lifetime" }),
+  ]);
+  return [event ?? NO_BOARD, lifetime ?? NO_BOARD];
 }
 
 // 11 Ranking: both scopes are loaded up front so the toggle is instant.
 export default async function RankingPage() {
   const me = await apiGet("/api/me", Me);
-  const slug = me.currentEvent?.slug ?? (process.env.API_MODE === "mock" ? "founders-fest" : null);
-  const [event, lifetime, list] = await Promise.all([boardFor(slug, "event"), boardFor(slug, "lifetime"), apiGet("/api/connections", ConnectionList)]);
+  const [[event, lifetime], list] = await Promise.all([loadBoards(me.currentEvent?.code), apiGet("/api/connections", ConnectionList)]);
   // Monito looks and handles come from my connections; strangers on the podium show the default monito.
   const looks: Record<string, MonitoLook | undefined> = { [me.id]: me.avatar };
   const handles: Record<string, string> = { [me.id]: me.handle };

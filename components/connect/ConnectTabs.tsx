@@ -8,8 +8,9 @@ import { Card } from "@/components/ui/Card";
 import { Screen } from "@/components/ui/Screen";
 import { Segmented } from "@/components/ui/Segmented";
 import { Muted } from "@/components/ui/Text";
+import { Tour } from "@/components/tour/Tour";
 import type { MeT } from "@/lib/api/schemas";
-import { connect as copy } from "@/lib/copy/es";
+import { connect as copy, tour } from "@/lib/copy/es";
 import { ScanPanel } from "./ScanPanel";
 
 type Tab = "qr" | "scan";
@@ -34,15 +35,17 @@ export function ConnectTabs({ me, qrSvg }: Props) {
           {copy.invite}
         </Link>
       </div>
-      <Segmented
-        label={copy.modeLabel}
-        value={tab}
-        onChange={setTab}
-        options={[
-          { value: "qr", label: copy.myQr },
-          { value: "scan", label: copy.scan },
-        ]}
-      />
+      <div data-tour="mode">
+        <Segmented
+          label={copy.modeLabel}
+          value={tab}
+          onChange={setTab}
+          options={[
+            { value: "qr", label: copy.myQr },
+            { value: "scan", label: copy.scan },
+          ]}
+        />
+      </div>
       {tab === "qr" ? (
         <div className="flex flex-col items-center gap-3">
           <Card size="sm" className="flex w-[315px] items-center gap-3 px-[14px] py-[10px]">
@@ -52,7 +55,7 @@ export function ConnectTabs({ me, qrSvg }: Props) {
               <Muted className="text-[13px] font-bold">{[me.headline, me.company, me.city?.split(",")[0]].filter(Boolean).join(" · ")}</Muted>
             </span>
           </Card>
-          <Card className="flex flex-col items-center rounded-[28px] p-[18px]">
+          <Card className="flex flex-col items-center rounded-[28px] p-[18px]" data-tour="qr">
             <div
               role="img"
               aria-label={copy.qrLabel(me.name)}
@@ -65,6 +68,7 @@ export function ConnectTabs({ me, qrSvg }: Props) {
       ) : (
         <ScanPanel />
       )}
+      <Tour id="connect" steps={tour.connect} />
     </Screen>
   );
 }

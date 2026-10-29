@@ -128,7 +128,7 @@ export async function approveSummary({ user, params, body }: InputOf<typeof R.ap
   const row = await markApproved(draft, body);
   const { event } = await requireAcceptedMembership(row.connectionId, user.id);
   await awardBadges(user, event, row.id).catch((error: unknown) => console.error("awards failed", error));
-  await broadcast({ topic: liveTopic(event.slug), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } });
+  await broadcast({ topic: liveTopic(event.accessCode), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } });
   const interaction = {
     id: row.id,
     connectionId: row.connectionId,

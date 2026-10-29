@@ -1,6 +1,7 @@
 # Deploys production through the Vercel CLI with the team owner's token, because Vercel Pro
 # blocks native git deploys whose commit author is not a member of the Vercel team.
 # No preview deployments: the captain decided only production exists (2026-10-29).
+# Database migrations run automatically on every deploy (vercel.json buildCommand).
 name: Vercel
 
 on:
@@ -27,13 +28,11 @@ jobs:
           bun-version: 1.3.10
       - name: Install Vercel CLI
         run: bun add --global vercel@60.1.3
-      - name: Pull project settings and env
-        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
-      - name: Build
-        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
-      - name: Deploy
+      # Vercel builds remotely so the build can read sensitive env values (never downloadable);
+      # the build command applies pending migrations first, and a failed migration fails the deploy.
+      - name: Deploy (migrate, then build on Vercel)
         id: deploy
-        run: echo "url=$(vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}")" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(vercel deploy --prod --yes --token="${{ secrets.VERCEL_TOKEN }}")" >> "$GITHUB_OUTPUT"
       - name: Summary
         run: |
           echo "Deployed (production): ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
