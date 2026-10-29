@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>COMPA live: Event clock</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  #cv { position: absolute; inset: 0; }
+  .panel { position: absolute; z-index: 5; }
+  #counters { left: 24px; top: 24px; display: flex; gap: 40px; padding: 10px 28px 12px; }
+  .big { font-family: var(--display); font-weight: 700; font-size: 72px; line-height: 1; }
+  .lab { font-size: 28px; font-weight: 800; color: var(--muted); line-height: 1.2; }
+  #phase { right: 24px; top: 24px; padding: 8px 26px; }
+  #phase.closing { background: var(--coral-soft); animation: pulse 1s ease-in-out infinite; }
+  #phase.ended { background: var(--sun-soft); }
+  @keyframes pulse { 50% { transform: scale(1.05); } }
+  @keyframes rise { from { transform: translateY(20px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .tag { font-family: var(--display); font-weight: 700; font-size: 40px; display: inline-flex; align-items: center; gap: 12px; }
+  #stats { right: 24px; top: 150px; width: 416px; padding: 12px 26px; font-family: var(--display); font-weight: 700; font-size: 32px; }
+  #stats div { display: flex; align-items: center; gap: 14px; margin: 4px 0; }
+  #stats i { width: 40px; height: 10px; border: 3px solid var(--ink); border-radius: 6px; box-sizing: content-box; }
+  #stats b { margin-left: auto; font-size: 56px; line-height: 1.1; }
+  #latest { right: 24px; top: 650px; width: 480px; padding: 12px 20px 14px; }
+  #latest .row { display: flex; align-items: center; justify-content: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 34px; animation: rise 350ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+  #latest .nm { max-width: 150px; }
+  #latest .meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+  .kind { padding: 2px 14px; border: 3px solid var(--ink); border-radius: 999px; font-family: var(--display); font-weight: 700; font-size: 28px; }
+  #qr { left: 24px; bottom: 24px; padding: 14px 14px 10px; text-align: center; }
+  #qr svg, #invite svg { display: block; border: 3px solid var(--ink); border-radius: 10px; margin: 0 auto; }
+  #qr .lab, #invite .lab { color: var(--ink); font-family: var(--display); font-weight: 700; margin-top: 6px; }
+  #invite { right: 24px; top: 170px; width: 416px; padding: 18px 20px 20px; text-align: center; }
+  #invite .t { font-family: var(--display); font-weight: 700; font-size: 36px; line-height: 1.12; margin-bottom: 12px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <canvas id="cv" width="1920" height="1080"></canvas>
+  <div class="panel card" id="counters"></div>
+  <div class="panel card" id="phase"></div>
+  <div class="panel card hidden" id="stats"></div>
+  <div class="panel card hidden" id="latest"></div>
+  <div class="panel card" id="qr"></div>
+  <div class="panel card hidden" id="invite"></div>
+</div>
+<script src="_shared.js"></script>
+<script>
+(async () => {
+  const { COLORS: C, copy, fmt, opts: O } = COMPA;
+  const W = 1920, H = 1080, CX = 960, CY = 565, RI = 255, RO = 330, RT = 342, BINS = 240, MAXH = 90;
+  if (O.reduced) document.body.classList.add("reduced");
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const $ = (id) => document.getElementById(id);
+  try { await Promise.race([Promise.all([document.fonts.load("700 28px Fredoka"), document.fonts.load("900 28px Nunito")]), new Promise((r) => setTimeout(r, 1500))]); } catch (e) {}
+  const es = O.locale === "es", TAU = Math.PI * 2;
+  const clean = (s) => String(s || "?").trim().replace(/\s+/g, " ") || "?";
+  const first = (s) => clean(s).split(" ")[0];
+  const esc = (t) => String(t).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+  const F = (z) => `700 ${z}px Fredoka, Nunito, sans-serif`;
+  const dur = (sec) => { const m = Math.round(sec / 60); return m < 60 ? m + "m" : Math.floor(m / 60) + ":" + String(m % 60).padStart(2, "0"); };
+  const T = { closing: es ? "¡Últimos minutos!" : "Closing soon", peak: es ? "Pico" : "Peak" };
+
+  let model = null, scn = null, stamp = 0, bins = null, maxBin = 0, peak = null, dirty = true, sigK = "";
+  const simNow = () => (model ? model.now + (O.speed > 0 ? Math.min(0.6, ((performance.now() - stamp) / 1000) * O.speed) : 0) : 0);
+  const ang = (f) => -Math.PI / 2 + TAU * Math.min(1, Math.max(0, f));
+
+  function buildBins(s, sc) {
+    const len = s.eventLength, n = new Array(BINS).fill(0), r = new Array(BINS).fill(0);
+    for (const c of s.connections) { const b = Math.min(BINS - 1, Math.max(0, Math.floor(((c.t - sc.eventStartsAtSec) / len) * BINS))); (c.kind === "new" ? n : r)[b]++; }
+    bins = { n, r }; maxBin = 0; peak = null;
+    let pi = null;
+    for (let i = 0; i < BINS; i++) { const tot = n[i] + r[i]; if (tot > maxBin) { maxBin = tot; pi = i; } }
+    if (pi === null || maxBin < 4) return;
+    const t0 = sc.eventStartsAtSec + (pi / BINS) * len, win = Math.max(60, len / BINS);
+    const inWin = s.connections.filter((c) => c.t >= t0 && c.t < t0 + win).length;
+    peak = { i: pi, perMin: Math.round((inWin / win) * 60) };
+  }
+
+  function annulus(r0, r1, a0, a1) { ctx.beginPath(); ctx.arc(CX, CY, r1, a0, a1); ctx.arc(CX, CY, r0, a1, a0, true); ctx.closePath(); }
+  function fitText(txt, maxW, start, min) { let z = start; ctx.font = F(z); while (z > min && ctx.measureText(txt).width > maxW) { z -= 4; ctx.font = F(z); } return z; }
+  const tickLen = (tot) => 24 + (MAXH - 24) * Math.pow(tot / maxBin, 0.7);
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    if (!model) return;
+    const s = model, now = simNow(), len = s.eventLength, fEl = Math.min(1, Math.max(0, (now - scn.eventStartsAtSec) / len));
+    const closing = s.phase === "closing", ended = s.phase === "ended", pre = s.phase === "pre";
+    ctx.beginPath(); ctx.arc(CX + 8, CY + 8, RO + 2, 0, TAU); ctx.fillStyle = C.ink; ctx.fill();
+    ctx.beginPath(); ctx.arc(CX, CY, RO, 0, TAU); ctx.fillStyle = "#fff"; ctx.fill();
+    if (len > 900) { annulus(RI, RO, ang(1 - 600 / len), ang(1)); ctx.fillStyle = C.coralSoft; ctx.fill(); } // closing zone
+    if (fEl > 0.0005) { annulus(RI + 7, RO - 7, ang(0), ang(fEl)); ctx.fillStyle = closing ? C.coral : C.mint; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = C.ink; ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(CX, CY, RO, 0, TAU); ctx.lineWidth = 5; ctx.strokeStyle = C.ink; ctx.stroke();
+    ctx.beginPath(); ctx.arc(CX, CY, RI, 0, TAU); ctx.stroke();
+    ctx.fillStyle = C.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "900 28px Nunito, sans-serif";
+    for (const q of [0.25, 0.5, 0.75]) { const a = ang(q), r = (RI + RO) / 2; ctx.fillText(dur(len * q), CX + Math.cos(a) * r, CY + Math.sin(a) * r + 1); }
+    ctx.beginPath(); ctx.moveTo(CX, CY - RI + 2); ctx.lineTo(CX, CY - RT - 8); ctx.lineWidth = 5; ctx.strokeStyle = C.ink; ctx.stroke();
+    // connection ticks: one bar per time bin, height = burst, mint new + gum reconnection stacked
+    ctx.lineCap = "butt";
+    const bw = Math.min(11, ((TAU * RT) / BINS) * 0.72), hasAny = maxBin > 0;
+    if (!hasAny) { ctx.fillStyle = "rgba(30,27,46,0.3)"; for (let i = 0; i < BINS; i += 3) { const a = ang((i + 0.5) / BINS); ctx.beginPath(); ctx.arc(CX + Math.cos(a) * (RT + 12), CY + Math.sin(a) * (RT + 12), 4, 0, TAU); ctx.fill(); } }
+    for (let i = 0; i < BINS && hasAny; i++) {
+      const nn = bins.n[i], rr = bins.r[i], tot = nn + rr; if (!tot) continue;
+      const a = ang((i + 0.5) / BINS), ca = Math.cos(a), sa = Math.sin(a), h = tickLen(tot), hn = h * (nn / tot);
+      const bar = (r0, r1, w, col) => { ctx.beginPath(); ctx.moveTo(CX + ca * r0, CY + sa * r0); ctx.lineTo(CX + ca * r1, CY + sa * r1); ctx.lineWidth = w; ctx.strokeStyle = col; ctx.stroke(); };
+      const binT0 = scn.eventStartsAtSec + (i / BINS) * len, isFresh = now >= binT0 && now - binT0 < 5 + len / BINS;
+      ctx.save();
+      if (isFresh && !O.reduced) { ctx.shadowColor = C.mint; ctx.shadowBlur = 26; }
+      bar(RT - 1, RT + h + 1.5, bw + 4, C.ink);
+      ctx.restore();
+      if (nn) bar(RT, RT + hn, bw, C.mint);
+      if (rr) bar(RT + hn, RT + h, bw, C.gum);
+    }
+    if (peak) {
+      const a = ang((peak.i + 0.5) / BINS), txt = `${T.peak} ${peak.perMin}/min`;
+      ctx.font = "900 28px Nunito, sans-serif"; const w = ctx.measureText(txt).width + 28;
+      const r = RT + tickLen(maxBin) + 34; let x = CX + Math.cos(a) * r - w / 2, y = CY + Math.sin(a) * r - 22;
+      x = Math.min(W - w - 8, Math.max(8, x)); y = Math.max(96, Math.min(H - 60, y));
+      ctx.beginPath(); ctx.roundRect(x, y, w, 44, 14); ctx.fillStyle = C.sunSoft; ctx.fill(); ctx.lineWidth = 3.5; ctx.strokeStyle = C.ink; ctx.stroke();
+      ctx.fillStyle = C.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(txt, x + w / 2, y + 23);
+    }
+    if (!pre) { // now knob
+      const a = ang(fEl), kx = CX + Math.cos(a) * ((RI + RO) / 2), ky = CY + Math.sin(a) * ((RI + RO) / 2);
+      ctx.beginPath(); ctx.arc(kx, ky, 26 + (closing && !O.reduced ? 5 * Math.sin(performance.now() / 160) : 0), 0, TAU); ctx.fillStyle = C.sun; ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = C.ink; ctx.stroke();
+    }
+    // center readout
+    const ps = closing && !O.reduced ? 1 + 0.03 * Math.sin(performance.now() / 160) : 1;
+    ctx.save(); ctx.translate(CX, CY); ctx.scale(ps, ps); ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+    const lab = (t, y, size, col) => { ctx.font = F(size); ctx.fillStyle = col; ctx.fillText(t, 0, y); };
+    if (ended) {
+      let z = fitText(copy.ended, 400, 72, 40); lab(copy.ended, -10, z, C.ink);
+      const t1 = `${fmt(s.counters.checkedIn)} ${copy.people.toLowerCase()}`, t2 = `${fmt(s.counters.connections)} ${copy.connections.toLowerCase()}`;
+      z = fitText(t2, 400, 52, 32); lab(t1, 60, z, C.muted); lab(t2, 60 + z + 10, z, C.muted);
+    } else if (pre) {
+      lab(copy.startsIn, -50, 52, C.muted);
+      const t = COMPA.clock(Math.max(0, scn.eventStartsAtSec - now)), z = fitText(t, 410, 150, 80); lab(t, 70, z, C.ink);
+    } else {
+      const t = COMPA.clock(s.remaining), z = fitText(t, 410, 160, 80);
+      lab(t, z * 0.3, z, closing ? "#C93A1C" : C.ink);
+      lab(copy.left, z * 0.3 + 62, 52, C.muted);
+      if (closing) lab(T.closing, z * 0.3 + 120, 40, "#C93A1C");
+    }
+    ctx.restore();
+  }
+
+  const sig = {};
+  const setHTML = (id, html) => { if (sig[id] !== html) { sig[id] = html; $(id).innerHTML = html; } };
+  function overlays(s) {
+    const empty = s.people.length === 0, has = s.connections.length > 0;
+    setHTML("counters", `<div><div class="big num">${fmt(s.counters.checkedIn)}</div><div class="lab">${copy.people}</div></div><div><div class="big num">${fmt(s.counters.connections)}</div><div class="lab">${copy.connections}</div></div>`);
+    $("phase").className = "panel card " + s.phase;
+    setHTML("phase", s.phase === "ended" ? `<span class="tag">${copy.ended}</span>` : s.phase === "pre" ? `<span class="tag">${copy.startsIn}</span>` : `<span class="tag"><span class="live-dot" style="background:${s.phase === "closing" ? C.coral : "#fff"}"></span>${copy.live}</span>`);
+    $("qr").classList.toggle("hidden", empty); setHTML("qr", `${COMPA.fakeQr(220)}<div class="lab">${copy.scan}</div>`);
+    $("invite").classList.toggle("hidden", !empty); setHTML("invite", `<div class="t">${copy.noActivity}</div>${COMPA.fakeQr(280)}<div class="lab">${copy.scan}</div>`);
+    $("stats").classList.toggle("hidden", empty);
+    setHTML("stats", `<div><i style="background:${C.mint}"></i>${es ? "Nueva" : "New"}<b class="num">${fmt(s.counters.newCount)}</b></div><div><i style="background:${C.gum}"></i>${es ? "Reencuentro" : "Reconnection"}<b class="num">${fmt(s.counters.reconnections)}</b></div>`);
+    $("latest").classList.toggle("hidden", !has);
+    if (!has) return;
+    const c = s.connections[s.connections.length - 1], a = s.byId.get(c.a), b = s.byId.get(c.b), isNew = c.kind === "new";
+    setHTML("latest", `<div class="row">${COMPA.avatar(a, 56)}<span class="nm truncate">${esc(first(a.display))}</span><span>⇄</span><span class="nm truncate">${esc(first(b.display))}</span>${COMPA.avatar(b, 56)}</div><div class="meta"><span class="kind" style="background:${isNew ? C.mintSoft : C.gumSoft}">${isNew ? copy.met : copy.reconnected}</span><span class="lab num">${COMPA.clock(Math.max(0, s.now - c.t))} ${copy.ago || ""}</span></div>`);
+  }
+
+  function render(s, sc) {
+    model = s; scn = sc; stamp = performance.now();
+    const k = s.connections.length + ":" + s.eventLength;
+    if (k !== sigK) { sigK = k; buildBins(s, sc); }
+    overlays(s); dirty = true;
+    if (O.reduced) draw();
+  }
+  window.__perf = { frames: 0, drawMs: 0 };
+  function frame() {
+    requestAnimationFrame(frame);
+    if (O.reduced) return;
+    // Redraw only while something moves (closing pulse, fresh glow) or the state changed.
+    const last = model && model.connections[model.connections.length - 1];
+    const recent = last && simNow() - last.t < 5.2 + model.eventLength / BINS;
+    if (!(dirty || recent || (model && model.phase === "closing"))) return;
+    const t0 = performance.now(); draw(); dirty = false; window.__perf.frames++; window.__perf.drawMs += performance.now() - t0;
+  }
+  requestAnimationFrame(frame);
+  COMPA.run(render, { tickMs: 250 });
+})();
+</script>
+</body>
+</html>

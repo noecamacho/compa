@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>COMPA finale (end-of-event awards)</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.stale-pill { top: 18px !important; }
+.top { position: absolute; left: 40px; right: 40px; top: 24px; display: flex; justify-content: space-between; align-items: center; z-index: 30; }
+.brand { font: 700 56px/1 var(--display); display: flex; gap: 20px; align-items: center; }
+.brand .pill { font-size: 30px; background: var(--silver); }
+.dots { position: absolute; left: 0; right: 0; bottom: 22px; display: flex; justify-content: center; gap: 16px; z-index: 30; }
+.dots i { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--ink); background: #fff; transition: background 300ms, transform 300ms; }
+.dots i.on { background: var(--sun); transform: scale(1.35); }
+.scene { position: absolute; inset: 0; padding: 130px 70px 80px; opacity: 0; visibility: hidden; transform: translateY(24px); transition: opacity 500ms, transform 500ms, visibility 0s 500ms; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 36px; text-align: center; }
+.scene.on { opacity: 1; visibility: visible; transform: none; transition: opacity 500ms, transform 500ms; }
+.kicker { font: 700 64px/1.1 var(--display); color: var(--muted); margin: 0; }
+.big { font: 700 150px/1 var(--display); margin: 0; }
+.tiles { display: flex; gap: 40px; width: 100%; justify-content: center; }
+.tile { flex: 1; max-width: 560px; padding: 30px 20px; }
+.tile b { display: block; font: 700 200px/1 var(--display); font-variant-numeric: tabular-nums; }
+.tile span { font: 700 56px/1.1 var(--display); }
+.topic { padding: 40px 90px; background: var(--sun); border: 5px solid var(--ink); box-shadow: var(--hard-8); border-radius: 80px; font: 700 190px/1.25 var(--display); max-width: 1700px; }
+.chips { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+.chip { padding: 10px 30px; border: 4px solid var(--ink); border-radius: 999px; background: #fff; font: 700 44px/1.3 var(--display); box-shadow: var(--hard-4); max-width: 620px; }
+.cards { display: flex; gap: 50px; width: 100%; justify-content: center; align-items: stretch; }
+.award { flex: 1; max-width: 800px; min-width: 0; padding: 36px 30px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.award h3 { margin: 0; font: 700 52px/1.2 var(--display); max-width: 100%; }
+.award .who { display: flex; gap: 6px; justify-content: center; }
+.award .who .av { margin-left: -18px; } .award .who .av:first-child { margin-left: 0; }
+.award .nm, .col .nm { unicode-bidi: isolate; } .award .nm { font: 700 64px/1.25 var(--display); max-width: 100%; }
+.award .val { font: 700 120px/1 var(--display); font-variant-numeric: tabular-nums; }
+.award .sub { font: 800 36px/1.3 var(--body); color: var(--muted); max-width: 100%; }
+.pod { display: flex; align-items: flex-end; gap: 30px; height: 640px; }
+.col { width: 460px; display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+.col .nm { font: 700 52px/1.25 var(--display); max-width: 100%; }
+.col .pts { font: 800 44px var(--body); }
+.step { width: 100%; border: 5px solid var(--ink); border-radius: 22px 22px 0 0; box-shadow: var(--hard-6); display: flex; align-items: flex-start; justify-content: center; padding-top: 10px; font: 700 130px/1 var(--display); }
+.run .col { animation: rise 700ms cubic-bezier(.2,.9,.3,1.2) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(120px) scale(.9); } }
+.conf { position: absolute; top: -40px; width: 18px; height: 28px; border: 2px solid var(--ink); z-index: 5; pointer-events: none; }
+.run .conf { animation: fall 3.2s linear var(--d) both; }
+@keyframes fall { to { transform: translateY(1250px) rotate(540deg); } }
+.static .conf { top: var(--fy); transform: rotate(var(--r)); }
+.reduced .conf { display: none; }
+.thanks { font: 700 140px/1.1 var(--display); margin: 0; }
+.closer { display: flex; gap: 70px; align-items: center; }
+.closer .qrcard { padding: 22px; background: var(--sun); text-align: center; }
+.closer .qrbox { background: #fff; border: 5px solid var(--ink); border-radius: 18px; padding: 12px; line-height: 0; }
+.closer .cap { font: 700 40px/1.15 var(--display); margin-top: 14px; max-width: 330px; }
+.all { display: grid; grid-template-columns: repeat(4, 440px); gap: 8px 24px; padding: 20px; position: absolute; inset: 0; align-content: start; }
+.thumb { width: 440px; height: 248px; position: relative; overflow: hidden; border: 3px solid var(--ink); background: var(--paper); }
+.thumb .frame { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; transform: scale(.2292); transform-origin: 0 0; }
+.thumb .scene { opacity: 1; visibility: visible; transform: none; }
+.lbl { font: 800 20px var(--body); }
+</style></head>
+<body><div class="stage" id="stage"></div>
+<script src="_shared.js"></script>
+<script>
+const { opts, COLORS, fmt, avatar, fakeQr } = COMPA;
+const es = opts.locale === "es", T = (a, b) => (es ? b : a);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const stage = document.getElementById("stage");
+document.body.classList.toggle("reduced", opts.reduced);
+const sceneParam = new URLSearchParams(location.search).get("scene");
+const STATIC = opts.reduced || opts.shot; // no staged reveal: show the end state
+const BADGE_NAMES = { apreton: "Primer apretón", madrugador: "Madrugador", cierre: "Cierre", iman: "Imán", maraton: "Maratón", tresdetres: "Tres de tres", puente: "Puente", duo: "Dúo dinámico", ff2026: "Founders Fest 2026", og: "OG", rey: "Rey del reencuentro", speaker: "Con el speaker", noctambulo: "Noctámbulo", cazatalentos: "Cazatalentos", conector100: "Conector 100", trotamundos: "Trotamundos", curioso: "Curioso", memoria: "Memoria de elefante", quinientos: "500 en la noche", cuatro: "Cuatro trimestres" };
+const plural = (n, one, many) => `${fmt(n)} ${n === 1 ? one : many}`;
+
+// "Ana", "Ana & Luis", "Ana, Luis +3": tied winners share the award.
+function names(list) {
+  if (list.length === 1) return list[0].display;
+  const first = (p) => p.display.trim().split(/\s+/)[0];
+  return list.length === 2 ? `${first(list[0])} & ${first(list[1])}` : `${first(list[0])}, ${first(list[1])} +${list.length - 2}`;
+}
+const tops = (people, score) => { // winners with the max positive score
+  let max = 0, out = [];
+  for (const p of people) { const v = score(p); if (v > max) { max = v; out = [p]; } else if (v === max && v > 0) out.push(p); }
+  return { max, winners: out };
+};
+
+function computeAwards(s, scn) {
+  const out = [];
+  const add = (key, title, winners, value, sub, tint) => winners.length && out.push({ key, title, winners, value, sub, tint });
+  const conn = tops(s.people, (p) => p.connections);
+  add("most", T("Most connections", "Más conexiones"), conn.winners, conn.max, "", COLORS.mintSoft);
+  const rec = new Map();
+  for (const c of s.connections) if (c.kind === "reconnection") for (const id of [c.a, c.b]) rec.set(id, (rec.get(id) || 0) + 1);
+  const rc = tops(s.people, (p) => rec.get(p.id) || 0);
+  add("rec", T("Most reconnections", "Más reencuentros"), rc.winners, rc.max, "", COLORS.gumSoft);
+  const nt = tops(s.people, (p) => p.summaries);
+  add("notes", T("Top note-taker", "Más notas"), nt.winners, nt.max, T("notes saved", "notas guardadas"), COLORS.skySoft);
+  const first = s.connections[0];
+  if (first) add("early", T("Early bird", "Madrugadores"), [s.byId.get(first.a), s.byId.get(first.b)].filter(Boolean), null, T("made the first connection", "primera conexión de la noche"), COLORS.sunSoft);
+  const lastFrom = scn.eventEndsAtSec - 600, lastCount = new Map();
+  for (const c of s.connections) if (c.t >= lastFrom && c.t <= scn.eventEndsAtSec) for (const id of [c.a, c.b]) lastCount.set(id, (lastCount.get(id) || 0) + 1);
+  const lm = tops(s.people, (p) => lastCount.get(p.id) || 0);
+  add("last", T("Last-minute connector", "Conector de último minuto"), lm.winners, lm.max, T("connections in the last 10 min", "conexiones en los últimos 10 min"), COLORS.coralSoft);
+  const bd = tops(s.people, (p) => p.badges.length);
+  add("badge", T("Badge hunter", "Cazador de insignias"), bd.winners, bd.max, T("badges earned", "insignias ganadas"), COLORS.sunSoft);
+  return out;
+}
+
+function awardCard(a) {
+  const nm = names(a.winners);
+  return `<div class="card award" style="background:${a.tint}"><h3 class="truncate">${esc(a.title)}</h3>
+    <div class="who">${a.winners.slice(0, 3).map((p) => avatar(p, 150)).join("")}</div>
+    <div class="nm truncate">${esc(nm)}</div>
+    ${a.value != null ? `<div class="val">${fmt(a.value)}</div>` : ""}${a.sub ? `<div class="sub truncate">${esc(a.sub)}</div>` : ""}
+    ${a.winners.length > 1 && a.key !== "early" ? `<div class="sub">${T("shared award", "premio compartido")}</div>` : ""}</div>`;
+}
+
+function podium(s) {
+  const top = s.leaderboard.slice(0, 3);
+  const fill = [COLORS.sun, COLORS.silver, COLORS.bronze], height = [340, 250, 170];
+  const order = top.length === 3 ? [1, 0, 2] : top.length === 2 ? [1, 0] : [0]; // silver left, gold centre, bronze right
+  const delay = [3.0, 1.6, 0.2]; // 3rd place first, then 2nd, then 1st
+  const cols = order.map((i) => { const p = top[i], r = Math.min(p.rank - 1, 2);
+    return `<div class="col" style="animation-delay:${delay[i]}s"><span style="font:700 40px var(--display);height:44px">${p.tied ? T("tie", "empate") : ""}</span>${avatar(p, 170)}<div class="nm truncate">${esc(p.display)}</div><div class="pts">${fmt(p.points)} ${T("pts", "pts")}</div><div class="step" style="height:${height[r]}px;background:${fill[r]}">${p.rank}</div></div>`; }).join("");
+  const colors = [COLORS.mint, COLORS.sky, COLORS.sun, COLORS.gum, COLORS.coral];
+  const conf = Array.from({ length: 70 }, (_, i) => `<i class="conf" style="left:${(i * 137) % 1900}px;background:${colors[i % 5]};--d:${3.0 + (i % 9) * 0.12}s;--fy:${(i * 53) % 900 + 100}px;--r:${(i * 41) % 180}deg"></i>`).join("");
+  const extra = s.leaderboard.filter((p) => p.rank === top[top.length - 1].rank).length - top.filter((p) => p.rank === top[top.length - 1].rank).length;
+  const more = extra > 0 ? `<div class="kicker" style="color:var(--ink);font-size:48px">+${fmt(extra)} ${T("more tied at the same rank", "más empatadas en el mismo lugar")}</div>` : "";
+  return `<h2 class="kicker">${T("Tonight's podium", "El podio de la noche")}</h2><div class="pod">${cols}</div>${more}${conf}`;
+}
+
+function buildScenes(s, scn) {
+  const sc = [], c = s.counters;
+  const closer = `<h2 class="thanks">${T("Thanks for coming!", "¡Gracias por venir!")}</h2>
+    <div class="closer"><div class="card qrcard"><div class="qrbox">${fakeQr(330, "compa-profile")}</div><div class="cap">${T("Scan to see your profile and connections", "Escanea para ver tu perfil y tus conexiones")}</div></div>
+    <div style="text-align:left;max-width:900px"><div class="kicker" style="color:var(--ink)">${T("See you at the next event", "Nos vemos en el próximo evento")}</div>${c.checkedIn ? `<div class="kicker" style="margin-top:14px">${plural(c.checkedIn, T("person", "persona"), T("people", "personas"))} · ${plural(c.connections, T("connection", "conexión"), T("connections", "conexiones"))}</div>` : ""}</div></div>`;
+  if (!c.checkedIn) return [{ id: "closer", html: closer, ms: 1e9 }];
+  sc.push({ id: "recap", ms: 6000, html: `<h2 class="kicker">${T("What a night", "Qué noche")}</h2><div class="tiles">
+    <div class="card tile" style="background:${COLORS.skySoft}"><b>${fmt(c.checkedIn)}</b><span>${c.checkedIn === 1 ? T("person", "persona") : T("people", "personas")}</span></div>
+    <div class="card tile" style="background:${COLORS.sunSoft}"><b>${fmt(c.connections)}</b><span>${c.connections === 1 ? T("connection", "conexión") : T("connections", "conexiones")}</span></div>
+    <div class="card tile" style="background:${COLORS.mintSoft}"><b>${fmt(c.summaries)}</b><span>${c.summaries === 1 ? T("note", "nota") : T("notes", "notas")}</span></div></div>` });
+  const t = s.topics[0];
+  if (t) sc.push({ id: "topic", ms: 6000, html: `<h2 class="kicker">${T("Top topic of the night", "El tema de la noche")}</h2><div class="topic truncate">${esc(t.name)}</div>
+    <div class="kicker" style="color:var(--ink)">${plural(t.connections, T("connection", "conexión"), T("connections", "conexiones"))}${t.summaries ? ` · ${plural(t.summaries, T("note", "nota"), T("notes", "notas"))}` : ""}</div>
+    <div class="chips">${s.topics.slice(1, 4).map((x) => `<span class="chip truncate">${esc(x.name)}</span>`).join("")}</div>` });
+  const awards = computeAwards(s, scn);
+  for (let i = 0; i < awards.length; i += 2) sc.push({ id: "awards" + i / 2, ms: 6500, html: `<h2 class="kicker">${T("Awards", "Premios")}</h2><div class="cards">${awards.slice(i, i + 2).map(awardCard).join("")}</div>` });
+  const badgeCount = new Map();
+  for (const b of s.badges) badgeCount.set(b.badge, (badgeCount.get(b.badge) || 0) + 1);
+  if (badgeCount.size) { const top = [...badgeCount].sort((a, b) => b[1] - a[1]).slice(0, 4); sc.push({ id: "badges", ms: 6000, html: `<h2 class="kicker">${T("Badges earned tonight", "Insignias de la noche")}</h2><div class="big">${fmt(s.badges.length)}</div><div class="chips">${top.map(([id, n]) => `<span class="chip truncate">${esc(BADGE_NAMES[id] || id)} · ${fmt(n)}</span>`).join("")}</div>` }); }
+  if (s.leaderboard[0]?.points > 0) sc.push({ id: "podium", ms: 9000, podium: true, html: podium(s) });
+  sc.push({ id: "closer", ms: 1e9, html: closer });
+  return sc;
+}
+
+function mountScene(parent, sc, cls) {
+  const d = document.createElement("section");
+  d.className = "scene " + (cls || "");
+  d.dataset.id = sc.id; d.innerHTML = sc.html; parent.appendChild(d);
+  return d;
+}
+
+let scenes = [], sig = "", nodes = [], dots, cur = -1, timer = null;
+function show(i) {
+  if (i === cur) return;
+  nodes.forEach((n, k) => { n.classList.toggle("on", k === i); n.classList.toggle("run", k === i && !STATIC && Boolean(scenes[k].podium)); n.classList.toggle("static", STATIC); });
+  [...dots.children].forEach((d, k) => d.classList.toggle("on", k === i));
+  cur = i;
+  clearTimeout(timer);
+  if (sceneParam !== null || i >= scenes.length - 1) return; // forced or last scene: stay
+  timer = setTimeout(() => show(i + 1), scenes[i].ms);
+}
+
+COMPA.run((s, scn) => {
+  const next = buildScenes(s, scn);
+  const nextSig = JSON.stringify(next.map((x) => x.html));
+  if (nextSig === sig) return;
+  sig = nextSig; scenes = next; cur = -1; clearTimeout(timer);
+  stage.innerHTML = sceneParam === "all" ? "" : `<div class="top"><div class="brand">compa <span class="pill">${T("Event ended", "Evento terminado")}</span></div>${s.phase !== "ended" ? `<span class="pill" style="background:var(--sun-soft);font-size:28px">${T("preview: event still running", "vista previa: el evento sigue")}</span>` : ""}</div>`;
+  if (sceneParam === "all") {
+    const grid = document.createElement("div"); grid.className = "all";
+    scenes.forEach((sc) => { const cell = document.createElement("div"); cell.innerHTML = `<div class="lbl">${sc.id}</div><div class="thumb"><div class="frame"></div></div>`; mountScene(cell.querySelector(".frame"), sc, "static"); grid.appendChild(cell); });
+    stage.appendChild(grid); return;
+  }
+  nodes = scenes.map((sc) => mountScene(stage, sc));
+  dots = document.createElement("div"); dots.className = "dots"; dots.innerHTML = scenes.length > 1 ? scenes.map(() => "<i></i>").join("") : ""; stage.appendChild(dots);
+  const n = Number(sceneParam);
+  show(sceneParam !== null && !Number.isNaN(n) ? Math.min(scenes.length - 1, Math.max(0, n - 1)) : 0);
+}, { tickMs: 2000 });
+</script></body></html>

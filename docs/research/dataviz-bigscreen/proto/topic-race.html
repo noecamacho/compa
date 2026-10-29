@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>COMPA live: topic-race</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.top { position: absolute; left: 40px; right: 40px; top: 18px; height: 92px; display: flex; align-items: center; gap: 24px; }
+.logo { font: 700 60px/1 var(--display); letter-spacing: 1px; }
+#pill { font-size: 32px; padding: 8px 22px; background: var(--mint); white-space: nowrap; }
+#pill.closing { background: var(--coral); }
+#pill.ended { background: var(--sun); }
+#pill.pre { background: var(--sky); }
+#clk { margin-left: auto; font: 700 60px/1 var(--display); white-space: nowrap; }
+#clk small { font-size: 32px; color: var(--muted); font-weight: 600; margin-left: 8px; }
+#main { position: absolute; left: 40px; top: 130px; width: 1200px; height: 910px; }
+.side { position: absolute; left: 1280px; top: 130px; width: 600px; height: 910px; }
+.cnt { position: absolute; left: 0; width: 600px; height: 128px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; }
+.cnt span { font: 700 34px/1.1 var(--display); }
+.cnt b { font: 700 84px/1 var(--display); font-variant-numeric: tabular-nums; display: inline-block; transition: transform .25s ease-out; }
+.cnt b.bump { transform: scale(1.18); }
+.sidecard { position: absolute; left: 0; top: 436px; width: 600px; height: 474px; padding: 24px; }
+.qrcard { display: flex; flex-direction: column; align-items: center; gap: 16px; background: #fff; }
+.qrcard svg, .invqr svg { border: 4px solid var(--ink); border-radius: 12px; display: block; }
+.qrcard b { font: 700 46px/1 var(--display); }
+.qrcard i, .invqr i { font: 800 28px/1 var(--body); font-style: normal; color: var(--muted); }
+.howto { background: var(--sun-soft); display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+.howto h3 { margin: 0; font: 700 44px/1.1 var(--display); }
+.howto div { display: flex; align-items: center; gap: 18px; font: 800 34px/1.15 var(--body); }
+.howto div em { flex: none; width: 60px; height: 60px; border-radius: 50%; border: 4px solid var(--ink); background: #fff; display: grid; place-items: center; font: 700 36px/1 var(--display); font-style: normal; }
+.invite { position: absolute; inset: 0; display: flex; align-items: center; gap: 40px; padding: 40px 48px; background: var(--sun-soft); }
+.invite .it { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 26px; }
+.invite h1 { margin: 0; font: 700 84px/1.02 var(--display); }
+.invite p { margin: 0; font: 800 38px/1.25 var(--body); color: var(--ink); }
+.invqr { flex: none; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.invqr b { font: 700 44px/1 var(--display); }
+.here { display: flex; align-items: center; gap: 0; font: 700 38px/1 var(--display); }
+.here .av { margin-right: -16px; border-width: 4px; }
+.here span { margin-left: 32px; }
+.pulse { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.03); } }
+.final { position: absolute; z-index: 20; font: 700 64px/1 var(--display); padding: 10px 28px; background: var(--sun); border: 4px solid var(--ink); border-radius: 18px; box-shadow: var(--hard-6); transform: rotate(4deg); }
+#legend { position: absolute; left: 0; top: 0; display: flex; gap: 28px; font: 800 28px/1 var(--body); align-items: center; height: 44px; }
+#legend span { display: inline-flex; align-items: center; gap: 10px; }
+#legend i { width: 30px; height: 30px; border: 3px solid var(--ink); border-radius: 8px; display: inline-block; }
+#race { position: absolute; left: 0; top: 56px; right: 0; bottom: 0; }
+.row, .gr { position: absolute; left: 0; width: 1200px; height: 94px; }
+.row { transition: transform .5s cubic-bezier(.3,.9,.3,1), opacity .35s; }
+.row .lab { position: absolute; left: 0; top: 0; width: 340px; height: 94px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+.row .nm { font: 700 40px/44px var(--display); }
+.row .tag { align-self: flex-start; font: 700 28px/1 var(--display); padding: 3px 12px; background: var(--coral); border: 3px solid var(--ink); border-radius: 999px; display: none; }
+.row.rising .tag { display: inline-block; }
+.row .bar { position: absolute; left: 350px; top: 11px; height: 72px; width: var(--w, 20px); display: flex; border: 4px solid var(--ink); border-radius: 16px; overflow: hidden; box-shadow: var(--hard-4); background: #fff; transition: width .5s cubic-bezier(.3,.9,.3,1); min-width: 20px; }
+.row .bar i { display: block; height: 100%; flex: none; transition: width .5s cubic-bezier(.3,.9,.3,1); }
+.row .bar .c { background: var(--mint); } .row .bar .s { background: var(--sun); border-left: 4px solid var(--ink); }
+.row .bar .s[style*="width:0px"] { border-left: 0; }
+.row .val { position: absolute; top: 0; left: calc(350px + var(--w, 20px) + 18px); height: 94px; display: flex; align-items: center; font: 700 68px/1 var(--display); font-variant-numeric: tabular-nums; transition: left .5s cubic-bezier(.3,.9,.3,1); }
+.row.hit .bar { animation: flash .6s ease-out; }
+@keyframes flash { 0% { filter: brightness(1.25) saturate(1.3); } 100% { filter: none; } }
+.gr { border: 4px dashed rgba(30,27,46,.28); border-radius: 16px; left: 350px; width: 830px; height: 72px; margin-top: 11px; display: flex; align-items: center; padding-left: 24px; font: 700 34px/1 var(--display); color: var(--muted); }
+</style></head>
+<body><div class="stage"></div>
+<script src="_shared.js"></script>
+<script>
+const C = COMPA, K = C.COLORS, O = C.opts, ES = O.locale === "es";
+if (O.reduced) document.body.classList.add("reduced");
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const TC = ES
+  ? { connections: "Conexiones", checkedIn: "Registrados", notes: "Notas", scan: "Escanea para entrar", left: "restante", final: "FINAL", startsIn: "Empieza en", closing: "ÚLTIMOS 10 MIN", howTitle: "Así se juega", steps: ["Escanea el QR", "Saluda a alguien", "Sube en el ranking"], here: "ya están aquí", hereOne: "ya está aquí" }
+  : { connections: "Connections", checkedIn: "Checked in", notes: "Notes", scan: "Scan to join", left: "left", final: "FINAL", startsIn: "Starts in", closing: "LAST 10 MIN", howTitle: "How it works", steps: ["Scan the QR", "Say hi to someone", "Climb the board"], here: "here already", hereOne: "is here" };
+const QR_URL = "compa.app/e/demo";
+document.querySelector(".stage").insertAdjacentHTML("afterbegin", `
+<header class="top"><div class="logo">COMPA</div><div id="pill" class="pill"></div><div id="clk"></div></header>
+<main id="main"></main>
+<aside class="side">
+ <div class="cnt card" style="top:0;background:var(--mint-soft)"><span>${TC.connections}</span><b id="c1">0</b></div>
+ <div class="cnt card" style="top:140px;background:var(--sky-soft)"><span>${TC.checkedIn}</span><b id="c2">0</b></div>
+ <div class="cnt card" style="top:280px;background:var(--gum-soft)"><span>${TC.notes}</span><b id="c3">0</b></div>
+ <div id="qrc" class="sidecard card qrcard"></div>
+ <div id="how" class="sidecard card howto" style="display:none"></div>
+</aside>`);
+$("qrc").innerHTML = `${C.fakeQr(280)}<b>${TC.scan}</b><i>${QR_URL}</i>`;
+$("how").innerHTML = `<h3>${TC.howTitle}</h3>` + TC.steps.map((s, i) => `<div><em>${i + 1}</em>${s}</div>`).join("");
+const prevNum = {};
+function setNum(id, v) {
+  const el = $(id), txt = C.fmt(v);
+  if (el.textContent === txt) return;
+  const had = prevNum[id] !== undefined;
+  el.textContent = txt; prevNum[id] = v;
+  if (!had || O.reduced) return;
+  el.classList.add("bump"); setTimeout(() => el.classList.remove("bump"), 250);
+}
+// zero=true: side column swaps the QR card for the how-to (the invite in #main carries the big QR).
+function chrome(state, scn, zero) {
+  const pill = $("pill"), clk = $("clk"), ph = state.phase;
+  pill.className = "pill " + ph;
+  if (ph === "ended") { pill.textContent = TC.final; clk.innerHTML = ""; }
+  else if (ph === "pre") { pill.textContent = `${TC.startsIn} ${C.clock(scn.eventStartsAtSec - state.now)}`; clk.innerHTML = ""; }
+  else {
+    pill.innerHTML = `<span class="live-dot"></span>${ph === "closing" ? TC.closing : C.copy.live}`;
+    clk.innerHTML = `${C.clock(state.remaining)}<small>${TC.left}</small>`;
+  }
+  setNum("c1", state.counters.connections); setNum("c2", state.counters.checkedIn); setNum("c3", state.counters.summaries);
+  $("qrc").style.display = zero ? "none" : ""; $("how").style.display = zero ? "" : "none";
+}
+let invSig = "";
+function invite(el, title, sub, state) {
+  const people = state.people.slice(0, 6), n = state.people.length;
+  const sig = title + n + people.map((p) => p.id).join();
+  if (sig === invSig && el.firstChild) return;
+  invSig = sig;
+  const here = n ? `<div class="here">${people.map((p) => C.avatar(p, 72)).join("")}<span>${n === 1 ? esc(people[0].display) + " " + TC.hereOne : (n > 6 ? "+" + C.fmt(n - 6) + " · " : "") + C.fmt(n) + " " + TC.here}</span></div>` : "";
+  el.innerHTML = `<div class="invite card"><div class="it"><h1>${title}</h1><p>${sub}</p>${here}</div><div class="invqr pulse">${C.fakeQr(420)}<b>${TC.scan}</b><i>${QR_URL}</i></div></div>`;
+}
+const T = ES
+  ? { zeroT: "Los temas aparecen cuando la gente conecta", zeroS: "Cada conexión suma +1 a los intereses que comparten; cada nota aprobada suma ×3.", conn: "Intereses compartidos ×1", sum: "Notas ×3", rising: "subiendo", next: "Más temas aparecen con cada conexión…", final: "Clasificación final" }
+  : { zeroT: "Topics appear when people connect", zeroS: "Every connection adds +1 to the interests the pair shares; every approved note adds ×3.", conn: "Shared interests ×1", sum: "Notes ×3", rising: "rising", next: "More topics appear with every connection…", final: "Final standings" };
+const ROW = 106, BARMAX = 640;
+$("main").innerHTML = `<div id="inv"></div><div id="wrap" style="display:none"><div id="legend"><span><i style="background:var(--mint)"></i>${T.conn}</span><span><i style="background:var(--sun)"></i>${T.sum}</span></div><div id="race"></div><div class="final" id="fin" style="right:10px;top:-6px;display:none">${TC.final}</div></div>`;
+const race = $("race");
+for (let i = 0; i < 8; i++) race.insertAdjacentHTML("beforeend", `<div class="gr" id="g${i}" style="top:${i * ROW}px">${i === 0 ? "" : ""}</div>`);
+const rows = new Map(), gone = new Map(), prevScore = new Map();
+
+function makeRow(name) {
+  const el = document.createElement("div");
+  el.className = "row"; el.style.opacity = 0;
+  el.innerHTML = `<div class="lab"><div class="nm truncate"></div><span class="tag">▲ ${T.rising}</span></div><div class="bar"><i class="c"></i><i class="s"></i></div><div class="val num"></div>`;
+  race.appendChild(el);
+  return el;
+}
+// Growth in the last 5 min: +1 per connection carrying the topic, +3 per approved note.
+function growth(state) {
+  const g = new Map(), from = state.now - 300;
+  for (const c of state.connections) if (c.t > from) for (const x of c.topics || []) g.set(x, (g.get(x) || 0) + 1);
+  for (const s of state.summaries) if (s.t > from) for (const x of s.topics || []) g.set(x, (g.get(x) || 0) + 3);
+  return g;
+}
+function render(state, scn) {
+  const zero = state.topics.length === 0;
+  chrome(state, scn, zero);
+  $("inv").style.display = zero ? "" : "none"; $("wrap").style.display = zero ? "none" : "";
+  if (zero) { invite($("inv"), T.zeroT, T.zeroS, state); return; }
+  const ended = state.phase === "ended";
+  const top = state.topics.slice(0, 8), max = top[0].score;
+  const g = growth(state);
+  let rise = null;
+  for (const t of top) if ((g.get(t.name) || 0) >= 2 && (!rise || g.get(t.name) > g.get(rise))) rise = t.name;
+  if (ended) rise = null;
+  const names = new Set(top.map((t) => t.name));
+  top.forEach((t, i) => {
+    let el = rows.get(t.name);
+    if (gone.has(t.name)) { clearTimeout(gone.get(t.name)); gone.delete(t.name); }
+    if (!el) { el = makeRow(t.name); rows.set(t.name, el); requestAnimationFrame(() => requestAnimationFrame(() => (el.style.opacity = 1))); }
+    el.style.transform = `translateY(${i * ROW}px)`;
+    el.classList.toggle("rising", t.name === rise);
+    const nm = el.querySelector(".nm"); if (nm.textContent !== t.name) { nm.textContent = t.name; nm.title = t.name; }
+    const w = Math.max(20, Math.round((t.score / max) * BARMAX));
+    const cw = t.connections, sw = t.summaries * 3, tot = cw + sw || 1;
+    el.style.setProperty("--w", w + "px");
+    const [c, s] = el.querySelectorAll(".bar i");
+    const inner = w - 8; // border
+    const sPx = sw ? Math.max(14, Math.round((inner * sw) / tot)) : 0;
+    s.style.width = sPx + "px"; c.style.width = Math.max(0, inner - sPx) + "px";
+    el.querySelector(".val").textContent = C.fmt(t.score);
+    const before = prevScore.get(t.name);
+    if (before !== undefined && t.score > before && !ended && !O.reduced) { el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit"); }
+    prevScore.set(t.name, t.score);
+  });
+  for (const [n, el] of rows) if (!names.has(n) && !gone.has(n)) {
+    el.style.opacity = 0;
+    gone.set(n, setTimeout(() => { el.remove(); rows.delete(n); gone.delete(n); prevScore.delete(n); }, 400));
+  }
+  for (let i = 0; i < 8; i++) { const gr = $("g" + i); gr.style.display = i < top.length ? "none" : ""; gr.textContent = i === top.length ? T.next : ""; }
+  $("fin").style.display = ended ? "" : "none";
+}
+COMPA.run(render);
+</script></body></html>

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>COMPA live: Loom ring</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  #cv { position: absolute; inset: 0; }
+  .panel { position: absolute; z-index: 5; }
+  #counters { left: 24px; top: 24px; display: flex; gap: 40px; padding: 10px 28px 12px; }
+  .big { font-family: var(--display); font-weight: 700; font-size: 72px; line-height: 1; }
+  .lab { font-size: 28px; font-weight: 800; color: var(--muted); line-height: 1.2; }
+  #clock { right: 24px; top: 24px; padding: 10px 26px 12px; display: flex; align-items: center; gap: 18px; }
+  #clock.closing { background: var(--coral-soft); animation: pulse 1s ease-in-out infinite; }
+  #clock.ended { background: var(--sun-soft); }
+  @keyframes pulse { 50% { transform: scale(1.04); } }
+  @keyframes rise { from { transform: translateY(26px) scale(0.96); opacity: 0; } to { transform: none; opacity: 1; } }
+  .tag { font-family: var(--display); font-weight: 700; font-size: 32px; display: inline-flex; align-items: center; gap: 10px; }
+  #legend { left: 24px; top: 172px; width: 380px; padding: 12px 26px; font-family: var(--display); font-weight: 700; font-size: 32px; }
+  #legend div { display: flex; align-items: center; gap: 14px; margin: 4px 0; }
+  #legend i { width: 56px; height: 10px; border: 3px solid var(--ink); border-radius: 6px; box-sizing: content-box; }
+  #legend b { margin-left: auto; padding-left: 20px; font-size: 44px; }
+  #qr { left: 24px; bottom: 24px; padding: 14px 14px 10px; text-align: center; }
+  #qr svg, #invite svg { display: block; border: 3px solid var(--ink); border-radius: 10px; margin: 0 auto; }
+  #qr .lab, #invite .lab { color: var(--ink); font-family: var(--display); font-weight: 700; margin-top: 6px; }
+  #banner { left: 50%; bottom: 22px; transform: translateX(-50%); width: 1040px; height: 104px; display: flex; align-items: center; justify-content: center; gap: 18px; padding: 0 24px; font-family: var(--display); font-weight: 700; font-size: 52px; white-space: nowrap; }
+  #banner > * { animation: rise 350ms cubic-bezier(0.2, 0.8, 0.2, 1); }
+  #banner .nm { max-width: 320px; }
+  #banner .kind { font-size: 28px; padding: 2px 14px; border: 3px solid var(--ink); border-radius: 999px; }
+  #banner .small { font-size: 28px; color: var(--muted); }
+  #banner.msg { font-size: 36px; background: var(--sun-soft); }
+  #invite { left: 50%; top: 50%; transform: translate(-50%, -50%); width: 400px; padding: 20px 20px 22px; text-align: center; background: #fff; z-index: 6; }
+  #invite .t { font-family: var(--display); font-weight: 700; font-size: 36px; line-height: 1.1; margin-bottom: 12px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <canvas id="cv" width="1920" height="1080"></canvas>
+  <div class="panel card" id="counters"></div>
+  <div class="panel card" id="clock"></div>
+  <div class="panel card hidden" id="legend"></div>
+  <div class="panel card" id="qr"></div>
+  <div class="panel card" id="banner"></div>
+  <div class="panel card hidden" id="invite"></div>
+</div>
+<script src="_shared.js"></script>
+<script>
+(async () => {
+  const { COLORS: C, copy, fmt, opts: O } = COMPA;
+  const W = 1920, H = 1080, CX = 960, CY = 520, R = 310;
+  if (O.reduced) document.body.classList.add("reduced");
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const $ = (id) => document.getElementById(id);
+  try { await Promise.race([Promise.all([document.fonts.load("700 28px Fredoka"), document.fonts.load("900 28px Nunito")]), new Promise((r) => setTimeout(r, 1500))]); } catch (e) {}
+  const es = O.locale === "es";
+  const clean = (s) => String(s || "?").trim().replace(/\s+/g, " ") || "?";
+  const first = (s) => clean(s).split(" ")[0];
+  // shortcut: _shared initials() splits surrogate pairs; this one is code-point safe
+  const ini = (n) => clean(n).split(" ").slice(0, 2).map((w) => Array.from(w)[0].toUpperCase()).join("");
+  const esc = (t) => String(t).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+  const wc = new Map();
+  const measure = (font, t) => { const k = font + "|" + t; let w = wc.get(k); if (w === undefined) { ctx.font = font; w = ctx.measureText(t).width; wc.set(k, w); } return w; };
+  const fit = (font, t, maxW) => { if (measure(font, t) <= maxW) return t; let s = t; while (s.length > 1 && measure(font, s + "…") > maxW) s = s.slice(0, -1); return s.trimEnd() + "…"; };
+
+  const pegs = new Map(); // id -> {id, ang, tang}
+  let order = [], model = null, stamp = 0, links = [], seg = [], segMax = 1, moving = true, dirty = true, first_ = true, sigK = "";
+  const SEG = 72;
+  const simNow = () => (model ? model.now + (O.speed > 0 ? Math.min(0.6, ((performance.now() - stamp) / 1000) * O.speed) : 0) : 0);
+
+  function sync(s, snap) {
+    const sorted = [...s.people].sort((a, b) => (a.id < b.id ? -1 : 1)), n = sorted.length;
+    order = sorted.map((p, i) => {
+      let pg = pegs.get(p.id);
+      const tang = -Math.PI / 2 + (i * Math.PI * 2) / Math.max(1, n);
+      if (!pg) { pg = { id: p.id, ang: tang, tang }; pegs.set(p.id, pg); }
+      pg.tang = tang; if (snap) pg.ang = tang; pg.p = p; return pg;
+    });
+    links = s.connections.map((c) => ({ a: pegs.get(c.a), b: pegs.get(c.b), t: c.t, kind: c.kind })).filter((l) => l.a && l.b);
+    seg = new Array(SEG).fill(0);
+    for (const l of links) for (const pg of [l.a, l.b]) { const f = (((pg.tang + Math.PI / 2) / (Math.PI * 2)) % 1 + 1) % 1; seg[Math.min(SEG - 1, (f * SEG) | 0)]++; }
+    segMax = Math.max(1, ...seg);
+    moving = true;
+  }
+
+  const pos = (pg, r) => [CX + Math.cos(pg.ang) * r, CY + Math.sin(pg.ang) * r];
+  const pegR = (n, p, maxP) => { const room = Math.min(n <= 12 ? 30 : 17, Math.max(1.3, ((Math.PI * R) / Math.max(1, n)) * (n <= 12 ? 0.9 : 0.42))); return n > 150 ? room : room * (0.75 + 0.5 * (maxP ? Math.sqrt(p / maxP) : 0.3)); };
+
+  function chord(a, b, move) {
+    const [ax, ay] = pos(a, R), [bx, by] = pos(b, R);
+    if (move) ctx.moveTo(ax, ay);
+    ctx.quadraticCurveTo(CX + ((ax + bx) / 2 - CX) * 0.3, CY + ((ay + by) / 2 - CY) * 0.3, bx, by);
+  }
+
+  function pill(x, y, w, h, fill, border, lw) { ctx.beginPath(); ctx.roundRect(x, y, w, h, 14); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = border; ctx.stroke(); }
+
+  function drawLabels(s, newest) {
+    const n = order.length, font = "900 28px Nunito, sans-serif", HH = 44;
+    const N = n <= 14 ? n : 10, ids = new Map();
+    s.leaderboard.slice(0, N).forEach((p) => ids.set(p.id, p));
+    if (newest) for (const id of [newest.a, newest.b]) if (s.byId.get(id)) ids.set(id, s.byId.get(id));
+    const items = [...ids.values()].map((p) => pegs.get(p.id)).filter(Boolean).map((pg) => ({ pg, side: Math.cos(pg.ang) >= 0 ? 1 : -1, y: CY + Math.sin(pg.ang) * (R + 66) }));
+    for (const side of [1, -1]) {
+      const g = items.filter((i) => i.side === side).sort((a, b) => a.y - b.y);
+      for (let k = 0; k < g.length; k++) { if (k && g[k].y < g[k - 1].y + 50) g[k].y = g[k - 1].y + 50; }
+      for (let k = g.length - 1; k >= 0; k--) { const max = 900 - (g.length - 1 - k) * 50; if (g[k].y > max) g[k].y = max; if (g[k].y < 118 + k * 50) g[k].y = 118 + k * 50; }
+      for (const it of g) {
+        const p = it.pg.p, dy = it.y - CY, rr = R + 70, x0 = CX + side * Math.sqrt(Math.max(0, rr * rr - Math.min(dy * dy, rr * rr - 1600)));
+        const txt = `${p.tied ? "=" : "#"}${p.rank} ${fit(font, clean(p.display), 230)}`, w = measure(font, txt) + 26;
+        const x = side > 0 ? x0 : x0 - w, [px, py] = pos(it.pg, R);
+        const isNew = newest && (p.id === newest.a || p.id === newest.b);
+        ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(side > 0 ? x : x + w, it.y); ctx.lineWidth = 3; ctx.strokeStyle = C.ink; ctx.stroke();
+        pill(x, it.y - HH / 2, w, HH, isNew ? C.sunSoft : "#fff", C.ink, 3.5);
+        ctx.font = font; ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(txt, x + 13, it.y + 1);
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    if (!model) return;
+    const s = model, now = simNow(), n = order.length, m = links.length;
+    // plate with hard shadow
+    ctx.beginPath(); ctx.arc(CX + 8, CY + 8, R + 52, 0, 7); ctx.fillStyle = C.ink; ctx.fill();
+    ctx.beginPath(); ctx.arc(CX, CY, R + 52, 0, 7); ctx.fillStyle = "#fff"; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = C.ink; ctx.stroke();
+    // density segments (connection endpoints per angular segment)
+    for (let i = 0; i < SEG; i++) {
+      const a0 = -Math.PI / 2 + (i / SEG) * Math.PI * 2, a1 = a0 + (Math.PI * 2) / SEG, v = seg[i] / segMax;
+      ctx.beginPath(); ctx.arc(CX, CY, R + 46, a0, a1); ctx.arc(CX, CY, R + 20, a1, a0, true); ctx.closePath();
+      ctx.fillStyle = v > 0 ? C.sun : "rgba(30,27,46,0.06)"; ctx.globalAlpha = v > 0 ? 0.25 + 0.75 * Math.sqrt(v) : 1; ctx.fill(); ctx.globalAlpha = 1;
+      ctx.lineWidth = 1.5; ctx.strokeStyle = "rgba(30,27,46,0.35)"; ctx.stroke();
+    }
+    // chords
+    const lw = m <= 120 ? 3 : m <= 500 ? 2 : 1, al = m <= 120 ? 0.85 : m <= 500 ? 0.55 : m <= 1200 ? 0.28 : 0.2;
+    const newest = links.length ? links[links.length - 1] : null;
+    for (const kind of ["new", "reconnection"]) {
+      ctx.beginPath();
+      for (const l of links) if (l.kind === kind && l !== newest && now - l.t >= 5) chord(l.a, l.b, true);
+      ctx.globalAlpha = al; ctx.lineWidth = lw; ctx.lineCap = "round"; ctx.strokeStyle = kind === "new" ? C.mint : C.gum; ctx.stroke(); ctx.globalAlpha = 1;
+    }
+    const fresh = links.filter((l) => l !== newest && now - l.t < 5).slice(-40);
+    for (const l of fresh.concat(newest ? [newest] : [])) {
+      const age = Math.max(0, now - l.t), k = O.reduced ? 1 : Math.max(0, 1 - age / 5), isNewest = l === newest, col = l.kind === "new" ? C.mint : C.gum;
+      if (!isNewest && age >= 5) continue;
+      ctx.save(); ctx.beginPath(); chord(l.a, l.b, true);
+      const w = isNewest ? 8 : 4 + 4 * k;
+      ctx.strokeStyle = C.ink; ctx.lineWidth = w + 6; ctx.stroke();
+      if (!O.reduced && k > 0) { ctx.shadowColor = col; ctx.shadowBlur = 30 * k; }
+      ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke(); ctx.restore();
+    }
+    // center disc + counter
+    ctx.beginPath(); ctx.arc(CX + 6, CY + 6, 150, 0, 7); ctx.fillStyle = C.ink; ctx.fill();
+    ctx.beginPath(); ctx.arc(CX, CY, 150, 0, 7); ctx.fillStyle = C.paper; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = C.ink; ctx.stroke();
+    let size = 112, txt = fmt(s.counters.connections); const f = (z) => `700 ${z}px Fredoka, Nunito, sans-serif`;
+    while (size > 56 && measure(f(size), txt) > 240) size -= 6;
+    ctx.font = f(size); ctx.fillStyle = C.ink; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic"; ctx.fillText(txt, CX, CY + size * 0.28);
+    ctx.font = "800 30px Nunito, sans-serif"; ctx.fillStyle = C.muted; ctx.fillText(copy.connections, CX, CY + size * 0.28 + 40);
+    // pegs
+    const maxP = Math.max(0, ...s.people.map((p) => p.points));
+    if (!n) {
+      ctx.save(); ctx.setLineDash([2, 14]); ctx.lineCap = "round"; ctx.lineWidth = 5; ctx.strokeStyle = "rgba(30,27,46,0.35)";
+      for (let i = 0; i < 28; i++) { const a = (i / 28) * 7 - 1.57; ctx.beginPath(); ctx.arc(CX + Math.cos(a) * R, CY + Math.sin(a) * R, 14, 0, 7); ctx.stroke(); }
+      ctx.restore(); return;
+    }
+    const labelIds = new Set(s.leaderboard.slice(0, n <= 14 ? n : 10).map((p) => p.id));
+    if (n > 150) {
+      ctx.fillStyle = n > 600 ? "rgba(30,27,46,0.7)" : C.ink; ctx.beginPath();
+      for (const pg of order) { const [x, y] = pos(pg, R), r = pegR(n, pg.p.points, maxP); ctx.moveTo(x + r, y); ctx.arc(x, y, r, 0, 7); }
+      ctx.fill();
+    } else {
+      for (const pg of order) {
+        const [x, y] = pos(pg, R), r = pegR(n, pg.p.points, maxP);
+        ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = labelIds.has(pg.id) ? C.sun : "#fff"; ctx.fill(); ctx.lineWidth = Math.min(3.5, Math.max(1.5, r / 4)); ctx.strokeStyle = C.ink; ctx.stroke();
+        if (r >= 13) { ctx.font = `700 ${Math.round(r * 0.85)}px Fredoka, Nunito, sans-serif`; ctx.fillStyle = C.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(pg.p.anonymous ? "?" : ini(pg.p.name), x, y + 1); }
+      }
+    }
+    if (newest && now - newest.t < 5) for (const pg of [newest.a, newest.b]) { const [x, y] = pos(pg, R); ctx.beginPath(); ctx.arc(x, y, pegR(n, pg.p.points, maxP) + 8 + (O.reduced ? 0 : 4 * Math.sin(performance.now() / 180)), 0, 7); ctx.lineWidth = 5; ctx.strokeStyle = C.sun; ctx.stroke(); }
+    drawLabels(s, newest);
+  }
+
+  // ---- overlays ----
+  const sig = {};
+  const setHTML = (id, html) => { if (sig[id] !== html) { sig[id] = html; $(id).innerHTML = html; } };
+  function overlays(s, scn) {
+    const empty = s.people.length === 0, has = s.connections.length > 0;
+    setHTML("counters", `<div><div class="big num">${fmt(s.counters.checkedIn)}</div><div class="lab">${copy.people}</div></div><div><div class="big num">${fmt(s.counters.summaries)}</div><div class="lab">${copy.summaries}</div></div>`);
+    $("clock").className = "panel card " + s.phase;
+    const toStart = Math.max(0, scn.eventStartsAtSec - s.now);
+    setHTML("clock", s.phase === "pre" ? `<div class="lab">${copy.startsIn}</div><div class="big num">${COMPA.clock(toStart)}</div>`
+      : s.phase === "ended" ? `<div class="tag" style="font-size:44px">${copy.ended}</div>`
+      : `<div class="tag"><span class="live-dot" style="background:${s.phase === "closing" ? C.coral : "#fff"}"></span>${copy.live}</div><div><span class="big num">${COMPA.clock(s.remaining)}</span> <span class="lab">${copy.left}</span></div>`);
+    $("legend").classList.toggle("hidden", !has);
+    setHTML("legend", `<div><i style="background:${C.mint}"></i>${es ? "Nueva" : "New"}<b class="num">${fmt(s.counters.newCount)}</b></div><div><i style="background:${C.gum}"></i>${es ? "Reencuentro" : "Reconnection"}<b class="num">${fmt(s.counters.reconnections)}</b></div>`);
+    $("qr").classList.toggle("hidden", empty); setHTML("qr", `${COMPA.fakeQr(220)}<div class="lab">${copy.scan}</div>`);
+    $("invite").classList.toggle("hidden", !empty); setHTML("invite", `<div class="t">${copy.noActivity}</div>${COMPA.fakeQr(260)}<div class="lab">${copy.scan}</div>`);
+    const b = $("banner");
+    if (has && s.phase !== "ended") {
+      const c = s.connections[s.connections.length - 1], a = s.byId.get(c.a), bb = s.byId.get(c.b), isNew = c.kind === "new";
+      b.className = "panel card"; b.style.borderColor = "";
+      setHTML("banner", `${COMPA.avatar(a, 72)}<span class="nm truncate">${esc(first(a.display))}</span><span>⇄</span><span class="nm truncate">${esc(first(bb.display))}</span>${COMPA.avatar(bb, 72)}<span class="kind" style="background:${isNew ? C.mintSoft : C.gumSoft}">${isNew ? copy.met : copy.reconnected}</span>`);
+    } else {
+      b.className = "panel card msg";
+      setHTML("banner", s.phase === "ended" ? `<span>${copy.ended} · ${fmt(s.counters.checkedIn)} ${copy.people.toLowerCase()} · ${fmt(s.counters.connections)} ${copy.connections.toLowerCase()}</span>` : empty ? `<span>${copy.scan}</span>` : `<span>${copy.noActivity}</span>`);
+    }
+  }
+
+  function render(s, scn) {
+    model = s; stamp = performance.now();
+    const k = s.people.length + ":" + s.connections.length;
+    if (k !== sigK) { sigK = k; sync(s, first_ || O.reduced); first_ = false; }
+    overlays(s, scn); dirty = true;
+    if (O.reduced) draw();
+  }
+  window.__perf = { frames: 0, drawMs: 0 };
+  function frame() {
+    requestAnimationFrame(frame);
+    if (O.reduced) return;
+    if (moving) { let any = false; for (const pg of order) { const d = pg.tang - pg.ang; if (Math.abs(d) > 0.0005) { pg.ang += d * 0.14; any = true; } else pg.ang = pg.tang; } moving = any; }
+    const nl = links[links.length - 1];
+    const recent = model && nl && simNow() - nl.t < 5.2;
+    if (moving || dirty || recent) { const t0 = performance.now(); draw(); dirty = false; window.__perf.frames++; window.__perf.drawMs += performance.now() - t0; }
+  }
+  requestAnimationFrame(frame);
+  COMPA.run(render, { tickMs: 250 });
+})();
+</script>
+</body>
+</html>

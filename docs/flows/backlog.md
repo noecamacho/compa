@@ -1325,3 +1325,14 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 - **Acceptance:** the docs match the code-gated routes, and the M19 decision is recorded.
 
 Related: [README](README.md), [catalog](catalog.md), [actors and permissions](actors-and-permissions.md), [edge cases and risks](edge-cases-and-risks.md), [gap analysis](../backend-gap-analysis.md).
+
+## Research tickets (2026-10-29)
+
+Drafted by the live data-viz and UX audit research. Full ticket text, with E2E lines, lives beside each report; promote one into the epics above when you pick it up. Every one depends on [T-000](#t-000).
+
+| Range | Source | Count |
+| --- | --- | --- |
+| DV-1 – DV-10 | [big-screen data viz](../research/dataviz-bigscreen/findings.md#5-backlog-tickets-format-of-docsflowsbacklogmd-all-depend-on-t-000) | 10 |
+| DP-1 – DP-9 | [phone data viz](../research/dataviz-phone/findings.md#11-backlog-tickets) | 9 |
+| UX-A1 – UX-A22 | [attendee audit](../research/ux-audit-parts/attendee/tickets.md) | 22 |
+| UX-P1 – UX-P18 | [public and admin audit](../research/ux-audit-parts/public-admin/tickets.md) | 18 |

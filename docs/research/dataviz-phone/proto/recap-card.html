@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recap card</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .stage { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .card9 { container-type: inline-size; position: relative; width: 100%; max-width: 360px; aspect-ratio: 9 / 16; border: 3px solid var(--ink); border-radius: 28px; box-shadow: var(--h4); background: var(--sun); overflow: hidden; }
+  .in { position: absolute; inset: 0; padding: 5.5cqw 6cqw; padding-top: var(--top, 5.5cqw); display: flex; flex-direction: column; gap: 3cqw; min-height: 0; }
+  .brand { display: flex; justify-content: space-between; align-items: center; font-family: var(--display); font-size: 5cqw; }
+  .brand .caps { font-size: 3cqw; }
+  .big { background: #fff; border: 2.5px solid var(--ink); border-radius: 5cqw; padding: 3cqw 4cqw; text-align: center; box-shadow: var(--h3); }
+  .big .n { font-family: var(--display); font-size: 17cqw; line-height: 1; }
+  .big .of { font-size: 4.2cqw; color: var(--muted); }
+  .kp { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5cqw; }
+  .kp > div { background: var(--paper); border: 2.5px solid var(--ink); border-radius: 4cqw; padding: 2cqw 3cqw; text-align: center; min-width: 0; }
+  .kp .n { font-family: var(--display); font-size: 8cqw; line-height: 1.05; }
+  .kp small { display: block; font-size: 3.1cqw; color: var(--muted); font-weight: 800; }
+  .tops { display: flex; flex-wrap: wrap; gap: 1.6cqw; justify-content: center; }
+  .tops .chip { font-size: 3.4cqw; max-width: 100%; }
+  .bd { font-size: 3.4cqw; text-align: center; }
+  .sky { flex: 1; min-height: 0; background: #fff; border: 2.5px solid var(--ink); border-radius: 4cqw; display: flex; }
+  .sky svg { width: 100%; height: 100%; }
+  .foot { text-align: center; font-size: 3.3cqw; font-weight: 800; }
+  .rib { position: absolute; top: 0; left: 0; right: 0; text-align: center; background: var(--coral); color: #fff; font-family: var(--display); font-size: 3cqw; padding: 1.2cqw 2cqw; border-bottom: 2.5px solid var(--ink); z-index: 2; }
+  .kind { text-align: center; padding: 4cqw; font-family: var(--display); font-size: 6.2cqw; line-height: 1.15; }
+  .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 360px; }
+  .acts .btn { min-height: 48px; font-size: 15px; cursor: default; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav class="dock" aria-label="Dock"><span>Inicio</span><span>Conectar</span><span>Conexiones</span><span class="on">Ranking</span></nav>
+<script src="engine.js"></script>
+<script>
+const { run, badgesFor, esc, fmt, clock, tr } = COMPA;
+const CAP = 14;
+
+function topicsOf(st, c) {
+  if (c.topics.length) return c.topics;
+  const a = st.people.get(c.a), b = st.people.get(c.b);
+  return a && b ? a.interests.filter((x) => b.interests.includes(x)) : [];
+}
+
+// Plain dots: partners spiral out from me; no initials on a card meant to be shared publicly.
+function constellation(st, me, ids) {
+  const W = 200, H = 120, cx = W / 2, cy = H / 2;
+  const n = Math.min(ids.length, CAP), r = n > 8 ? 6 : 9, letters = false;
+  const dots = ids.slice(0, n).map((id, i) => {
+    const p = st.people.get(id), ang = i * 2.399963, rad = 22 + 11 * Math.sqrt(i);
+    const x = cx + Math.cos(ang) * rad * 1.4, y = cy + Math.sin(ang) * rad * 0.78;
+    const ch = !p || p.anonymous || !letters ? "" : [...p.name.trim()][0] || "";
+    return `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#1E1B2E" stroke-width="1.5" opacity=".35"/>
+      <circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" fill="${p && !p.anonymous ? COMPA.hue(p.id) : "#D5DCE6"}" stroke="#1E1B2E" stroke-width="2"/>${ch ? `<text x="${x.toFixed(1)}" y="${(y + 3.5).toFixed(1)}" text-anchor="middle" font-size="9" font-family="Fredoka,sans-serif" fill="#1E1B2E">${esc(ch.toUpperCase())}</text>` : ""}`;
+  }).join("");
+  const more = ids.length - n;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${tr(`${ids.length} conexiones`, `${ids.length} connections`)}" preserveAspectRatio="xMidYMid meet"><g fill="none" stroke="#1E1B2E" stroke-width="1" stroke-dasharray="3 4" opacity=".25"><ellipse cx="${cx}" cy="${cy}" rx="45" ry="26"/><ellipse cx="${cx}" cy="${cy}" rx="85" ry="48"/></g>${dots}
+    <circle cx="${cx}" cy="${cy}" r="11" fill="#FF8FAB" stroke="#1E1B2E" stroke-width="2.5"/><text x="${cx}" y="${cy + 4}" text-anchor="middle" font-size="9" font-family="Fredoka,sans-serif" fill="#1E1B2E">${tr("Tú", "You")}</text>
+    ${more > 0 ? `<text x="${W - 8}" y="${H - 8}" text-anchor="end" font-size="12" font-family="Fredoka,sans-serif" fill="#6F6A7E">+${fmt(more)}</text>` : ""}</svg>`;
+}
+
+run((st, me, v) => {
+  const ended = st.phase === "ended";
+  const checked = me.checkinT !== null;
+  const name = tr("Noche COMPA", "COMPA night");
+  const rib = ended ? "" : `<div class="rib">${tr("Vista previa · se cierra al terminar", "Preview · finalises when the event ends")}</div>`;
+  const head = `<div class="brand"><span>COMPA</span><span class="caps">${esc(name)}</span></div>`;
+  let body;
+  if (!checked || me.connections === 0) {
+    body = `${head}<div class="big"><div class="caps">${checked ? tr("Tu noche", "Your night") : tr("Todavía no llegas", "Not here yet")}</div>
+      <div class="kind">${checked ? tr("Viniste.<br>La próxima vez escanea a una persona: +50", "You came.<br>Next time scan one person: +50") : tr("Tu resumen empieza con tu check-in", "Your recap starts when you check in")}</div></div>
+      <div class="sky" style="align-items:center;justify-content:center">${constellation(st, me, [])}</div>
+      <div class="foot">${checked ? tr("Cada constelación empieza con un punto", "Every constellation starts with one dot") : tr("Te esperamos", "See you inside")}</div>`;
+  } else {
+    const partners = [...me.partners.keys()];
+    const newC = st.connections.filter((c) => (c.a === me.id || c.b === me.id) && c.kind === "new").length;
+    const re = me.connections - newC;
+    const cnt = new Map();
+    for (const c of st.connections) if (c.a === me.id || c.b === me.id) for (const x of topicsOf(st, c)) cnt.set(x, (cnt.get(x) || 0) + 1);
+    const tops = [...cnt.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3).map((x) => x[0]);
+    const bds = badgesFor(st, me).filter((b) => b.earned);
+    const standing = v.rank ? `<div class="big"><div class="caps">${tr("Lugar final", "Final spot")}${ended ? "" : " · " + tr("hoy", "now")}</div><div class="n">#${fmt(v.crank)}</div><div class="of">${tr(`de ${fmt(v.total)}`, `of ${fmt(v.total)}`)}${v.tiedWith ? " · " + tr("empatad@", "tied").replace("empatad@", "empate") : ""}</div></div>` : "";
+    body = `${head}${standing}
+      <div class="kp"><div><span class="n">${fmt(me.points)}</span><small>${tr("puntos", "points")}</small></div><div><span class="n">${fmt(me.connections)}</span><small>${tr(`${newC} nuevas · ${re} reconexiones`, `${newC} new · ${re} reconnected`)}</small></div></div>
+      ${tops.length ? `<div class="tops">${tops.map((x) => `<span class="chip"><span class="ellipsis">${esc(x)}</span></span>`).join("")}</div>` : ""}
+      <div class="sky">${constellation(st, me, partners)}</div>
+      <div class="bd">${bds.length ? bds.slice(0, 3).map((b) => `<span class="chip">★ ${esc(b.name)}</span>`).join(" ") + (bds.length > 3 ? ` <span class="chip">+${bds.length - 3}</span>` : "") : tr("Insignias: la próxima", "Badges: next time")}</div>
+      <div class="foot">${tr(`Primera conexión a las ${clock(st, me.firstConnT)}`, `First connection at ${clock(st, me.firstConnT)}`)}</div>`;
+  }
+  return `<div class="stage"><div class="card9" aria-label="${tr("Tarjeta de resumen", "Recap card")}">${rib}<div class="in"${ended ? "" : ' style="--top:10cqw"'}>${body}</div></div>
+    <div class="acts"><button class="btn" type="button">${tr("Compartir", "Share")}</button><button class="btn white" type="button">${tr("Guardar imagen", "Save image")}</button></div>
+    <p class="muted" style="font-size:12px;text-align:center;max-width:300px">${tr("La tarjeta solo muestra conteos y temas, nunca nombres.", "The card only shows counts and topics, never names.")}</p></div>`;
+});
+</script>
+</body>
+</html>

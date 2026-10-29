@@ -1,0 +1,35 @@
+/* COMPA V2 tokens (app/globals.css) for the big-screen prototypes. Stage is fixed 1920x1080. */
+@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@700;800;900&display=swap");
+:root {
+  --paper: #fff6e5; --ink: #1e1b2e; --muted: #6f6a7e;
+  --mint: #6be4a3; --sky: #6cc4ff; --gum: #ff8fab; --sun: #ffd93d; --coral: #ff6b4a;
+  --mint-soft: #ddf8ea; --sky-soft: #ddf1ff; --gum-soft: #ffe3ea; --sun-soft: #fff3bf; --coral-soft: #ffe1d9;
+  --silver: #d5dce6; --bronze: #f2a766;
+  --display: "Fredoka", "Nunito", system-ui, sans-serif;
+  --body: "Nunito", system-ui, sans-serif;
+  --hard-4: 4px 4px 0 #1e1b2e; --hard-6: 6px 6px 0 #1e1b2e; --hard-8: 8px 8px 0 #1e1b2e;
+  --r-card: 22px; --r-button: 16px; --r-chip: 11px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: var(--paper); color: var(--ink); font-family: var(--body); font-weight: 800; }
+body { overflow: hidden; }
+.stage {
+  position: relative; width: 1920px; height: 1080px; overflow: hidden;
+  background-color: var(--paper);
+  background-image: radial-gradient(rgba(30, 27, 46, 0.09) 2px, transparent 2px); background-size: 28px 28px;
+}
+.card { background: #fff; border: 4px solid var(--ink); border-radius: var(--r-card); box-shadow: var(--hard-6); }
+.display { font-family: var(--display); font-weight: 700; }
+.num { font-variant-numeric: tabular-nums; }
+.truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.av { display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; border: 3px solid var(--ink); overflow: hidden; flex: none; background: #fff; }
+.av img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.av-fallback { font-family: var(--display); font-weight: 700; color: var(--ink); }
+.pill { display: inline-flex; align-items: center; gap: 10px; padding: 6px 16px; border: 3px solid var(--ink); border-radius: 999px; box-shadow: var(--hard-4); font-family: var(--display); font-weight: 700; }
+.live-dot { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 2px solid var(--ink); animation: blink 1.4s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0.25; } }
+.hud { position: fixed; left: 8px; bottom: 6px; font: 700 12px/1 ui-monospace, monospace; color: var(--muted); z-index: 99; }
+.stale-pill { position: absolute; top: 24px; left: 50%; transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 12px; padding: 10px 22px; border: 4px solid var(--ink); border-radius: 999px; background: var(--sun-soft); box-shadow: var(--hard-4); font-family: var(--display); font-weight: 700; font-size: 28px; }
+.stale-dot { width: 16px; height: 16px; border-radius: 50%; background: var(--coral); border: 2px solid var(--ink); }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+.reduced *, .reduced *::before, .reduced *::after { animation: none !important; transition: none !important; }

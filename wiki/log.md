@@ -168,6 +168,9 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - `/admin` now follows the V2 breakpoints (390/834/1440): tables from md, cards below, consequence dialogs proportional to stakes (`components/admin/ConfirmDialog.tsx`), inline validation in `EventForm`. UI only; no API or data-model change.
 
+## [2026-10-29] ingest | Live data-viz and UX audit research
+
+- Added `docs/research/` (simulator, 20 prototypes, ~1,000 screenshots, two audits) and 59 draft tickets (DV, DP, UX-A, UX-P) referenced from `docs/flows/backlog.md`. Key gaps: `LiveSnapshot` lacks time window, topics and anonymous flag; attendee screens use a 390 px column on every device. No product code changed.
 ## [2026-10-29] query | Responsive public pages and landing CTA
 
 - Landing, event door, join, not found and live reviewed at 390/834/1440 (live 1280/1920) in both locales; LinkedIn sign-in is the landing's single primary action (`app/page.tsx`, `components/brand/LinkedInMark.tsx`), event entry screens share one frame (`components/event/layout.ts`). DESIGN.md breakpoints unchanged.

@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>COMPA live · Story feed</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .head-l { position: absolute; left: 40px; top: 22px; }
+  .head-l h1 { margin: 0; font: 700 56px/1 var(--display); }
+  .head-r { position: absolute; right: 40px; top: 22px; display: flex; gap: 24px; align-items: center; }
+  .pill.live { background: var(--mint); font-size: 30px; }
+  .pill.final { background: var(--sun); font-size: 30px; }
+  .pill.pre { background: var(--sky); font-size: 30px; }
+  .clock { font: 700 64px/1 var(--display); font-variant-numeric: tabular-nums; }
+
+  #feed { position: absolute; left: 40px; top: 140px; width: 1240px; height: 910px; }
+  .sc { position: absolute; left: 0; width: 100%; border: 4px solid var(--ink); border-radius: var(--r-card); box-shadow: var(--hard-6); background: #fff; overflow: hidden;
+        display: flex; align-items: center; gap: 28px; padding: 0 32px;
+        transition: top 400ms cubic-bezier(.2,.8,.2,1), height 400ms cubic-bezier(.2,.8,.2,1), opacity 400ms, font-size 400ms, transform 400ms cubic-bezier(.2,.8,.2,1); }
+  .sc.enter { opacity: 0; transform: translateY(-48px); }
+  .sc.leave { opacity: 0; }
+  .sc .avs { display: flex; flex: none; align-items: center; }
+  .sc .avs .av + .av { margin-left: -12px; }
+  .sc .txt { flex: 1 1 auto; min-width: 0; }
+  .sc .l1 { display: flex; align-items: baseline; gap: 0.3em; white-space: nowrap; font-family: var(--display); font-weight: 700; line-height: 1.1; }
+  .sc .l1 .nm { min-width: 0; max-width: 46%; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; }
+  .sc .l1 .vb { flex: none; font-weight: 600; }
+  .sc .l1 .nm:last-of-type { flex: 0 1 auto; }
+  .sc .l2 { margin-top: 0.18em; font-size: 0.62em; color: #3c3850; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sc .ic { flex: none; width: 1.7em; height: 1.7em; border: 3px solid var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-weight: 700; background: #fff; font-size: 0.8em; }
+  .k-new { background: var(--mint-soft); } .k-re { background: var(--gum-soft); } .k-sum { background: var(--sky-soft); }
+  .k-badge { background: var(--sun-soft); } .k-join { background: #fff; }
+  .k-agg { background: var(--mint); } .k-prompt { background: var(--paper); border-style: dashed; }
+  .k-final { background: var(--sun); }
+  .sc .big { font: 700 1.9em/1 var(--display); flex: none; font-variant-numeric: tabular-nums; }
+  .chips { display: flex; gap: 14px; margin-top: 12px; flex-wrap: nowrap; overflow: hidden; }
+  .sc.old .chips { display: none; }
+  .chip { font: 700 28px/1 var(--display); padding: 7px 16px; border: 3px solid var(--ink); border-radius: var(--r-chip); background: #fff; white-space: nowrap; max-width: 300px; overflow: hidden; text-overflow: ellipsis; }
+
+  #side { position: absolute; left: 1330px; top: 140px; width: 550px; }
+  .stat { padding: 18px 28px; margin-bottom: 26px; }
+  .stat b { display: block; font: 700 128px/1 var(--display); font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 32px; color: var(--muted); }
+  .stat.mint { background: var(--mint); } .stat.mint span { color: var(--ink); }
+  .stat.two { display: flex; gap: 28px; align-items: flex-end; }
+  .stat.two div { flex: 1; } .stat.two b { font-size: 84px; }
+  #qrbox { position: absolute; left: 1330px; top: 810px; width: 550px; height: 240px; padding: 15px 20px; display: flex; gap: 24px; align-items: center; background: #fff; }
+  #qrbox.big { top: 540px; height: 510px; flex-direction: column; justify-content: center; }
+  #qrbox .t { font: 700 40px/1.1 var(--display); }
+  #qrbox .t small { display: block; font: 800 28px/1.2 var(--body); color: var(--muted); margin-top: 6px; }
+  #qrbox svg { flex: none; display: block; border-radius: 10px; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="head-l"><h1 id="title"></h1></div>
+  <div class="head-r"><span id="phase"></span><span class="clock" id="clock"></span></div>
+  <div id="feed"></div>
+  <div id="side">
+    <div class="card stat mint"><b id="sConn">0</b><span id="sConnL"></span></div>
+    <div class="card stat two"><div><b id="sPeople">0</b><span id="sPeopleL"></span></div><div><b id="sNotes">0</b><span id="sNotesL"></span></div></div>
+  </div>
+  <div class="card" id="qrbox"></div>
+</div>
+<script src="_shared.js"></script>
+<script>
+(function () {
+  const C = COMPA;
+  if (C.opts.reduced) document.body.classList.add("reduced");
+  const es = C.opts.locale === "es";
+  const L = es ? {
+    title: "Lo que pasa ahora", live: "EN VIVO", final: "FINAL", pre: "PRONTO", left: "restante",
+    conns: "conexiones", people: "personas", notes: "notas", scan: "Escanea para entrar", scanSub: "Conoce a alguien nuevo",
+    connected: "conectaron", reconnected: "se reencontraron", joined: "llegó", earned: "ganó", talked: "hablaron de", both: "ambos en", firstMeet: "primera vez que se ven",
+    agg: (n, w) => `+${n} conexiones en ${w}`, win1: "el último minuto", winS: (s) => `los últimos ${s} s`,
+    aggSub: (j, s, b) => [j && `${j} llegaron`, s && `${s} ${s === 1 ? "nota" : "notas"}`, b && `${b} ${b === 1 ? "insignia" : "insignias"}`].filter(Boolean).join(" · "),
+    aggJoin: (n) => `+${n} personas llegaron`, aggMisc: (n) => `+${n} novedades`,
+    anon: "Anónimo", final1: "Evento terminado", finalSub: (c, p, n) => `${c} conexiones · ${p} personas · ${n} notas`,
+    emptyH: "Sé la primera persona", emptyS: "Escanea el QR y saluda a alguien.",
+    prompts: (t) => [`¿Quién aquí trabaja en ${t[0]}? Ve a buscarle`, `¿Alguien más le entra a ${t[1]}? Preséntate`, "Pregunta: ¿qué estás construyendo?", "Escanea a alguien que no conozcas"],
+    badges: { apreton: "Apretón", madrugador: "Madrugador", cierre: "Cierre", maraton: "Maratón" }, badge: "Insignia", into: "le gusta",
+  } : {
+    title: "Happening now", live: "LIVE", final: "FINAL", pre: "SOON", left: "left",
+    conns: "connections", people: "people", notes: "notes", scan: "Scan to join", scanSub: "Meet someone new",
+    connected: "connected", reconnected: "reconnected", joined: "joined", earned: "earned", talked: "talked about", both: "both into", firstMeet: "met for the first time",
+    agg: (n, w) => `+${n} connections in ${w}`, win1: "the last minute", winS: (s) => `the last ${s} s`,
+    aggSub: (j, s, b) => [j && `${j} joined`, s && `${s} ${s === 1 ? "note" : "notes"}`, b && `${b} ${b === 1 ? "badge" : "badges"}`].filter(Boolean).join(" · "),
+    aggJoin: (n) => `+${n} people joined`, aggMisc: (n) => `+${n} updates`,
+    anon: "Anonymous", final1: "Event ended", finalSub: (c, p, n) => `${c} connections · ${p} people · ${n} notes`,
+    emptyH: "Be the first", emptyS: "Scan the QR and say hi to someone.",
+    prompts: (t) => [`Who here works on ${t[0]}? Go find them`, `Anyone else into ${t[1]}? Say hi`, "Ask someone: what are you building?", "Scan someone you have not met"],
+    badges: { apreton: "Handshake", madrugador: "Early bird", cierre: "Closer", maraton: "Marathon" }, badge: "Badge", into: "into",
+  };
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const RELEASE_MS = 2500, PROMPT_MS = 8000, QUIET_SIM = 20, AGG_THRESHOLD = 3, AGG_UPDATE_MS = 15000;
+  // slot geometry: hero, then shrinking older cards
+  const SLOTS = [{ h: 250, fs: 54, op: 1, av: 112 }, { h: 132, fs: 38, op: 0.92, av: 76 }, { h: 118, fs: 34, op: 0.74, av: 66 }, { h: 106, fs: 30, op: 0.52, av: 58 }, { h: 100, fs: 28, op: 0.32, av: 52 }];
+  const GAP = 22;
+  const LOW_PRIO_BADGES = new Set(["apreton", "madrugador", "cierre"]);
+
+  $("title").textContent = L.title;
+  $("sConnL").textContent = L.conns; $("sPeopleL").textContent = L.people; $("sNotesL").textContent = L.notes;
+
+  const cards = []; // newest first: { el, kind, aggAt }
+  let rushUntil = 0, seen = null, pending = [], lastRelease = 0, lastPrompt = 0, promptI = 0, booted = false, finalShown = false;
+  const evKey = (e) => [e.t, e.type, e.a, e.b || "", e.badge || ""].join("|");
+
+  const person = (state, id) => state.byId.get(id) || { id, display: "?", name: "?", anonymous: false, interests: [] };
+  const av = (p, size) => C.avatar(p, size);
+
+  function html(kind, inner, size) {
+    return inner;
+  }
+
+  // Builds the card body for one event (never the summary text).
+  function bodyFor(state, e, slot0) {
+    const A = person(state, e.a), B = e.b ? person(state, e.b) : null;
+    const names = (x, y) => `<span class="nm">${esc(x.display)}</span>`;
+    if (e.type === "connection_accepted") {
+      const shared = (e.topics || []).slice(0, 2);
+            return { cls: e.kind === "reconnection" ? "k-re" : "k-new", pair: [A, B], l1: `${names(A)}<span class="vb">⇄</span>${names(B)}`, l2: `${e.kind === "reconnection" ? L.reconnected : L.connected}${shared.length ? " · " + L.both + " " + esc(shared.join(" + ")) : ""}` };
+    }
+    if (e.type === "summary_approved") {
+      const t = (e.topics || []).slice(0, 2).join(" + ");
+      return { cls: "k-sum", pair: B ? [A, B] : [A], l1: `${names(A)}${B ? `<span class="vb">⇄</span>${names(B)}` : ""}`, l2: `${L.talked} ${esc(t || "…")}` };
+    }
+    if (e.type === "badge") {
+      return { cls: "k-badge", pair: [A], l1: `${names(A)}<span class="vb">${L.earned}</span><span class="nm">${esc(L.badges[e.badge] || e.badge)}</span>`, l2: L.badge };
+    }
+    const interests = A.anonymous ? [] : (A.interests || []).slice(0, 2);
+    return { cls: "k-join", pair: [A], l1: `${names(A)}<span class="vb">${L.joined}</span>`, l2: interests.length ? `${L.into} ${esc(interests.join(", "))}` : "" };
+  }
+
+  function layout(animateNew) {
+    let top = 0;
+    cards.forEach((c, i) => {
+      const s = SLOTS[Math.min(i, SLOTS.length - 1)];
+      if (i >= SLOTS.length) { c.el.style.opacity = "0"; return; }
+      c.el.style.top = top + "px"; c.el.style.height = s.h + "px"; c.el.style.fontSize = s.fs + "px";
+      if (!(animateNew && i === 0)) c.el.style.opacity = s.op;
+      c.slot = i; c.el.classList.toggle("old", i > 0);
+      const avs = c.el.querySelector(".avs");
+      if (avs && c.pair && c.avSize !== s.av) { avs.innerHTML = c.pair.map((p) => av(p, s.av)).join(""); c.avSize = s.av; }
+      top += s.h + GAP;
+    });
+    while (cards.length > SLOTS.length + 1) { const old = cards.pop(); old.el.remove(); }
+  }
+
+  function addCard(spec, { animate = true } = {}) {
+    const el = document.createElement("div");
+    el.className = `sc ${spec.cls}` + (animate ? " enter" : "");
+    el.innerHTML = spec.raw || `<div class="avs"></div><div class="txt"><div class="l1">${spec.l1}</div>${spec.l2 ? `<div class="l2">${spec.l2}</div>` : ""}</div>`;
+    $("feed").appendChild(el);
+    const card = { el, kind: spec.kind || spec.cls, pair: spec.pair, avSize: 0, at: performance.now(), aggAt: spec.agg ? performance.now() : 0 };
+    cards.unshift(card);
+    layout(animate);
+    if (animate) requestAnimationFrame(() => requestAnimationFrame(() => { el.classList.remove("enter"); el.style.opacity = SLOTS[0].op; }));
+    return card;
+  }
+
+  // Aggregate card: headline = connections in the last minute, chips = topics grouped from what is queued.
+  function aggSpec(state, batch) {
+    const conns = batch.filter((e) => e.type === "connection_accepted");
+    const joins = batch.filter((e) => e.type === "checkin").length;
+    const notes = batch.filter((e) => e.type === "summary_approved").length;
+    const badges = batch.filter((e) => e.type === "badge").length;
+    const topics = new Map();
+    conns.forEach((e) => (e.topics || []).forEach((x) => topics.set(x, (topics.get(x) || 0) + 1)));
+    const chips = [...topics.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 4).map(([n, k]) => `<span class="chip">${esc(n)} ×${k}</span>`).join("");
+    const inMinute = state.connections.filter((c) => c.t > state.now - 60).length;
+    const n = inMinute || conns.length;
+    let head, big;
+    if (conns.length) { big = "+" + C.fmt(n); head = L.agg(C.fmt(n), L.win1).replace(/^\+\S+\s*/, ""); }
+    else if (joins) { big = "+" + C.fmt(joins); head = L.aggJoin(joins).replace(/^\+\S+\s*/, ""); }
+    else { big = "+" + C.fmt(batch.length); head = L.aggMisc(batch.length).replace(/^\+\S+\s*/, ""); }
+    const sub = L.aggSub(conns.length ? joins : 0, notes, badges);
+    return { cls: "k-agg", kind: "agg", agg: true, raw: `<span class="big">${big}</span><div class="txt"><div class="l1"><span class="nm" style="max-width:100%">${esc(head)}</span></div>${chips ? `<div class="chips">${chips}</div>` : ""}${sub ? `<div class="l2">${esc(sub)}</div>` : ""}</div>` };
+  }
+
+  function topicsList(state) {
+    const t = state.topics.map((x) => x.name);
+    const pool = [...new Set(state.people.flatMap((p) => (p.anonymous ? [] : p.interests || [])))];
+    const all = [...t, ...pool, "AI", "Design"];
+    return [all[0], all[1] || all[0]];
+  }
+
+  function promptCard(state) {
+    const list = L.prompts(topicsList(state));
+    const text = list[promptI++ % list.length];
+    return { cls: "k-prompt", kind: "prompt", raw: `<span class="ic">?</span><div class="txt"><div class="l1"><span class="nm" style="max-width:100%;white-space:normal;line-height:1.15">${esc(text)}</span></div></div>` };
+  }
+
+  function finalCard(state) {
+    const c = state.counters;
+    return { cls: "k-final", kind: "final", raw: `<span class="big">${L.final}</span><div class="txt"><div class="l1"><span class="nm" style="max-width:100%">${esc(L.final1)}</span></div><div class="l2">${esc(L.finalSub(C.fmt(c.connections), C.fmt(c.checkedIn), C.fmt(c.summaries)))}</div></div>` };
+  }
+
+  const tween = {};
+  function setNum(id, v) {
+    const el = $(id), from = Number(el.dataset.v ?? v);
+    el.dataset.v = v;
+    if (C.opts.reduced || from === v) { el.textContent = C.fmt(v); return; }
+    const t0 = performance.now();
+    cancelAnimationFrame(tween[id]);
+    const stepFn = (now) => { const k = Math.min(1, (now - t0) / 400); el.textContent = C.fmt(Math.round(from + (v - from) * k)); if (k < 1) tween[id] = requestAnimationFrame(stepFn); };
+    tween[id] = requestAnimationFrame(stepFn);
+  }
+
+  function showable(e) {
+    if (e.type === "connection_requested") return false;
+    return true;
+  }
+
+  function render(state, scn) {
+    const ended = state.phase === "ended", pre = state.phase === "pre";
+    $("phase").innerHTML = `<span class="pill ${ended ? "final" : pre ? "pre" : "live"}">${ended || pre ? "" : '<i class="live-dot"></i>'}${ended ? L.final : pre ? L.pre : L.live}</span>`;
+    $("clock").textContent = ended ? "" : C.clock(pre ? scn.eventStartsAtSec - state.now : state.remaining) + " " + (pre ? "" : L.left);
+    setNum("sConn", state.counters.connections); setNum("sPeople", state.counters.checkedIn); setNum("sNotes", state.counters.summaries);
+
+    const none = state.counters.connections === 0 && state.counters.checkedIn === 0;
+    const qrBig = none && !ended;
+    const qrbox = $("qrbox");
+    if (qrbox.dataset.big !== String(qrBig)) {
+      qrbox.dataset.big = String(qrBig);
+      qrbox.classList.toggle("big", qrBig);
+      qrbox.innerHTML = C.fakeQr(qrBig ? 340 : 200, "story") + `<div class="t">${L.scan}<small>${L.scanSub}</small></div>`;
+    }
+    $("side").style.opacity = qrBig ? 0 : 1;
+
+    const now = performance.now();
+    const fresh = state.feed.filter((e) => showable(e));
+    if (!booted) {
+      booted = true;
+      seen = new Set(state.feed.map(evKey));
+      // first paint: the latest meaningful events, no animation (oldest first so newest ends on top)
+      const init = fresh.filter((e) => !(e.type === "badge" && LOW_PRIO_BADGES.has(e.badge))).slice(0, SLOTS.length).reverse();
+      init.forEach((e) => addCard(bodyFor(state, e), { animate: false }));
+      if (ended) addCard(finalCard(state), { animate: false });
+      else if (!init.length) { addCard(promptCard(state), { animate: false }); addCard({ cls: "k-new", kind: "invite", raw: `<span class="ic">+</span><div class="txt"><div class="l1"><span class="nm" style="max-width:100%">${L.emptyH}</span></div><div class="l2">${L.emptyS}</div></div>` }, { animate: false }); }
+      lastRelease = now; lastPrompt = now;
+      return;
+    }
+    if (ended) {
+      if (!finalShown) { finalShown = true; addCard(finalCard(state)); }
+      return;
+    }
+    // collect new events (oldest first)
+    const incoming = [];
+    for (let i = state.feed.length - 1; i >= 0; i--) {
+      const e = state.feed[i];
+      if (seen.has(evKey(e))) continue;
+      seen.add(evKey(e));
+      if (showable(e)) incoming.push(e);
+    }
+    if (seen.size > 600) seen = new Set(state.feed.map(evKey));
+    // low-priority badges only matter when nothing else is waiting
+    incoming.forEach((e) => { if (!(e.type === "badge" && LOW_PRIO_BADGES.has(e.badge))) pending.push(e); });
+    if (!pending.length) incoming.filter((e) => e.type === "badge").forEach((e) => pending.push(e));
+    if (pending.length > 80) pending = pending.slice(-80);
+
+    if (now - lastRelease >= RELEASE_MS && pending.length) {
+      lastRelease = now;
+      const top = cards[0];
+      if (pending.length > AGG_THRESHOLD || now < rushUntil) {
+        rushUntil = now + 20000; // rush mode: keep aggregating until it calms down
+        const spec = aggSpec(state, pending);
+        pending = [];
+        if (top && top.kind === "agg" && now - top.aggAt < AGG_UPDATE_MS) { top.el.innerHTML = spec.raw; } // keep updating one card instead of scrolling
+        else addCard(spec);
+      } else {
+        addCard(bodyFor(state, pending.shift()));
+      }
+      lastPrompt = now;
+    } else if (!pending.length && now - lastRelease >= PROMPT_MS && now - lastPrompt >= PROMPT_MS && state.idleFor >= QUIET_SIM) {
+      lastPrompt = now;
+      if (cards[0] && cards[0].kind === "prompt") { cards[0].el.remove(); cards.shift(); } // replace, do not stack prompts
+      addCard(promptCard(state));
+    }
+  }
+  C.run(render, { tickMs: 200 });
+})();
+</script>
+</body>
+</html>

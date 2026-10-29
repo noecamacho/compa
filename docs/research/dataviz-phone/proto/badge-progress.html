@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Badge progress</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .next { display: flex; flex-direction: column; gap: 10px; }
+  .nb { display: grid; grid-template-columns: 76px 1fr; gap: 12px; align-items: center; min-height: 88px; }
+  .nb .what { font-size: 13px; color: var(--muted); margin-top: 3px; }
+  .nb .name { font-family: var(--display); font-size: 18px; display: block; }
+  .nb.first { background: var(--sun-soft); }
+  .ring text { font-family: var(--display); fill: var(--ink); }
+  .shelf { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; }
+  .tile { display: grid; grid-template-columns: 44px 1fr; gap: 8px; align-items: center; min-height: 64px; padding: 8px 10px; border: 2px solid var(--ink); border-radius: var(--r-btn); background: #fff; }
+  .tile .name { font-family: var(--display); font-size: 15px; display: block; }
+  .tile .when { font-size: 12px; color: var(--muted); display: block; }
+  .ms { display: flex; flex-direction: column; gap: 6px; }
+  .ms .big { font-family: var(--display); font-size: 20px; line-height: 1.15; }
+  .later { display: flex; flex-wrap: wrap; gap: 6px; }
+  .later .chip { min-height: 32px; }
+  .sechead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  @media (min-width: 800px) { .next { display: grid; grid-template-columns: repeat(3, 1fr); } .nb { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+  @media (prefers-reduced-motion: no-preference) { .ring circle.val { transition: stroke-dashoffset .6s ease; } }
+</style>
+</head>
+<body>
+<main id="app" class="wide"></main>
+<nav class="dock" aria-label="Dock"><span>Inicio</span><span>Conectar</span><span class="on">Insignias</span><span>Ranking</span></nav>
+<script src="engine.js"></script>
+<script>
+const { run, avatar, label, first, esc, fmt, clock, tr, P } = COMPA;
+
+// Badge model: ids and totals mirror lib/badges/rules.ts; "need" is the concrete next action (es, en per unit).
+const SHAPE = { person: ["M60 8 L104 24 V66 C104 96 84 116 60 124 C36 116 16 96 16 66 V24 Z", "#6BE4A3"], pair: ["M60 8 L106 34 V90 L60 116 L14 90 V34 Z", "#FF8FAB"], progress: ["M60 8 L106 34 V90 L60 116 L14 90 V34 Z", "#D5DCE6"], streak: ["M60 8 A54 54 0 1 1 59.9 8 Z", "#FF6B4A"] };
+const DEF = {
+  apreton:     { n: ["Primer apretón", "First handshake"], cat: "person", total: 1, act: (k) => tr("Haz tu primera conexión", "Make your first connection") },
+  madrugador:  { n: ["Madrugador", "Early bird"], cat: "person", total: 1, act: () => tr("Conecta en la primera hora", "Connect within the first hour") },
+  cierre:      { n: ["Cierre", "Closer"], cat: "person", total: 1, act: () => tr("Conecta en los últimos 30 min", "Connect in the last 30 min") },
+  iman:        { n: ["Imán", "Magnet"], cat: "person", total: 10, act: (k) => tr(`${k} ${k === 1 ? "persona más te escanea" : "personas más te escanean"}`, `${k} more ${k === 1 ? "person scans" : "people scan"} you`) },
+  maraton:     { n: ["Maratón", "Marathon"], cat: "person", total: 15, act: (k) => tr(`${k} ${k === 1 ? "conexión" : "conexiones"} más esta noche`, `${k} more ${k === 1 ? "connection" : "connections"} tonight`) },
+  tresdetres:  { n: ["Tres de tres", "Three of three"], cat: "pair", total: 3, act: (k) => tr(`Reconecta ${k} ${k === 1 ? "vez" : "veces"} más con la misma persona`, `Reconnect ${k} more ${k === 1 ? "time" : "times"} with the same person`) },
+  curioso:     { n: ["Curioso", "Curious"], cat: "progress", total: 10, act: (k) => tr(`${k} ${k === 1 ? "tema nuevo" : "temas nuevos"} en tus conversaciones`, `${k} new ${k === 1 ? "topic" : "topics"} in your chats`) },
+  memoria:     { n: ["Memoria de elefante", "Elephant memory"], cat: "progress", total: 20, act: (k) => tr(`Aprueba ${k} ${k === 1 ? "nota" : "notas"} más`, `Approve ${k} more ${k === 1 ? "note" : "notes"}`) },
+  conector100: { n: ["Conector 100", "Connector 100"], cat: "streak", total: 100, act: (k) => tr(`${k} ${k === 1 ? "conexión" : "conexiones"} más`, `${k} more ${k === 1 ? "connection" : "connections"}`) },
+};
+const name = (id) => (DEF[id] ? DEF[id].n[P.lang === "en" ? 1 : 0] : id);
+
+// Facts for me, derived from the replay (the engine's badgesFor covers 7 of these; tresdetres/conector100 and "when/with whom" are computed here).
+function facts(st, me) {
+  const { s } = st;
+  const mine = st.connections.filter((c) => c.a === me.id || c.b === me.id).sort((x, y) => x.t - y.t);
+  const other = (c) => st.people.get(c.a === me.id ? c.b : c.a);
+  const scans = mine.filter((c) => c.b === me.id);
+  const perPartner = new Map(); let third = null;
+  for (const c of mine.filter((c) => c.kind === "reconnection")) { const o = other(c).id; const n = (perPartner.get(o) || 0) + 1; perPartner.set(o, n); if (n === 3 && !third) third = c; }
+  const maxRecon = Math.max(0, ...perPartner.values());
+  const myNotes = s.events.filter((e) => e.type === "summary_approved" && e.a === me.id && e.t <= st.t);
+  const seen = new Set(); let curiousAt = null;
+  for (const c of mine) { const o = other(c); const tp = c.topics.length ? c.topics : me.interests.filter((x) => o.interests.includes(x)); tp.forEach((x) => seen.add(x)); if (seen.size >= 10 && !curiousAt) curiousAt = c; }
+  const ev = (id) => me.badges.find((b) => b.id === id);
+  const at = (c) => (c ? { t: c.t, who: other(c) } : null);
+  const cur = {
+    apreton: Math.min(mine.length, 1),
+    madrugador: me.firstConnT !== null && me.firstConnT - s.eventStartsAtSec <= 3600 ? 1 : 0,
+    cierre: me.lastConnT !== null && s.eventEndsAtSec - me.lastConnT <= 1800 && me.lastConnT <= s.eventEndsAtSec ? 1 : 0,
+    iman: scans.length, maraton: mine.length, tresdetres: maxRecon, curioso: Math.max(seen.size, me.topics.size), memoria: myNotes.length, conector100: mine.length,
+  };
+  const when = {
+    apreton: at(mine[0]), madrugador: at(mine[0]), cierre: at(mine[mine.length - 1]), iman: at(scans[9]), maraton: at(mine[14]),
+    tresdetres: at(third), curioso: at(curiousAt) || at(mine[mine.length - 1]), conector100: at(mine[99]),
+    memoria: myNotes[19] ? { t: myNotes[19].t, who: st.people.get(myNotes[19].b) } : null,
+  };
+  return { cur, when, ev, mine };
+}
+
+function rows(st, me) {
+  const f = facts(st, me);
+  const { s } = st;
+  const sinceStart = st.t - s.eventStartsAtSec;
+  return Object.keys(DEF).map((id) => {
+    const d = DEF[id];
+    const cur = Math.min(d.total, f.cur[id]);
+    const e = f.ev(id);
+    const earned = cur >= d.total || !!e;
+    const w = e ? { t: e.t, who: f.when[id]?.who || null } : f.when[id];
+    // closed windows: Madrugador after the first hour, Cierre before its window opens.
+    const closed = !earned && ((id === "madrugador" && sinceStart > 3600) || st.phase === "ended");
+    const notYet = !earned && id === "cierre" && st.phase !== "ended" && st.t < s.eventEndsAtSec - 1800;
+    return { id, d, cur: earned ? d.total : cur, total: d.total, earned, w, closed, notYet, left: d.total - cur, pct: earned ? 1 : cur / d.total };
+  });
+}
+
+function ring(r, size = 76) {
+  const [path, fill] = SHAPE[r.d.cat];
+  const R = size / 2 - 6, C = 2 * Math.PI * R;
+  const off = C * (1 - r.pct);
+  const c = size / 2, sc = (size - 30) / 120;
+  const txt = r.total > 1 ? `${r.cur}/${r.total}` : r.earned ? "ok" : "0/1";
+  return `<svg class="ring" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(name(r.id))}: ${r.cur}/${r.total}">
+    <circle cx="${c}" cy="${c}" r="${R}" fill="#fff" stroke="rgba(30,27,46,.14)" stroke-width="7"/>
+    <circle class="val" cx="${c}" cy="${c}" r="${R}" fill="none" stroke="#1E1B2E" stroke-width="7" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 ${c} ${c})"/>
+    <circle cx="${c}" cy="${c}" r="${R - 6}" fill="${fill}" stroke="#1E1B2E" stroke-width="2.5"/>
+    <text x="${c}" y="${c + 5}" text-anchor="middle" font-size="${size > 60 ? 15 : 12}" font-weight="700">${txt}</text></svg>`;
+}
+function medal(r, size = 44) {
+  const [path, fill] = SHAPE[r.d.cat];
+  return `<svg width="${size}" height="${size}" viewBox="0 0 120 124" aria-hidden="true"><path d="${path}" fill="${fill}" stroke="#1E1B2E" stroke-width="7" stroke-linejoin="round"/><path d="M40 62 L55 78 L84 44" fill="none" stroke="#1E1B2E" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+function nextCard(r, i) {
+  return `<div class="card nb ${i === 0 ? "first" : ""}">${ring(r)}<div class="grow"><span class="name ellipsis">${esc(name(r.id))}</span>
+    <div class="what">${esc(r.d.act(r.left))}</div></div></div>`;
+}
+
+function shelfTile(r, st) {
+  const w = r.w;
+  const who = w?.who ? tr(" con ", " with ") + label(w.who) : "";
+  return `<div class="tile">${medal(r)}<div class="grow"><span class="name ellipsis">${esc(name(r.id))}</span>
+    <span class="when" style="display:flex;gap:4px;min-width:0"><span style="flex:none">${w ? clock(st, w.t) : tr("esta noche", "tonight")}</span><span class="ellipsis">${esc(who)}</span></span></div></div>`;
+}
+
+function milestone(st, me, v, cand) {
+  // Merge the rank gap and the closest badge by actions needed (one new connection ~ 50 pts).
+  const options = [];
+  if (v.rank && v.above && v.gap > 0) {
+    const n = Math.ceil((v.gap + 1) / 50);
+    options.push({ n, text: tr(`${n} ${n === 1 ? "conexión nueva" : "conexiones nuevas"} → pasas a ${first(v.above)} (#${v.rank - 1})`, `${n} new ${n === 1 ? "connection" : "connections"} → pass ${first(v.above)} (#${v.rank - 1})`), kind: "rank" });
+  }
+  if (v.rank && v.tiedWith && v.crank) options.push({ n: 1, text: tr(`1 conexión → te despegas del empate en #${v.crank}`, `1 connection → break the tie at #${v.crank}`), kind: "rank" });
+  if (cand[0]) options.push({ n: cand[0].left, text: `${cand[0].d.act(cand[0].left)} → ${name(cand[0].id)}`, kind: "badge" });
+  options.sort((a, b) => a.n - b.n || (a.kind === "badge" ? -1 : 1));
+  return options[0] || null;
+}
+
+run((st, me, v) => {
+  const head = `<div class="row" style="justify-content:space-between"><h1>${tr("Insignias", "Badges")}</h1>
+    <span class="pill ${st.phase === "ended" ? "ink" : "coral"}">${st.phase === "ended" ? tr("Final", "Final") : `<span class="live-dot"></span>${tr("En vivo", "Live")}`}</span></div>`;
+  if (!me || me.checkinT === null) {
+    return head + `<div class="empty"><h2 style="color:var(--ink)">${tr("Haz check-in para empezar", "Check in to get started")}</h2>
+      <p style="margin-top:6px">${tr("Tu primera insignia, Primer apretón, está a una conexión de distancia.", "Your first badge, First handshake, is one connection away.")}</p></div>
+      <a class="btn" href="#">${tr("Hacer check-in", "Check in")}</a>`;
+  }
+  let all = rows(st, me);
+  if (new URLSearchParams(location.search).get("demo") === "all") all = all.map((r) => ({ ...r, earned: true, cur: r.total, pct: 1, w: r.w || { t: me.lastConnT ?? st.s.eventStartsAtSec, who: null } }));
+  const earned = all.filter((r) => r.earned).sort((a, b) => (b.w?.t ?? 0) - (a.w?.t ?? 0));
+  const pending = all.filter((r) => !r.earned);
+  const open = pending.filter((r) => !r.closed);
+  const cand = open.filter((r) => !r.notYet).sort((a, b) => b.pct - a.pct || a.left - b.left || a.d.total - b.d.total);
+  const top = cand.slice(0, 3);
+  const rest = pending.filter((r) => !top.includes(r));
+  const ended = st.phase === "ended";
+
+  let main = "";
+  if (ended) {
+    main += `<div class="card tone-sun-soft"><div class="caps">${tr("Tu noche", "Your night")}</div>
+      <h2 style="margin-top:4px">${earned.length ? tr(`Ganaste ${earned.length} ${earned.length === 1 ? "insignia" : "insignias"}`, `You earned ${earned.length} ${earned.length === 1 ? "badge" : "badges"}`) : tr("Esta noche no sumaste insignias", "No badges this time")}</h2>
+      <p class="muted" style="margin-top:6px;font-size:14px">${earned.length ? tr(`${me.connections} conexiones · ${fmt(me.points)} pts`, `${me.connections} connections · ${fmt(me.points)} pts`) : tr("El próximo evento empieza de cero: tu primera conexión te da Primer apretón.", "The next event starts fresh: your first connection earns First handshake.")}</p></div>`;
+  } else if (!pending.length) {
+    main += `<div class="card tone-mint"><div class="caps">${tr("Colección completa", "Collection complete")}</div><h2 style="margin-top:4px">${tr("Tienes todas las insignias de esta noche", "You have every badge tonight")}</h2></div>`;
+  } else {
+    const m = milestone(st, me, v, cand);
+    main += `<div class="card tone-sky-soft ms"><div class="caps">${tr("Tu siguiente meta", "Your next milestone")}</div>
+      ${m ? `<div class="big">${esc(m.text)}</div><span class="chip" style="align-self:flex-start">${m.kind === "badge" ? tr("insignia", "badge") : tr("ranking", "rank")}</span>` : `<div class="big">${tr("Sigue conectando", "Keep connecting")}</div>`}</div>`;
+    if (top.length) main += `<div class="sechead"><h2>${tr("Las más cerca", "Closest to earning")}</h2><span class="caps">${top.length}</span></div><div class="next">${top.map(nextCard).join("")}</div>`;
+    else main += `<div class="empty">${tr("Por ahora no hay insignias a tu alcance. Vuelve en los últimos 30 min.", "Nothing within reach right now. Come back for the last 30 min.")}</div>`;
+  }
+
+  const shelf = earned.length
+    ? `<div class="sechead"><h2>${ended ? tr("Tus insignias", "Your badges") : tr("Tu repisa", "Your shelf")}</h2><span class="caps">${earned.length}/${all.length}</span></div><div class="shelf">${earned.map((r) => shelfTile(r, st)).join("")}</div>`
+    : ended ? "" : `<div class="empty"><p>${tr("Tu repisa está vacía. La primera insignia está a una conexión.", "Your shelf is empty. The first badge is one connection away.")}</p></div>`;
+
+  const lateLabel = ended ? tr("Se quedaron cerca", "Got close") : tr("Más adelante", "Later");
+  const lateRows = ended ? rest.filter((r) => r.cur > 0).sort((a, b) => b.pct - a.pct) : rest;
+  const later = lateRows.length
+    ? `<div class="card sm"><div class="caps" style="margin-bottom:6px">${lateLabel}</div><div class="later">${lateRows.map((r) => `<span class="chip">${esc(name(r.id))} · ${r.cur}/${r.total}</span>`).join("")}</div></div>`
+    : "";
+  const cta = ended ? `<a class="btn sun" href="recap-card.html${location.search}">${tr("Ver mi resumen de la noche", "See my night recap")}</a>` : `<a class="btn" href="#">${tr("Conectar ahora", "Connect now")}</a>`;
+  return head + main + shelf + later + cta;
+});
+</script>
+</body>
+</html>

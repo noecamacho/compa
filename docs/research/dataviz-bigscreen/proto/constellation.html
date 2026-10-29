@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>COMPA live: Constellation</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  #cv { position: absolute; inset: 0; }
+  .panel { position: absolute; z-index: 5; }
+  #counters { left: 24px; top: 24px; display: flex; gap: 40px; padding: 10px 28px 12px; }
+  .big { font-family: var(--display); font-weight: 700; font-size: 72px; line-height: 1; }
+  .lab { font-size: 28px; font-weight: 800; color: var(--muted); line-height: 1.2; }
+  #clock { right: 24px; top: 24px; padding: 10px 26px 12px; display: flex; align-items: center; gap: 18px; }
+  #clock .big { font-size: 72px; }
+  #clock.closing { background: var(--coral-soft); animation: pulse 1s ease-in-out infinite; }
+  #clock.ended { background: var(--sun-soft); }
+  @keyframes pulse { 50% { transform: scale(1.04); } }
+  .tag { font-family: var(--display); font-weight: 700; font-size: 32px; display: inline-flex; align-items: center; gap: 10px; }
+  #qr { left: 24px; bottom: 24px; padding: 14px 14px 10px; text-align: center; }
+  #qr svg { display: block; border: 3px solid var(--ink); border-radius: 10px; }
+  #qr .lab { color: var(--ink); font-family: var(--display); font-weight: 700; margin-top: 6px; }
+  #latest { right: 24px; bottom: 24px; width: 620px; padding: 14px 22px 16px; }
+  #latest .row { display: flex; align-items: center; justify-content: center; gap: 14px; font-family: var(--display); font-weight: 700; font-size: 44px; }
+  #latest .row .nm { max-width: 215px; }
+  #latest .meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 28px; }
+  .kind { padding: 2px 14px; border: 3px solid var(--ink); border-radius: 999px; font-family: var(--display); font-weight: 700; font-size: 28px; }
+  #hint { left: 50%; bottom: 28px; transform: translateX(-50%); padding: 8px 28px; font-family: var(--display); font-weight: 700; font-size: 36px; white-space: nowrap; background: var(--sun-soft); }
+  #legend { left: 50%; bottom: 28px; transform: translateX(-50%); padding: 6px 24px; display: flex; gap: 34px; font-family: var(--display); font-weight: 700; font-size: 28px; background: #fff; }
+  #legend i { display: inline-block; width: 44px; height: 10px; border: 3px solid var(--ink); border-radius: 6px; vertical-align: middle; margin-right: 10px; box-sizing: content-box; }
+  #invite { left: 50%; top: 52%; transform: translate(-50%, -50%); width: 640px; padding: 26px 30px 30px; text-align: center; background: #fff; }
+  #invite .t { font-family: var(--display); font-weight: 700; font-size: 44px; line-height: 1.15; margin-bottom: 16px; }
+  #invite svg { border: 3px solid var(--ink); border-radius: 12px; }
+  #invite .lab { color: var(--ink); font-family: var(--display); font-weight: 700; margin-top: 10px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <canvas id="cv" width="1920" height="1080"></canvas>
+  <div class="panel card" id="counters"></div>
+  <div class="panel card" id="clock"></div>
+  <div class="panel card" id="qr"></div>
+  <div class="panel card" id="latest"></div>
+  <div class="panel card hidden" id="hint"></div>
+  <div class="panel card hidden" id="legend"></div>
+  <div class="panel card hidden" id="invite"></div>
+</div>
+<script src="_shared.js"></script>
+<script>
+(async () => {
+  const { COLORS: C, copy, fmt, opts: O } = COMPA;
+  const W = 1920, H = 1080;
+  if (O.reduced) document.body.classList.add("reduced");
+  const cv = document.getElementById("cv"), ctx = cv.getContext("2d");
+  const $ = (id) => document.getElementById(id);
+  try { await Promise.race([Promise.all([document.fonts.load("700 28px Fredoka"), document.fonts.load("900 28px Nunito")]), new Promise((r) => setTimeout(r, 1500))]); } catch (e) {}
+
+  const clean = (s) => String(s || "?").trim().replace(/\s+/g, " ") || "?";
+  // shortcut: _shared initials() splits surrogate pairs (emoji names render a replacement glyph); local copy is code-point safe
+  const ini = (n) => clean(n).split(" ").slice(0, 2).map((w) => Array.from(w)[0].toUpperCase()).join("");
+  const first = (s) => clean(s).split(" ")[0];
+  const CLUSTER = [C.sky, C.sun, C.coral, "#B9A7FF", C.bronze, C.silver, C.sky, C.sun];
+  const CX = 990, CY = 590, RX = 560, RY = 260, TOP = 150;
+  const wcache = new Map();
+  function measure(font, text) { const k = font + "|" + text; let w = wcache.get(k); if (w === undefined) { ctx.font = font; w = ctx.measureText(text).width; wcache.set(k, w); } return w; }
+  function fit(font, text, maxW) { if (measure(font, text) <= maxW) return text; let s = text; while (s.length > 1 && measure(font, s + "…") > maxW) s = s.slice(0, -1); return s.trimEnd() + "…"; }
+  const ease = (x) => 1 - Math.pow(1 - x, 3);
+
+  // ---- sim state -----------------------------------------------------------------------------
+  const nodes = new Map(); // id -> node
+  let list = [], edges = [], held = [], heldKey = "", model = null, stamp = 0, mode = "full", scnRef = null;
+  let maxR = 30, gap = 6, moving = true, dirty = true, popUntil = 0;
+
+  const modeFor = (n) => (n <= 120 ? "full" : n <= 600 ? "mid" : "dots");
+  const RR = { full: [22, 50], mid: [8, 30], dots: [2.2, 12] };
+
+  function anchorOf(name) {
+    const i = held.indexOf(name); if (i < 0) return { x: CX, y: CY, k: 0.004 };
+    const k = held.length, a = -Math.PI / 2 + (i * 2 * Math.PI) / k;
+    return { x: CX + RX * Math.cos(a) * (k === 1 ? 0 : 1), y: CY + RY * Math.sin(a) * (k === 1 ? 0 : 1), k: 0.006 };
+  }
+
+  function updateHeld(state) {
+    const n = state.people.length, K = n > 200 ? 8 : n > 40 ? 6 : 5;
+    const pop = new Map(), members = new Map();
+    for (const p of state.people) for (const t of p.interests || []) members.set(t, (members.get(t) || 0) + 1);
+    for (const t of state.topics) pop.set(t.name, t.score * 8);
+    const rank = [...members.entries()].filter(([, c]) => c >= 2).map(([name, c]) => ({ name, v: c + (pop.get(name) || 0) })).sort((a, b) => b.v - a.v || a.name.localeCompare(b.name));
+    const want = rank.slice(0, n >= 4 ? K : 0).map((r) => r.name);
+    const next = held.filter((h) => want.includes(h)); // keep slots stable
+    for (const w of want) if (!next.includes(w)) { const free = held.findIndex((h) => !want.includes(h)); if (free >= 0 && !next.includes(w)) next.splice(Math.min(free, next.length), 0, w); else next.push(w); }
+    const key = next.join("|");
+    const changed = key !== heldKey; held = next; heldKey = key;
+    popOf = (t) => (members.get(t) || 0) + (pop.get(t) || 0);
+    return changed;
+  }
+  let popOf = () => 0;
+
+  function assignClusters(force) {
+    const counts = new Map(held.map((h) => [h, 0]));
+    for (const nd of list) {
+      if (!force && nd.cluster !== undefined) { if (nd.cluster) counts.set(nd.cluster, (counts.get(nd.cluster) || 0) + 1); continue; }
+      let best = null, bv = 1e9;
+      for (const t of nd.person.interests || []) if (held.includes(t) && counts.get(t) < bv) { best = t; bv = counts.get(t); }
+      if (!best && held.length) best = [...counts.entries()].sort((a, b) => a[1] - b[1])[0][0];
+      nd.cluster = best; if (best) counts.set(best, counts.get(best) + 1);
+    }
+  }
+
+  function sync(state, born) {
+    const n = state.people.length;
+    mode = modeFor(n);
+    const [rMin, rMax] = RR[mode];
+    const maxP = Math.max(0, ...state.people.map((p) => p.points));
+    const heldChanged = updateHeld(state);
+    const seen = new Set();
+    for (const p of state.people) {
+      seen.add(p.id);
+      let nd = nodes.get(p.id);
+      if (!nd) {
+        const h = COMPA.hash(p.id);
+        nd = { id: p.id, x: 0, y: 0, vx: 0, vy: 0, r: 0, tr: rMin, born, person: p, cluster: undefined };
+        nodes.set(p.id, nd);
+        nd.jx = ((h % 97) / 97 - 0.5) * 2; nd.jy = (((h >> 7) % 89) / 89 - 0.5) * 2;
+        nd.fresh = true;
+      }
+      nd.person = p;
+      nd.tr = rMin + (rMax - rMin) * (maxP > 0 ? Math.sqrt(p.points / maxP) : n <= 3 ? 0.9 : 0.4);
+    }
+    list = state.people.map((p) => nodes.get(p.id));
+    assignClusters(heldChanged);
+    for (const nd of list) if (nd.fresh) { const a = anchorOf(nd.cluster); nd.x = a.x + nd.jx * 60; nd.y = a.y + nd.jy * 60; if (O.reduced || born < 0) nd.r = nd.tr; nd.fresh = false; }
+    maxR = Math.max(...list.map((nd) => nd.tr), 4);
+    gap = mode === "dots" ? 0.8 : mode === "mid" ? 3 : 8;
+    edges = state.connections.map((c) => ({ a: nodes.get(c.a), b: nodes.get(c.b), t: c.t, kind: c.kind })).filter((e) => e.a && e.b);
+    moving = true;
+  }
+
+  // ---- force sim -------------------------------------------------------------------------------
+  let head = new Int32Array(1), nextI = new Int32Array(1);
+  function tick(edgeBudget) {
+    const n = list.length; if (!n) return 0;
+    const cell = Math.max(16, maxR * 2 + gap + 2), cols = Math.ceil(W / cell) + 2, rows = Math.ceil(H / cell) + 2;
+    if (head.length < cols * rows) head = new Int32Array(cols * rows);
+    head.fill(-1, 0, cols * rows);
+    if (nextI.length < n) nextI = new Int32Array(n);
+    for (let i = 0; i < n; i++) { const nd = list[i]; const c = Math.min(cols - 1, Math.max(0, (nd.x / cell) | 0)) + Math.min(rows - 1, Math.max(0, (nd.y / cell) | 0)) * cols; nextI[i] = head[c]; head[c] = i; }
+    for (let i = 0; i < n; i++) {
+      const a = list[i], cx = Math.min(cols - 1, Math.max(0, (a.x / cell) | 0)), cy = Math.min(rows - 1, Math.max(0, (a.y / cell) | 0));
+      for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+        const xx = cx + ox, yy = cy + oy; if (xx < 0 || yy < 0 || xx >= cols || yy >= rows) continue;
+        for (let j = head[xx + yy * cols]; j !== -1; j = nextI[j]) {
+          if (j <= i) continue;
+          const b = list[j]; let dx = b.x - a.x, dy = b.y - a.y; const min = a.r + b.r + gap, d2 = dx * dx + dy * dy;
+          if (d2 >= min * min) continue;
+          let d = Math.sqrt(d2); if (d < 0.01) { dx = (i % 2) - 0.5; dy = 0.5 - (j % 2); d = 0.7; }
+          const s = ((min - d) / d) * 0.5; a.x -= dx * s; a.y -= dy * s; b.x += dx * s; b.y += dy * s;
+        }
+      }
+    }
+    for (const nd of list) { const an = anchorOf(nd.cluster); nd.vx += (an.x - nd.x) * an.k; nd.vy += (an.y - nd.y) * an.k; }
+    const m = edges.length;
+    if (m) {
+      const stepN = Math.min(m, edgeBudget), off = (tickNo * stepN) % m;
+      for (let k = 0; k < stepN; k++) {
+        const e = edges[(off + k) % m]; const dx = e.b.x - e.a.x, dy = e.b.y - e.a.y, d = Math.sqrt(dx * dx + dy * dy) || 1;
+        const rest = e.a.r + e.b.r + 30; if (d < rest) continue;
+        const f = ((d - rest) / d) * 0.0016 * (m > 600 ? 600 / m * 2 : 1);
+        e.a.vx += dx * f; e.a.vy += dy * f; e.b.vx -= dx * f; e.b.vy -= dy * f;
+      }
+    }
+    let e2 = 0;
+    for (const nd of list) {
+      nd.vx *= 0.8; nd.vy *= 0.8; nd.x += nd.vx; nd.y += nd.vy;
+      const mg = nd.r + 12; nd.x = Math.min(W - mg, Math.max(mg, nd.x)); nd.y = Math.min(H - mg, Math.max(TOP + nd.r * 0.3, nd.y));
+      e2 += nd.vx * nd.vx + nd.vy * nd.vy;
+    }
+    tickNo++;
+    return Math.sqrt(e2 / n);
+  }
+  let tickNo = 0;
+  function warm(k) { for (const nd of list) nd.r = nd.tr; for (let i = 0; i < k; i++) tick(1500); }
+  const warmTicks = () => (list.length > 1500 ? 90 : list.length > 400 ? 160 : 260);
+
+  // ---- drawing -----------------------------------------------------------------------------------
+  const simNow = () => (model ? model.now + (O.speed > 0 ? Math.min(0.6, ((performance.now() - stamp) / 1000) * O.speed) : 0) : 0);
+
+  function drawEdges(now) {
+    const m = edges.length; if (!m) return;
+    const lw = m <= 100 ? 3.5 : m <= 400 ? 2.5 : m <= 1200 ? 1.5 : 1, al = m <= 100 ? 0.85 : m <= 400 ? 0.6 : m <= 1200 ? 0.35 : 0.16, bundle = m > 400;
+    const fresh = [];
+    for (const kind of ["new", "reconnection"]) {
+      ctx.beginPath();
+      for (const e of edges) {
+        if (e.kind !== kind) continue;
+        if (now - e.t < 5) { fresh.push(e); continue; }
+        ctx.moveTo(e.a.x, e.a.y);
+        if (bundle && e.a.cluster !== e.b.cluster) ctx.quadraticCurveTo((e.a.x + e.b.x) * 0.25 + CX * 0.5, (e.a.y + e.b.y) * 0.25 + CY * 0.5, e.b.x, e.b.y);
+        else ctx.lineTo(e.b.x, e.b.y);
+      }
+      ctx.globalAlpha = al; ctx.lineWidth = lw; ctx.strokeStyle = kind === "new" ? C.mint : C.gum; ctx.lineCap = "round";
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    fresh.sort((a, b) => b.t - a.t);
+    for (const e of fresh.slice(0, 60).reverse()) {
+      const age = Math.max(0, now - e.t), k = O.reduced ? 1 : 1 - age / 5, col = e.kind === "new" ? C.mint : C.gum;
+      ctx.save();
+      ctx.beginPath(); ctx.moveTo(e.a.x, e.a.y); ctx.lineTo(e.b.x, e.b.y);
+      ctx.strokeStyle = C.ink; ctx.lineWidth = 8 + 8 * k + 6; ctx.stroke();
+      if (!O.reduced) { ctx.shadowColor = col; ctx.shadowBlur = 34 * k; }
+      ctx.strokeStyle = col; ctx.lineWidth = 8 + 8 * k; ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function drawBlobs() {
+    if (!held.length) return [];
+    const agg = held.map(() => ({ x: 0, y: 0, n: 0, a: 0 }));
+    for (const nd of list) { const i = held.indexOf(nd.cluster); if (i < 0) continue; const g = agg[i]; g.x += nd.x; g.y += nd.y; g.n++; g.a += Math.pow(nd.r + gap, 2) * 4; }
+    return agg.map((g, i) => {
+      if (!g.n) return null;
+      const x = g.x / g.n, y = g.y / g.n, r = Math.max(60, Math.sqrt(g.a / 0.78 / Math.PI) + 26);
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fillStyle = CLUSTER[i % 8]; ctx.globalAlpha = 0.2; ctx.fill();
+      ctx.globalAlpha = 0.5; ctx.setLineDash([2, 14]); ctx.lineCap = "round"; ctx.lineWidth = 4; ctx.strokeStyle = C.ink; ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      return { x, y, r, n: g.n, i };
+    });
+  }
+
+  function drawNodes(now) {
+    const nowP = performance.now();
+    if (mode === "dots") {
+      ctx.fillStyle = "rgba(30,27,46,0.78)"; ctx.beginPath();
+      for (const nd of list) { ctx.moveTo(nd.x + nd.r, nd.y); ctx.arc(nd.x, nd.y, nd.r, 0, 7); }
+      ctx.fill();
+      return;
+    }
+    const font = (r) => `700 ${Math.round(r * 0.82)}px Fredoka, Nunito, sans-serif`;
+    for (const nd of list) {
+      const pop = O.reduced ? 1 : ease(Math.min(1, Math.max(0, (nowP - nd.born) / 450)));
+      const r = nd.r * (0.3 + 0.7 * pop) * (pop < 1 ? 1 + (1 - pop) * 0.2 : 1);
+      ctx.beginPath(); ctx.arc(nd.x, nd.y, r, 0, 7);
+      ctx.fillStyle = COMPA.colorFor(nd.id); if (nd.person.anonymous) ctx.fillStyle = C.silver; ctx.fill();
+      ctx.lineWidth = mode === "full" ? 4 : 2.5; ctx.strokeStyle = C.ink; ctx.stroke();
+      if (r >= 14) { ctx.font = font(r); ctx.fillStyle = C.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(nd.person.anonymous ? "?" : ini(nd.person.name), nd.x, nd.y + r * 0.06); }
+    }
+  }
+
+  function pill(x, y, w, h, fill, border, lw) { ctx.beginPath(); ctx.roundRect(x, y, w, h, Math.min(16, h / 2)); ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = lw; ctx.strokeStyle = border; ctx.stroke(); }
+
+  function drawLabels(state, placed) {
+    const font = "900 28px Nunito, sans-serif", H_ = 44;
+    const picks = new Map();
+    const top = state.leaderboard.slice(0, 10).filter((p) => p.points > 0 || state.people.length <= 10);
+    top.forEach((p) => picks.set(p.id, p));
+    const lastC = state.connections[state.connections.length - 1];
+    if (lastC) for (const id of [lastC.a, lastC.b]) if (state.byId.get(id)) picks.set(id, state.byId.get(id));
+    const hit = (r) => r.x < 4 || r.y < 4 || r.x + r.w > W - 4 || r.y + r.h > H - 4 || placed.some((q) => r.x < q.x + q.w && r.x + r.w > q.x && r.y < q.y + q.h && r.y + r.h > q.y);
+    for (const p of picks.values()) {
+      const nd = nodes.get(p.id); if (!nd) continue;
+      const rank = (p.tied ? "=" : "#") + p.rank;
+      const name = fit(font, clean(p.display), 250);
+      const txt = `${rank} ${name} · ${fmt(p.points)}`;
+      const w = measure(font, txt) + 28, off = nd.r + 8;
+      const cands = [[nd.x + off, nd.y - H_ / 2], [nd.x - off - w, nd.y - H_ / 2], [nd.x - w / 2, nd.y - nd.r - H_ - 8], [nd.x - w / 2, nd.y + nd.r + 8]];
+      for (const d of [off + 40, off + 90, off + 150]) for (let k = 0; k < 12; k++) { const a = (k / 12) * 6.283 + 0.3; cands.push([nd.x + Math.cos(a) * d - w / 2, nd.y + Math.sin(a) * d - H_ / 2]); }
+      let rect = null;
+      for (const [x, y] of cands) { const r = { x, y, w, h: H_ }; if (!hit(r)) { rect = r; break; } }
+      if (!rect) rect = { x: cands[0][0], y: cands[0][1], w, h: H_ };
+      placed.push(rect);
+      if (Math.hypot(rect.x + w / 2 - nd.x, rect.y + H_ / 2 - nd.y) > nd.r + H_ + 30) { ctx.beginPath(); ctx.moveTo(nd.x, nd.y); ctx.lineTo(Math.min(rect.x + w, Math.max(rect.x, nd.x)), Math.min(rect.y + H_, Math.max(rect.y, nd.y))); ctx.lineWidth = 3; ctx.strokeStyle = C.ink; ctx.stroke(); }
+      const isNew = lastC && (p.id === lastC.a || p.id === lastC.b);
+      pill(rect.x, rect.y, w, H_, "#fff", C.ink, 3.5);
+      if (isNew) { ctx.lineWidth = 3.5; ctx.strokeStyle = lastC.kind === "new" ? C.mint : C.gum; ctx.beginPath(); ctx.roundRect(rect.x - 5, rect.y - 5, w + 10, H_ + 10, 20); ctx.stroke(); }
+      ctx.font = font; ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(txt, rect.x + 14, rect.y + H_ / 2 + 1);
+    }
+  }
+
+  function drawAnchors(blobs, rects) {
+    const font = "700 44px Fredoka, Nunito, sans-serif";
+    blobs.forEach((b) => {
+      if (!b) return;
+      const name = held[b.i], txt = fit(font, name, 300), w = measure(font, txt) + 60, h = 62;
+      const x = Math.min(W - w - 8, Math.max(8, b.x - w / 2)), y = Math.min(H - h - 8, Math.max(TOP - 18, b.y - b.r - h * 0.75));
+      rects.push({ x, y, w, h });
+      pill(x, y, w, h, "#fff", C.ink, 4.5);
+      ctx.beginPath(); ctx.arc(x + 26, y + h / 2, 11, 0, 7); ctx.fillStyle = CLUSTER[b.i % 8]; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = C.ink; ctx.stroke();
+      ctx.font = font; ctx.fillStyle = C.ink; ctx.textAlign = "left"; ctx.textBaseline = "middle"; ctx.fillText(txt, x + 46, y + h / 2 + 2);
+    });
+  }
+
+  function drawGhost() {
+    ctx.save(); ctx.setLineDash([3, 16]); ctx.lineCap = "round"; ctx.lineWidth = 5; ctx.strokeStyle = "rgba(30,27,46,0.28)";
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2, rx = 470, ry = 250, r = 34 + (i % 3) * 8;
+      ctx.beginPath(); ctx.arc(CX + rx * Math.cos(a), CY + 30 + ry * Math.sin(a), r, 0, 7); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+    if (!model) return;
+    const now = simNow();
+    if (!list.length) { drawGhost(); return; }
+    const blobs = drawBlobs();
+    drawEdges(now);
+    drawNodes(now);
+    const lastC = model.connections[model.connections.length - 1];
+    if (lastC && now - lastC.t < 5) for (const id of [lastC.a, lastC.b]) { const nd = nodes.get(id); if (!nd) continue; ctx.beginPath(); ctx.arc(nd.x, nd.y, nd.r + 8 + (O.reduced ? 0 : 5 * Math.sin(performance.now() / 180)), 0, 7); ctx.lineWidth = 6; ctx.strokeStyle = C.sun; ctx.stroke(); }
+    const rects = [];
+    drawAnchors(blobs, rects);
+    drawLabels(model, rects);
+  }
+
+  // ---- HTML overlays ----------------------------------------------------------------------------------
+  const sig = {};
+  const setHTML = (id, html) => { if (sig[id] !== html) { sig[id] = html; $(id).innerHTML = html; } };
+  const qrCard = (size) => `${COMPA.fakeQr(size)}<div class="lab">${copy.scan}</div>`;
+
+  function overlays(s, scn) {
+    const empty = s.people.length === 0;
+    setHTML("counters", `<div><div class="big num">${fmt(s.counters.checkedIn)}</div><div class="lab">${copy.people}</div></div><div><div class="big num">${fmt(s.counters.connections)}</div><div class="lab">${copy.connections}</div></div>`);
+    const cl = $("clock"); cl.className = "panel card " + s.phase;
+    const toStart = Math.max(0, scn.eventStartsAtSec - s.now);
+    setHTML("clock", s.phase === "pre" ? `<div><div class="lab">${copy.startsIn}</div></div><div class="big num">${COMPA.clock(toStart)}</div>`
+      : s.phase === "ended" ? `<div class="tag" style="font-size:44px">${copy.ended}</div>`
+      : `<div class="tag"><span class="live-dot" style="background:${s.phase === "closing" ? C.coral : "#fff"}"></span>${copy.live}</div><div><span class="big num">${COMPA.clock(s.remaining)}</span> <span class="lab">${copy.left}</span></div>`);
+    $("qr").classList.toggle("hidden", empty); setHTML("qr", qrCard(220));
+    $("invite").classList.toggle("hidden", !empty);
+    setHTML("invite", `<div class="t">${copy.noActivity}</div>${COMPA.fakeQr(300)}<div class="lab">${copy.scan}</div>`);
+    const has = s.connections.length > 0, c = s.connections[s.connections.length - 1];
+    $("latest").classList.toggle("hidden", !has);
+    if (has) {
+      const a = s.byId.get(c.a), b = s.byId.get(c.b), isNew = c.kind === "new";
+      setHTML("latest", `<div class="row">${COMPA.avatar(a, 72)}<span class="nm truncate">${esc(first(a.display))}</span><span>⇄</span><span class="nm truncate">${esc(first(b.display))}</span>${COMPA.avatar(b, 72)}</div><div class="meta"><span class="kind" style="background:${isNew ? C.mintSoft : C.gumSoft}">${isNew ? copy.met : copy.reconnected}</span><span class="lab num">${COMPA.clock(Math.max(0, s.now - c.t))} ${copy.ago || ""}</span></div>`);
+    }
+    $("hint").classList.toggle("hidden", empty || has); setHTML("hint", copy.noActivity);
+    $("legend").classList.toggle("hidden", !has);
+    setHTML("legend", `<span><i style="background:${C.mint}"></i>${COMPA.locale === "es" ? "Nueva" : "New"} ${fmt(s.counters.newCount)}</span><span><i style="background:${C.gum}"></i>${O.locale === "es" ? "Reencuentro" : "Reconnection"} ${fmt(s.counters.reconnections)}</span>`);
+  }
+  const esc = (t) => String(t).replace(/[&<>"]/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[m]));
+  COMPA.locale = O.locale;
+
+  // ---- loop -----------------------------------------------------------------------------------------------
+  let first_ = true, lastSig = "", frames = 0, t0 = performance.now();
+  window.__perf = { ticks: 0, drawMs: 0, simMs: 0, frames: 0 };
+  function render(s, scn, info) {
+    model = s; scnRef = scn; stamp = performance.now();
+    const k = s.people.length + ":" + s.connections.length + ":" + s.counters.checkedIn;
+    if (k !== lastSig) {
+      lastSig = k;
+      sync(s, first_ || O.reduced ? -1e9 : performance.now());
+      if (first_ || O.reduced) warm(warmTicks());
+      first_ = false;
+    }
+    overlays(s, scn);
+    dirty = true;
+    if (O.reduced) draw();
+  }
+
+  function frame() {
+    requestAnimationFrame(frame);
+    if (O.reduced) return;
+    const s0 = performance.now();
+    let speed = 0;
+    if (moving) {
+      for (const nd of list) nd.r += (nd.tr - nd.r) * 0.15;
+      speed = tick(1500);
+      if (speed < 0.03 && list.every((nd) => Math.abs(nd.tr - nd.r) < 0.05)) moving = false;
+      window.__perf.simMs += performance.now() - s0; window.__perf.ticks++;
+    }
+    const recent = model && model.connections.length && simNow() - model.connections[model.connections.length - 1].t < 5.2;
+    const popping = list.some((nd) => performance.now() - nd.born < 480);
+    if (moving || dirty || recent || popping) {
+      const d0 = performance.now(); draw(); dirty = false;
+      window.__perf.drawMs += performance.now() - d0; window.__perf.frames++;
+    }
+  }
+  requestAnimationFrame(frame);
+  COMPA.run(render, { tickMs: 250 });
+})();
+</script>
+</body>
+</html>
