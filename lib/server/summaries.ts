@@ -12,6 +12,7 @@ import { AudioUploadError, readAudioFile } from "./audio-upload";
 import { SUMMARY_POINTS } from "../points";
 import { broadcast, liveTopic } from "../realtime";
 import { awardBadges } from "./badges";
+import { badgeNotices, notify } from "./notify";
 import { requireAcceptedMembership } from "./connections";
 import { requireUnderCap } from "./rate-limit";
 import { isUniqueViolation, usersByIds } from "./people";
@@ -138,8 +139,14 @@ export async function approveSummary({ user, params, body }: InputOf<typeof R.ap
   if (!draft.substantive) return fail(E.notSubstantive);
   const row = await markApproved(draft, body);
   const { event } = await requireAcceptedMembership(row.connectionId, user.id);
-  await awardBadges(user, event, row.id).catch((error: unknown) => console.error("awards failed", error));
-  await broadcast({ topic: liveTopic(event.accessCode), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } });
+  const badges = await awardBadges(user, event, row.id).catch((error: unknown) => {
+    console.error("awards failed", error);
+    return [];
+  });
+  await Promise.all([
+    notify(...badgeNotices(user.id, badges)),
+    broadcast({ topic: liveTopic(event.accessCode), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } }),
+  ]);
   const interaction = {
     id: row.id,
     connectionId: row.connectionId,

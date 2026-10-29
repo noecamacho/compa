@@ -336,6 +336,26 @@ export const invites = pgTable(
   (t) => [check("invites_code_check", sql`${t.code} ~ '^[a-z0-9-]{2,40}$'`), index("invites_inviter_idx").on(t.inviterId)],
 ).enableRLS();
 
+// One Web Push subscription per browser (T-080). The endpoint is unique: a device that signs in as someone else moves
+// to that person. `locale` picks the language of the pushed text, since the server sends it without a request.
+export const pushSubscriptions = pgTable(
+  "push_subscriptions",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull().unique(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    locale: text("locale").notNull().default("en"),
+    createdAt: createdAt(),
+  },
+  (t) => [index("push_subscriptions_user_idx").on(t.userId), check("push_subscriptions_locale_check", sql`${t.locale} in ('es', 'en')`)],
+).enableRLS();
+
+export type PushSubscriptionRow = typeof pushSubscriptions.$inferSelect;
+
 // Scores are derived, never stored (M3, M18). Connections pay both people, notes pay their author,
 // bonus_points pay whoever they name (V2 design points table). security_invoker keeps the tables' RLS in force, so the
 // Supabase Data API cannot read scores through the views either (§4.7).

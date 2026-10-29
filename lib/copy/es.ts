@@ -179,6 +179,16 @@ export const notifications = {
   accepted: (name: string, event: string) => `${name} aceptó tu solicitud en ${event}`,
   inviteeConnected: (name: string) => `${name} conectó con alguien por tu invitación`,
   badgeEarned: (name: string) => `Ganaste la insignia ${name}`,
+  dismiss: "Cerrar aviso",
+  pushTitle: "Avisos en este dispositivo",
+  pushHint: "Entérate al instante cuando alguien te escanea o acepta, aunque COMPA esté cerrado.",
+  pushEnable: "Activar avisos",
+  pushOn: "Avisos activados en este dispositivo.",
+  pushDisable: "Desactivar",
+  pushDenied: "Bloqueaste los avisos. Actívalos en los ajustes del navegador para este sitio.",
+  pushUnsupported: "Este navegador no muestra avisos. Te seguiremos avisando aquí dentro de COMPA.",
+  pushInstall: "En iPhone: toca Compartir → Agregar a inicio y abre COMPA desde ahí para activar avisos.",
+  pushFailed: "No pudimos cambiar los avisos. Intenta de nuevo.",
 };
 
 export const connect = {

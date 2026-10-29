@@ -164,6 +164,13 @@ export const notifications: z.input<typeof S.Notifications> = {
 
 export const notificationsSeen: z.input<typeof S.NotificationsSeenBody> = { seenThrough: TONIGHT };
 
+export const pushSubscription: z.input<typeof S.PushSubscriptionBody> = {
+  endpoint: "https://fcm.googleapis.com/fcm/send/dQw4w9WgXcQ:APA91bExample",
+  keys: { p256dh: "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM", auth: "tBHItJI5svbpez7KI4CCXg" },
+  locale: "es",
+};
+export const pushUnsubscribe: z.input<typeof S.PushUnsubscribeBody> = { endpoint: pushSubscription.endpoint };
+
 export const connectionDetail: z.input<typeof S.ConnectionDetail> = {
   connectionId: ids.connection,
   status: "accepted",

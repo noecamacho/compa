@@ -429,6 +429,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -770,6 +828,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       },
@@ -1028,6 +1144,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -1214,6 +1388,64 @@
                       "error": {
                         "code": "unauthorized",
                         "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -1644,6 +1876,64 @@
                       "error": {
                         "code": "user_not_found",
                         "message": "No person with that handle."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -5342,7 +5632,7 @@
       "get": {
         "operationId": "getEvent",
         "summary": "Event door (event QR)",
-        "description": "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404. Name, window and the two counters the door shows.",
+        "description": "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404. Name, window and the two counters the door shows; cached for at most 1 s (A6).",
         "tags": [
           "events"
         ],
@@ -5794,6 +6084,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -6200,6 +6548,141 @@
                       "error": {
                         "code": "test_user_not_allowed",
                         "message": "Test users can only join test events."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "rate_limited, limit_reached",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string",
+                  "description": "Seconds until the limit window resets; absent for per-event and per-connection caps.",
+                  "example": "42"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "rate_limited",
+                            "limit_reached"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests. Wait a moment and try again.",
+                    "value": {
+                      "error": {
+                        "code": "rate_limited",
+                        "message": "Too many requests. Wait a moment and try again."
+                      }
+                    }
+                  },
+                  "limit_reached": {
+                    "summary": "You reached the limit for this event or connection.",
+                    "value": {
+                      "error": {
+                        "code": "limit_reached",
+                        "message": "You reached the limit for this event or connection."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -6624,6 +7107,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -6810,6 +7351,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -6909,6 +7508,400 @@
                       "error": {
                         "code": "unauthorized",
                         "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/push/subscriptions": {
+      "post": {
+        "operationId": "savePushSubscription",
+        "summary": "Turn on push alerts for this browser",
+        "description": "Stores the browser's Web Push subscription for the signed-in person. Repeat-safe by endpoint; an endpoint saved by someone else moves to you (shared device). Only browser push services are accepted.",
+        "tags": [
+          "notifications"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "endpoint": "https://fcm.googleapis.com/fcm/send/dQw4w9WgXcQ:APA91bExample",
+                "keys": {
+                  "p256dh": "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM",
+                  "auth": "tBHItJI5svbpez7KI4CCXg"
+                },
+                "locale": "es"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/PushSubscriptionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The subscription is saved."
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePushSubscription",
+        "summary": "Turn off push alerts for this browser",
+        "description": "Deletes your subscription with this endpoint. Repeat-safe: an unknown endpoint also answers 204.",
+        "tags": [
+          "notifications"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "endpoint": "https://fcm.googleapis.com/fcm/send/dQw4w9WgXcQ:APA91bExample"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/PushUnsubscribeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The subscription is gone."
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -7272,6 +8265,64 @@
                       "error": {
                         "code": "not_pending",
                         "message": "This request was already answered."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -7734,6 +8785,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -8020,6 +9129,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -8028,7 +9195,7 @@
       "get": {
         "operationId": "liveSnapshot",
         "summary": "Big screen snapshot",
-        "description": "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404. Accepted connections only; cached for at most 1 s (A6).",
+        "description": "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404. Accepted connections only, the 1,000 most recent; counters count them all. People carry their event points and connection count. Cached for at most 1 s (A6).",
         "tags": [
           "live"
         ],
@@ -8076,43 +9243,50 @@
                       "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
                       "name": "Valeria Ochoa",
                       "photoUrl": null,
-                      "points": 1980
+                      "points": 1980,
+                      "connections": 24
                     },
                     {
                       "id": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
                       "name": "Rodrigo Peña",
                       "photoUrl": null,
-                      "points": 1720
+                      "points": 1720,
+                      "connections": 20
                     },
                     {
                       "id": "9b2c1d0e-4f5a-4b6c-8d7e-1f2a3b4c5d66",
                       "name": "Sofía Treviño",
                       "photoUrl": null,
-                      "points": 1540
+                      "points": 1540,
+                      "connections": 18
                     },
                     {
                       "id": "c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e99",
                       "name": "Paola Núñez",
                       "photoUrl": null,
-                      "points": 1410
+                      "points": 1410,
+                      "connections": 16
                     },
                     {
                       "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c77",
                       "name": "Ximena Salcedo",
                       "photoUrl": null,
-                      "points": 1300
+                      "points": 1300,
+                      "connections": 15
                     },
                     {
                       "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
                       "name": "Diego Ramírez",
                       "photoUrl": null,
-                      "points": 1265
+                      "points": 1265,
+                      "connections": 15
                     },
                     {
                       "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d88",
                       "name": "Carlos Ibarra",
                       "photoUrl": null,
-                      "points": 980
+                      "points": 980,
+                      "connections": 11
                     }
                   ],
                   "connections": [
@@ -8872,6 +10046,73 @@
               }
             }
           },
+          "429": {
+            "description": "rate_limited",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string",
+                  "description": "Seconds until the limit window resets; absent for per-event and per-connection caps.",
+                  "example": "42"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "rate_limited"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests. Wait a moment and try again.",
+                    "value": {
+                      "error": {
+                        "code": "rate_limited",
+                        "message": "Too many requests. Wait a moment and try again."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "502": {
             "description": "transcription_failed",
             "content": {
@@ -8923,6 +10164,64 @@
                       "error": {
                         "code": "transcription_failed",
                         "message": "Transcription failed. Type the note instead."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -9270,6 +10569,83 @@
               }
             }
           },
+          "429": {
+            "description": "rate_limited, limit_reached",
+            "headers": {
+              "Retry-After": {
+                "schema": {
+                  "type": "string",
+                  "description": "Seconds until the limit window resets; absent for per-event and per-connection caps.",
+                  "example": "42"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "rate_limited",
+                            "limit_reached"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "rate_limited": {
+                    "summary": "Too many requests. Wait a moment and try again.",
+                    "value": {
+                      "error": {
+                        "code": "rate_limited",
+                        "message": "Too many requests. Wait a moment and try again."
+                      }
+                    }
+                  },
+                  "limit_reached": {
+                    "summary": "You reached the limit for this event or connection.",
+                    "value": {
+                      "error": {
+                        "code": "limit_reached",
+                        "message": "You reached the limit for this event or connection."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
           "502": {
             "description": "summary_failed",
             "content": {
@@ -9321,6 +10697,64 @@
                       "error": {
                         "code": "summary_failed",
                         "message": "The summary could not be drafted. Retry."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -9727,6 +11161,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -10024,6 +11516,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -10294,6 +11844,64 @@
                 }
               }
             }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -10426,6 +12034,64 @@
                       "error": {
                         "code": "unauthorized",
                         "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -10626,6 +12292,64 @@
                       "error": {
                         "code": "not_found",
                         "message": "Not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "auth_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "auth_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "auth_unavailable": {
+                    "summary": "Sign-in could not be checked right now. Retry in a moment.",
+                    "value": {
+                      "error": {
+                        "code": "auth_unavailable",
+                        "message": "Sign-in could not be checked right now. Retry in a moment."
                       }
                     }
                   }
@@ -11440,6 +13164,62 @@
         },
         "required": [
           "seenThrough"
+        ]
+      },
+      "PushSubscriptionBody": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri"
+          },
+          "keys": {
+            "type": "object",
+            "properties": {
+              "p256dh": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9_-]+=*$"
+              },
+              "auth": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9_-]+=*$"
+              }
+            },
+            "required": [
+              "p256dh",
+              "auth"
+            ]
+          },
+          "locale": {
+            "description": "Language of the pushed text; defaults to English.",
+            "type": "string",
+            "enum": [
+              "es",
+              "en"
+            ]
+          }
+        },
+        "required": [
+          "endpoint",
+          "keys"
+        ]
+      },
+      "PushUnsubscribeBody": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri"
+          }
+        },
+        "required": [
+          "endpoint"
         ]
       },
       "KnewBody": {
@@ -13316,13 +15096,19 @@
                   "type": "integer",
                   "minimum": -9007199254740991,
                   "maximum": 9007199254740991
+                },
+                "connections": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
                 }
               },
               "required": [
                 "id",
                 "name",
                 "photoUrl",
-                "points"
+                "points",
+                "connections"
               ],
               "additionalProperties": false
             }

@@ -78,15 +78,16 @@ async function unlockGoldenCap(inviter: UserRow, db: Executor): Promise<void> {
 }
 
 // When an invited person's first connection is accepted: +100 to the inviter, +50 to the invitee, once.
-export async function awardInvite(invitee: UserRow, event: EventRow, connectionId: string, db: Executor = getDb()): Promise<void> {
+// Returns the inviter's id the one time it pays, so the caller can tell them.
+export async function awardInvite(invitee: UserRow, event: EventRow, connectionId: string, db: Executor = getDb()): Promise<string | null> {
   const [invite] = await db.select().from(invites).where(eq(invites.inviteeId, invitee.id)).limit(1);
-  if (!invite || invite.firstConnectionAt) return;
+  if (!invite || invite.firstConnectionAt) return null;
   const [marked] = await db
     .update(invites)
     .set({ firstConnectionAt: new Date() })
     .where(and(eq(invites.id, invite.id), isNull(invites.firstConnectionAt)))
     .returning({ inviterId: invites.inviterId });
-  if (!marked) return;
+  if (!marked) return null;
   await db
     .insert(bonusPoints)
     .values([
@@ -96,4 +97,5 @@ export async function awardInvite(invitee: UserRow, event: EventRow, connectionI
     .onConflictDoNothing();
   const [inviter] = await db.select().from(users).where(eq(users.id, marked.inviterId)).limit(1);
   if (inviter) await unlockGoldenCap(inviter, db);
+  return marked.inviterId;
 }

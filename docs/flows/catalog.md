@@ -76,8 +76,8 @@ Screen numbers (01–12) are the V2 screens in [DESIGN.md](../../DESIGN.md#scree
 | [F-46](#f-46) | Ranking all year (11) | Mock-only | Partial → IP | Ready | T-072 |
 | [F-47](#f-47) | Share my invite (12) | Mock-only | Mock-only → IP | Missing → IP | T-074 |
 | [F-48](#f-48) | Invite claim and reward | Missing | Mock-only → IP | Missing | T-075, T-076 |
-| [F-49](#f-49) | Bell and notifications | Partial | Missing | — | T-031, T-080 |
-| [F-50](#f-50) | Acceptance notice to the requester | Missing | Partial | — | T-032, T-081 |
+| [F-49](#f-49) | Bell and notifications | Ready | Ready | Ready | T-031, T-080, T-081 |
+| [F-50](#f-50) | Acceptance notice to the requester | Ready | Ready | Ready | T-032, T-081 |
 | [F-51](#f-51) | Big screen opens (gated) | IP | IP | IP | T-090, T-092 |
 | [F-52](#f-52) | Big screen with an empty event | IP | Ready | Ready | T-090, T-028 |
 | [F-53](#f-53) | Big screen with many nodes, for hours | IP | Partial | Ready | T-091, T-093 |
@@ -913,12 +913,12 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | Home bell |
 | Pre | — |
 | Happy path (intended) | The count of unseen items → tap → list (requests, acceptances, invitee connected, badge earned) |
-| Alternates | The bell count polls the unseen notification total; the list is at `/notifications` |
-| Errors | — |
-| Edge cases | Declines never appear (M8). Opening the list marks displayed items seen; new items remain unseen |
+| Alternates | Live on every attendee screen: the private Realtime channel `user:<id>` pokes the app, which refetches `GET /api/notifications` (bell, a toast) and the incoming cards (`GET /api/connections`, otherwise polled every 3 s by `usePoll`, T-031); polling every 3 s when Realtime is down, every 30 s as a safety net when it is up. Web Push alerts (`/notifications` → "Turn on alerts") when the app is closed |
+| Errors | Push unsupported, blocked, or iPhone outside an installed Home Screen app: the alerts card says why and the in-app alerts keep working |
+| Edge cases | Declines never appear and never notify (M8). Opening the list marks seen through the newest item; the seen mark never moves backwards or into the future, and other tabs clear at once (`notifications.seen`). A badge that lands with an acceptance never hides it in the toast. Sign-out turns push off for that browser; a browser that signs in as someone else moves its subscription to them |
 | Status | UI Ready · API Ready · DB Ready |
-| E2E coverage | `e2e/notifications/bell.spec.ts`: count updates by polling; tap → list; opening marks seen |
-| Tickets | [T-031](backlog.md#t-031), [T-080](backlog.md#t-080) |
+| E2E coverage | `e2e/notifications/live.spec.ts` (real mode, two browsers): request arrives in under 2 s by Realtime and push; accept reaches the requester in under 2 s; another person's channel is refused; polling delivers with Realtime blocked; a decline never notifies; the alerts card at 390 |
+| Tickets | [T-031](backlog.md#t-031), [T-080](backlog.md#t-080), [T-081](backlog.md#t-081) |
 
 <a id="f-50"></a>
 ### F-50 · Acceptance notice to the requester
@@ -931,9 +931,9 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Happy path (intended, A4) | "Connected! +N" appears live and the networks unlock |
 | Alternates | Polling |
 | Errors | — |
-| Edge cases | `request.accepted` is broadcast on a private channel no client joins (OQ #27) |
-| Status | UI Missing · API Partial · DB — |
-| E2E coverage | `e2e/requests/pending.spec.ts`: requester screen flips within 4 s |
+| Edge cases | The pending screen re-renders on `request.accepted` from the private channel, else on its 3 s poll; the toast and push say "<name> accepted your request" |
+| Status | UI Ready · API Ready · DB Ready |
+| E2E coverage | `e2e/notifications/live.spec.ts`: requester screen flips to "Conectaste con …" with the points (+50 new) within 2 s |
 | Tickets | [T-032](backlog.md#t-032), [T-081](backlog.md#t-081) |
 
 ## Big screen

@@ -222,3 +222,8 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | How does an addressee find incoming requests?
 
 - T-031: home and `/connections` show incoming requests on top, polled every 3 s through `lib/use-poll.ts` (pauses on hidden tabs, backs off on errors); the bell opens `/notifications`. A request whose event ended shows the expired copy instead of accept (API spec §7.3). See [screens/connections](screens/connections.md).
+
+## [2026-10-29] ingest | Live notifications and Web Push (T-080, T-081)
+
+- Every attendee screen now hears its private Realtime channel `user:<users.id>`; RLS on `realtime.messages` (migration `0011_realtime_user_channels`) lets a person join only their own. Messages are pokes: the client refetches `GET /api/notifications`, polls every 3 s when Realtime is down, 30 s when up. Web Push alerts (`/api/push/subscriptions`, `public/sw.js`, VAPID env) cover a closed app; iPhone needs the Home Screen app. Open question #27 resolved. Local two-browser proof: `e2e/notifications/live.spec.ts` on a local Supabase stack (`docs/testing/real-mode.md` §6). API spec §8, catalog F-49/F-50 and backlog T-080/T-081 updated.
+

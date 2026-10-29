@@ -5,6 +5,7 @@ import { z } from "zod";
 import { AVATAR_MODES } from "../avatar-mode";
 import { BADGE_IDS } from "../badges/catalog";
 import { MonitoLook } from "../monito/look";
+import { LOCALES } from "../i18n";
 import { LINK_KEYS, VISIBILITY_LEVELS } from "../profile-fields";
 import { USER_ROLES } from "../roles";
 import { TOPICS } from "../topics";
@@ -319,6 +320,17 @@ export const Notifications = z
   .meta({ id: "Notifications" });
 export const NotificationsSeenBody = z.object({ seenThrough: isoDate }).meta({ id: "NotificationsSeenBody" });
 
+// The browser's PushSubscription.toJSON() (W3C Push API); the endpoint must belong to a browser push service.
+const pushKey = z.string().min(16).max(256).regex(/^[A-Za-z0-9_-]+=*$/);
+export const PushSubscriptionBody = z
+  .object({
+    endpoint: z.url().max(2048),
+    keys: z.object({ p256dh: pushKey, auth: pushKey }),
+    locale: z.enum(LOCALES).optional().meta({ description: "Language of the pushed text; defaults to English." }),
+  })
+  .meta({ id: "PushSubscriptionBody" });
+export const PushUnsubscribeBody = z.object({ endpoint: z.url().max(2048) }).meta({ id: "PushUnsubscribeBody" });
+
 // `connections` is the person's accepted count at the event; the `connections` list below holds only the most recent links.
 const LivePerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable(), points: z.int(), connections: z.int() });
 const LiveConnection = z.object({ id: uuid, a: uuid, b: uuid, kind: ConnectionKind, at: isoDate });
@@ -437,6 +449,7 @@ export type UserProfileT = z.infer<typeof UserProfile>;
 export type ConnectionListT = z.infer<typeof ConnectionList>;
 export type NotificationT = z.infer<typeof Notification>;
 export type NotificationsT = z.infer<typeof Notifications>;
+export type PushSubscriptionBodyT = z.infer<typeof PushSubscriptionBody>;
 export type PersonHistoryT = z.infer<typeof PersonHistory>;
 export type ConnectionDetailT = z.infer<typeof ConnectionDetail>;
 export type LeaderboardT = z.infer<typeof Leaderboard>;

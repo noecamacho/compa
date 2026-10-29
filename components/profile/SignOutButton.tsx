@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { apiCall } from "@/lib/api/client";
 import { NoBody } from "@/lib/api/route-spec";
 import { me as copy } from "@/lib/copy/es";
+import { disablePush } from "@/lib/push/client";
 
 // Two taps on purpose: getting back in needs the event QR, so signing out by accident is costly.
 export function SignOutButton() {
@@ -15,6 +16,8 @@ export function SignOutButton() {
 
   async function signOut() {
     setBusy(true);
+    // This browser stops alerting for this person; done first, while the session can still delete the subscription.
+    await disablePush().catch(() => undefined);
     // A 401 means the session was already gone; either way the person ends up signed out.
     await apiCall("POST", "/api/auth/signout", NoBody).catch(() => undefined);
     router.replace("/");
