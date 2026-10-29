@@ -1,24 +1,24 @@
+import Image from "next/image";
 import { landing } from "@/lib/copy/es";
 
-type Props = { size?: "md" | "lg" };
+type Props = { size?: "md" | "lg"; variant?: "inline" | "stacked" | "mark" };
 
-// The speech-bubble mark and the wordmark (V2Bienvenida).
-export function Logo({ size = "md" }: Props) {
+const MARK = { src: "/brand/compa-mark.png", width: 1024, height: 1002 } as const;
+const STACKED = { src: "/brand/compa-logo.png", width: 925, height: 1024 } as const;
+
+// The official COMPA logo (design/brand): two interlocking speech bubbles, with the wordmark beside or below.
+export function Logo({ size = "md", variant = "inline" }: Props) {
   const large = size === "lg";
+  if (variant === "stacked") {
+    return <Image src={STACKED.src} width={STACKED.width} height={STACKED.height} alt={landing.brand} className={large ? "h-auto w-[220px]" : "h-auto w-[150px]"} priority />;
+  }
+  const mark = (
+    <Image src={MARK.src} width={MARK.width} height={MARK.height} alt={variant === "mark" ? landing.brand : ""} aria-hidden={variant === "mark" ? undefined : true} className={large ? "h-12 w-auto" : "h-10 w-auto"} priority />
+  );
+  if (variant === "mark") return mark;
   return (
-    <span className="flex items-center gap-3">
-      <span
-        aria-hidden="true"
-        className="relative flex h-10 w-[46px] items-center justify-center gap-2 rounded-[17px] bg-sun border-ink shadow-hard-3"
-        style={{ transform: "rotate(-6deg)" }}
-      >
-        <span className="h-[10px] w-[7px] rounded-[4px] bg-ink" />
-        <span className="h-[10px] w-[7px] rounded-[4px] bg-ink" />
-        <span
-          className="absolute bottom-[-10px] left-[10px] h-3 w-3 bg-sun"
-          style={{ borderLeft: "2.5px solid #1E1B2E", borderBottom: "2.5px solid #1E1B2E", transform: "skewX(20deg)" }}
-        />
-      </span>
+    <span className="flex items-center gap-[10px]">
+      {mark}
       <span className={`font-display leading-none font-bold tracking-[-0.5px] ${large ? "text-[34px]" : "text-[30px]"}`}>{landing.brand}</span>
     </span>
   );

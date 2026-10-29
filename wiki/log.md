@@ -123,3 +123,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Which user flows exist, what is missing, and what do agents build next?
 
 - Added `docs/flows/`: 74 user flows with status per layer and e2e coverage, an actor permission and CRUD matrix (34 missing operations), 40 risks, and 86 agent-ready tickets (12 P0, 48 P1, 26 P2; 11 in progress on the landing and real-mode branches). Per the captain's requirement, every ticket depends on the Playwright harness T-000 and ships e2e specs. New open questions #43–#56.
+
+## [2026-10-29] ingest | Official COMPA logo
+
+- The captain set the official logo: two interlocking speech bubbles (green and blue, ink outline, hard shadow) with the rounded wordmark "compa". Originals in `design/brand/`; transparent web versions in `public/brand/`; favicon, `app/icon.png`, `app/apple-icon.png` and `app/opengraph-image.png` generated from them. Replaces the yellow single-bubble mark.

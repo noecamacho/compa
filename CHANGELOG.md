@@ -28,6 +28,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- Official COMPA logo (two interlocking speech bubbles): originals in `design/brand/`, web assets in `public/brand/`, favicon, app and Apple icons, and the Open Graph image; the `Logo` component uses it (inline, stacked or mark only).
 - `compa.lol` landing page in the V2 style: one promise, idle monitos, "you get in only by scanning your event's QR", and a "Back to my event" button for checked-in people. No public sign-up.
 - Event door `/e/<code>` (name, live counters, Enter with LinkedIn), check-in screen with the big-screen notice `/e/<code>/join`, and the projected dashboard `/e/<code>/live` (Three.js loom of accepted connections colored new vs reconnection, counters, join QR, leaderboard, person cards; polls every 3 s; 390 to 1920 px).
 - Spanish or English by the visitor's first preferred language (`lib/i18n.ts`, `lib/copy/en.ts`) for the landing and event-entry screens.
