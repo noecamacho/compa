@@ -308,3 +308,47 @@ export const rankingTips = {
   first: "Vas en primer lugar.",
   gap: (gap: number) => (gap <= 50 ? "Una conexión nueva (+50) y la pasas." : `Te faltan ${gap} pts: ${Math.ceil(gap / 50)} conexiones nuevas.`),
 };
+
+// Guided onboarding: one spotlight per button, in the order a new person meets them.
+export const tour = {
+  step: (n: number, total: number) => `${n} de ${total}`,
+  skip: "Saltar",
+  back: "Atrás",
+  next: "Siguiente",
+  done: "¡Entendido!",
+  replay: "Guía rápida",
+  home: [
+    { target: "live", title: "Esto es lo que pasa en el evento", body: "Cuántas conexiones van esta noche, quiénes se acaban de conectar y en qué lugar vas tú. Toca la fila de abajo para ver el ranking completo." },
+    { target: "connect", title: "Aquí conectas con la gente", body: "Es el botón principal. Muestra tu QR para que te escaneen, o escanea el de la otra persona. Cada conexión nueva vale +50 pts; un reencuentro, +20." },
+    { target: "invite", title: "Invita a tus amigos", body: "Comparte tu enlace. Cada amigo que entre y haga su primera conexión te da +100 pts, y con tres ganas la gorra dorada para tu monito." },
+    { target: "dock", title: "Tu barra de siempre", body: "Inicio, Conectar (tu QR), tus Conexiones con lo que platicaron, y tu Perfil con puntos, insignias y las redes que compartes." },
+  ],
+  connect: [
+    { target: "mode", title: "Dos formas de conectar", body: "\"Mi QR\" lo enseñas para que te escaneen. \"Escanear\" abre la cámara para leer el QR de la otra persona; si no sale, búscala por nombre." },
+    { target: "qr", title: "Tu QR personal", body: "Cualquier cámara lo lee y abre tu tarjeta en Compa. La otra persona registra la conexión y tú recibes la solicitud para aceptarla." },
+  ],
+  register: [
+    { target: "kind", title: "¿Nueva o reencuentro?", body: "Nueva si es la primera vez que se conectan (+50). Reencuentro si ya se conocían (+20). Si ya aparece en tus conexiones, lo marcamos solos." },
+    { target: "topics", title: "¿De qué hablaron?", body: "Marca hasta tres temas. Te quedan guardados con la persona y suman +5 pts." },
+    { target: "note", title: "Cuéntaselo a Compa", body: "Graba una nota de voz de hasta dos minutos. Compa la resume en un título, tres puntos y un pendiente. Vale +15 pts al guardarla." },
+    { target: "confirm", title: "Manda la solicitud", body: "La otra persona la acepta desde su teléfono y, hasta entonces, nadie ve las redes del otro. Al aceptar, los dos ganan los puntos." },
+  ],
+  me: [
+    { target: "avatar", title: "Tu monito", body: "Así te ven en el evento. Tócalo para cambiarlo; con el tiempo ganas ropa y accesorios por conectar." },
+    { target: "links", title: "Las redes que compartes", body: "Enciende solo las que quieras mostrar. Nadie las ve hasta que acepta una conexión contigo; las apagadas no se muestran a nadie." },
+    { target: "badges", title: "Tus insignias", body: "Las ganas por conectar: la primera, madrugador, maratón… Hay cuatro secretas que no te decimos cómo se ganan." },
+  ],
+  ranking: [
+    { target: "scope", title: "Esta noche o todo el año", body: "El ranking de esta noche cuenta solo el evento actual; el del año suma todos los eventos a los que has ido." },
+    { target: "you", title: "Tú en el ranking", body: "Tu lugar, tus puntos y cuánto te falta para pasar a la persona de arriba. Una conexión nueva suele bastar." },
+  ],
+  incoming: {
+    title: (name: string) => `${name} quiere conectar contigo`,
+    hint: "Toca para ver quién es y aceptar.",
+    view: "Ver",
+  },
+  outsideEvent: {
+    title: "No estás en un evento ahora",
+    body: "Cuando llegues a uno, escanea el QR de la entrada para registrarte y empezar a conectar.",
+  },
+};

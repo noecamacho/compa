@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Icon, type IconName } from "@/components/icons";
+import { PendingWatcher } from "@/components/connections/PendingWatcher";
 import { Avatar } from "@/components/monito/Avatar";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -46,6 +47,7 @@ export default async function ConfirmationPage({ params }: Props) {
   const links = Object.entries(other.links ?? {}).filter(([key]) => NETWORK_STYLE[key as LinkKey]);
   return (
     <Screen>
+      {pending && <PendingWatcher connectionId={detail.connectionId} />}
       <Header close="/home" />
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center">

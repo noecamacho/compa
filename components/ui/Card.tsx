@@ -28,6 +28,8 @@ type Props = {
   className?: string;
   style?: CSSProperties;
   ariaLabel?: string;
+  // Spotlight target for the guided tour (components/tour/Tour.tsx).
+  "data-tour"?: string;
 };
 
 const SIZE_CLASS = {
@@ -36,18 +38,18 @@ const SIZE_CLASS = {
   flat: "rounded-[16px]",
 } as const;
 
-export function Card({ children, tone = "white", size = "md", href, className, style, ariaLabel }: Props) {
+export function Card({ children, tone = "white", size = "md", href, className, style, ariaLabel, "data-tour": dataTour }: Props) {
   const classes = `box-border block border-ink ${SIZE_CLASS[size]} ${className ?? ""}`;
   const merged = { background: TONE_BG[tone], ...style };
   if (href) {
     return (
-      <Link href={href} className={classes} style={merged} aria-label={ariaLabel}>
+      <Link href={href} className={classes} style={merged} aria-label={ariaLabel} data-tour={dataTour}>
         {children}
       </Link>
     );
   }
   return (
-    <div className={classes} style={merged} aria-label={ariaLabel}>
+    <div className={classes} style={merged} aria-label={ariaLabel} data-tour={dataTour}>
       {children}
     </div>
   );
