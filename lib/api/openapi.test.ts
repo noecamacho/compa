@@ -6,7 +6,7 @@ import { ROUTES } from "./routes";
 
 const NOT_IN_CONTRACT = new Set(["/api/openapi.json", "/api/docs"]);
 
-// app/api/events/[slug]/route.ts → /api/events/{slug}
+// app/api/e/[code]/route.ts → /api/e/{code}
 const toOpenApiPath = (file: string) =>
   `/${file}`.replace(/^\/app/, "").replace(/\/route\.ts$/, "").replace(/\[([^\]]+)\]/g, "{$1}");
 

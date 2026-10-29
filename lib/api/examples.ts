@@ -21,6 +21,10 @@ export const ids = {
 } as const;
 
 export const founders = { slug: "founders-fest", name: "Founders Fest GDL" } as const;
+// Example access code (M19); real codes come from lib/access-code.ts and are never documented.
+export const accessCode = "k7m2p9xq4t";
+export const foundersDoor = { code: accessCode, name: founders.name } as const;
+export const joinUrl = `https://compa.lol/e/${accessCode}`;
 const meetup = { slug: "gdl-founders-septiembre", name: "Founders Meetup Septiembre" } as const;
 
 const TONIGHT = "2026-10-29T18:15:00.000Z";
@@ -65,7 +69,7 @@ export const me: z.input<typeof S.Me> = {
   nameEdited: false,
   photoEdited: false,
   isAdmin: false,
-  currentEvent: founders,
+  currentEvent: foundersDoor,
   stats: { newConnections: 42, reconnections: 16, events: 7 },
   scores: { event: { rank: 6, points: 1265 }, lifetime: { rank: 14, points: 5110 } },
   badges: ["apreton", "tresdetres", "ff2026", "madrugador", "og"],
@@ -84,6 +88,16 @@ export const event: z.input<typeof S.Event> = {
   startsAt: "2026-10-29T16:00:00.000Z",
   endsAt: "2026-10-30T04:00:00.000Z",
   isRunning: true,
+};
+
+export const eventDoor: z.input<typeof S.EventDoor> = {
+  code: accessCode,
+  name: founders.name,
+  startsAt: event.startsAt,
+  endsAt: event.endsAt,
+  isRunning: true,
+  phase: "running",
+  counters: { checkedIn: 340, connections: 218 },
 };
 
 export const interests: z.input<typeof S.InterestList> = [
@@ -178,7 +192,7 @@ export const incomingDetail: z.input<typeof S.ConnectionDetail> = {
 };
 
 export const liveSnapshot: z.input<typeof S.LiveSnapshot> = {
-  event: { ...founders, isRunning: true },
+  event: { ...foundersDoor, isRunning: true },
   people: [
     { id: ids.valeria, name: valeriaPublic.name, photoUrl: null, points: 1980 },
     { id: ids.rodrigo, name: rodrigo.name, photoUrl: null, points: 1720 },
