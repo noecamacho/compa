@@ -456,8 +456,7 @@ export const createConnection = route({
     schema: S.ConnectionRequest,
     example: { connectionId: X.ids.connection, status: "pending", event: X.founders, to: X.valeriaPublic },
   },
-  errors: [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed, E.rateLimited],
-  // The per-event cap (LIMITS.scanPerEvent) needs the resolved event, so createConnection checks it.
+  errors: [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed, E.rateLimited, E.limitReached],
   rateLimit: [LIMITS.scanPerMinute],
 });
 
@@ -648,8 +647,8 @@ export const draftSummary = route({
       },
     },
   },
-  errors: [E.invalidInput, E.unauthorized, E.notFound, E.connectionNotAccepted, E.rateLimited, E.summaryFailed],
-  rateLimit: [LIMITS.draftPerMinute, { ...LIMITS.draftPerConnection, scope: (body) => body.connectionId }],
+  errors: [E.invalidInput, E.unauthorized, E.notFound, E.connectionNotAccepted, E.rateLimited, E.limitReached, E.summaryFailed],
+  rateLimit: [LIMITS.draftPerMinute],
 });
 
 export const approveSummary = route({

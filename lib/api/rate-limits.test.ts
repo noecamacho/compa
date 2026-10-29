@@ -20,15 +20,11 @@ describe("windowSlot", () => {
   test("retry is at least one second on a window edge", () => {
     expect(windowSlot("minute", new Date("2026-10-29T10:00:59.999Z")).retryAfterSeconds).toBe(1);
   });
-
-  test("ever has one slot and no retry time", () => {
-    expect(windowSlot("ever", new Date())).toEqual({ start: new Date(0), retryAfterSeconds: null });
-  });
 });
 
 test("counterKey scopes by user, rule and optional scope", () => {
   expect(counterKey("u1", LIMITS.scanPerMinute)).toBe("u1:scan-minute");
-  expect(counterKey("u1", LIMITS.draftPerConnection, "c9")).toBe("u1:draft-connection:c9");
+  expect(counterKey("u1", LIMITS.draftPerMinute, "c9")).toBe("u1:draft-minute:c9");
 });
 
 test("an error with headers keeps them in its response (Retry-After)", () => {
@@ -40,6 +36,7 @@ test("an error with headers keeps them in its response (Retry-After)", () => {
 
 test("errorText maps rate_limited to copy and keeps other messages", () => {
   expect(errorText(new ApiClientError(429, "rate_limited", "Too many requests."))).toBe(common.rateLimited);
+  expect(errorText(new ApiClientError(429, "limit_reached", "Limit reached."))).toBe(common.limitReached);
   expect(errorText(new ApiClientError(409, "not_pending", "Already answered."))).toBe("Already answered.");
   expect(errorText("boom")).toBe("boom");
 });

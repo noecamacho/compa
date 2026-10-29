@@ -2,26 +2,24 @@ import "server-only";
 import { sql } from "drizzle-orm";
 import { getDb } from "../../db/client";
 import { rateLimitCounters } from "../../db/schema";
-import { ApiError, E } from "../api/errors";
+import { ApiError, E, fail } from "../api/errors";
 import { counterKey, windowSlot, type RateLimitRule } from "../api/rate-limits";
 
 export type ScopedRule = { rule: RateLimitRule; scope?: string };
 
-type Hit = { key: string; windowStart: Date; limit: number; retryAfterSeconds: number | null };
+type Hit = { key: string; windowStart: Date; limit: number; retryAfterSeconds: number };
 
 const toHit = (userId: string, now: Date) => ({ rule, scope }: ScopedRule): Hit => {
   const slot = windowSlot(rule.per, now);
   return { key: counterKey(userId, rule, scope), windowStart: slot.start, limit: rule.limit, retryAfterSeconds: slot.retryAfterSeconds };
 };
 
-function rateLimited(hit: Hit): ApiError {
-  const headers = hit.retryAfterSeconds === null ? undefined : { "Retry-After": `${hit.retryAfterSeconds}` };
-  return new ApiError(E.rateLimited.status, E.rateLimited.code, E.rateLimited.message, undefined, headers);
-}
+const rateLimited = (retryAfterSeconds: number): ApiError =>
+  new ApiError(E.rateLimited.status, E.rateLimited.code, E.rateLimited.message, undefined, { "Retry-After": `${retryAfterSeconds}` });
 
 // Counts the request against every rule in one upsert and throws 429 when any count passes its limit.
 // Keyed by user id, never IP: a whole venue shares one NAT. Rejected requests still count.
-// shortcut: expired minute and day rows are never deleted, add a cleanup cron if the table grows large.
+// shortcut: expired counter rows are never deleted, add a cleanup cron if the table grows large.
 export async function enforceRateLimits(userId: string, rules: readonly ScopedRule[], now = new Date()): Promise<void> {
   if (rules.length === 0) return;
   const hits = rules.map(toHit(userId, now));
@@ -34,6 +32,11 @@ export async function enforceRateLimits(userId: string, rules: readonly ScopedRu
     })
     .returning({ key: rateLimitCounters.key, count: rateLimitCounters.count });
   const counts = new Map(rows.map((row) => [row.key, row.count]));
-  const over = hits.find((hit) => (counts.get(hit.key) ?? 0) > hit.limit);
-  if (over) throw rateLimited(over);
+  const over = hits.filter((hit) => (counts.get(hit.key) ?? 0) > hit.limit);
+  // The longest wait wins: a user over the daily cap must not be told to retry in a few seconds.
+  if (over.length > 0) throw rateLimited(Math.max(...over.map((hit) => hit.retryAfterSeconds)));
 }
+
+export const requireUnderCap = (used: number, cap: number): void => {
+  if (used >= cap) fail(E.limitReached);
+};

@@ -9,7 +9,7 @@ export class ApiError extends Error {
     readonly code: string,
     message: string,
     readonly fields?: ErrorFieldMap,
-    readonly headers?: HeadersInit,
+    readonly headers?: Record<string, string>,
   ) {
     super(message);
     this.name = "ApiError";
@@ -65,6 +65,7 @@ export const E = {
   notSubstantive: spec(409, "not_substantive", "The summary does not describe a conversation."),
   alreadyApproved: spec(409, "already_approved", "This connection already has an approved summary."),
   rateLimited: spec(429, "rate_limited", "Too many requests. Wait a moment and try again."),
+  limitReached: spec(429, "limit_reached", "You reached the limit for this event or connection."),
   internal: spec(500, "internal_error", "Something went wrong."),
   harnessUnavailable: spec(503, "harness_unavailable", "The test harness needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."),
   sessionFailed: spec(502, "session_failed", "Supabase did not issue a session for the test user."),

@@ -1,9 +1,9 @@
 import "server-only";
-import { and, desc, eq, lt, ne, or } from "drizzle-orm";
+import { and, count, desc, eq, lt, ne, or } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { bonusPoints, connections, events, lifetimeScores, type ConnectionRow, type EventRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
-import { LIMITS } from "../api/rate-limits";
+import { CAPS } from "../api/rate-limits";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import type { CardT } from "../api/schemas";
@@ -13,7 +13,7 @@ import { broadcast, liveTopic, userTopic } from "../realtime";
 import { awardBadges } from "./badges";
 import { ensureCheckedIn, isCheckedIn } from "./events";
 import { awardInvite } from "./invites";
-import { enforceRateLimits } from "./rate-limit";
+import { requireUnderCap } from "./rate-limit";
 import { cardFor, cardsFor, findCurrentEvent, findUserByHandle, pairCondition, usersByIds } from "./people";
 
 const eventRef = (event: EventRow) => ({ slug: event.slug, name: event.name });
@@ -49,11 +49,27 @@ async function findPairAt(eventId: string, a: string, b: string): Promise<Connec
   return row;
 }
 
+async function countSentAt(eventId: string, requesterId: string): Promise<number> {
+  const [row] = await getDb()
+    .select({ sent: count() })
+    .from(connections)
+    .where(and(eq(connections.eventId, eventId), eq(connections.requesterId, requesterId)));
+  return row?.sent ?? 0;
+}
+
+// A repeat scan of someone already requested stays idempotent even at the cap.
+async function requireUnderEventCap(event: EventRow, user: UserRow, target: UserRow): Promise<void> {
+  const sent = await countSentAt(event.id, user.id);
+  if (sent < CAPS.requestsPerEvent) return;
+  if (await findPairAt(event.id, user.id, target.id)) return;
+  requireUnderCap(sent, CAPS.requestsPerEvent);
+}
+
 export async function createConnection({ user, body }: InputOf<typeof R.createConnection>): ResultOf<typeof R.createConnection> {
   const target = await requireTarget(user, body.toHandle);
   const now = new Date();
   const event = (await findCurrentEvent(target.id, now)) ?? fail(E.notAtEvent);
-  await enforceRateLimits(user.id, [{ rule: LIMITS.scanPerEvent, scope: event.id }]);
+  await requireUnderEventCap(event, user, target);
   await checkInScanner(user, event, body.screenConsent === true);
   const inserted = await insertRequest(event, user, target, body.knew, body.topics ?? []);
   const row = inserted ?? (await findPairAt(event.id, user.id, target.id)) ?? fail(E.internal);

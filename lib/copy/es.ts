@@ -13,6 +13,7 @@ export const common = {
   of: "de",
   you: "Tú",
   rateLimited: "Vas muy rápido. Espera un momento y vuelve a intentarlo.",
+  limitReached: "Llegaste al límite aquí. No puedes hacer más intentos.",
 };
 
 // Main navigation: the bottom dock on phones and tablets, the left rail from 1024 (DockV2, Figma "Dock layout=rail").

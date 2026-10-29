@@ -1,8 +1,9 @@
 import "server-only";
-import { and, eq, isNotNull, isNull } from "drizzle-orm";
+import { and, count, eq, isNotNull, isNull } from "drizzle-orm";
 import { getDb } from "../../db/client";
 import { interactions, type InteractionRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
+import { CAPS } from "../api/rate-limits";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { draftSummary as draftWithAi } from "../ai/draft-summary";
@@ -12,6 +13,7 @@ import { SUMMARY_POINTS } from "../points";
 import { broadcast, liveTopic } from "../realtime";
 import { awardBadges } from "./badges";
 import { requireAcceptedMembership } from "./connections";
+import { requireUnderCap } from "./rate-limit";
 import { isUniqueViolation, usersByIds } from "./people";
 
 // ---- POST /api/transcribe ----
@@ -57,8 +59,17 @@ async function draftOrFail(user: UserRow, text: string, other: string) {
   }
 }
 
+async function countDrafts(connectionId: string, authorId: string): Promise<number> {
+  const [row] = await getDb()
+    .select({ drafts: count() })
+    .from(interactions)
+    .where(and(eq(interactions.connectionId, connectionId), eq(interactions.authorId, authorId)));
+  return row?.drafts ?? 0;
+}
+
 export async function draftSummary({ user, body }: InputOf<typeof R.draftSummary>): ResultOf<typeof R.draftSummary> {
   const { row } = await requireAcceptedMembership(body.connectionId, user.id);
+  requireUnderCap(await countDrafts(row.id, user.id), CAPS.draftsPerConnection);
   const draft = await draftOrFail(user, body.text, await otherName(user.id, row));
   const [saved] = await getDb()
     .insert(interactions)

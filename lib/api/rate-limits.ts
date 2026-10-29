@@ -1,25 +1,29 @@
 // Per-user limits on scans and the AI routes (backlog T-036, open question #51). Change a number here to adjust it.
-// "ever" counts without a time window, for caps scoped to one event or one connection.
-export type RateWindow = "minute" | "day" | "ever";
+export type RateWindow = "minute" | "day";
 
 export type RateLimitRule = { name: string; limit: number; per: RateWindow };
 
 export const LIMITS = {
   scanPerMinute: { name: "scan-minute", limit: 30, per: "minute" },
-  scanPerEvent: { name: "scan-event", limit: 300, per: "ever" },
   transcribePerMinute: { name: "transcribe-minute", limit: 10, per: "minute" },
   transcribePerDay: { name: "transcribe-day", limit: 60, per: "day" },
   draftPerMinute: { name: "draft-minute", limit: 10, per: "minute" },
-  draftPerConnection: { name: "draft-connection", limit: 5, per: "ever" },
 } as const satisfies Record<string, RateLimitRule>;
 
-const WINDOW_SECONDS: Record<Exclude<RateWindow, "ever">, number> = { minute: 60, day: 86_400 };
+// Caps with no time window, checked against stored rows so only successful requests count (429 limit_reached).
+export const CAPS = {
+  // New requests one person sends at one event.
+  requestsPerEvent: 300,
+  // Drafts one author writes for one connection.
+  draftsPerConnection: 5,
+} as const;
 
-export type WindowSlot = { start: Date; retryAfterSeconds: number | null };
+const WINDOW_SECONDS: Record<RateWindow, number> = { minute: 60, day: 86_400 };
 
-// Fixed windows aligned to the epoch; "ever" shares one slot at the epoch and has no retry time.
+export type WindowSlot = { start: Date; retryAfterSeconds: number };
+
+// Fixed windows aligned to the epoch: a burst across a window edge can reach twice the limit, which is fine here.
 export function windowSlot(per: RateWindow, now: Date): WindowSlot {
-  if (per === "ever") return { start: new Date(0), retryAfterSeconds: null };
   const size = WINDOW_SECONDS[per] * 1000;
   const start = Math.floor(now.getTime() / size) * size;
   return { start: new Date(start), retryAfterSeconds: Math.max(1, Math.ceil((start + size - now.getTime()) / 1000)) };

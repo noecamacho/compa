@@ -36,8 +36,11 @@ export async function apiCall<T extends z.ZodType>(method: Method, path: string,
   return schema.parse(await response.json());
 }
 
+const ERROR_COPY: Record<string, string> = { rate_limited: common.rateLimited, limit_reached: common.limitReached };
+
 // Text for a caught error: known codes get their own copy, anything else keeps the server message.
 export function errorText(caught: unknown): string {
-  if (caught instanceof ApiClientError && caught.code === "rate_limited") return common.rateLimited;
+  const known = caught instanceof ApiClientError ? ERROR_COPY[caught.code] : undefined;
+  if (known) return known;
   return caught instanceof Error ? caught.message : String(caught);
 }

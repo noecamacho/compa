@@ -80,7 +80,7 @@ describe("rate limits (T-036)", () => {
     for (const path of ["/api/connections", "/api/transcribe", "/api/interactions/draft"]) {
       const response = document.paths?.[path]?.post?.responses?.["429"];
       expect(response && "headers" in response ? response.headers : undefined).toHaveProperty("Retry-After");
-      expect(response?.description).toBe("rate_limited");
+      expect(response?.description).toContain("rate_limited");
     }
   });
 });
