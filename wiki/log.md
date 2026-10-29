@@ -139,3 +139,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Why did shared links point to localhost?
 
 - The invite link, the personal QR (`/u/<handle>`) and the live join QR fell back to `http://localhost:3000` because `NEXT_PUBLIC_SITE_URL` was unset in Vercel. Set it to `https://compa.lol` and replaced the fallbacks with `requestOrigin()` (configured URL, else the request host, never localhost).
+
+## [2026-10-29] query | Must every attendee build a monito, and can it show gender?
+
+- Team decision (Sebastián): yes. The (app) layout sends anyone without a saved look to 02b and back (`MonitoGate`, `?next=`); onboarding moved to its own `(onboarding)` route group. The look gains an optional `body` (Hombre / Mujer / Otro), drawn as a skirt for Mujer; it lives in `users.avatar` jsonb, so no migration and no separate gender field. Recorded in [DESIGN.md](../DESIGN.md) 02b and `docs/flows/catalog.md` F-08.
