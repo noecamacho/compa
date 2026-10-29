@@ -97,6 +97,7 @@ export const eventDoor: z.input<typeof S.EventDoor> = {
   name: founders.name,
   startsAt: event.startsAt,
   endsAt: event.endsAt,
+  timezone: "America/Mexico_City",
   isRunning: true,
   phase: "running",
   counters: { checkedIn: 340, connections: 218 },
