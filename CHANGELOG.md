@@ -4,6 +4,10 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Added
+
+- Email sign-in on the event door: people without LinkedIn enter their email and get a one-time link (Supabase magic link) that creates the account or signs them in. New route `POST /api/auth/email`. Requires the Supabase Email provider enabled and `/auth/callback` in the redirect allow list.
+
 ### Security
 
 - Events are reachable only through an unguessable access code in the event QR (`compa.lol/e/<code>`). Public event routes moved from `/api/events/{slug}/…` to `/api/e/{code}/…` and answer any wrong code with the same `404 event_not_found`; the old slug routes are removed. Admins rotate a code with `POST /api/admin/events/{slug}/rotate-code`. Migration `0003_event_access_code` adds and backfills `events.access_code` (must be applied to production).

@@ -34,6 +34,21 @@ export const authCallback = route({
   errors: [],
 });
 
+export const authEmail = route({
+  id: "authEmail",
+  method: "post",
+  path: "/api/auth/email",
+  summary: "Send an email sign-in link",
+  description:
+    "Emails a one-time link (Supabase magic link) that creates the account or signs in, then lands on `/auth/callback` like LinkedIn. `next` must be a same-site path.",
+  tags: ["auth"],
+  auth: "public",
+  body: S.EmailSignInBody,
+  bodyExample: { email: "luis@example.com", next: "/onboarding/profile" },
+  success: { status: 204, description: "Link sent.", schema: NoBody },
+  errors: [E.invalidInput, E.internal],
+});
+
 export const signOut = route({
   id: "signOut",
   method: "post",
@@ -464,6 +479,7 @@ export const claimInvite = route({
 export const ROUTES: readonly AnyRouteSpec[] = [
   authLinkedin,
   authCallback,
+  authEmail,
   signOut,
   getMe,
   patchMe,

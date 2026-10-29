@@ -279,7 +279,7 @@ export const landing = {
   doorTitle: "Solo entras escaneando el QR de tu evento.",
   doorHint: "Está en la entrada y en la pantalla del evento. Apúntale con la cámara de tu teléfono.",
   backToEvent: "Volver a mi evento",
-  signInError: "No pudimos entrar con LinkedIn. Escanea el QR de tu evento otra vez.",
+  signInError: "No pudimos iniciar tu sesión. Escanea el QR de tu evento otra vez.",
   sceneLabel: "Dos monitos se conectan y ganan +50",
   sampleTopic: "Levantar capital",
 };
@@ -296,6 +296,13 @@ export const door = {
   notStarted: (hour: string) => `Las puertas abren a las ${hour}. Vuelve a escanear entonces.`,
   ended: "Este evento ya terminó. Gracias por venir.",
   watchLive: "Ver la pantalla en vivo",
+  orEmail: "o entra con tu correo",
+  emailLabel: "Correo",
+  emailPlaceholder: "tu@correo.com",
+  emailCta: "Mandarme un enlace",
+  emailSending: "Enviando…",
+  emailSent: (email: string) => `Listo. Abre el enlace que mandamos a ${email} en este teléfono.`,
+  emailFailed: "No pudimos mandar el correo. Revisa la dirección e inténtalo otra vez.",
 };
 
 // /e/<code>/join: check-in with the big-screen notice (A1, M13).

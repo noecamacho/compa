@@ -131,3 +131,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] ingest | Official COMPA logo
 
 - The captain set the official logo: two interlocking speech bubbles (green and blue, ink outline, hard shadow) with the rounded wordmark "compa". Originals in `design/brand/`; transparent web versions in `public/brand/`; favicon, `app/icon.png`, `app/apple-icon.png` and `app/opengraph-image.png` generated from them. Replaces the yellow single-bubble mark.
+
+## [2026-10-29] query | Can people sign in without LinkedIn?
+
+- Yes, by request: the event door adds an email magic link (`POST /api/auth/email`, same `/auth/callback`). M2 in the data-model spec, `AGENTS.md` §4 and the API spec updated.

@@ -402,6 +402,9 @@ export const CodeParams = z.object({ code: z.string().regex(/^[a-z0-9-]{2,40}$/)
 export const NextQuery = z.object({
   next: z.string().optional().meta({ description: "Relative path to return to, e.g. `/u/luis` or `/e/k7m2p9xq4t/join`." }),
 });
+export const EmailSignInBody = NextQuery.extend({
+  email: z.email().max(254).meta({ description: "Where the one-time sign-in link goes." }),
+});
 export const CallbackQuery = NextQuery.extend({ code: z.string().optional(), error: z.string().optional() });
 
 export const ErrorFields = z.record(z.string(), z.array(z.string()));
