@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rank ladder</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: 8px; }
+  .podium .col { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+  .podium .blk { width: 100%; border: 2.5px solid var(--ink); border-bottom: 0; border-radius: 16px 16px 0 0; display: flex; flex-direction: column; align-items: center; padding-top: 6px; box-shadow: inset 0 6px 0 rgba(255,255,255,.55); }
+  .podium .name { font-family: var(--display); font-size: 14px; max-width: 100%; }
+  .base { border-top: 3px solid var(--ink); margin-top: -14px; }
+  .ladder { display: flex; flex-direction: column; gap: 6px; }
+  .rung { display: grid; grid-template-columns: 34px 32px 1fr auto; align-items: center; gap: 8px; min-height: 48px; padding: 6px 10px; border: 2px solid var(--ink); border-radius: var(--r-btn); background: #fff; }
+  .rung.me { background: var(--gum-soft); border-width: 3px; box-shadow: var(--h3); min-height: 58px; }
+  .rung .rk { font-family: var(--display); font-size: 17px; text-align: center; }
+  .rung .gap { font-size: 12px; font-weight: 800; color: var(--muted); }
+  .gapbar { position: relative; height: 6px; border-radius: 3px; background: rgba(30,27,46,.08); margin-top: 3px; }
+  .gapbar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; background: var(--ink); opacity: .35; }
+  .sep { text-align: center; font-size: 12px; color: var(--muted); letter-spacing: 4px; }
+  .hist { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav class="dock" aria-label="Dock"><span>Inicio</span><span>Conectar</span><span>Conexiones</span><span class="on">Ranking</span></nav>
+<script src="engine.js"></script>
+<script>
+const { run, stateAt, meView, avatar, label, first, esc, fmt, tr, spark } = COMPA;
+const BLK = { 1: [96, "#FFD93D", 30], 2: [70, "#D5DCE6", 24], 3: [54, "#F2A766", 22] };
+
+function podium(board) {
+  const col = (p, place) => {
+    if (!p) return `<div class="col"></div>`;
+    const [h, c, fs] = BLK[place];
+    return `<div class="col">${avatar(p, place === 1 ? 46 : 38)}<span class="name ellipsis">${esc(first(p))}</span>
+      <div class="blk" style="height:${h}px;background:${c}"><span class="num" style="font-size:${fs}px">${place}</span><span class="num" style="font-size:13px">${fmt(p.points)}</span></div></div>`;
+  };
+  return `<div class="podium">${col(board[1], 2)}${col(board[0], 1)}${col(board[2], 3)}</div><div class="base"></div>`;
+}
+
+// My rank sampled across the night (12 points), inverted so up = better.
+function rankHistory(st, meId) {
+  const { s } = st;
+  const end = Math.min(st.t, s.eventEndsAtSec);
+  const out = [];
+  for (let i = 1; i <= 12; i++) {
+    const x = stateAt(s, s.eventStartsAtSec + ((end - s.eventStartsAtSec) * i) / 12);
+    const p = x.people.get(meId);
+    out.push(p && p.points > 0 ? x.board.length - p.crank + 1 : 0);
+  }
+  return out;
+}
+
+function rung(p, me, isMe) {
+  const diff = p.points - me.points;
+  const gapTxt = isMe ? tr("Tú", "You") : diff > 0 ? `+${fmt(diff)}` : diff < 0 ? `−${fmt(-diff)}` : tr("empate", "tie");
+  const w = Math.min(100, (Math.abs(diff) / 100) * 100);
+  return `<div class="rung ${isMe ? "me" : ""}">
+    <span class="rk">${p.rank}</span>${avatar(p, 32)}
+    <span class="grow"><span class="ellipsis" style="display:block">${esc(isMe ? (p.anonymous ? tr("Tú · anónimo en pantalla", "You · anonymous on screen") : label(p)) : label(p))}</span>
+      ${isMe ? "" : `<span class="gapbar"><i style="width:${w}%"></i></span>`}</span>
+    <span style="text-align:right"><span class="num" style="font-size:16px">${fmt(p.points)}</span><br><span class="gap">${gapTxt}</span></span></div>`;
+}
+
+function headline(st, me, v) {
+  if (st.phase === "ended") return v.rank ? tr(`Final: quedaste #${v.rank} de ${v.total}`, `Final: you finished #${v.rank} of ${v.total}`) : tr("El evento terminó", "The event ended");
+  if (!v.rank) return tr("Tu primera conexión te mete al ranking", "Your first connection puts you on the board");
+  if (v.rank === 1) return v.below ? tr(`Vas primero · ${fmt(me.points - v.below.points)} pts de ventaja`, `You're first · ${fmt(me.points - v.below.points)} pts ahead`) : tr("Vas primero", "You're first");
+  if (v.tiedWith >= 5) return tr(`Top ${Math.max(1, Math.round((v.crank / v.total) * 100))}% · ${fmt(v.tiedWith + 1)} personas con ${fmt(me.points)} pts`, `Top ${Math.max(1, Math.round((v.crank / v.total) * 100))}% · ${fmt(v.tiedWith + 1)} people on ${fmt(me.points)} pts`);
+  if (v.tiedWith) return tr(`#${v.crank} compartido con ${v.tiedWith} más · +1 conexión te despega`, `#${v.crank} shared with ${v.tiedWith} more · +1 connection breaks the tie`);
+  return tr(`Te faltan ${fmt(v.gap)} pts para pasar a ${first(v.above)}`, `${fmt(v.gap)} pts to pass ${first(v.above)}`);
+}
+
+function nextMove(st, v) {
+  if (st.phase === "ended" || !v.rank || !v.above) return "";
+  const conns = Math.ceil((v.gap + 1) / 50);
+  return `<span class="chip">≈ ${conns} ${tr(conns === 1 ? "conexión nueva" : "conexiones nuevas", conns === 1 ? "new connection" : "new connections")}</span>`;
+}
+
+run((st, me, v) => {
+  const scope = `<div class="row" style="justify-content:space-between"><h1>${tr("Ranking", "Ranking")}</h1>
+    <span class="pill ${st.phase === "ended" ? "ink" : "coral"}">${st.phase === "ended" ? tr("Final", "Final") : `<span class="live-dot"></span>${tr("En vivo", "Live")}`}</span></div>`;
+  if (!st.board.length || st.board.every((p) => p.points === 0)) {
+    const alone = st.board.length <= 1;
+    return scope + `<div class="empty"><h2 style="color:var(--ink)">${alone ? tr("Llegaste primero", "You're the first one here") : tr("Nadie ha conectado todavía", "No one has connected yet")}</h2>
+      <p style="margin-top:6px">${alone ? tr("Cuando llegue alguien más, escanéalo: los dos ganan +50.", "When someone else arrives, scan them: you both get +50.") : tr(`${st.board.length} personas esperando. La primera conexión se lleva el podio.`, `${st.board.length} people waiting. The first connection takes the podium.`)}</p></div>
+      <a class="btn" href="#">${tr("Conectar ahora", "Connect now")}</a>`;
+  }
+  if (!v.rank && st.phase !== "ended") {
+    const landing = st.board.filter((p) => p.points > 50).length + 1;
+    const waiting = st.board.filter((p) => p.points === 0).length;
+    return scope + podium(st.board) + `<div class="card tone-gum-soft"><div class="caps">${tr("Tu lugar", "Your spot")}</div>
+      <h2 style="margin-top:4px">${tr(`Una conexión te pone en el #${landing}`, `One connection puts you at #${landing}`)}</h2>
+      <p class="muted" style="margin-top:6px;font-size:13px">${tr(`+50 para ti y para quien escanees. ${waiting - 1 > 0 ? `${fmt(waiting - 1)} personas más también están empezando.` : ""}`, `+50 for you and whoever you scan. ${waiting - 1 > 0 ? `${fmt(waiting - 1)} other people are starting too.` : ""}`)}</p></div>
+      <a class="btn" href="#">${tr("Conectar ahora", "Connect now")}</a>`;
+  }
+  const i = me.rank - 1;
+  const lo = Math.max(0, i - 2), hi = Math.min(st.board.length, i + 3);
+  const win = st.board.slice(lo, hi);
+  const ladder = me.rank <= 3 ? "" : (lo > 3 ? `<div class="sep">• • •</div>` : "") + win.filter((p) => p.rank > 3 || p === me).map((p) => rung(p, me, p === me)).join("") + (hi < st.board.length ? `<div class="sep">• • • ${fmt(st.board.length - hi)} ${tr("más", "more")}</div>` : "");
+  // Big ties: neighbors all look the same, so show point bands (distinct scores + head count) instead.
+  let bandsHtml = "";
+  if (v.tiedWith >= 5) {
+    const levels = new Map();
+    for (const p of st.board) levels.set(p.points, (levels.get(p.points) || 0) + 1);
+    const keys = [...levels.keys()];
+    const k = keys.indexOf(me.points);
+    const near = keys.slice(Math.max(0, k - 2), k + 3);
+    const maxN = Math.max(...near.map((x) => levels.get(x)));
+    bandsHtml = `<div class="ladder" aria-label="${tr("Bandas de puntos", "Point bands")}">` + near.map((pts) => `<div class="rung ${pts === me.points ? "me" : ""}" style="grid-template-columns:64px 1fr auto">
+      <span class="num" style="font-size:17px">${fmt(pts)}</span>
+      <span class="gapbar" style="height:12px"><i style="width:${(levels.get(pts) / maxN) * 100}%;opacity:${pts === me.points ? 0.9 : 0.35}"></i></span>
+      <span style="font-size:12px;font-weight:800">${fmt(levels.get(pts))} ${tr("pers.", "ppl")}${pts === me.points ? " · " + tr("tú", "you") : ""}</span></div>`).join("") + `</div>`;
+  }
+  const hist = rankHistory(st, me.id);
+  const best = Math.max(...hist) ? st.board.length - Math.max(...hist) + 1 : null;
+  return scope + podium(st.board) +
+    `<div class="card tone-gum-soft"><div class="caps">${tr("Tu lugar", "Your spot")}</div>
+      <h2 style="margin-top:4px">${esc(headline(st, me, v))}</h2>
+      ${v.above && v.gap > 0 && st.phase !== "ended" ? `<div class="bar" style="margin-top:10px" role="progressbar" aria-valuenow="${Math.round((me.points / v.above.points) * 100)}"><i style="width:${Math.min(100, (me.points / Math.max(1, v.above.points)) * 100)}%"></i></div>` : ""}
+      <div class="row" style="margin-top:8px;flex-wrap:wrap">${nextMove(st, v)}${v.below && v.rank && me.points > v.below.points ? `<span class="chip">${tr("te sigue", "behind you")} ${esc(first(v.below))} · −${fmt(me.points - v.below.points)}</span>` : ""}</div></div>` +
+    (bandsHtml || `<div class="ladder" aria-label="${tr("Tu escalera", "Your ladder")}">${ladder}</div>`) +
+    `<div class="card sm hist"><span><span class="caps">${tr("Tu noche", "Your night")}</span><br><span style="font-size:13px">${best ? tr(`Mejor lugar: #${best}`, `Best spot: #${best}`) : tr("Aún sin lugar", "No spot yet")}</span></span>${spark(hist, 130, 32, "#FF6B4A")}</div>` +
+    (st.phase === "ended" ? `<a class="btn sun" href="recap-card.html${location.search}">${tr("Ver mi resumen de la noche", "See my night recap")}</a>` : `<a class="btn" href="#">${tr("Conectar ahora", "Connect now")}</a>`);
+});
+</script>
+</body>
+</html>

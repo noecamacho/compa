@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My network</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .graph { padding: 8px; display: flex; justify-content: center; }
+  .graph svg { width: 100%; max-width: 440px; height: auto; display: block; overflow: visible; }
+  .node { cursor: pointer; outline: none; }
+  .node .hit { fill: transparent; }
+  .node:focus-visible .hit, .node.sel .hit { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 4 3; fill: rgba(255,217,61,.35); }
+  .node text { font-family: var(--display); fill: var(--ink); pointer-events: none; }
+  .guide { fill: none; stroke: rgba(30,27,46,.18); stroke-width: 1.5; stroke-dasharray: 3 5; }
+  .slot { fill: none; stroke: rgba(30,27,46,.35); stroke-width: 2; stroke-dasharray: 4 5; }
+  .link { stroke: rgba(30,27,46,.16); stroke-width: 1.5; fill: none; }
+  .spoke { stroke: rgba(30,27,46,.28); stroke-width: 1.5; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 8px; }
+  .legend .chip { min-height: 32px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--ink); flex: none; display: inline-block; }
+  .lrow { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; min-height: 48px; padding: 6px 10px; border: 2px solid var(--ink); border-radius: var(--r-btn); background: #fff; }
+  .lrow .meta { font-size: 12px; color: var(--muted); }
+  .list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+  summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-family: var(--display); }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stats .card { text-align: center; padding: 8px 6px; }
+  .stats .num { font-size: 24px; display: block; }
+  @media (min-width: 800px) { .split { display: grid; grid-template-columns: 1.1fr 1fr; gap: 16px; align-items: start; } }
+</style>
+</head>
+<body>
+<main id="app" class="wide"></main>
+<nav class="dock" aria-label="Dock"><span>Inicio</span><span>Conectar</span><span class="on">Red</span><span>Ranking</span></nav>
+<script src="engine.js"></script>
+<script>
+const { run, avatar, label, esc, fmt, clock, tr } = COMPA;
+const MAXN = 18; // individual nodes before the oldest ones fold into "+N"
+const CX = 180, CY = 180, R1 = 100, R2 = 148;
+const TCOL = ["#6BE4A3", "#6CC4FF", "#FF8FAB", "#FFD93D"]; // top-4 topics; everything else is grey
+const OTHER = "#D5DCE6";
+const initials = (p) => (p.anonymous ? "?" : p.name.split(/\s+/).slice(0, 2).map((w) => [...w][0] || "").join("").toUpperCase());
+
+// Unique partners with kind, times, shared topics. Edges among partners are derived here (the API has no second-degree edges today).
+function network(st, me) {
+  // ?stress=N injects N synthetic partners (every 4th a reconnection) to check how the graph scales; the shipped scenarios top out near 10.
+  const N = Number(new URLSearchParams(location.search).get("stress") || 0);
+  if (N) {
+    const others = [...st.people.values()].filter((p) => p !== me);
+    for (let i = 0; i < N && others.length; i++) {
+      const o = others[i % others.length];
+      st.connections.push({ a: me.id, b: o.id, t: 300 + i * 60, kind: "new", topics: i % 3 ? [] : ["Cloud"] });
+      if (i % 4 === 3) st.connections.push({ a: i % 2 ? me.id : o.id, b: i % 2 ? o.id : me.id, t: 500 + i * 60, kind: "reconnection", topics: [] });
+    }
+  }
+  const by = new Map();
+  for (const c of st.connections) {
+    if (c.a !== me.id && c.b !== me.id) continue;
+    const o = st.people.get(c.a === me.id ? c.b : c.a);
+    if (!o) continue;
+    const e = by.get(o.id) || { p: o, t: c.t, times: 0, kind: "new", topics: new Set() };
+    e.times++; e.t = Math.min(e.t, c.t);
+    if (c.kind === "reconnection" || e.times > 1) e.kind = "reconnection";
+    c.topics.forEach((x) => e.topics.add(x));
+    by.set(o.id, e);
+  }
+  for (const e of by.values()) me.interests.filter((x) => e.p.interests.includes(x)).forEach((x) => e.topics.add(x));
+  const all = [...by.values()].sort((x, y) => x.t - y.t);
+  const freq = new Map();
+  all.forEach((e) => e.topics.forEach((x) => freq.set(x, (freq.get(x) || 0) + 1)));
+  const top = [...freq.entries()].sort((x, y) => y[1] - x[1] || (x[0] < y[0] ? -1 : 1)).slice(0, 4);
+  const col = new Map(top.map(([n], i) => [n, TCOL[i]]));
+  all.forEach((e) => { const k = [...e.topics].find((x) => col.has(x)); e.color = k ? col.get(k) : OTHER; });
+  return { all, top, col };
+}
+
+function secondDegree(st, nodes) {
+  const idx = new Map(nodes.map((n, i) => [n.p.id, i]));
+  const seen = new Set(), out = [];
+  for (const c of st.connections) {
+    const i = idx.get(c.a), j = idx.get(c.b);
+    if (i === undefined || j === undefined) continue;
+    const k = i < j ? i + "-" + j : j + "-" + i;
+    if (!seen.has(k)) { seen.add(k); out.push([i, j]); }
+  }
+  return out.slice(0, 80);
+}
+
+function graph(st, me, net) {
+  const { all } = net;
+  const folded = Math.max(0, all.length - (MAXN - 1));
+  const shown = folded ? all.slice(folded) : all;
+  const slots = folded ? shown.length + 1 : shown.length; // the fold bubble takes the first (oldest) slot
+  const dense = slots > 12;
+  const pos = (i, kind) => { const a = -Math.PI / 2 + (i / Math.max(slots, 1)) * 2 * Math.PI, r = kind === "new" ? R1 : R2; return [CX + r * Math.cos(a), CY + r * Math.sin(a)]; };
+  const nodes = shown.map((e, k) => { const i = folded ? k + 1 : k; const [x, y] = pos(i, e.kind); const sh = Math.min(3, e.topics.size); return { ...e, x, y, r: (dense ? 9 : 12) + sh * (dense ? 2 : 3) }; });
+  let s = `<svg viewBox="0 0 360 360" role="group" aria-label="${tr("Tu red de conexiones", "Your connection network")}">
+    <circle class="guide" cx="${CX}" cy="${CY}" r="${R1}"/><circle class="guide" cx="${CX}" cy="${CY}" r="${R2}"/>`;
+  if (!all.length) {
+    const N = 8;
+    for (let i = 0; i < N; i++) { const a = -Math.PI / 2 + (i / N) * 2 * Math.PI; s += `<circle class="slot" cx="${(CX + R1 * Math.cos(a)).toFixed(1)}" cy="${(CY + R1 * Math.sin(a)).toFixed(1)}" r="17"/>`; }
+  } else {
+    s += secondDegree(st, nodes).map(([i, j]) => `<line class="link" x1="${nodes[i].x.toFixed(1)}" y1="${nodes[i].y.toFixed(1)}" x2="${nodes[j].x.toFixed(1)}" y2="${nodes[j].y.toFixed(1)}"/>`).join("");
+    s += nodes.map((n) => `<line class="spoke" x1="${CX}" y1="${CY}" x2="${n.x.toFixed(1)}" y2="${n.y.toFixed(1)}"/>`).join("");
+  }
+  s += `<g aria-hidden="true"><circle cx="${CX}" cy="${CY}" r="30" fill="#FFD93D" stroke="#1E1B2E" stroke-width="3"/><text x="${CX}" y="${CY + 5}" text-anchor="middle" font-family="Fredoka,Nunito,sans-serif" font-weight="700" font-size="15">${tr("Tú", "You")}</text></g>`;
+  s += `<text x="${CX}" y="352" text-anchor="middle" font-size="9" font-weight="800" fill="#6f6a7e" font-family="Nunito,sans-serif">${all.length ? tr("▲ primera conexión · sentido del reloj", "▲ first connection · clockwise") : ""}</text>`;
+  if (folded) {
+    const [x, y] = pos(0, "new");
+    s += `<g class="node" tabindex="0" role="button" data-d="${esc(tr(`${folded} conexiones anteriores`, `${folded} earlier connections`))}|${esc(tr("Están en la lista de abajo", "They are in the list below"))}" aria-label="${tr(`${folded} conexiones anteriores`, `${folded} earlier connections`)}">
+      <circle class="hit" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="24"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="16" fill="#1E1B2E"/>
+      <text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="700" style="fill:#fff">+${folded}</text></g>`;
+  }
+  for (const n of nodes) {
+    const who = label(n.p);
+    const meta = `${clock(st, n.t)} · ${n.kind === "new" ? tr("nueva", "new") : tr("reconexión", "reconnection")}${n.topics.size ? " · " + [...n.topics].slice(0, 2).join(", ") : ""}`;
+    s += `<g class="node" tabindex="0" role="button" data-d="${esc(who)}|${esc(meta)}" aria-label="${esc(who)}, ${esc(meta)}">
+      <circle class="hit" cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${Math.max(22, n.r + 6)}"/>
+      <circle cx="${n.x.toFixed(1)}" cy="${n.y.toFixed(1)}" r="${n.r}" fill="${n.color}" stroke="#1E1B2E" stroke-width="2.5" ${n.p.anonymous ? 'stroke-dasharray="3 2"' : ""}/>
+      ${n.r >= 12 ? `<text x="${n.x.toFixed(1)}" y="${(n.y + 4).toFixed(1)}" text-anchor="middle" font-size="${n.r >= 15 ? 12 : 10}" font-weight="700">${esc(initials(n.p))}</text>` : ""}</g>`;
+  }
+  return s + "</svg>";
+}
+
+function row(st, e) {
+  const sub = [clock(st, e.t), e.kind === "new" ? tr("nueva", "new") : tr("reconexión", "reconnection") + (e.times > 1 ? ` ×${e.times}` : "")];
+  return `<div class="lrow">${avatar(e.p, 34)}<span class="grow"><span class="ellipsis" dir="auto" style="display:block">${esc(label(e.p))}</span><span class="meta ellipsis" style="display:block">${esc(sub.join(" · "))}</span></span>
+    <span class="chip"><i class="dot" style="background:${e.color}"></i>${e.topics.size}</span></div>`;
+}
+
+run((st, me) => {
+  const ended = st.phase === "ended";
+  const head = `<div class="row" style="justify-content:space-between"><h1>${ended ? tr("Tu red de la noche", "Your night's network") : tr("Mi red", "My network")}</h1>
+    <span class="pill ${ended ? "ink" : "coral"}">${ended ? tr("Final", "Final") : `<span class="live-dot"></span>${tr("En vivo", "Live")}`}</span></div>`;
+  if (!me || me.checkinT === null) {
+    return head + `<div class="card graph"><svg viewBox="0 0 360 360" aria-hidden="true"><circle class="guide" cx="180" cy="180" r="100"/>${Array.from({ length: 8 }, (_, i) => { const a = -Math.PI / 2 + (i / 8) * 2 * Math.PI; return `<circle class="slot" cx="${(180 + 100 * Math.cos(a)).toFixed(1)}" cy="${(180 + 100 * Math.sin(a)).toFixed(1)}" r="17"/>`; }).join("")}<circle cx="180" cy="180" r="30" fill="#fff" stroke="#1E1B2E" stroke-width="3" stroke-dasharray="5 4"/></svg></div>
+      <div class="empty"><h2 style="color:var(--ink)">${tr("Haz check-in para armar tu red", "Check in to start your network")}</h2><p style="margin-top:6px">${tr("Cada persona que conectes aparece aquí.", "Everyone you connect with shows up here.")}</p></div>`;
+  }
+  const net = network(st, me);
+  const n = net.all.length;
+  const newN = net.all.filter((e) => e.kind === "new").length;
+  const stats = `<div class="stats"><div class="card sm"><span class="num">${fmt(n)}</span><span class="caps">${tr("personas", "people")}</span></div>
+    <div class="card sm"><span class="num">${fmt(newN)}</span><span class="caps">${tr("nuevas", "new")}</span></div>
+    <div class="card sm"><span class="num">${fmt(n - newN)}</span><span class="caps">${tr("reconex.", "reconn.")}</span></div></div>`;
+  const legend = net.top.length
+    ? `<div class="card sm"><div class="caps" style="margin-bottom:6px">${tr("Tus temas", "Your topics")}</div><div class="legend">${net.top.map(([t, c], i) => `<span class="chip"><i class="dot" style="background:${TCOL[i]}"></i><span class="ellipsis" style="max-width:130px">${esc(t)}</span> · ${c}</span>`).join("")}<span class="chip"><i class="dot" style="background:${OTHER}"></i>${tr("otros", "other")}</span></div>
+       <p class="muted" style="font-size:12px;margin-top:8px">${tr("Tamaño = temas en común · anillo interior = nueva · exterior = reconexión", "Size = shared topics · inner ring = new · outer ring = reconnection")}</p></div>`
+    : "";
+  const detail = `<div class="card sm" id="detail" role="status" aria-live="polite" style="min-height:58px">${n ? `<span class="muted">${tr("Toca un punto para ver quién es, o usa la lista.", "Tap a dot to see who it is, or use the list.")}</span>` : ""}</div>`;
+  const zero = !n
+    ? `<div class="empty"><h2 style="color:var(--ink)">${ended ? tr("No hiciste conexiones esta vez", "No connections this time") : tr("Tu red empieza contigo", "Your network starts with you")}</h2>
+       <p style="margin-top:6px">${ended ? tr("Los puntos vacíos eran para ti. Nos vemos en el próximo evento.", "Those empty spots were for you. See you at the next event.") : tr("Escanea a alguien y aparece el primer punto. Son 8 lugares para empezar.", "Scan someone and the first dot appears. Here are 8 spots to start.")}</p></div>${ended ? "" : `<a class="btn" href="#">${tr("Conectar ahora", "Connect now")}</a>`}`
+    : "";
+  const recent = net.all.slice().reverse();
+  const OPEN = 8;
+  const list = n
+    ? `<div><div class="sechead row" style="justify-content:space-between"><h2>${tr("Tus conexiones", "Your connections")}</h2><span class="caps">${fmt(n)}</span></div>
+       <div class="list" aria-label="${tr("Lista de conexiones", "Connections list")}">${recent.slice(0, OPEN).map((e) => row(st, e)).join("")}</div>
+       ${n > OPEN ? `<details style="margin-top:6px"><summary>${tr(`Ver ${fmt(n - OPEN)} más`, `Show ${fmt(n - OPEN)} more`)}</summary><div class="list">${recent.slice(OPEN).map((e) => row(st, e)).join("")}</div></details>` : ""}</div>`
+    : "";
+  return head + `<div class="split"><div style="display:flex;flex-direction:column;gap:14px"><div class="card graph">${graph(st, me, net)}</div>${detail}</div>
+    <div style="display:flex;flex-direction:column;gap:14px">${stats}${legend}${zero}${list}</div></div>` + (ended || !n ? "" : `<a class="btn" href="#">${tr("Conectar ahora", "Connect now")}</a>`);
+});
+
+// Tap/keyboard selection shows the person in the detail card (the list below is the accessible alternative).
+const pick = (el) => {
+  const g = el.closest(".node"); if (!g) return;
+  document.querySelectorAll(".node.sel").forEach((x) => x.classList.remove("sel"));
+  g.classList.add("sel");
+  const [a, b] = g.dataset.d.split("|");
+  const d = document.getElementById("detail");
+  const t1 = document.createElement("div"), t2 = document.createElement("div");
+  t1.className = "ellipsis num"; t1.dir = "auto"; t1.style.fontSize = "17px"; t1.textContent = a;
+  t2.className = "muted ellipsis"; t2.style.fontSize = "13px"; t2.textContent = b;
+  d.replaceChildren(t1, t2);
+};
+document.addEventListener("click", (e) => pick(e.target));
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") pick(e.target); });
+</script>
+</body>
+</html>

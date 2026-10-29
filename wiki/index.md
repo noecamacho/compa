@@ -61,6 +61,8 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
   - [docs/flows/catalog.md](../docs/flows/catalog.md) — 74 user flows (F-01–F-74) with steps, error codes, edge cases, status per layer, e2e coverage and tickets.
   - [docs/flows/edge-cases-and-risks.md](../docs/flows/edge-cases-and-risks.md) — 40 unhandled risks (abuse, AI, privacy, operations, concurrency, security) with tickets.
   - [docs/flows/backlog.md](../docs/flows/backlog.md) — 86 agent-ready tickets (T-000–T-122; 12 P0, 48 P1, 26 P2) by epic, with e2e scenarios.
+- [docs/research/live-dataviz.md](../docs/research/live-dataviz.md) — live data-viz research: simulator, big-screen and phone concepts, DV/DP tickets.
+- [docs/research/ux-audit.md](../docs/research/ux-audit.md) — whole-app UX and edge-case audit at all breakpoints; 139 findings, UX-A/UX-P tickets.
 - [CHANGELOG.md](../CHANGELOG.md) — Keep a Changelog history.
 - [docs/api-quickstart.md](../docs/api-quickstart.md) — local mock requests, backend setup, and email sign-in requirements for hosted Supabase.
 - [docs/engineering-standards.md](../docs/engineering-standards.md) — SOLID, KISS, DRY, no nesting, clean code.

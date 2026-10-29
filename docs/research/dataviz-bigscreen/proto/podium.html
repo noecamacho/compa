@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>COMPA live: podium</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.top { position: absolute; left: 40px; right: 40px; top: 18px; height: 92px; display: flex; align-items: center; gap: 24px; }
+.logo { font: 700 60px/1 var(--display); letter-spacing: 1px; }
+#pill { font-size: 32px; padding: 8px 22px; background: var(--mint); white-space: nowrap; }
+#pill.closing { background: var(--coral); }
+#pill.ended { background: var(--sun); }
+#pill.pre { background: var(--sky); }
+#clk { margin-left: auto; font: 700 60px/1 var(--display); white-space: nowrap; }
+#clk small { font-size: 32px; color: var(--muted); font-weight: 600; margin-left: 8px; }
+#main { position: absolute; left: 40px; top: 130px; width: 1200px; height: 910px; }
+.side { position: absolute; left: 1280px; top: 130px; width: 600px; height: 910px; }
+.cnt { position: absolute; left: 0; width: 600px; height: 128px; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; }
+.cnt span { font: 700 34px/1.1 var(--display); }
+.cnt b { font: 700 84px/1 var(--display); font-variant-numeric: tabular-nums; display: inline-block; transition: transform .25s ease-out; }
+.cnt b.bump { transform: scale(1.18); }
+.sidecard { position: absolute; left: 0; top: 436px; width: 600px; height: 474px; padding: 24px; }
+.qrcard { display: flex; flex-direction: column; align-items: center; gap: 16px; background: #fff; }
+.qrcard svg, .invqr svg { border: 4px solid var(--ink); border-radius: 12px; display: block; }
+.qrcard b { font: 700 46px/1 var(--display); }
+.qrcard i, .invqr i { font: 800 28px/1 var(--body); font-style: normal; color: var(--muted); }
+.howto { background: var(--sun-soft); display: flex; flex-direction: column; justify-content: center; gap: 22px; }
+.howto h3 { margin: 0; font: 700 44px/1.1 var(--display); }
+.howto div { display: flex; align-items: center; gap: 18px; font: 800 34px/1.15 var(--body); }
+.howto div em { flex: none; width: 60px; height: 60px; border-radius: 50%; border: 4px solid var(--ink); background: #fff; display: grid; place-items: center; font: 700 36px/1 var(--display); font-style: normal; }
+.invite { position: absolute; inset: 0; display: flex; align-items: center; gap: 40px; padding: 40px 48px; background: var(--sun-soft); }
+.invite .it { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 26px; }
+.invite h1 { margin: 0; font: 700 84px/1.02 var(--display); }
+.invite p { margin: 0; font: 800 38px/1.25 var(--body); color: var(--ink); }
+.invqr { flex: none; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.invqr b { font: 700 44px/1 var(--display); }
+.here { display: flex; align-items: center; gap: 0; font: 700 38px/1 var(--display); }
+.here .av { margin-right: -16px; border-width: 4px; }
+.here span { margin-left: 32px; }
+.pulse { animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 50% { transform: scale(1.03); } }
+.final { position: absolute; z-index: 20; font: 700 64px/1 var(--display); padding: 10px 28px; background: var(--sun); border: 4px solid var(--ink); border-radius: 18px; box-shadow: var(--hard-6); transform: rotate(4deg); }
+@property --av { syntax: "<length>"; inherits: true; initial-value: 120px; }
+#board { position: absolute; inset: 0; }
+.pc, .gh { position: absolute; }
+.pc { transition: left .4s cubic-bezier(.2,.8,.2,1), top .4s cubic-bezier(.2,.8,.2,1), width .4s cubic-bezier(.2,.8,.2,1), height .4s cubic-bezier(.2,.8,.2,1), opacity .3s; --av: 120px; }
+.pc .pbody { position: absolute; left: 0; right: 0; bottom: 0; top: 60px; background: #fff; border: 4px solid var(--ink); border-radius: 22px; box-shadow: var(--hard-6); transition: top .4s; }
+.pc.k1 .pbody { background: var(--sun); } .pc.k2 .pbody { background: var(--silver); } .pc.k3 .pbody { background: var(--bronze); }
+.pc .avw { position: absolute; left: 50%; top: 0; transform: translateX(-50%); transition: left .4s, top .4s; }
+.pc .av { width: var(--av) !important; height: var(--av) !important; font-size: calc(var(--av) * .4) !important; border-width: 5px; transition: width .4s, height .4s; }
+.pc .nm { position: absolute; left: 14px; right: 14px; top: 138px; text-align: center; font: 700 40px/48px var(--display); }
+.pc .pt { position: absolute; left: 0; right: 0; top: 184px; text-align: center; font: 700 80px/84px var(--display); font-variant-numeric: tabular-nums; }
+.pc .pt small { font: 800 28px var(--body); margin-left: 8px; color: rgba(30,27,46,.7); }
+.pc .rk { position: absolute; left: 0; right: 0; bottom: 8px; text-align: center; font: 700 var(--rk, 100px)/1 var(--display); color: rgba(30,27,46,.32); }
+.k1 { --rk: 150px; } .k2 { --rk: 100px; } .k3 { --rk: 62px; }
+.crown { position: absolute; left: 50%; top: -40px; margin-left: -34px; width: 68px; height: 50px; z-index: 3; }
+.pc .dl { position: absolute; right: 14px; top: 72px; z-index: 4; font: 700 34px/1 var(--display); padding: 4px 14px; border: 3px solid var(--ink); border-radius: 999px; background: var(--mint); }
+.pc .dl.dn { background: var(--coral); }
+.pc .pop { position: absolute; right: 10px; top: 2px; z-index: 5; font: 700 58px/1 var(--display); padding: 4px 16px; border: 4px solid var(--ink); border-radius: 16px; background: var(--mint); box-shadow: var(--hard-4); animation: pop 1.7s ease-out forwards; }
+@keyframes pop { 0% { transform: translateY(14px) scale(.5); opacity: 0; } 12% { transform: scale(1.15); opacity: 1; } 70% { opacity: 1; } 100% { transform: translateY(-60px); opacity: 0; } }
+.pc.r4, .pc.r5 { --av: 80px; }
+.r4 .pbody, .r5 .pbody { top: 0; }
+.r4 .avw, .r5 .avw { left: 130px; top: 10px; transform: none; }
+.r4 .nm, .r5 .nm { left: 240px; right: 470px; top: 0; line-height: 100px; text-align: left; font-size: 44px; }
+.r4 .pt, .r5 .pt { left: auto; right: 30px; top: 0; line-height: 100px; font-size: 72px; }
+.r4 .rk, .r5 .rk { left: 16px; right: auto; width: 100px; top: 0; bottom: auto; line-height: 100px; font-size: 60px; color: var(--ink); }
+.r4 .dl, .r5 .dl { right: 330px; top: 28px; }
+.r4 .pop, .r5 .pop { right: 250px; top: -22px; }
+.crown, .r4 .crown { display: none; } .k1 .crown { display: block; }
+.gh { border: 4px dashed rgba(30,27,46,.45); border-radius: 22px; display: grid; place-items: center; font: 700 44px/1 var(--display); color: rgba(30,27,46,.5); }
+.gh.top { align-items: end; padding-bottom: 14px; }
+#cap { position: absolute; left: 0; top: 0; font: 800 28px/1.2 var(--body); color: var(--muted); white-space: nowrap; }
+#chase { position: absolute; left: 0; top: 840px; width: 1200px; height: 76px; display: flex; align-items: center; gap: 22px; font: 700 30px/1 var(--display); }
+#chase .lab { flex: none; width: 190px; line-height: 1.05; }
+#chase .ch { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; background: #fff; border: 3px solid var(--ink); border-radius: 999px; box-shadow: var(--hard-4); }
+#chase .ch .av { width: 52px !important; height: 52px !important; font-size: 21px !important; border-width: 3px; }
+#chase .ch .n { flex: 1; min-width: 0; font-size: 30px; }
+#chase .ch .g { flex: none; background: var(--sun); border: 3px solid var(--ink); border-radius: 999px; padding: 4px 12px; font-size: 30px; }
+#chase .open { flex: 1; color: var(--muted); }
+</style></head>
+<body><div class="stage"></div>
+<script src="_shared.js"></script>
+<script>
+const C = COMPA, K = C.COLORS, O = C.opts, ES = O.locale === "es";
+if (O.reduced) document.body.classList.add("reduced");
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const TC = ES
+  ? { connections: "Conexiones", checkedIn: "Registrados", notes: "Notas", scan: "Escanea para entrar", left: "restante", final: "FINAL", startsIn: "Empieza en", closing: "ÚLTIMOS 10 MIN", howTitle: "Así se juega", steps: ["Escanea el QR", "Saluda a alguien", "Sube en el ranking"], here: "ya están aquí", hereOne: "ya está aquí" }
+  : { connections: "Connections", checkedIn: "Checked in", notes: "Notes", scan: "Scan to join", left: "left", final: "FINAL", startsIn: "Starts in", closing: "LAST 10 MIN", howTitle: "How it works", steps: ["Scan the QR", "Say hi to someone", "Climb the board"], here: "here already", hereOne: "is here" };
+const QR_URL = "compa.app/e/demo";
+document.querySelector(".stage").insertAdjacentHTML("afterbegin", `
+<header class="top"><div class="logo">COMPA</div><div id="pill" class="pill"></div><div id="clk"></div></header>
+<main id="main"></main>
+<aside class="side">
+ <div class="cnt card" style="top:0;background:var(--mint-soft)"><span>${TC.connections}</span><b id="c1">0</b></div>
+ <div class="cnt card" style="top:140px;background:var(--sky-soft)"><span>${TC.checkedIn}</span><b id="c2">0</b></div>
+ <div class="cnt card" style="top:280px;background:var(--gum-soft)"><span>${TC.notes}</span><b id="c3">0</b></div>
+ <div id="qrc" class="sidecard card qrcard"></div>
+ <div id="how" class="sidecard card howto" style="display:none"></div>
+</aside>`);
+$("qrc").innerHTML = `${C.fakeQr(280)}<b>${TC.scan}</b><i>${QR_URL}</i>`;
+$("how").innerHTML = `<h3>${TC.howTitle}</h3>` + TC.steps.map((s, i) => `<div><em>${i + 1}</em>${s}</div>`).join("");
+const prevNum = {};
+function setNum(id, v) {
+  const el = $(id), txt = C.fmt(v);
+  if (el.textContent === txt) return;
+  const had = prevNum[id] !== undefined;
+  el.textContent = txt; prevNum[id] = v;
+  if (!had || O.reduced) return;
+  el.classList.add("bump"); setTimeout(() => el.classList.remove("bump"), 250);
+}
+// zero=true: side column swaps the QR card for the how-to (the invite in #main carries the big QR).
+function chrome(state, scn, zero) {
+  const pill = $("pill"), clk = $("clk"), ph = state.phase;
+  pill.className = "pill " + ph;
+  if (ph === "ended") { pill.textContent = TC.final; clk.innerHTML = ""; }
+  else if (ph === "pre") { pill.textContent = `${TC.startsIn} ${C.clock(scn.eventStartsAtSec - state.now)}`; clk.innerHTML = ""; }
+  else {
+    pill.innerHTML = `<span class="live-dot"></span>${ph === "closing" ? TC.closing : C.copy.live}`;
+    clk.innerHTML = `${C.clock(state.remaining)}<small>${TC.left}</small>`;
+  }
+  setNum("c1", state.counters.connections); setNum("c2", state.counters.checkedIn); setNum("c3", state.counters.summaries);
+  $("qrc").style.display = zero ? "none" : ""; $("how").style.display = zero ? "" : "none";
+}
+let invSig = "";
+function invite(el, title, sub, state) {
+  const people = state.people.slice(0, 6), n = state.people.length;
+  const sig = title + n + people.map((p) => p.id).join();
+  if (sig === invSig && el.firstChild) return;
+  invSig = sig;
+  const here = n ? `<div class="here">${people.map((p) => C.avatar(p, 72)).join("")}<span>${n === 1 ? esc(people[0].display) + " " + TC.hereOne : (n > 6 ? "+" + C.fmt(n - 6) + " · " : "") + C.fmt(n) + " " + TC.here}</span></div>` : "";
+  el.innerHTML = `<div class="invite card"><div class="it"><h1>${title}</h1><p>${sub}</p>${here}</div><div class="invqr pulse">${C.fakeQr(420)}<b>${TC.scan}</b><i>${QR_URL}</i></div></div>`;
+}
+const T = ES
+  ? { zeroT: "El podio se abre con la primera conexión", zeroS: "Escanea el QR, saluda a alguien y gana +50 puntos.", tie: "= empatados en puntos y conexiones · quien llegó antes va primero", final: "Clasificación final", chase: "Persiguiendo el top 5", toGo: "faltan", tied: "empate", open: "lugares libres: conéctate para entrar", you: "¿Tú?" }
+  : { zeroT: "Podium opens at the first connection", zeroS: "Scan the QR, say hi to someone and earn +50 points.", tie: "= tied on points and connections · earlier check-in is listed first", final: "Final standings", chase: "Chasing the top 5", toGo: "to go", tied: "tied", open: "spots open: connect to enter", you: "You?" };
+// Slot geometry relative to #main (1200x910). Podium order 2-1-3, then two rows.
+const SLOTS = [
+  { k: "k1", x: 410, y: 85, w: 380, h: 500 }, { k: "k2", x: 0, y: 165, w: 380, h: 420 }, { k: "k3", x: 820, y: 235, w: 380, h: 350 },
+  { k: "r4", x: 0, y: 615, w: 1200, h: 100 }, { k: "r5", x: 0, y: 725, w: 1200, h: 100 },
+];
+const CROWN = `<svg class="crown" viewBox="0 0 68 50"><path d="M4 44 L8 12 L24 28 L34 4 L44 28 L60 12 L64 44 Z" fill="${K.sun}" stroke="${K.ink}" stroke-width="4" stroke-linejoin="round"/></svg>`;
+$("main").innerHTML = `<div id="inv"></div><div id="board" style="display:none"><div id="cap"></div></div>`;
+const board = $("board");
+board.insertAdjacentHTML("beforeend", SLOTS.map((s, i) => `<div class="gh ${i < 3 ? "top" : ""}" id="gh${i}" style="left:${s.x}px;top:${s.y}px;width:${s.w}px;height:${s.h}px">${T.you}</div>`).join("") + `<div id="chase"></div><div class="final" id="fin" style="right:20px;top:0;display:none">${TC.final}</div>`);
+const cards = new Map(), leaving = new Map(), prevPts = new Map(), deltas = new Map();
+let prevRank = null, prevPhase = null;
+
+function makeCard(p) {
+  const el = document.createElement("div");
+  el.className = "pc"; el.style.opacity = 0;
+  el.innerHTML = `<div class="pbody"></div>${CROWN}<span class="avw">${C.avatar(p, 120)}</span><div class="rk"></div><div class="nm truncate"></div><div class="pt"></div><div class="dl" style="display:none"></div>`;
+  board.appendChild(el);
+  return el;
+}
+function setText(el, sel, txt) { const n = el.querySelector(sel); if (n.textContent !== txt) n.textContent = txt; }
+
+function render(state, scn) {
+  const lb = state.leaderboard.filter((p) => p.points > 0);
+  const zero = lb.length === 0;
+  chrome(state, scn, zero);
+  $("inv").style.display = zero ? "" : "none"; board.style.display = zero ? "none" : "";
+  if (zero) { invite($("inv"), T.zeroT, T.zeroS, state); prevRank = null; return; }
+  const ended = state.phase === "ended", now = performance.now();
+  const top = lb.slice(0, 5), ids = new Set(top.map((p) => p.id));
+  // Rank deltas and +points pops, only while the event runs and after the first frame we have seen.
+  const nextRank = new Map(lb.slice(0, 8).map((p) => [p.id, p.rank]));
+  top.forEach((p, i) => {
+    const el = cards.get(p.id);
+    const before = prevPts.get(p.id);
+    if (el && !ended && before !== undefined && p.points > before) {
+      const pop = document.createElement("div"); pop.className = "pop"; pop.textContent = "+" + (p.points - before);
+      el.appendChild(pop); setTimeout(() => pop.remove(), O.reduced ? 2500 : 1700);
+    }
+    if (prevRank && !ended) {
+      const old = prevRank.get(p.id) ?? 99;
+      if (old !== p.rank) deltas.set(p.id, { d: old - p.rank, until: now + 10000 });
+    }
+  });
+  lb.slice(0, 8).forEach((p) => prevPts.set(p.id, p.points));
+  prevRank = nextRank;
+
+  top.forEach((p, i) => {
+    let el = cards.get(p.id);
+    if (leaving.has(p.id)) { clearTimeout(leaving.get(p.id)); leaving.delete(p.id); }
+    if (!el) { el = makeCard(p); cards.set(p.id, el); requestAnimationFrame(() => requestAnimationFrame(() => (el.style.opacity = 1))); }
+    const s = SLOTS[i];
+    el.className = "pc " + s.k;
+    Object.assign(el.style, { left: s.x + "px", top: s.y + "px", width: s.w + "px", height: s.h + "px", zIndex: 5 - i });
+    setText(el, ".nm", p.display);
+    setText(el, ".rk", (p.tied ? "=" : "") + p.rank);
+    const pt = el.querySelector(".pt"), txt = C.fmt(p.points);
+    if (pt.firstChild?.textContent !== txt) pt.innerHTML = `${txt}<small>${C.copy.points}</small>`;
+    const dl = el.querySelector(".dl"), dd = deltas.get(p.id);
+    const showD = dd && dd.until > now && dd.d !== 0 && !ended;
+    dl.style.display = showD ? "" : "none";
+    if (showD) { dl.className = "dl" + (dd.d < 0 ? " dn" : ""); dl.textContent = (dd.d > 0 ? "▲" : "▼") + (Math.abs(dd.d) < 90 ? Math.abs(dd.d) : ""); }
+  });
+  for (const [id, el] of cards) if (!ids.has(id) && !leaving.has(id)) {
+    el.style.opacity = 0;
+    leaving.set(id, setTimeout(() => { el.remove(); cards.delete(id); leaving.delete(id); }, 400));
+  }
+  SLOTS.forEach((s, i) => ($("gh" + i).style.display = i < top.length ? "none" : ""));
+  $("fin").style.display = ended ? "" : "none";
+  const anyTie = top.some((p) => p.tied);
+  $("cap").textContent = ended ? T.final + (anyTie ? " · " + T.tie : "") : anyTie ? T.tie : "";
+  // Chasing strip: the next three people and their gap to 5th place.
+  const fifth = top.length === 5 ? top[4].points : null;
+  const chasers = fifth === null ? [] : lb.slice(5, 8);
+  const more = fifth === null ? 0 : Math.max(0, lb.length - 8);
+  const sig = chasers.map((p) => p.id + ":" + (fifth - p.points)).join() + "|" + more + "|" + top.length;
+  const ch = $("chase");
+  if (ch.dataset.sig !== sig) {
+    ch.dataset.sig = sig;
+    ch.innerHTML = `<div class="lab">${T.chase}</div>` + (fifth === null ? `<div class="open">${5 - top.length} ${T.open}</div>` :
+      chasers.length ? chasers.map((p) => { const g = fifth - p.points; return `<div class="ch">${C.avatar(p, 52)}<span class="n truncate">${esc(p.display)}</span><span class="g">${g === 0 ? T.tied : "−" + C.fmt(g)}</span></div>`; }).join("") + (more ? `<div class="lab" style="width:auto">+${C.fmt(more)} ${ES ? "más" : "more"}</div>` : "") : `<div class="open">${T.open.replace(/^.*?:/, "")}</div>`);
+  }
+}
+COMPA.run(render);
+</script></body></html>

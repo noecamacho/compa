@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trending</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .list { display: flex; flex-direction: column; gap: 6px; padding: 0; list-style: none; }
+  .tr { display: grid; grid-template-columns: 26px 34px minmax(0,1fr) 56px 58px; align-items: center; gap: 8px; min-height: 56px; padding: 6px 10px; border: 2px solid var(--ink); border-radius: var(--r-btn); background: #fff; animation: rise .3s both; }
+  .tr.me { background: var(--gum-soft); border-width: 3px; box-shadow: var(--h3); }
+  .tr .rk { font-family: var(--display); font-size: 17px; text-align: center; }
+  .tr .sub { display: block; font-size: 12px; color: var(--muted); }
+  .tr .pts { text-align: right; line-height: 1.1; }
+  .mv { font-size: 12px; font-weight: 800; }
+  .mv.up { color: #0b7a44; } .mv.flat { color: var(--muted); }
+  @media (max-width: 380px) { .tr { grid-template-columns: 22px 30px minmax(0,1fr) 44px 52px; gap: 6px; padding: 6px 8px; } }
+  .topics { display: flex; flex-direction: column; gap: 6px; }
+  .tp { display: grid; grid-template-columns: minmax(0,1fr) 2fr 36px; align-items: center; gap: 8px; min-height: 36px; }
+  .tp .b { height: 12px; border: 2px solid var(--ink); border-radius: 999px; background: #fff; overflow: hidden; }
+  .tp .b i { display: block; height: 100%; background: var(--mint); border-right: 2px solid var(--ink); }
+  .mecard { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  @media (min-width: 800px) { .cols { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; align-items: start; } .cols > div { display: flex; flex-direction: column; gap: 14px; } }
+</style>
+</head>
+<body>
+<main id="app" class="wide"></main>
+<nav class="dock" aria-label="Dock"><span>Inicio</span><span>Conectar</span><span>Conexiones</span><span class="on">Ranking</span></nav>
+<script src="engine.js"></script>
+<script>
+const { run, stateAt, avatar, label, first, esc, fmt, tr, spark } = COMPA;
+const W = 600, TOPN = 8;
+
+const ptsAt = (p, at) => { let v = 0; for (const [t, x] of p.series) { if (t <= at) v = x; else break; } return v; };
+// Cumulative points sampled over [from, to], normalised to start at 0, for a mini sparkline.
+const trail = (p, from, to, n = 6) => Array.from({ length: n }, (_, i) => ptsAt(p, from + ((to - from) * i) / (n - 1)) - ptsAt(p, from));
+const topicsOf = (st, c) => {
+  if (c.topics.length) return c.topics;
+  const a = st.people.get(c.a), b = st.people.get(c.b);
+  return a && b ? a.interests.filter((x) => b.interests.includes(x)) : [];
+};
+// Topic counts over connections inside [from, to] (summary bonus is not in the connection list: see API gap).
+function topicCounts(st, from, to) {
+  const m = new Map();
+  for (const c of st.connections) if (c.t > from && c.t <= to) for (const x of topicsOf(st, c)) m.set(x, (m.get(x) || 0) + 1);
+  return m;
+}
+function topTopicOf(st, p, from, to) {
+  const m = new Map();
+  for (const c of st.connections) if (c.t > from && c.t <= to && (c.a === p.id || c.b === p.id)) for (const x of topicsOf(st, c)) m.set(x, (m.get(x) || 0) + 1);
+  const best = [...m.entries()].sort((x, y) => y[1] - x[1])[0];
+  return best ? best[0] : null;
+}
+const spots = (now, before) => (before ? before - now : null); // positive = climbed; null = new on the board
+
+function mv(d) {
+  if (d === null) return `<span class="mv up">${tr("nuevo", "new")}</span>`;
+  if (d > 0) return `<span class="mv up" aria-label="${tr("subió", "up")} ${d}">▲${fmt(d)}</span>`;
+  return `<span class="mv flat" aria-label="${tr("sin cambio", "no change")}">–</span>`; // never shame: drops are not shown for others
+}
+
+function row(st, r, i, from, to, isMe) {
+  const p = r.p, tp = topTopicOf(st, p, from, to);
+  const sub = tp ? tr(`hablando de ${tp}`, `talking about ${tp}`) : tr("conectando", "connecting");
+  return `<li class="tr ${isMe ? "me" : ""}" style="animation-delay:${i * 30}ms"><span class="rk">${i + 1}</span>${avatar(p, 32)}
+    <span class="grow"><span class="ellipsis" style="display:block">${esc(isMe ? (p.anonymous ? tr("Tú · anónimo en pantalla", "You · anonymous on screen") : label(p)) : label(p))}</span><span class="sub ellipsis">${esc(sub)}</span></span>
+    <span aria-hidden="true">${spark(trail(p, from, to), 52, 24, "#FF6B4A")}</span>
+    <span class="pts"><span class="num" style="font-size:16px">+${fmt(r.gain)}</span><br>${mv(r.d)}</span></li>`;
+}
+
+function meCard(st, me, v, prev, ended) {
+  const checked = me.checkinT !== null;
+  const gain = ended ? me.points : me.recent;
+  const before = prev && prev.people.get(me.id);
+  const d = checked && before && before.rank ? before.rank - me.rank : null;
+  let line;
+  if (!checked) line = tr("Haz check-in para entrar a la jugada.", "Check in to join in.");
+  else if (ended) line = tr(`Terminaste con ${fmt(me.points)} pts.`, `You finished with ${fmt(me.points)} pts.`);
+  else if (gain > 0) line = tr(`Sumaste ${fmt(gain)} pts en 10 min.`, `You earned ${fmt(gain)} pts in 10 min.`);
+  else line = tr("Tu racha está en pausa. Un escaneo la reactiva.", "Your streak is paused. One scan restarts it.");
+  const move = d > 0 ? `<span class="pill mint">▲ ${fmt(d)}</span>` : "";
+  return `<div class="card tone-gum-soft mecard"><div class="grow"><div class="caps">${tr("Tu movimiento", "Your movement")}</div><div style="margin-top:3px;font-size:14px">${esc(line)}</div></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">${gain > 0 ? spark(trail(me, ended ? st.s.eventStartsAtSec : st.t - W, Math.min(st.t, st.s.eventEndsAtSec)), 60, 26, "#1E1B2E") : ""}${move}</div></div>`;
+}
+
+run((st, me, v) => {
+  const { s } = st, ended = st.phase === "ended";
+  const head = `<div class="row" style="justify-content:space-between"><h1>${ended ? tr("Escaladores", "Climbers") : tr("En tendencia", "Trending")}</h1>
+    <span class="pill ${ended ? "ink" : "coral"}">${ended ? tr("Final", "Final") : `<span class="live-dot"></span>${tr("Últimos 10 min", "Last 10 min")}`}</span></div>`;
+  if (st.phase === "upcoming" || !st.board.length)
+    return head + `<div class="empty"><h2 style="color:var(--ink)">${tr("Aquí se verá quién se mueve", "See who is moving here")}</h2><p style="margin-top:6px">${st.phase === "upcoming" ? tr("El evento no ha empezado.", "The event hasn't started.") : tr("Nadie ha hecho check-in todavía. Sé la primera chispa.", "Nobody has checked in yet. Be the first spark.")}</p></div><a class="btn" href="#">${tr("Hacer check-in", "Check in")}</a>`;
+
+  const to = Math.min(st.t, s.eventEndsAtSec), from = ended ? s.eventStartsAtSec : st.t - W;
+  // Climb reference: ranks 10 min ago while running; a quarter into the event for the night recap.
+  const refT = ended ? s.eventStartsAtSec + (s.eventEndsAtSec - s.eventStartsAtSec) * 0.25 : st.t - W;
+  const prev = stateAt(s, refT);
+  const gainOf = (p) => (ended ? p.points : p.recent);
+  const dOf = (p) => { const b = prev.people.get(p.id); return b && b.rank && b.checkinT !== null ? spots(p.rank, b.rank) : null; };
+  let pool = st.board.filter((p) => gainOf(p) > 0).map((p) => ({ p, gain: gainOf(p), d: dOf(p) }));
+  if (ended) pool = pool.filter((r) => r.d > 0).sort((a, b) => b.d - a.d || b.gain - a.gain);
+  else pool.sort((a, b) => b.gain - a.gain || a.p.rank - b.p.rank);
+  const top = pool.slice(0, 8);
+
+  const meIn = top.findIndex((r) => r.p === me);
+  const meRow = meIn < 0 && me.checkinT !== null && gainOf(me) > 0 ? pool.find((r) => r.p === me) : null;
+  let list;
+  if (!top.length) {
+    list = `<div class="empty"><h2 style="color:var(--ink)">${ended ? tr("Noche tranquila", "A calm night") : tr("Todo en calma ahora", "Quiet right now")}</h2>
+      <p style="margin-top:6px">${ended ? tr("Nadie escaló posiciones esta vez.", "Nobody climbed this time.") : tr("Sé la chispa: un escaneo y apareces aquí.", "Be the spark: one scan and you show up here.")}</p></div>${ended ? "" : `<a class="btn" href="#">${tr("Escanear a alguien", "Scan someone")} · +50</a>`}`;
+  } else {
+    list = `<div><div class="caps" style="margin-bottom:6px">${ended ? tr("Los que más subieron en la noche", "Biggest climbers of the night") : tr("Los que más suman ahora", "Earning the most right now")}</div>
+      <ul class="list">${top.map((r, i) => row(st, r, i, from, to, r.p === me)).join("")}${meRow ? `<li class="caps" style="text-align:center;list-style:none">• • •</li>${row(st, { ...meRow, d: meRow.d }, pool.indexOf(meRow), from, to, true)}` : ""}</ul></div>`;
+  }
+
+  // Topics: counts in the window vs earlier. Running = rising topics; ended = topics of the night.
+  const rec = topicCounts(st, from, to), tot = ended ? rec : null;
+  const tp = [...rec.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const mx = Math.max(1, ...tp.map((x) => x[1]));
+  const topics = tp.length ? `<div class="card sm"><div class="caps" style="margin-bottom:6px">${ended ? tr("Temas de la noche", "Topics of the night") : tr("Temas en alza", "Rising topics")}</div><div class="topics">${tp.map(([n, c]) => `<div class="tp"><span class="ellipsis">${esc(n)}</span><span class="b"><i style="width:${(c / mx) * 100}%"></i></span><span class="num" style="font-size:14px;text-align:right">${ended ? "" : "+"}${fmt(c)}</span></div>`).join("")}</div></div>`
+    : `<div class="card sm"><div class="caps">${ended ? tr("Temas de la noche", "Topics of the night") : tr("Temas en alza", "Rising topics")}</div><p class="muted" style="margin-top:4px;font-size:14px">${tr("Aún no hay temas en movimiento.", "No topics moving yet.")}</p></div>`;
+
+  const cta = ended ? `<a class="btn sun" href="recap-card.html${location.search}">${tr("Ver mi resumen de la noche", "See my night recap")}</a>` : "";
+  return head + `<div class="cols"><div>${list}</div><div>${meCard(st, me, v, prev, ended)}${topics}${cta}</div></div>`;
+});
+</script>
+</body>
+</html>

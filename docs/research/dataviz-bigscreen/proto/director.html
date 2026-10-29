@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>COMPA director (recommended /live composite)</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+.stale-pill { top: 18px !important; }
+.bar { position: absolute; left: 0; top: 0; right: 0; height: 100px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; background: #fff; border-bottom: 6px solid var(--ink); transition: background-color 600ms; z-index: 20; }
+.bar.closing { background: var(--coral); }
+.brand { display: flex; align-items: center; gap: 22px; font: 700 56px/1 var(--display); }
+.brand .pill { font-size: 30px; color: var(--ink); }
+.clock { display: flex; align-items: baseline; gap: 16px; font-family: var(--display); font-weight: 700; }
+.clock b { font-size: 68px; line-height: 1; font-variant-numeric: tabular-nums; }
+.clock span { font-size: 30px; }
+.bump { animation: bump 450ms cubic-bezier(.2,.9,.3,1.4); }
+@keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+.pop { animation: pop 420ms cubic-bezier(.2,.9,.3,1.4) both; }
+@keyframes pop { 0% { transform: scale(.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+.stale .livey { opacity: .45; filter: grayscale(.6); transition: opacity 400ms; }
+.modehud { position: fixed; left: 8px; bottom: 22px; font: 700 14px/1 ui-monospace, monospace; color: var(--muted); z-index: 99; }
+.idle { position: absolute; left: 0; right: 0; top: 100px; bottom: 0; }
+.qrcard { position: absolute; left: 60px; top: 110px; width: 694px; padding: 24px; background: var(--sun); text-align: center; }
+.qrbox { background: #fff; border: 5px solid var(--ink); border-radius: 18px; padding: 14px; line-height: 0; }
+.qrurl { margin-top: 16px; font: 700 40px/1.1 var(--display); }
+.idle-r { position: absolute; left: 800px; right: 60px; top: 40px; bottom: 40px; display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.h-main { margin: 0; font: 700 104px/1.08 var(--display); }
+.h-sub { margin: 0; font: 600 56px/1.1 var(--display); color: var(--muted); }
+.joined { display: flex; align-items: center; gap: 28px; padding: 14px 32px; background: var(--mint-soft); }
+.joined .jn { font: 700 150px/1 var(--display); font-variant-numeric: tabular-nums; }
+.joined .jt { font: 700 44px/1.15 var(--display); min-width: 0; } .joined .jt small { display: block; font: 800 32px/1.2 var(--body); color: var(--muted); }
+.stack { display: grid; grid-template-columns: repeat(10, 92px); gap: 12px; align-content: start; min-height: 196px; }
+.stack .more { width: 92px; height: 92px; border-radius: 50%; border: 3px solid var(--ink); background: #fff; display: flex; align-items: center; justify-content: center; font: 700 34px var(--display); }
+.stack-empty { grid-column: 1 / -1; padding: 28px; border: 4px dashed var(--ink); border-radius: 22px; font: 700 40px/1.2 var(--display); color: var(--muted); }
+.tip { padding: 22px 32px; background: var(--sky-soft); font: 800 44px/1.2 var(--body); min-height: 150px; display: flex; align-items: center; gap: 24px; margin-top: auto; }
+.tip.quiet { background: var(--coral-soft); font-size: 46px; }
+.tip-in { animation: tipin 400ms ease-out; } @keyframes tipin { from { opacity: 0; transform: translateY(14px); } }
+.tipdot { flex: none; width: 76px; height: 76px; border-radius: 50%; border: 4px solid var(--ink); background: var(--mint); display: flex; align-items: center; justify-content: center; font: 700 34px var(--display); }
+.layer { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: opacity 600ms ease, visibility 0s 600ms; }
+.idle.layer { top: 100px; }
+.layer.on { opacity: 1; visibility: visible; transition: opacity 600ms ease; }
+.ctiles { position: absolute; left: 40px; right: 40px; top: 118px; height: 138px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.ctile { border: 4px solid var(--ink); border-radius: 20px; box-shadow: var(--hard-4); padding: 6px 22px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.ctile .cn { font: 700 84px/.95 var(--display); font-variant-numeric: tabular-nums; display: inline-block; transform-origin: left center; }
+.ctile .cl { font: 800 28px/1.2 var(--body); }
+.panel { position: absolute; padding: 0; overflow: hidden; }
+.panel h3 { margin: 0; padding: 12px 22px 0; font: 700 36px/1.2 var(--display); }
+.vizsvg { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.legend { position: absolute; left: 22px; bottom: 12px; display: flex; gap: 26px; font: 800 28px var(--body); }
+.legend i { display: inline-block; width: 38px; height: 8px; border-radius: 4px; margin-right: 10px; vertical-align: middle; outline: 2px solid var(--ink); }
+.rows { position: relative; margin: 8px 22px 0; }
+.trow { position: absolute; left: 0; right: 0; display: flex; align-items: center; gap: 16px; transition: transform 500ms cubic-bezier(.3,.8,.3,1); }
+.trow .rk { flex: none; width: 52px; height: 52px; border: 3px solid var(--ink); border-radius: 50%; display: flex; align-items: center; justify-content: center; font: 700 32px var(--display); background: #fff; }
+.trow .nm { flex: 1; min-width: 0; font: 800 32px/1.2 var(--body); unicode-bidi: plaintext; }
+.trow .pt { flex: none; font: 700 40px var(--display); font-variant-numeric: tabular-nums; }
+.brow { position: absolute; left: 0; right: 0; transition: transform 500ms cubic-bezier(.3,.8,.3,1); }
+.brow .track { position: relative; height: 50px; border: 3px solid var(--ink); border-radius: 14px; background: #fff; overflow: hidden; }
+.brow .fill { position: absolute; inset: 0 auto 0 0; transition: width 500ms ease; border-right: 3px solid var(--ink); }
+.brow .lb { position: absolute; left: 14px; right: 80px; top: 0; line-height: 44px; font: 800 30px var(--body); }
+.brow .sc { position: absolute; right: 12px; top: 0; line-height: 44px; font: 700 32px var(--display); }
+.empty { padding: 22px; font: 800 30px/1.3 var(--body); color: var(--muted); }
+.feed { position: absolute; left: 40px; right: 40px; top: 962px; height: 86px; }
+.fchip { position: absolute; top: 0; width: 600px; height: 86px; display: flex; align-items: center; gap: 14px; padding: 0 20px; background: #fff; border: 4px solid var(--ink); border-radius: 18px; box-shadow: var(--hard-4); font: 800 30px var(--body); transition: transform 500ms cubic-bezier(.3,.8,.3,1), opacity 500ms; }
+.fchip .dot { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--ink); }
+.fchip .tx { min-width: 0; }
+.qrblock { position: absolute; display: flex; align-items: center; gap: 18px; padding: 6px 10px; background: var(--sun); }
+.qrblock .qrbox { padding: 0; border-width: 4px; width: auto !important; }
+.qrblock .cap { font: 700 34px/1.15 var(--display); }
+.qrblock .cap small { display: block; font: 800 28px/1.2 var(--body); color: var(--ink); opacity: .75; }
+.qrblock.col { flex-direction: column; justify-content: center; text-align: center; gap: 8px; }
+.pulse-big { font: 700 240px/1 var(--display); font-variant-numeric: tabular-nums; }
+.rush-lines { display: flex; flex-direction: column; gap: 22px; padding: 22px 30px; }
+.stat3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.stat3 div b { display: block; font: 700 96px/1 var(--display); } .stat3 div span { font: 800 28px var(--body); }
+.hot { display: flex; gap: 14px; flex-wrap: wrap; } .hot .chip { padding: 6px 22px; border: 4px solid var(--ink); border-radius: 999px; background: #fff; font: 700 38px/1.3 var(--display); box-shadow: var(--hard-4); max-width: 100%; }
+.roll { display: flex; align-items: center; gap: 18px; } .roll .nm { flex: 1; font: 800 34px/1.2 var(--body); } .roll b { font: 700 56px var(--display); }
+.sech { font: 700 36px/1.2 var(--display); color: var(--muted); margin: 0; }
+.pod { position: absolute; display: flex; align-items: flex-end; justify-content: center; gap: 22px; }
+.pcol { width: 300px; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.pcol .nm { font: 700 36px/1.25 var(--display); max-width: 100%; unicode-bidi: plaintext; } .pcol .pts { font: 800 30px var(--body); }
+.pstep { width: 100%; border: 4px solid var(--ink); border-radius: 18px 18px 0 0; box-shadow: var(--hard-6); text-align: center; font: 700 96px/1.1 var(--display); }
+.bigtile { padding: 8px 26px; display: flex; align-items: baseline; gap: 20px; border: 4px solid var(--ink); border-radius: 20px; box-shadow: var(--hard-4); } .bigtile b { font: 700 96px/1.1 var(--display); font-variant-numeric: tabular-nums; } .bigtile span { font: 700 40px var(--display); }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+</style></head>
+<body><div class="stage"></div>
+<script src="_shared.js"></script>
+<script>
+const { opts, COLORS, CATEGORY, POINTS, fmt, clock, avatar, fakeQr, hash } = COMPA;
+const es = opts.locale === "es";
+const T = (en, sp) => (es ? sp : en);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const el = (html) => { const t = document.createElement("template"); t.innerHTML = html.trim(); return t.content.firstElementChild; };
+const stage = document.querySelector(".stage");
+document.body.classList.toggle("reduced", opts.reduced);
+document.body.classList.toggle("shot", opts.shot);
+document.body.classList.toggle("stale", opts.stale > 0);
+const bump = (node) => { node.classList.remove("bump"); void node.offsetWidth; node.classList.add("bump"); };
+
+// Keyed DOM sync: reuses nodes (photos do not reload), animates only entries added after the first sync.
+function syncKeyed(parent, items, key, make, upd) {
+  const map = parent._m || (parent._m = new Map());
+  const seen = new Set(), nodes = [];
+  items.forEach((it, i) => {
+    const k = key(it); seen.add(k);
+    let n = map.get(k);
+    if (!n) { n = make(it, i); if (parent._init) n.classList.add("pop"); map.set(k, n); }
+    if (upd) upd(n, it, i);
+    nodes.push(n);
+  });
+  for (const [k, n] of map) if (!seen.has(k)) { n.remove(); map.delete(k); }
+  nodes.forEach((n, i) => { if (parent.children[i] !== n) parent.insertBefore(n, parent.children[i] || null); });
+  parent._init = true;
+  return nodes;
+}
+
+// Top bar: brand + phase pill left, clock right (stale pill sits in the free centre). Coral while closing.
+function Bar(root) {
+  const bar = el(`<header class="bar"><div class="brand">compa <span class="pill"></span></div><div class="clock"><span class="cl"></span><b class="cv"></b></div></header>`);
+  root.appendChild(bar);
+  const pill = bar.querySelector(".pill"), cl = bar.querySelector(".cl"), cv = bar.querySelector(".cv");
+  let key = "";
+  return {
+    update(s, scn, closing) {
+      bar.classList.toggle("closing", closing);
+      const startsIn = scn.eventStartsAtSec - s.now;
+      const k = s.phase + closing;
+      if (k !== key) {
+        key = k;
+        const tone = { pre: [COLORS.sun, T("Starting soon", "Empieza pronto")], live: [COLORS.coral, `<span class="live-dot"></span>${T("LIVE", "EN VIVO")}`], closing: [COLORS.white, `<span class="live-dot" style="background:${COLORS.coral}"></span>${T("LAST CALL", "ÚLTIMA LLAMADA")}`], ended: [COLORS.silver, T("Ended", "Terminó")] }[s.phase];
+        pill.style.background = tone[0]; pill.innerHTML = tone[1];
+      }
+      if (s.phase === "ended") { cl.textContent = ""; cv.style.fontSize = "52px"; cv.textContent = T("Event ended", "Evento terminado"); return; }
+      cv.style.fontSize = "";
+      cl.textContent = s.phase === "pre" ? T("Starts in", "Empieza en") : s.phase === "closing" ? T("Ends in", "Termina en") : T("left", "restante");
+      cv.textContent = clock(s.phase === "pre" ? startsIn : s.remaining);
+      cl.style.order = s.phase === "live" ? 2 : 0;
+    },
+  };
+}
+
+function Qr(size, label) {
+  return `<div class="qrbox" style="width:${size + 38}px">${fakeQr(size, "compa-join")}</div>${label ? `<div class="qrurl">${label}</div>` : ""}`;
+}
+
+// Attract layer: giant QR, joined counter with stacking avatars, rotating tip, quiet-minute prompt.
+function Idle(root) {
+  const node = el(`<section class="idle"><div class="card qrcard">${Qr(600, "compa.app/e/demo")}</div>
+    <div class="idle-r"><h1 class="h-main truncate"></h1><h2 class="h-sub truncate"></h2>
+    <div class="card joined livey"><span class="jn num">0</span><span class="jt"></span></div>
+    <div class="stack livey"></div><div class="card tip"><span class="tipdot">+</span><span class="tt"></span></div></div></section>`);
+  root.appendChild(node);
+  const q = (c) => node.querySelector(c);
+  const [hMain, hSub, jn, jt, stack, tip, tt] = ["h-main", "h-sub", "jn", "jt", "stack", "tip", "tt"].map((c) => q("." + c));
+  let lastN = -1, lastTip = "", headKey = "";
+  return {
+    el: node,
+    update(s) {
+      const ended = s.phase === "ended";
+      const hk = ended + "";
+      if (hk !== headKey) { headKey = hk; const a = ended ? T("Thanks for coming", "Gracias por venir") : T("Scan to join", "Escanea para entrar"), b = ended ? T("See you at the next event", "Nos vemos en el próximo evento") : T("Escanea para entrar", "Scan to join"); hMain.textContent = a; hSub.textContent = b; }
+      const n = s.counters.checkedIn;
+      if (n !== lastN) { jn.textContent = fmt(n); if (lastN >= 0) bump(jn); lastN = n; }
+      jt.innerHTML = `${n === 1 ? T("person is in", "persona ya está") : T("people are in", "personas ya están")}${s.registered > n ? `<small>${T("of", "de")} ${fmt(s.registered)} ${T("registered", "registradas")}</small>` : ""}`;
+      // newest arrivals first; 19 avatars + overflow chip fit two rows
+      const recent = [...s.people].sort((x, y) => y.checkedInAt - x.checkedInAt).slice(0, n > 20 ? 19 : 20);
+      stack.querySelector(".stack-empty")?.remove();
+      syncKeyed(stack, recent, (p) => p.id, (p) => el(`<span class="avwrap" style="display:inline-flex">${avatar(p, 92)}</span>`));
+      stack.querySelector(".more")?.remove();
+      if (n > 20) stack.appendChild(el(`<span class="more num">+${fmt(n - 19)}</span>`));
+      if (!n) stack.appendChild(el(`<div class="stack-empty">${T("Be the first: scan the QR and say hi", "Sé la primera persona: escanea el QR y saluda")}</div>`));
+      const quiet = (s.phase === "live" || s.phase === "closing") && s.idleFor > 180;
+      const tips = [T(`Scan someone's QR to connect: +${POINTS.new} each`, `Escanea el QR de alguien para conectar: +${POINTS.new} cada uno`), T(`Met before? Reconnect for +${POINTS.reconnection}`, `¿Ya se conocían? Reencuéntrense: +${POINTS.reconnection}`), T(`Record a voice note after chatting: +${POINTS.summary}`, `Graba una nota de voz tras platicar: +${POINTS.summary}`), T(`Pick what you talked about: +${POINTS.topics}`, `Elige de qué hablaron: +${POINTS.topics}`)];
+      const idx = opts.reduced || opts.shot ? 0 : Math.floor(performance.now() / 6000) % tips.length;
+      const topic = s.topics[0]?.name;
+      const text = quiet ? (topic ? T(`Quiet minute? Find someone who likes <u>${esc(topic)}</u>`, `¿Minuto tranquilo? Busca a alguien a quien le guste <u>${esc(topic)}</u>`) : T("Quiet minute? Say hi to someone new", "¿Minuto tranquilo? Saluda a alguien nuevo")) : ended ? T("Scan to see your profile and connections", "Escanea para ver tu perfil y tus conexiones") : tips[idx];
+      if (text !== lastTip) { lastTip = text; tt.innerHTML = text; tip.classList.toggle("quiet", quiet); tt.classList.remove("tip-in"); void tt.offsetWidth; tt.classList.add("tip-in"); tip.querySelector(".tipdot").textContent = quiet ? "?" : "+"; }
+    },
+  };
+}
+// ---------- derived inputs (all from the folded state; see notes for the API fields each needs)
+function rateIn(s, win) { let n = 0; for (let i = s.connections.length - 1; i >= 0 && s.connections[i].t >= s.now - win; i--) n++; return n; }
+const BADGE = { apreton: "Primer apretón", madrugador: "Madrugador", cierre: "Cierre", iman: "Imán", maraton: "Maratón", tresdetres: "Tres de tres", puente: "Puente", duo: "Dúo dinámico", ff2026: "Founders Fest 2026", og: "OG", rey: "Rey del reencuentro", speaker: "Con el speaker", noctambulo: "Noctámbulo", cazatalentos: "Cazatalentos", conector100: "Conector 100", trotamundos: "Trotamundos", curioso: "Curioso", memoria: "Memoria de elefante", quinientos: "500 en la noche", cuatro: "Cuatro trimestres" };
+const topicColor = (name) => CATEGORY[hash(name) % CATEGORY.length];
+
+// ---------- mode state machine (pure; unit-checked by ?selftest=1)
+const TH = { rushEnter: 20, rushExit: 10, idleBelowConnections: 3, idleAfterSec: 180, idleExitSec: 60, dwellSec: 30 };
+// Returns the mode the inputs ask for, given the current one (hysteresis on rush and idle).
+function desiredMode(cur, i) {
+  if (i.phase === "ended") return "finale";
+  if (i.phase === "pre") return "idle";
+  const enterIdle = i.connections < TH.idleBelowConnections || i.idleFor > TH.idleAfterSec;
+  const stayIdle = i.connections < TH.idleBelowConnections || i.idleFor > TH.idleExitSec;
+  if (cur === "idle" ? stayIdle : enterIdle) return "idle";
+  if (i.phase === "closing") return "closing";
+  if (i.rate60 >= (cur === "rush" ? TH.rushExit : TH.rushEnter)) return "rush";
+  return "main";
+}
+// Applies the dwell rule: no more than one flip per 30 s, except one-way phase changes (closing, ended).
+function nextMode(cur, lastSwitchAt, i) {
+  const want = desiredMode(cur, i);
+  if (!cur) return want;
+  if (want === cur) return cur;
+  const phaseDriven = want === "finale" || want === "closing";
+  return phaseDriven || i.now - lastSwitchAt >= TH.dwellSec ? want : cur;
+}
+function selfTest() {
+  const base = { phase: "live", connections: 50, idleFor: 5, rate60: 2, now: 1000 };
+  const ok = [];
+  const a = (name, cond) => ok.push([name, !!cond]);
+  a("initial live -> main", nextMode(null, 0, base) === "main");
+  a("rush enters at 20", nextMode("main", 0, { ...base, rate60: 20 }) === "rush");
+  a("rush holds at 12 (hysteresis)", nextMode("rush", 0, { ...base, rate60: 12 }) === "rush");
+  a("rush exits below 10", nextMode("rush", 0, { ...base, rate60: 9 }) === "main");
+  a("dwell blocks flip within 30 s", nextMode("main", 990, { ...base, rate60: 30 }) === "main");
+  a("dwell allows flip after 30 s", nextMode("main", 960, { ...base, rate60: 30 }) === "rush");
+  a("idle after 180 s quiet", desiredMode("main", { ...base, idleFor: 181 }) === "idle");
+  a("idle holds until 60 s of activity", desiredMode("idle", { ...base, idleFor: 100 }) === "idle");
+  a("closing is phase driven (ignores dwell)", nextMode("rush", 995, { ...base, phase: "closing" }) === "closing");
+  a("ended -> finale at once", nextMode("main", 999, { ...base, phase: "ended" }) === "finale");
+  a("pre -> idle", desiredMode("main", { ...base, phase: "pre" }) === "idle");
+  console.log(ok.map(([n, p]) => (p ? "PASS " : "FAIL ") + n).join("\n"));
+  document.title = ok.every(([, p]) => p) ? "selftest PASS" : "selftest FAIL";
+}
+
+// ---------- components (one React component each in the port)
+function Counters(root) {
+  const defs = [["people", T("People", "Personas"), COLORS.skySoft], ["conn", T("Connections", "Conexiones"), COLORS.sunSoft], ["notes", T("Notes", "Notas"), COLORS.mintSoft], ["pulse", T("per minute", "por minuto"), COLORS.gumSoft]];
+  const box = el(`<div class="ctiles">${defs.map(([k, l, c]) => `<div class="ctile ${k === "pulse" ? "livey" : ""}" style="background:${c}"><span class="cn num" data-k="${k}">0</span><span class="cl truncate">${l}</span></div>`).join("")}</div>`);
+  root.appendChild(box);
+  const last = {};
+  return { update(v) { for (const k in v) { if (last[k] === v[k]) continue; const n = box.querySelector(`[data-k=${k}]`); n.textContent = fmt(v[k]); if (last[k] !== undefined) bump(n); last[k] = v[k]; } } };
+}
+
+function Top5(root, box, rowH) {
+  const node = el(`<div class="card panel" style="left:${box[0]}px;top:${box[1]}px;width:${box[2]}px;height:${box[3]}px"><h3>${T("Top 5 tonight", "Top 5 de la noche")}</h3><div class="rows" style="height:${rowH * 5}px"></div></div>`);
+  root.appendChild(node);
+  const rows = node.querySelector(".rows"), av = Math.min(80, rowH - 20);
+  const fills = [COLORS.sun, COLORS.silver, COLORS.bronze];
+  return { update(s) {
+    syncKeyed(rows, s.leaderboard.slice(0, 5), (p) => p.id,
+      (p) => el(`<div class="trow" style="height:${rowH}px"><b class="rk"></b>${avatar(p, av)}<span class="nm truncate"></span><b class="pt num"></b></div>`),
+      (n, p, i) => { n.style.transform = `translateY(${i * rowH}px)`; const rk = n.querySelector(".rk"); rk.textContent = p.rank; rk.style.background = fills[p.rank - 1] || "#fff"; n.querySelector(".nm").textContent = p.display; n.querySelector(".pt").textContent = fmt(p.points); });
+  } };
+}
+
+function TopicRace(root, box) {
+  const rowH = 60;
+  const node = el(`<div class="card panel" style="left:${box[0]}px;top:${box[1]}px;width:${box[2]}px;height:${box[3]}px"><h3>${T("Topic race", "Carrera de temas")}</h3><div class="rows" style="height:${rowH * 6}px"></div><div class="empty" hidden>${T("Topics appear as people connect", "Los temas aparecen cuando la gente conecta")}</div></div>`);
+  root.appendChild(node);
+  const rows = node.querySelector(".rows"), empty = node.querySelector(".empty");
+  return { update(s) {
+    const top = s.topics.slice(0, 6), max = top[0]?.score || 1;
+    empty.hidden = top.length > 0;
+    syncKeyed(rows, top, (t) => t.name,
+      (t) => el(`<div class="brow"><div class="track"><div class="fill" style="background:${topicColor(t.name)}"></div><span class="lb truncate"></span><span class="sc num"></span></div></div>`),
+      (n, t, i) => { n.style.transform = `translateY(${i * rowH}px)`; n.querySelector(".fill").style.width = Math.max(18, (t.score / max) * 100) + "%"; n.querySelector(".lb").textContent = t.name; n.querySelector(".sc").textContent = fmt(t.score); });
+  } };
+}
+
+function feedText(s, ev) {
+  const nm = (id) => esc(COMPA.nameOf(s, id));
+  if (ev.type === "connection_accepted") return `${nm(ev.a)} ⇄ ${nm(ev.b)} ${ev.topics?.length ? T("talked about", "hablaron de") + " " + esc(ev.topics[0]) : T("connected", "conectaron")}`;
+  if (ev.type === "summary_approved") return `${nm(ev.a)} ${T("saved a note", "guardó una nota")}${ev.topics?.length ? " · " + esc(ev.topics[0]) : ""}`; // never the note text
+  if (ev.type === "badge") return `${nm(ev.a)} ${T("earned", "ganó")} ${esc(BADGE[ev.badge] || ev.badge)}`;
+  return `${nm(ev.a)} ${T("joined", "llegó")}`;
+}
+function Feed(root) {
+  const node = el(`<div class="feed livey"></div>`); root.appendChild(node);
+  const tone = { connection_accepted: COLORS.mint, summary_approved: COLORS.sky, badge: COLORS.sun, checkin: COLORS.silver };
+  return { update(s) {
+    syncKeyed(node, s.feed.slice(0, 4), (e) => `${e.t}|${e.type}|${e.a}|${e.b || ""}|${e.badge || ""}`,
+      (e) => el(`<div class="fchip"><span class="dot" style="background:${e.kind === "reconnection" ? COLORS.gum : tone[e.type]}"></span><span class="tx truncate"></span></div>`),
+      (n, e, i) => { n.style.transform = `translateX(${i * 620}px)`; n.style.opacity = i === 3 ? 0 : 1; n.querySelector(".tx").innerHTML = feedText(s, e); });
+  } };
+}
+
+function QrBlock(root, box, size, stacked, cap = [T("Scan to join", "Escanea para entrar"), T("Escanea para entrar", "Scan to join")]) {
+  const node = el(`<div class="card qrblock ${stacked ? "col" : ""}" style="left:${box[0]}px;top:${box[1]}px;width:${box[2]}px;height:${box[3]}px"><div class="qrbox">${fakeQr(size, "compa-join")}</div><div class="cap">${cap[0]}<small>${cap[1]}</small></div></div>`);
+  root.appendChild(node);
+}
+
+// Ring of the top 28 by points; chords for their connections. Stable slot per person (check-in order); nodes glide on slot change.
+function Ring(root, box) {
+  const [x, y, w, h] = box, cx = w / 2, cy = h / 2 + 2, R = 242, N = 28;
+  const node = el(`<div class="card panel" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px"><h3>${T("Who met whom", "Quién conoció a quién")}</h3><svg class="vizsvg" viewBox="0 0 ${w} ${h}"><text class="crowd" x="${cx}" y="${cy + 18}" text-anchor="middle" font-family="Fredoka" font-weight="700" font-size="64" fill="${COLORS.muted}" opacity=".35"></text><g class="edges"></g><g class="nodes"></g></svg><div class="legend"><span><i style="background:${COLORS.mint}"></i>${T("new", "nueva")}</span><span><i style="background:${COLORS.gum}"></i>${T("reconnection", "reencuentro")}</span></div></div>`);
+  root.appendChild(node);
+  const edges = node.querySelector(".edges"), nodes = node.querySelector(".nodes"), svgns = "http://www.w3.org/2000/svg";
+  const mk = (tag, attrs) => { const e = document.createElementNS(svgns, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); return e; };
+  const stubEnd = (k, x1, y1) => { const a = Math.atan2(y1 - cy, x1 - cx) + ((hash(k) % 100) - 50) / 140, r = R * (0.3 + (hash(k + "r") % 40) / 100); return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+  const em = new Map(), nm = new Map(); let lastSig = "", init = false;
+  return { update(s) {
+    const sel = s.leaderboard.slice(0, N);
+    const slots = [...sel].sort((a, b) => a.checkedInAt - b.checkedInAt || (a.id < b.id ? -1 : 1));
+    const pos = new Map(slots.map((p, i) => { const a = (i / slots.length) * 2 * Math.PI - Math.PI / 2; return [p.id, [cx + R * Math.cos(a), cy + R * Math.sin(a)]]; }));
+    const sig = s.counters.connections + "|" + slots.map((p) => p.id + p.rank).join(",");
+    if (sig === lastSig) return; lastSig = sig;
+    const ids = new Set(pos.keys());
+    // nodes
+    for (const p of sel) {
+      let g = nm.get(p.id);
+      if (!g) { g = mk("g", { class: init ? "pop" : "" }); g.style.transition = "transform 600ms cubic-bezier(.3,.8,.3,1)"; g.appendChild(mk("circle", { r: 27, "stroke-width": 4, stroke: COLORS.ink })); const t = mk("text", { "text-anchor": "middle", dy: "0.35em", "font-family": "Fredoka", "font-weight": 700, "font-size": 22, fill: COLORS.ink }); g.appendChild(t); nodes.appendChild(g); nm.set(p.id, g); }
+      const [px, py] = pos.get(p.id);
+      g.style.transform = `translate(${px}px,${py}px)`;
+      const top3 = p.rank <= 3;
+      g.firstChild.setAttribute("fill", top3 ? [COLORS.sun, COLORS.silver, COLORS.bronze][p.rank - 1] : p.anonymous ? COLORS.silver : COLORS.colorFor?.(p.id) || COMPA.colorFor(p.id));
+      g.lastChild.textContent = top3 ? p.rank : p.anonymous ? "?" : Array.from((p.name || "?").trim().split(/\s+/).slice(0, 2).map((w) => Array.from(w)[0] || "").join("")).join("").toUpperCase();
+    }
+    for (const [id, g] of nm) if (!ids.has(id)) { g.remove(); nm.delete(id); }
+    // edges: last 160 connections among shown people
+    node.querySelector(".crowd").textContent = s.people.length > sel.length ? "+" + fmt(s.people.length - sel.length) : "";
+    // chords between shown people; a stub toward the centre for a connection to someone off the ring (dense crowds)
+    const list = []; for (let i = s.connections.length - 1; i >= 0 && i > s.connections.length - 600 && list.length < 180; i--) { const c = s.connections[i]; if (ids.has(c.a) || ids.has(c.b)) list.push(c); }
+    const seen = new Set();
+    list.forEach((c, i) => {
+      const k = c.a + "|" + c.b; seen.add(k);
+      const both = ids.has(c.a) && ids.has(c.b), [x1, y1] = pos.get(ids.has(c.a) ? c.a : c.b), [x2, y2] = both ? pos.get(c.b) : stubEnd(k, x1, y1);
+      const d = `M${x1} ${y1} Q${cx + (x1 + x2 - 2 * cx) * 0.12} ${cy + (y1 + y2 - 2 * cy) * 0.12} ${x2} ${y2}`;
+      let p = em.get(k);
+      if (!p) { p = mk("path", { fill: "none", "stroke-linecap": "round", pathLength: 1 }); if (init && !opts.reduced) { p.style.strokeDasharray = 1; p.style.animation = "draw 700ms ease-out both"; } edges.appendChild(p); em.set(k, p); }
+      p.setAttribute("d", d); p.setAttribute("stroke", c.kind === "reconnection" ? COLORS.gum : COLORS.mint); p.setAttribute("stroke-width", i < 6 ? 6 : 3); p.setAttribute("opacity", i < 6 ? 0.95 : 0.55);
+    });
+    for (const [k, p] of em) if (!seen.has(k)) { p.remove(); em.delete(k); }
+    init = true;
+  } };
+}
+
+function Podium(root, box) {
+  const node = el(`<div class="pod" style="left:${box[0]}px;top:${box[1]}px;width:${box[2]}px;height:${box[3]}px"></div>`); root.appendChild(node);
+  const fill = [COLORS.sun, COLORS.silver, COLORS.bronze], hs = [250, 180, 120];
+  return { update(s) {
+    const top = s.leaderboard.slice(0, 3), order = top.length === 3 ? [1, 0, 2] : top.length === 2 ? [1, 0] : [0];
+    node.innerHTML = order.map((i) => { const p = top[i], r = Math.min(p.rank - 1, 2); return `<div class="pcol">${avatar(p, 120)}<div class="nm truncate">${esc(p.display)}</div><div class="pts">${fmt(p.points)} ${T("pts", "pts")}</div><div class="pstep" style="height:${hs[r]}px;background:${fill[r]}">${p.rank}</div></div>`; }).join("");
+  } };
+}
+
+// ---------- layers
+function MainLayer(root) {
+  const L = el(`<section class="layer"></section>`); root.appendChild(L);
+  const counters = Counters(L), ring = Ring(L, [40, 272, 800, 672]), top5 = Top5(L, [860, 272, 560, 672], 116), topics = TopicRace(L, [1440, 272, 440, 428]), feed = Feed(L);
+  QrBlock(L, [1440, 716, 440, 232], 200, false);
+  return { el: L, update(s) { counters.update({ people: s.counters.checkedIn, conn: s.counters.connections, notes: s.counters.summaries, pulse: rateIn(s, 60) }); ring.update(s); top5.update(s); topics.update(s); feed.update(s); } };
+}
+
+function RushLayer(root) {
+  const L = el(`<section class="layer"></section>`); root.appendChild(L);
+  const counters = Counters(L), top5 = Top5(L, [1440, 272, 440, 428], 68);
+  QrBlock(L, [1440, 716, 440, 324], 200, true);
+  const left = el(`<div class="card panel livey" style="left:40px;top:272px;width:740px;height:768px;background:${COLORS.coralSoft}"><h3>${T("Connections per minute", "Conexiones por minuto")}</h3><div class="pulse-big num" style="padding:6px 28px 0">0</div><svg class="spark" viewBox="0 0 700 330" style="position:absolute;left:20px;bottom:24px;width:700px;height:330px"></svg></div>`);
+  const mid = el(`<div class="card panel" style="left:800px;top:272px;width:620px;height:768px"><div class="rush-lines"><p class="sech">${T("Last 5 minutes", "Últimos 5 minutos")}</p><div class="stat3"></div><p class="sech">${T("Hot topics", "Temas calientes")}</p><div class="hot"></div><p class="sech">${T("On a roll", "En racha")}</p><div class="rolls"></div></div></div>`);
+  L.append(left, mid);
+  const big = left.querySelector(".pulse-big"), spark = left.querySelector(".spark"), stat3 = mid.querySelector(".stat3"), hot = mid.querySelector(".hot"), rolls = mid.querySelector(".rolls");
+  let last = -1;
+  return { el: L, update(s) {
+    const r = rateIn(s, 60); counters.update({ people: s.counters.checkedIn, conn: s.counters.connections, notes: s.counters.summaries, pulse: r });
+    if (r !== last) { big.textContent = fmt(r); if (last >= 0) bump(big); last = r; }
+    const series = COMPA.rateSeries(s, 60, s.now - 720).slice(-12), mx = Math.max(1, ...series);
+    spark.innerHTML = series.map((v, i) => `<rect x="${i * 58 + 4}" y="${290 - (v / mx) * 250}" width="48" height="${(v / mx) * 250 + 2}" rx="6" fill="${i === series.length - 1 ? COLORS.coral : COLORS.sky}" stroke="${COLORS.ink}" stroke-width="3"/>`).join("") + `<text x="4" y="324" font-family="Nunito" font-weight="800" font-size="28" fill="${COLORS.muted}">-12 min</text><text x="696" y="324" text-anchor="end" font-family="Nunito" font-weight="800" font-size="28" fill="${COLORS.muted}">${T("now", "ahora")}</text>`;
+    const recent = []; for (let i = s.connections.length - 1; i >= 0 && s.connections[i].t >= s.now - 300; i--) recent.push(s.connections[i]);
+    const per = new Map(), tp = new Map();
+    for (const c of recent) { for (const id of [c.a, c.b]) per.set(id, (per.get(id) || 0) + 1); for (const t of c.topics || []) tp.set(t, (tp.get(t) || 0) + 1); }
+    const joined = s.feed.filter((e) => e.type === "checkin" && e.t >= s.now - 300).length, notes = s.summaries.filter((e) => e.t >= s.now - 300).length;
+    stat3.innerHTML = [[recent.length, T("connections", "conexiones")], [notes, T("notes", "notas")], [joined, T("arrivals", "llegadas")]].map(([n, l]) => `<div><b class="num">${fmt(n)}</b><span>${l}</span></div>`).join("");
+    const hotList = [...tp].sort((a, b) => b[1] - a[1]).slice(0, 3);
+    hot.innerHTML = (hotList.length ? hotList : s.topics.slice(0, 3).map((t) => [t.name])).map(([n]) => `<span class="chip truncate" style="background:${topicColor(n)}">${esc(n)}</span>`).join("");
+    rolls.innerHTML = [...per].sort((a, b) => b[1] - a[1]).slice(0, 3).map(([id, n]) => `<div class="roll">${avatar(s.byId.get(id), 64)}<span class="nm truncate">${esc(s.byId.get(id).display)}</span><b class="num">×${n}</b></div>`).join("");
+    top5.update(s);
+  } };
+}
+
+function FinaleLayer(root) {
+  const L = el(`<section class="layer"></section>`); root.appendChild(L);
+  const pod = Podium(L, [40, 190, 1000, 700]);
+  const right = el(`<div style="position:absolute;left:1100px;top:130px;width:780px;display:flex;flex-direction:column;gap:18px"><div class="bigtile" style="background:${COLORS.skySoft}"><b class="num p"></b><span class="pl"></span></div><div class="bigtile" style="background:${COLORS.sunSoft}"><b class="num c"></b><span class="cl"></span></div><div class="bigtile" style="background:${COLORS.mintSoft}"><b class="num n"></b><span class="nl"></span></div><div class="sech tt" style="color:var(--ink);font-size:44px"></div></div>`);
+  L.appendChild(right);
+  const thanks = el(`<h2 class="display" style="position:absolute;left:40px;top:930px;width:1000px;margin:0;font-size:64px;line-height:1.1">${T("Thanks for coming!", "¡Gracias por venir!")}</h2>`);
+  L.appendChild(thanks);
+  QrBlock(L, [1100, 700, 780, 300], 240, false, [T("Your profile and connections", "Tu perfil y tus conexiones"), T("Scan to open them", "Escanea para abrirlos")]);
+  const q = (c) => right.querySelector(c);
+  return { el: L, update(s) {
+    const c = s.counters; q(".p").textContent = fmt(c.checkedIn); q(".pl").textContent = c.checkedIn === 1 ? T("person", "persona") : T("people", "personas");
+    q(".c").textContent = fmt(c.connections); q(".cl").textContent = c.connections === 1 ? T("connection", "conexión") : T("connections", "conexiones");
+    q(".n").textContent = fmt(c.summaries); q(".nl").textContent = c.summaries === 1 ? T("note", "nota") : T("notes", "notas");
+    q(".tt").textContent = s.topics[0] ? T("Top topic: ", "Tema de la noche: ") + s.topics[0].name : "";
+    pod.update(s);
+  } };
+}
+
+// ---------- director
+const bar = Bar(stage);
+const layers = { idle: Idle(stage), main: MainLayer(stage), rush: RushLayer(stage), finale: FinaleLayer(stage) };
+layers.idle.el.classList.add("layer");
+const LAYER_OF = { idle: "idle", main: "main", closing: "main", rush: "rush", finale: "finale" };
+const hud = document.createElement("div"); hud.className = "modehud"; if (!opts.shot) document.body.appendChild(hud);
+let mode = null, lastSwitchAt = 0, shownLayer = null;
+if (new URLSearchParams(location.search).get("selftest") === "1") selfTest();
+
+COMPA.run((s, scn) => {
+  const inputs = { phase: s.phase, connections: s.counters.connections, idleFor: s.idleFor, rate60: rateIn(s, 60), now: s.now };
+  const next = nextMode(mode, lastSwitchAt, inputs);
+  if (next !== mode) { mode = next; lastSwitchAt = s.now; }
+  bar.update(s, scn, mode === "closing");
+  const key = LAYER_OF[mode], layer = layers[key];
+  layer.update(s); // populate before it fades in
+  if (key !== shownLayer) { if (shownLayer) layers[shownLayer].el.classList.remove("on"); layer.el.classList.add("on"); shownLayer = key; }
+  if (!opts.shot) hud.textContent = `mode: ${mode} · rate60=${inputs.rate60} idleFor=${Math.round(s.idleFor)} since-switch=${Math.round(s.now - lastSwitchAt)}s`;
+}, { tickMs: 500 });
+</script></body></html>

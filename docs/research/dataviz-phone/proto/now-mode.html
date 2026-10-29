@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Now mode</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  .youbar { position: sticky; top: 8px; z-index: 4; display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 4px 12px 4px 6px; border: 2.5px solid var(--ink); border-radius: 999px; background: var(--sun); box-shadow: var(--h3); }
+  .youbar .num { font-size: 18px; white-space: nowrap; }
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .kpi { background: #fff; border: 2px solid var(--ink); border-radius: 14px; padding: 8px 2px; text-align: center; min-width: 0; }
+  .kpi .num { font-size: 22px; display: block; } .kpi .caps { font-size: 9.5px; letter-spacing: .8px; }
+  .trow { display: grid; grid-template-columns: minmax(64px, 28%) 1fr 34px; align-items: center; gap: 8px; min-height: 30px; font-size: 14px; }
+  .trow .bar { height: 16px; } .trow .bar > i { background: var(--mint); }
+  .trow:first-child .bar > i { background: var(--coral); }
+  .ev { display: flex; align-items: center; gap: 8px; min-height: 44px; border-top: 1.5px dashed rgba(30,27,46,.2); }
+  .ev:first-child { border-top: 0; }
+  .rush { background: var(--coral-soft); border: 2px solid var(--ink); border-radius: 14px; padding: 10px 12px; font-family: var(--display); font-size: 16px; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav class="dock" aria-label="Dock"><span class="on">Inicio</span><span>Conectar</span><span>Conexiones</span><span>Ranking</span></nav>
+<script src="engine.js"></script>
+<script>
+const { run, avatar, label, first, esc, fmt, ago, clock, tr } = COMPA;
+const WIN = 300, MAX_ROWS = 6, RUSH_AT = 8;
+
+function you(st, me, v) {
+  if (!me || me.checkinT === null) return `<div class="youbar"><span class="grow ellipsis">${tr("Haz check-in para aparecer en el ranking", "Check in to join the ranking")}</span></div>`;
+  const place = v.rank ? `${v.tiedWith ? "=" : ""}#${fmt(v.crank)}` : "—";
+  return `<div class="youbar" aria-label="${tr("Tú", "You")}">${avatar(me, 36)}<span class="grow ellipsis">${tr("Tú", "You")} · ${esc(label(me))}</span><span class="num">${place}</span><span class="num">${fmt(me.points)}<small style="font-size:11px"> pts</small></span></div>`;
+}
+
+function kpis(st) {
+  const c = st.counters;
+  const k = (n, es, en) => `<div class="kpi"><span class="num">${fmt(n)}</span><span class="caps">${tr(es, en)}</span></div>`;
+  return `<div class="kpis">${k(c.checkedIn, "aquí", "here")}${k(c.connections, "conexiones", "connections")}${k(c.active, "activos", "active")}${k(c.summaries, "notas", "notes")}</div>`;
+}
+
+function topics(st) {
+  if (!st.topics.length) return `<p class="muted" style="font-size:14px">${tr("Los temas aparecen con las primeras conexiones.", "Topics show up with the first connections.")}</p>`;
+  const max = st.topics[0][1];
+  return st.topics.map(([name, n]) => `<div class="trow"><span class="ellipsis">${esc(name)}</span><div class="bar" role="img" aria-label="${esc(name)} ${n}"><i style="width:${Math.max(4, (n / max) * 100)}%"></i></div><span class="num" style="font-size:15px;text-align:right">${fmt(n)}</span></div>`).join("");
+}
+
+function feed(st) {
+  if (!st.connections.length) return `<div class="empty"><h3 style="color:var(--ink)">${tr("Todo en calma", "All quiet")}</h3><p style="margin-top:4px;font-size:14px">${tr("La primera conexión aparece aquí en cuanto ocurra.", "The first connection will show up here as soon as it happens.")}</p></div>`;
+  const recent = st.connections.filter((c) => c.t > st.t - WIN).length;
+  const rows = st.connections.slice(-MAX_ROWS).reverse().map((c) => {
+    const a = st.people.get(c.a), b = st.people.get(c.b);
+    if (!a || !b) return "";
+    return `<div class="ev">${avatar(a, 26)}<span class="grow ellipsis">${esc(first(a))} ⇄ ${esc(first(b))}${c.topics.length ? ` <span class="muted">· ${esc(c.topics.slice(0, 2).join(", "))}</span>` : ""}</span><span class="chip">${esc(ago(st, c.t))}</span></div>`;
+  }).join("");
+  const rush = recent >= RUSH_AT && st.phase === "running" ? `<div class="rush">+${fmt(recent)} ${tr("conexiones en los últimos 5 min", "connections in the last 5 min")}</div>` : "";
+  const more = st.connections.length > MAX_ROWS ? `<p class="muted" style="font-size:12px;text-align:center;margin-top:6px">${tr(`y ${fmt(st.connections.length - MAX_ROWS)} más esta noche`, `and ${fmt(st.connections.length - MAX_ROWS)} more tonight`)}</p>` : "";
+  return `${rush}<div>${rows}</div>${more}`;
+}
+
+run((st, me, v) => {
+  const ended = st.phase === "ended", up = st.phase === "upcoming";
+  const pill = ended ? `<span class="pill ink">${tr("Final", "Final")}</span>` : up ? `<span class="pill sun">${tr("Pronto", "Soon")}</span>` : `<span class="pill coral"><span class="live-dot"></span>${tr("En vivo", "Live")}</span>`;
+  return `<div class="row" style="justify-content:space-between"><h1>${tr("Ahora", "Now")}</h1><span class="muted">${clock(st, Math.min(st.t, st.s.eventEndsAtSec))}</span>${pill}</div>` +
+    you(st, me, v) + kpis(st) +
+    `<section class="card"><div class="caps" style="margin-bottom:8px">${tr("Temas del momento", "Hot topics")}</div>${topics(st)}</section>` +
+    `<section class="card"><div class="caps" style="margin-bottom:6px">${ended ? tr("Últimas conexiones", "Last connections") : tr("Pasando ahora", "Happening now")}</div>${feed(st)}</section>` +
+    `<p class="muted" style="font-size:12px;text-align:center">${tr("Espejo de la pantalla grande · sin notas privadas", "Mirror of the big screen · no private notes")}</p>`;
+});
+</script>
+</body>
+</html>

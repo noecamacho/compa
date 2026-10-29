@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>COMPA live · Topic heatmap</title>
+<meta name="viewport" content="width=1920">
+<link rel="stylesheet" href="_shared.css">
+<style>
+  .head-l { position: absolute; left: 40px; top: 22px; width: 600px; }
+  .head-l h1 { margin: 0; font: 700 56px/1 var(--display); }
+  .head-l p { margin: 6px 0 0; font-size: 28px; color: var(--muted); }
+  .head-r { position: absolute; right: 40px; top: 18px; display: flex; gap: 40px; align-items: flex-end; }
+  .kpi { text-align: right; line-height: 1; }
+  .kpi b { display: block; font: 700 72px/1 var(--display); font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 28px; color: var(--muted); }
+  .pill.live { background: var(--mint); font-size: 30px; }
+  .pill.final { background: var(--sun); font-size: 30px; }
+  .pill.pre { background: var(--sky); font-size: 30px; }
+  .pillrow { align-self: center; }
+
+  #axis { position: absolute; left: 340px; top: 150px; width: 1380px; height: 56px; }
+  #axis .tick { position: absolute; top: 14px; font: 700 28px/1 var(--display); transform: translateX(-2px); white-space: nowrap; }
+  #axis .tick::before { content: ""; position: absolute; left: 0; top: 34px; width: 3px; height: 12px; background: var(--ink); }
+  #axisTot { position: absolute; left: 1730px; top: 164px; width: 150px; text-align: right; font: 700 28px/1 var(--display); color: var(--muted); }
+  #grid { position: absolute; left: 40px; top: 215px; width: 1840px; height: 620px; }
+  .row { position: absolute; left: 0; width: 1840px; height: 58px; transition: top 500ms cubic-bezier(.2,.8,.2,1), opacity 400ms; }
+  .row .lab { position: absolute; left: 0; width: 290px; top: 0; height: 58px; display: flex; align-items: center; gap: 12px; font: 700 34px/1 var(--display); }
+  .row .rk { width: 40px; flex: none; text-align: right; color: var(--muted); font-size: 28px; }
+  .row .nm { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row.ph .nm { color: transparent; background: repeating-linear-gradient(90deg, rgba(30,27,46,.18) 0 10px, transparent 10px 16px); height: 6px; border-radius: 3px; flex: 0 0 120px; }
+  .row .tot { position: absolute; left: 1690px; width: 150px; top: 0; height: 58px; display: flex; align-items: center; justify-content: flex-end; font: 700 40px/1 var(--display); font-variant-numeric: tabular-nums; }
+  .row.ph .tot { color: rgba(30,27,46,.25); }
+  .cells { position: absolute; left: 300px; top: 0; height: 58px; width: 1380px; }
+  .cell { position: absolute; top: 0; height: 58px; border-radius: 8px; border: 2px solid rgba(30,27,46,.14); background: #fff; display: flex; align-items: center; justify-content: center; font: 700 28px/1 var(--display); transition: background-color 400ms, color 400ms; overflow: hidden; }
+  .cell.future { background-color: rgba(255,255,255,.35); background-image: repeating-linear-gradient(135deg, rgba(30,27,46,.16) 0 3px, transparent 3px 11px); border-style: dashed; border-color: rgba(30,27,46,.28); }
+  #nowcol { position: absolute; top: 208px; height: 632px; border: 5px solid var(--ink); border-radius: 12px; pointer-events: none; transition: left 500ms cubic-bezier(.2,.8,.2,1); box-shadow: var(--hard-4); }
+  #nowtag { position: absolute; top: -46px; left: 50%; transform: translateX(-50%); background: var(--coral); border: 3px solid var(--ink); border-radius: 999px; padding: 2px 14px; font: 700 28px/1.2 var(--display); white-space: nowrap; box-shadow: 3px 3px 0 var(--ink); }
+  #nowline { position: absolute; top: 0; bottom: 0; width: 5px; margin-left: -2px; background: var(--coral); border-left: 1px solid var(--ink); border-right: 1px solid var(--ink); }
+  #empty { position: absolute; left: 520px; top: 400px; width: 1000px; padding: 26px 36px; text-align: center; z-index: 5; background: #fff; }
+  #empty h2 { margin: 0 0 8px; font: 700 52px/1.1 var(--display); }
+  #empty p { margin: 0; font-size: 32px; line-height: 1.25; color: var(--muted); }
+  #bottom { position: absolute; left: 40px; top: 856px; width: 1590px; height: 190px; }
+  #legend { display: flex; align-items: center; gap: 24px; font-size: 28px; }
+  #ramp { width: 420px; height: 36px; border: 3px solid var(--ink); border-radius: 10px; }
+  .sw { display: inline-block; width: 44px; height: 36px; border-radius: 8px; border: 2px solid rgba(30,27,46,.3); vertical-align: middle; margin-right: 10px; }
+  .sw.fut { border-style: dashed; background-color: rgba(255,255,255,.35); background-image: repeating-linear-gradient(135deg, rgba(30,27,46,.16) 0 3px, transparent 3px 11px); }
+  .sw.quiet { background: #fff; border-color: rgba(30,27,46,.14); }
+  #cap { margin-top: 16px; font: 700 34px/1.25 var(--display); max-width: 1500px; }
+  #cap small { display: block; font: 800 28px/1.3 var(--body); color: var(--muted); margin-top: 6px; }
+  #qr { position: absolute; left: 1664px; top: 840px; width: 216px; height: 216px; padding: 6px; background: #fff; border-radius: 18px; }
+  #qr svg { display: block; border-radius: 10px; }
+  #qrlab { position: absolute; left: 1510px; top: 860px; width: 140px; text-align: right; font: 700 28px/1.15 var(--display); }
+  .final-note { color: var(--ink); }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="head-l"><h1 id="title"></h1><p id="sub"></p></div>
+  <div class="head-r">
+    <span class="pillrow" id="phase"></span>
+    <div class="kpi"><b id="kConn">0</b><span id="kConnL"></span></div>
+    <div class="kpi"><b id="kClock">0:00</b><span id="kClockL"></span></div>
+  </div>
+  <div id="axis"></div><div id="axisTot"></div>
+  <div id="grid"></div>
+  <div id="nowcol"><div id="nowtag"></div><div id="nowline"></div></div>
+  <div id="empty" class="card" hidden><h2 id="emptyH"></h2><p id="emptyP"></p></div>
+  <div id="bottom">
+    <div id="legend"></div>
+    <div id="cap"></div>
+  </div>
+  <div id="qrlab"></div>
+  <div id="qr" class="card"></div>
+</div>
+<script src="_shared.js"></script>
+<script>
+(function () {
+  const C = COMPA;
+  if (C.opts.reduced) document.body.classList.add("reduced");
+  const es = C.opts.locale === "es";
+  const L = es ? {
+    title: "Temas en el tiempo", sub: "De qué conectan, cada 5 min", live: "EN VIVO", final: "FINAL", pre: "PRONTO",
+    conns: "conexiones", left: "restante", starts: "empieza en", total: "duración", now: "AHORA",
+    emptyH: "La cuadrícula se llena sola", emptyP: "Cada conexión suma los intereses que dos personas comparten. Escanea el QR y saluda a alguien.",
+    cool: "pocas", hot: "muchas", fut: "por venir", quiet: "sin actividad", scan: "Escanea para entrar",
+    capLive: (t, n) => `${t} lidera con ${n}. Cuenta por conexión y nota, cada 5 min.`, capFinal: (t, n) => `Final: ${t} fue el tema del evento (${n}).`,
+    capNone: "Aún no hay temas. Aparecen cuando alguien conecta.",
+  } : {
+    title: "Topics through time", sub: "What people connect over, every 5 min", live: "LIVE", final: "FINAL", pre: "SOON",
+    conns: "connections", left: "left", starts: "starts in", total: "total", now: "NOW",
+    emptyH: "The grid fills itself", emptyP: "Every connection adds the interests two people share. Scan the QR and say hi to someone.",
+    cool: "few", hot: "many", fut: "upcoming", quiet: "quiet", scan: "Scan to join",
+    capLive: (t, n) => `${t} leads with ${n}. Counts each connection and note, per 5 min.`, capFinal: (t, n) => `Final: ${t} was the topic of the night (${n}).`,
+    capNone: "No topics yet. They show up as soon as someone connects.",
+  };
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const BUCKET = 300, ROWS = 10, GRID_W = 1380, ROW_H = 62;
+
+  // Single-hue (blue) ramp, monotonic in lightness: safe for color-vision deficiency.
+  const STOPS = [[0, [221, 241, 255]], [0.35, [108, 196, 255]], [0.7, [47, 111, 181]], [1, [30, 27, 46]]];
+  function ramp(t) {
+    for (let i = 1; i < STOPS.length; i++) {
+      if (t > STOPS[i][0]) continue;
+      const [t0, c0] = STOPS[i - 1], [t1, c1] = STOPS[i], k = (t - t0) / (t1 - t0);
+      return `rgb(${c0.map((v, j) => Math.round(v + (c1[j] - v) * k)).join(",")})`;
+    }
+    return "rgb(30,27,46)";
+  }
+  const lbl = (m) => (m === 0 ? "0" : m < 60 ? m + "m" : Math.floor(m / 60) + "h" + (m % 60 ? String(m % 60).padStart(2, "0") : ""));
+
+  $("title").textContent = L.title; $("sub").textContent = L.sub;
+  $("kConnL").textContent = L.conns;
+  $("qr").innerHTML = C.fakeQr(200, "heatmap"); $("qrlab").textContent = L.scan;
+  $("legend").innerHTML = `<span>0</span><div id="ramp" style="background:linear-gradient(90deg,${[0, .2, .4, .6, .8, 1].map(ramp).join(",")})"></div><span id="rmax">max</span><span style="margin-left:30px"><i class="sw fut"></i>${L.fut}</span><span><i class="sw quiet"></i>${L.quiet}</span>`;
+
+  const rows = new Map(); // key -> element
+  let built = null, sig = "";
+
+  function buildAxis(ncols, colW) {
+    const step = Math.max(1, Math.ceil(150 / colW));
+    let html = "";
+    for (let c = 0; c < ncols; c += step) html += `<span class="tick" style="left:${c * colW}px">${lbl(c * BUCKET / 60)}</span>`;
+    $("axis").innerHTML = html;
+  }
+
+  function makeRow(key, ncols, colW) {
+    const el = document.createElement("div");
+    el.className = "row"; el.dataset.key = key;
+    let cells = "";
+    for (let c = 0; c < ncols; c++) cells += `<div class="cell" style="left:${c * colW}px;width:${colW - 4}px"></div>`;
+    el.innerHTML = `<div class="lab"><span class="rk"></span><span class="nm"></span></div><div class="cells">${cells}</div><div class="tot"></div>`;
+    el.style.opacity = "0";
+    $("grid").appendChild(el);
+    requestAnimationFrame(() => (el.style.opacity = "1"));
+    return el;
+  }
+
+  function render(state, scn) {
+    const ncols = Math.max(1, Math.ceil(state.eventLength / BUCKET));
+    const colW = GRID_W / ncols;
+    if (!built) { built = ncols; buildAxis(ncols, colW); }
+    const pre = state.phase === "pre", ended = state.phase === "ended";
+    const cur = pre ? -1 : ended ? ncols : Math.min(ncols - 1, Math.floor(state.elapsed / BUCKET));
+
+    // header
+    $("phase").innerHTML = `<span class="pill ${ended ? "final" : pre ? "pre" : "live"}">${ended ? "" : pre ? "" : '<i class="live-dot"></i>'}${ended ? L.final : pre ? L.pre : L.live}</span>`;
+    $("kConn").textContent = C.fmt(state.counters.connections);
+    $("kClock").textContent = C.clock(ended ? state.eventLength : pre ? scn.eventStartsAtSec - state.now : state.remaining);
+    $("kClockL").textContent = ended ? L.total : pre ? L.starts : L.left;
+
+    // now marker
+    const showNow = !pre && !ended;
+    $("nowcol").style.display = showNow ? "" : "none";
+    if (!showNow) document.querySelectorAll("#axis .tick").forEach((t) => (t.style.visibility = ""));
+    if (showNow) {
+      $("nowcol").style.left = 340 + cur * colW - 3 + "px"; $("nowcol").style.width = colW + 2 + "px";
+      $("nowline").style.left = Math.min(colW, Math.max(0, ((state.elapsed % BUCKET) / BUCKET) * colW)) + "px";
+      $("nowtag").textContent = L.now;
+      const cx = colW * cur + colW / 2; // hide axis ticks the NOW tag would cover
+      document.querySelectorAll("#axis .tick").forEach((t) => { t.style.visibility = Math.abs(parseFloat(t.style.left) - cx) < 90 ? "hidden" : ""; });
+    }
+
+    const key = [state.counters.connections, state.summaries.length, cur, state.phase, ncols].join("|");
+    if (key === sig) return;
+    sig = key;
+
+    // bucket weights per topic: +1 per shared topic per connection, +3 per approved summary topic (same as the score)
+    const grid = new Map();
+    const add = (name, t, w) => {
+      const col = Math.min(ncols - 1, Math.max(0, Math.floor((t - scn.eventStartsAtSec) / BUCKET)));
+      if (!grid.has(name)) grid.set(name, new Array(ncols).fill(0));
+      grid.get(name)[col] += w;
+    };
+    state.connections.forEach((c) => (c.topics || []).forEach((x) => add(x, c.t, 1)));
+    state.summaries.forEach((s) => (s.topics || []).forEach((x) => add(x, s.t, 3)));
+
+    const top = state.topics.slice(0, ROWS);
+    let max = 3;
+    top.forEach((t) => (grid.get(t.name) || []).forEach((v) => (max = Math.max(max, v))));
+    $("rmax").textContent = String(max);
+
+    const order = top.map((t) => t.name);
+    for (let i = top.length; i < ROWS; i++) order.push("\u0000ph" + i);
+    const keep = new Set(order);
+    rows.forEach((el, k) => { if (!keep.has(k)) { el.remove(); rows.delete(k); } });
+    let rank = 0;
+    order.forEach((name, i) => {
+      const ph = name.startsWith("\u0000ph");
+      let el = rows.get(name);
+      if (!el) { el = makeRow(name, ncols, colW); rows.set(name, el); }
+      el.classList.toggle("ph", ph);
+      el.style.top = i * ROW_H + "px";
+      const t = ph ? null : top[i];
+      if (t) rank = i > 0 && top[i - 1].score === t.score ? rank : i + 1;
+      el.querySelector(".rk").textContent = t ? rank : "";
+      el.querySelector(".nm").textContent = t ? t.name : "-";
+      el.querySelector(".tot").textContent = t ? C.fmt(t.score) : "";
+      const vals = grid.get(name) || [];
+      el.querySelectorAll(".cell").forEach((cell, c) => {
+        const v = vals[c] || 0, future = c > cur;
+        cell.classList.toggle("future", future);
+        const hot = !future && v > 0 && v / max >= 0.45 && v >= 2;
+        const tt = Math.sqrt(v / max);
+        cell.style.backgroundColor = !future && v > 0 ? ramp(tt) : "";
+        cell.style.color = tt > 0.62 ? "#fff" : "var(--ink)";
+        cell.textContent = hot ? v : "";
+      });
+    });
+
+    // empty state and caption
+    const none = top.length === 0;
+    $("empty").hidden = !none || ended;
+    $("emptyH").textContent = L.emptyH; $("emptyP").textContent = L.emptyP;
+    $("axisTot").textContent = es ? "total" : "total";
+    const lead = top[0];
+    $("cap").innerHTML = none ? `${L.capNone}` : ended ? `<span class="final-note">${esc(L.capFinal(lead.name, lead.score))}</span>` : esc(L.capLive(lead.name, lead.score));
+  }
+  C.run(render);
+})();
+</script>
+</body>
+</html>

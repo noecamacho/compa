@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Night timeline</title>
+<link rel="stylesheet" href="common.css">
+<style>
+  svg.chart { width: 100%; height: auto; display: block; overflow: visible; }
+  svg text { font-family: var(--body); font-weight: 800; font-size: 10px; fill: var(--muted); }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; align-items: center; }
+  .legend i { display: inline-block; width: 14px; height: 8px; border-radius: 3px; border: 2px solid var(--ink); vertical-align: middle; margin-right: 4px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat { background: #fff; border: 2px solid var(--ink); border-radius: 14px; padding: 8px 4px; text-align: center; min-width: 0; }
+  .stat .num { font-size: 22px; display: block; } .stat .caps { font-size: 10px; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<nav class="dock" aria-label="Dock"><span>Inicio</span><span>Conectar</span><span>Conexiones</span><span class="on">Ranking</span></nav>
+<script src="engine.js"></script>
+<script>
+const { run, stateAt, avatar, label, esc, fmt, clock, tr } = COMPA;
+const W = 340, H = 190, L = 30, R = 8, T = 10, B = 24, SAMPLES = 16;
+
+const median = (xs, q) => { if (!xs.length) return 0; const s = xs.slice().sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.floor(q * (s.length - 1)))]; };
+
+function chart(st, me) {
+  const { s } = st, t0 = s.eventStartsAtSec, t1 = s.eventEndsAtSec, now = Math.min(st.t, t1);
+  // Peer band: p25 / median / p75 of checked-in attendees at evenly spaced instants up to now.
+  const band = [];
+  for (let i = 0; i <= SAMPLES; i++) {
+    const at = t0 + ((now - t0) * i) / SAMPLES;
+    const x = at === st.t ? st : stateAt(s, at);
+    const pts = x.board.map((p) => p.points);
+    band.push([at, median(pts, 0.25), median(pts, 0.5), median(pts, 0.75)]);
+  }
+  const ymax = Math.max(50, me.points, ...band.map((b) => b[3])) * 1.08;
+  const X = (at) => L + ((at - t0) / (t1 - t0)) * (W - L - R), Y = (v) => T + (1 - v / ymax) * (H - T - B);
+  // Step path: hold the value until the next change, then jump.
+  let d = `M${X(t0)},${Y(0)}`, prev = 0;
+  for (const [at, v] of me.series.slice(1)) { if (at > now) break; d += `H${X(at).toFixed(1)}V${Y(v).toFixed(1)}`; prev = v; }
+  d += `H${X(now).toFixed(1)}`;
+  const upper = band.map((b) => `${X(b[0]).toFixed(1)},${Y(b[3]).toFixed(1)}`), lower = band.slice().reverse().map((b) => `${X(b[0]).toFixed(1)},${Y(b[1]).toFixed(1)}`);
+  const med = band.map((b) => `${X(b[0]).toFixed(1)},${Y(b[2]).toFixed(1)}`).join(" ");
+  const valAt = (at) => { let v = 0; for (const [a, p] of me.series) if (a <= at) v = p; return v; };
+  const conns = st.connections.filter((c) => (c.a === me.id || c.b === me.id) && c.t <= now);
+  const dots = conns.map((c) => `<circle cx="${X(c.t).toFixed(1)}" cy="${Y(valAt(c.t)).toFixed(1)}" r="4" fill="${c.kind === "reconnection" ? "#fff" : "#6BE4A3"}" stroke="#1E1B2E" stroke-width="2"/>`).join("");
+  const stars = me.badges.filter((b) => b.t <= now).map((b) => `<path transform="translate(${X(b.t).toFixed(1)},${(Y(valAt(b.t)) - 12).toFixed(1)})" d="M0-6L1.8-1.8 6-1.5 2.8 1.4 3.7 5.6 0 3.4-3.7 5.6-2.8 1.4-6-1.5-1.8-1.8Z" fill="#FFD93D" stroke="#1E1B2E" stroke-width="1.5"/>`).join("");
+  const ticks = [0, 0.5, 1].map((f) => `<line x1="${L}" x2="${W - R}" y1="${Y(ymax * f / 1.08).toFixed(1)}" y2="${Y(ymax * f / 1.08).toFixed(1)}" stroke="rgba(30,27,46,.12)"/><text x="${L - 4}" y="${(Y(ymax * f / 1.08) + 3).toFixed(1)}" text-anchor="end">${fmt(Math.round(ymax * f / 1.08))}</text>`).join("");
+  const xt = [0, 0.5, 1].map((f) => `<text x="${X(t0 + (t1 - t0) * f).toFixed(1)}" y="${H - 6}" text-anchor="${f === 0 ? "start" : f === 1 ? "end" : "middle"}">${clock(st, t0 + (t1 - t0) * f)}</text>`).join("");
+  const nowLine = st.phase === "running" ? `<line x1="${X(now)}" x2="${X(now)}" y1="${T}" y2="${H - B}" stroke="#FF6B4A" stroke-width="2" stroke-dasharray="3 3"/>` : "";
+  const hatch = now < t1 ? `<rect x="${X(now)}" y="${T}" width="${W - R - X(now)}" height="${H - T - B}" fill="rgba(30,27,46,.04)"/>` : "";
+  const alt = tr(`Tus puntos durante la noche: ${me.points} al final, ${conns.length} conexiones`, `Your points over the night: ${me.points} at the end, ${conns.length} connections`);
+  return { conns, svg: `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(alt)}">${hatch}${ticks}
+    <polygon points="${upper.concat(lower).join(" ")}" fill="#6CC4FF" opacity=".28"/><polyline points="${med}" fill="none" stroke="#6CC4FF" stroke-width="2" stroke-dasharray="4 3"/>
+    <line x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}" stroke="#1E1B2E" stroke-width="2.5"/>${nowLine}
+    <path d="${d}" fill="none" stroke="#1E1B2E" stroke-width="3.5" stroke-linejoin="round"/>${dots}${stars}${xt}</svg>`, medNow: band[band.length - 1][2] };
+}
+
+run((st, me, v) => {
+  const head = `<div class="row" style="justify-content:space-between"><h1>${tr("Tu noche", "Your night")}</h1><span class="pill ${st.phase === "ended" ? "ink" : "coral"}">${st.phase === "ended" ? tr("Final", "Final") : `<span class="live-dot"></span>${tr("En vivo", "Live")}`}</span></div>`;
+  if (!me || me.checkinT === null || st.phase === "upcoming") return head + `<div class="empty"><h2 style="color:var(--ink)">${st.phase === "upcoming" ? tr("Tu noche empieza pronto", "Your night starts soon") : tr("Haz check-in para empezar tu línea", "Check in to start your line")}</h2><p style="margin-top:6px">${tr("Aquí verás tus puntos crecer durante el evento.", "You'll watch your points grow here during the event.")}</p></div>`;
+  const c = chart(st, me);
+  const noPts = me.points === 0;
+  return head + `<section class="card" style="display:flex;flex-direction:column;gap:10px">
+    <div class="row">${avatar(me, 36)}<span class="grow ellipsis">${esc(label(me))}</span><span class="num" style="font-size:26px">${fmt(me.points)}<small style="font-size:12px"> pts</small></span></div>
+    ${c.svg}
+    <div class="legend"><span><i style="background:#1E1B2E"></i>${tr("Tú", "You")}</span><span><i style="background:#6CC4FF;opacity:.6"></i>${tr("Asistentes típicos (mediana y rango medio)", "Typical attendee (median, middle half)")}</span><span><i style="background:#6BE4A3;border-radius:50%;width:10px;height:10px"></i>${tr("conexión", "connection")}</span><span><i style="background:#fff;border-radius:50%;width:10px;height:10px"></i>${tr("reconexión", "reconnection")}</span></div>
+    ${noPts ? `<p class="muted" style="font-size:14px">${tr("Tu línea despega con tu primera conexión.", "Your line takes off with your first connection.")}</p>` : ""}</section>
+    <div class="stats"><div class="stat"><span class="num">${fmt(c.conns.length)}</span><span class="caps">${tr("conexiones", "connections")}</span></div>
+      <div class="stat"><span class="num">${fmt(me.badges.length)}</span><span class="caps">${tr("insignias", "badges")}</span></div>
+      <div class="stat"><span class="num">${me.points >= c.medNow ? "+" : "−"}${fmt(Math.abs(me.points - c.medNow))}</span><span class="caps">${tr("vs mediana", "vs median")}</span></div></div>
+    ${st.phase === "ended" ? `<a class="btn sun" href="recap-card.html${location.search}">${tr("Ver mi resumen", "See my recap")}</a>` : `<a class="btn" href="#">${tr("Conectar ahora", "Connect now")}</a>`}`;
+});
+</script>
+</body>
+</html>
