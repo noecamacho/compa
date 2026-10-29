@@ -3,13 +3,12 @@ import { Suspense } from "react";
 import { ConnectTabs } from "@/components/connect/ConnectTabs";
 import { Me } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
-
-const siteUrl = () => (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+import { requestOrigin } from "@/lib/server/site";
 
 // 04 Conectar. The QR encodes the personal link /u/<handle> so the native camera also works (ADR-004).
 export default async function ConnectPage() {
   const me = await apiGet("/api/me", Me);
-  const qrSvg = await QRCode.toString(`${siteUrl()}/u/${me.handle}`, {
+  const qrSvg = await QRCode.toString(`${await requestOrigin()}/u/${me.handle}`, {
     type: "svg",
     margin: 0,
     errorCorrectionLevel: "M",
