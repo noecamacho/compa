@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { bonusPoints, invites, users, type EventRow, type InviteRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
@@ -72,7 +72,7 @@ export async function awardInvite(invitee: UserRow, event: EventRow, connectionI
   const [marked] = await db
     .update(invites)
     .set({ firstConnectionAt: new Date() })
-    .where(eq(invites.id, invite.id))
+    .where(and(eq(invites.id, invite.id), isNull(invites.firstConnectionAt)))
     .returning({ inviterId: invites.inviterId });
   if (!marked) return;
   await db

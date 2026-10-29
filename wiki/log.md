@@ -159,3 +159,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | What does the home notification bell show?
 
 - F-49/T-080 now has a notification list for pending requests, accepted requests, connected invitees and earned badges. The bell polls the unseen count, opening `/notifications` marks displayed items seen, and declines stay hidden (`docs/flows/catalog.md` F-49; `docs/flows/backlog.md` T-080).
+
+## [2026-10-29] query | What is needed to send attendee email sign-in links?
+
+- Hosted Supabase projects need custom SMTP or a Send Email hook to send magic links to arbitrary attendee addresses; its built-in email service only sends to team members and is limited to two emails per hour ([Supabase SMTP guide](https://supabase.com/docs/guides/auth/auth-smtp)). The README and API quickstart now state this deployment requirement.

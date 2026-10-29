@@ -99,8 +99,8 @@
     "/auth/callback": {
       "get": {
         "operationId": "authCallback",
-        "summary": "Finish LinkedIn sign-in",
-        "description": "Exchanges the code for a session, creates the user (unique handle) or syncs name and photo unless edited (M14), then redirects to `next` or `/me`. Failure redirects to `/?error=linkedin`.",
+        "summary": "Finish sign-in",
+        "description": "Exchanges the code for a session, creates the user (unique handle) or syncs name and photo unless edited (M14), then redirects to `next` or `/me`. Failure redirects to `/?error=signin`.",
         "tags": [
           "auth"
         ],
@@ -145,7 +145,7 @@
         ],
         "responses": {
           "302": {
-            "description": "Redirect to `next`, `/me`, or `/?error=linkedin`.",
+            "description": "Redirect to `next`, `/me`, or `/?error=signin`.",
             "headers": {
               "Location": {
                 "required": true,

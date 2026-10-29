@@ -4,7 +4,7 @@ Networking companion for conferences: fill in a profile once, connect by scannin
 
 ## What is built here
 
-This repository contains the Next.js app scaffold, PostgreSQL schema and migration, and API handlers for profiles, events, connections, the live dashboard, transcription and AI summaries. The home page links to the API reference at `/api/docs`; attendee-facing product screens are not implemented yet.
+This repository contains a working Next.js app for conference attendees: an event door and live dashboard, LinkedIn and email sign-in, consented check-in, profile and monito onboarding, QR and @tag connections, incoming requests, conversation summaries, invites, badges, rankings and sign-out. It also includes the PostgreSQL schema and migrations, server-side API handlers, and the API reference at `/api/docs`.
 
 ## Run locally
 
@@ -20,6 +20,8 @@ bun run dev
 ```
 
 Open `http://localhost:3000` for the app or `http://localhost:3000/api/docs` for the API reference. See [docs/api-quickstart.md](docs/api-quickstart.md) for mock requests and real backend configuration.
+
+For hosted Supabase projects, configure a custom SMTP server or a Send Email hook before enabling email sign-in for attendees. Supabase's built-in email service is limited to team addresses and two messages per hour; see the [Supabase SMTP setup guide](https://supabase.com/docs/guides/auth/auth-smtp).
 
 - Start with [AGENTS.md](AGENTS.md), the single instruction file for agents and contributors.
 - Knowledge lives in the wiki: [wiki/index.md](wiki/index.md).
