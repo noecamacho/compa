@@ -59,7 +59,7 @@ function PageSizes({ current, sizes, hrefFor, label }: { current: number; sizes:
     <span className="hidden items-center gap-2 text-[13px] font-extrabold text-muted md:flex">
       {label}
       {sizes.map((size) => (
-        <Link key={size} href={hrefFor(size)} aria-current={size === current ? "true" : undefined} className={`inline-flex h-9 min-w-9 items-center justify-center rounded-[9px] px-2 tabular-nums ${size === current ? "bg-ink text-paper" : "text-ink hover:bg-sun-soft"}`}>
+        <Link key={size} href={hrefFor(size)} aria-current={size === current ? "true" : undefined} className={`inline-flex h-11 min-w-11 items-center lg:h-9 lg:min-w-9 justify-center rounded-[9px] px-2 tabular-nums ${size === current ? "bg-ink text-paper" : "text-ink hover:bg-sun-soft"}`}>
           {size}
         </Link>
       ))}

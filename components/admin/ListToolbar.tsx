@@ -28,12 +28,12 @@ const hiddenEntries = (params: UrlParams, owned: string[]) =>
 // list wrapper keeps a DataTable header under it).
 export function ListToolbar({ action, params, owned = [], searchLabel, placeholder, submitLabel, chips, selects, result }: Props) {
   return (
-    <div className="z-20 -mx-4 bg-paper/95 px-4 py-3 md:sticky md:top-0 md:-mx-6 md:border-b-[1.5px] md:border-ink/15 md:px-6 xl:-mx-8 xl:px-8 2xl:-mx-12 2xl:px-12">
+    <div className="z-20 -mx-4 bg-paper px-4 py-3 md:sticky md:top-0 md:-mx-6 md:border-b-[1.5px] md:border-ink/15 md:px-6 xl:-mx-8 xl:px-8 2xl:-mx-12 2xl:px-12">
       <form method="get" action={action} role="search" className="flex flex-col gap-3 md:grid md:grid-cols-[minmax(0,1fr)_auto] md:items-center xl:flex xl:flex-row">
         {hiddenEntries(params, owned).map(([key, value]) => (
           <input key={key} type="hidden" name={key} value={value} />
         ))}
-        <div className="relative min-w-0 xl:w-[420px] xl:shrink-0">
+        <div className="relative min-w-0 xl:w-[300px] xl:shrink-0">
           <label htmlFor="list-q" className="sr-only">
             {searchLabel}
           </label>

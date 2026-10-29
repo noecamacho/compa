@@ -18,7 +18,7 @@ export type KpiTile = {
 
 type Props = { label: string; locale: Locale; tiles: KpiTile[] };
 
-const TILE = "box-border flex min-h-[72px] min-w-0 flex-col justify-between gap-1 rounded-[18px] bg-white px-3 py-2 border-ink shadow-hard-3 min-[390px]:px-4 min-[390px]:py-3";
+const TILE = "box-border flex min-h-[72px] min-w-0 flex-col justify-start gap-1 rounded-[18px] bg-white px-3 py-2 border-ink shadow-hard-3 min-[390px]:px-4 min-[390px]:py-3";
 
 // Overview numbers above a list: 2×2 on a phone, 4 in a row from md, 6 at 2xl. Data comes in already fetched.
 export function KpiStrip({ label, locale, tiles }: Props) {

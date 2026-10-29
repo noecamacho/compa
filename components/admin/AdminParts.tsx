@@ -9,7 +9,8 @@ export type SortDir = "asc" | "desc";
 
 export type Column = {
   key: string;
-  label: string;
+  // Usually text; a node for a header control (the select-page checkbox).
+  label: ReactNode;
   // Makes the header a sort link (spec §5.1).
   sortKey?: string;
   // Responsive visibility, for example "hidden lg:table-cell"; give the matching Cell the same class.
@@ -52,7 +53,7 @@ function HeaderCell({ column, sort }: { column: Column; sort?: TableSort }) {
     <th
       scope="col"
       aria-sort={ariaSort}
-      className={`label-caps sticky top-[var(--admin-sticky-top,0px)] z-[1] h-12 bg-paper px-4 py-1 whitespace-nowrap ${ALIGN[column.align ?? "left"]} ${column.className ?? ""}`}
+      className={`sticky top-[var(--admin-sticky-top,0px)] z-[15] h-12 bg-paper px-3 py-1 text-[12px] font-extrabold whitespace-nowrap text-muted ${ALIGN[column.align ?? "left"]} ${column.className ?? ""}`}
       style={{ boxShadow: "inset 0 -2.5px 0 var(--color-ink)" }}
     >
       {column.sortKey && sort ? <SortLink column={column} sortKey={column.sortKey} sort={sort} active={active} /> : column.label}
@@ -72,12 +73,18 @@ function SortLink({ column, sortKey, sort, active }: { column: Column; sortKey: 
   );
 }
 
-export const Row = ({ children }: { children: ReactNode }) => <tr className="relative align-middle transition-colors hover:bg-sun-soft [&:not(:first-child)>td]:dashed-ink">{children}</tr>;
+// A row with a checked checkbox (bulk selection) stays highlighted.
+export const Row = ({ children }: { children: ReactNode }) => (
+  <tr className="relative align-middle transition-colors hover:bg-sun-soft has-[input:checked]:bg-sun-soft [&:not(:first-child)>td]:dashed-ink">{children}</tr>
+);
 
-export const Cell = ({ children, className }: { children: ReactNode; className?: string }) => <td className={`px-4 py-3 text-[14px] font-bold ${className ?? ""}`}>{children}</td>;
+export const Cell = ({ children, className }: { children: ReactNode; className?: string }) => <td className={`px-3 py-3 text-[14px] font-bold ${className ?? ""}`}>{children}</td>;
 
 // Phone list: one card per row, hidden from 768 px up where the table takes over.
-export const CardList = ({ children }: { children: ReactNode }) => <ul className="m-0 flex list-none flex-col gap-3 p-0 md:hidden">{children}</ul>;
+// `className` adds layout, for example "sm:grid sm:grid-cols-2" for two columns on a landscape phone.
+export const CardList = ({ children, className }: { children: ReactNode; className?: string }) => (
+  <ul className={`m-0 flex list-none flex-col gap-3 p-0 md:hidden ${className ?? ""}`}>{children}</ul>
+);
 
 type EmptyProps = { title: string; body?: string; action?: ReactNode };
 
