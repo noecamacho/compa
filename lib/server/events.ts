@@ -81,6 +81,7 @@ export async function getEvent({ params }: InputOf<typeof R.getEvent>): ResultOf
     name: event.name,
     startsAt: event.startsAt.toISOString(),
     endsAt: event.endsAt.toISOString(),
+    timezone: event.timezone,
     isRunning: isRunning(event, now),
     phase: phaseOf(event, now),
     counters: await doorCounters(event),

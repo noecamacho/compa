@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { LiveBoard } from "@/components/live/LiveBoard";
-import { joinUrl } from "@/lib/access-code";
+import { codeFromSegment, joinUrl } from "@/lib/access-code";
 import { LiveSnapshot } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
 import { requestLocale } from "@/lib/server/locale";
@@ -15,7 +15,7 @@ export const metadata: Metadata = { title: "compa · live", robots: { index: fal
 // /e/<code>/live: the projected dashboard. The QR on screen is the event's own door, so people can join from their seat.
 export default async function LivePage({ params }: Props) {
   const { code } = await params;
-  const [snapshot, locale, origin] = await Promise.all([apiGetOrNull(`/api/e/${encodeURIComponent(code)}/live`, LiveSnapshot), requestLocale(), requestOrigin()]);
+  const [snapshot, locale, origin] = await Promise.all([apiGetOrNull(`/api/e/${encodeURIComponent(codeFromSegment(code))}/live`, LiveSnapshot), requestLocale(), requestOrigin()]);
   if (!snapshot) notFound();
   const url = joinUrl(origin, snapshot.event.code);
   const qrSvg = await QRCode.toString(url, { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#1E1B2E", light: "#FFFFFF" } });

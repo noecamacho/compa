@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ACCESS_CODE_ALPHABET, ACCESS_CODE_LENGTH, generateAccessCode, joinUrl, parseAccessCode } from "./access-code";
+import { ACCESS_CODE_ALPHABET, ACCESS_CODE_LENGTH, codeFromSegment, generateAccessCode, joinUrl, parseAccessCode } from "./access-code";
 
 describe("generateAccessCode", () => {
   test("is 10 URL-safe characters from the unambiguous alphabet", () => {
@@ -46,4 +46,15 @@ describe("parseAccessCode", () => {
 
 test("joinUrl builds the event QR link without a double slash", () => {
   expect(joinUrl("https://compa.lol/", "k7m2p9xq4t")).toBe("https://compa.lol/e/k7m2p9xq4t");
+});
+
+describe("codeFromSegment", () => {
+  test("decodes a percent-encoded route segment once", () => {
+    expect(codeFromSegment("%20k7m2p9xq4t%20")).toBe(" k7m2p9xq4t ");
+    expect(parseAccessCode(codeFromSegment("%20K7M2P9XQ4T"))).toBe("k7m2p9xq4t");
+  });
+
+  test("keeps a malformed escape as is", () => {
+    expect(codeFromSegment("%E0%A4%A")).toBe("%E0%A4%A");
+  });
 });
