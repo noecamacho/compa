@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { TOPICS } from "../topics";
 
-const SUMMARY_DESCRIPTION = "2-4 sentences, in Spanish, third person: what the two attendees talked about";
-const TITLE_DESCRIPTION = "One line, in Spanish, at most 100 characters: the gist of the conversation";
-const PENDING_DESCRIPTION = "One concrete follow-up the author committed to, in Spanish, or null when there is none";
+const SUMMARY_DESCRIPTION =
+  "2-4 sentences, in the same language as the note, third person: what the two attendees talked about";
+const TITLE_DESCRIPTION = "One line, in the same language as the note, at most 100 characters: the gist of the conversation";
+const PENDING_DESCRIPTION = "One concrete follow-up the author committed to, in the same language as the note, or null when there is none";
 const SUBSTANTIVE_DESCRIPTION = "false if the text does not describe a real conversation";
 
 export const SummaryOutput = z.object({

@@ -5,7 +5,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 ## Start here
 
 - [overview](overview.md) — what COMPA is, the pitch, the 2-tap design rule and the build goal.
-- [open-questions](open-questions.md) — 27 contradictions, gaps and ambiguities; resolved items are marked with their decision.
+- [open-questions](open-questions.md) — 42 contradictions, gaps and ambiguities; resolved items are marked with their decision.
 - [glossary](glossary.md) — English terms with the original Spanish source terms.
 
 ## Sources
@@ -53,7 +53,8 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 
 - [AGENTS.md](../AGENTS.md) — the single instruction file for every agent and contributor.
 - [ARCHITECTURE.md](../ARCHITECTURE.md) — system overview and ADR-style decisions derived from the plan.
-- [DESIGN.md](../DESIGN.md) — product and UX design intent derived from the plan.
+- [DESIGN.md](../DESIGN.md) — product and UX design from the V2 handoff: principles, 16 screens with routes, tokens, components, internationalization, states, pending screens, `/live`, decided vs open.
+- [docs/backend-gap-analysis.md](../docs/backend-gap-analysis.md) — V2 vs specs vs code: 35 use cases checked end to end (Ready, Partial, Mock-only, Missing, Conflict), 15 conflicts, edge cases, post-freeze P0/P1/P2 backlog, i18n status.
 - [CHANGELOG.md](../CHANGELOG.md) — Keep a Changelog history.
 - [docs/engineering-standards.md](../docs/engineering-standards.md) — SOLID, KISS, DRY, no nesting, clean code.
 - [docs/git-workflow.md](../docs/git-workflow.md) — commits, branches, versioning, hooks.

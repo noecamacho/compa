@@ -6,13 +6,15 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Accept Chrome and Android voice notes: MediaRecorder webm files carry no duration, so the server now rejects only audio whose known length exceeds two minutes or that contains no audio track.
 - Require explicit screen consent before writing an event check-in; accept multipart transcription uploads with server-side size and two-minute duration limits.
 
 ### Changed
 
+- Vercel deploys are production-only and keep exactly one deployment: the workflow no longer deploys PR previews and deletes older deployments after each successful production deploy (captain decision).
 - Package manager and runtime is Bun instead of pnpm (team decision); Next.js, TypeScript, Supabase and Vercel unchanged. Commands are `bun run dev|lint|typecheck|build|seed`.
 - TypeScript is 6.0 instead of 7.0: typescript-eslint and the Next.js build checker do not support the TS 7 API yet. The seed command is `bun run db:seed`.
-- Transcription and AI summaries are in Spanish (team decision); code and docs stay English.
+- Transcription and AI summaries follow the language the note was spoken or written in (captain decision, replaces Spanish-only); topics still come from the fixed vocabulary. Code and docs stay English.
 
 ### Added
 
