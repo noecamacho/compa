@@ -4,6 +4,10 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Fixed
+
+- Badges: `GET /api/badges` no longer fails for signed-in users (a raw date in the sign-up count broke the query), so the badge screen and awarding work again; badges still to earn show their own art, faded with a lock, and only secret ones stay grey.
+
 ### Added
 
 - Monito builder: a "Soy" row with Hombre, Mujer and Otro (Mujer draws a skirt and suggests long hair), stored in the look; building a monito is now required before using the app, also when signing in with a LinkedIn photo.
