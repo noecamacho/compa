@@ -62,7 +62,10 @@ export const getMe = route({
     description: "The signed-in person.",
     schema: S.Me,
     example: X.me,
-    examples: { empty: { summary: "First night, no connections yet", value: X.meEmpty } },
+    examples: {
+      empty: { summary: "First night, no connections yet", value: X.meEmpty },
+      superAdmin: { summary: "A super admin: /admin opens (A11)", value: { ...X.me, isAdmin: true, role: "super_admin" } },
+    },
   },
   errors: WITH_USER,
 });

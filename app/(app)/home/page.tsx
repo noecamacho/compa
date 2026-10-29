@@ -13,6 +13,7 @@ import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type ConnectionLi
 import { apiGet, apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
 import { home, tour } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
+import { isSuperAdmin } from "@/lib/roles";
 import type { MonitoLook } from "@/lib/monito/look";
 
 type Props = { searchParams: Promise<{ demo?: string }> };
@@ -52,7 +53,7 @@ export default async function HomePage({ searchParams }: Props) {
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
   const incoming = empty ? [] : list.incoming;
   return (
-    <Screen dock>
+    <Screen dock admin={isSuperAdmin(me)}>
       <div className="flex h-[46px] items-center justify-between">
         <Link href="/me" className="flex items-center gap-3">
           <Avatar person={{ name: me.name, look: me.avatar }} size={46} shadow={3} />
