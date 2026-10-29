@@ -61,7 +61,7 @@ export function IncomingRequests({ initial }: { initial: Incoming }) {
   const incoming = useIncomingRequests(initial);
   if (incoming.length === 0) return null;
   return (
-    <div className="flex flex-col gap-[10px]">
+    <div className="flex flex-col gap-[10px] md:grid md:grid-cols-2">
       {incoming.map((request, index) => (
         <Card
           key={request.connectionId}

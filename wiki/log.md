@@ -155,3 +155,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Why did compa.lol go down?
 
 - PR #40 merged with a typecheck error (a teammate change made the monito body required). The Vercel build failed, and the keep-one-deployment cleanup still deleted the working deployment, so the site served 404 until the fix (PR #41) deployed. Now: PR checks gate merges, the deploy runs lint/typecheck/tests first, and cleanup only runs when the new deployment is READY.
+
+## [2026-10-29] query | How does the attendee app adapt to tablet and desktop?
+
+- `components/ui/Screen.tsx` has two widths (`wide` 390/834/1120, `focus` 390/640/680); from 834 dashboard screens switch to two columns, from 1024 the dock is a left rail (`DockRail`) and `--rail` offsets the content. 390 stays pixel-identical. Summary in `DESIGN.md` "Responsive breakpoints".

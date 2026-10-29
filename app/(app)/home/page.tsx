@@ -13,7 +13,6 @@ import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type ConnectionLi
 import { apiGet, apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
 import { home, tour } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
-import { isSuperAdmin } from "@/lib/roles";
 import type { MonitoLook } from "@/lib/monito/look";
 import { StickyBar } from "@/components/ui/StickyBar";
 
@@ -54,7 +53,7 @@ export default async function HomePage({ searchParams }: Props) {
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
   const incoming = empty ? [] : list.incoming;
   return (
-    <Screen dock admin={isSuperAdmin(me)}>
+    <Screen dock>
       <StickyBar className="flex items-center justify-between">
         <Link href="/me" className="flex items-center gap-3 tappable">
           <Avatar person={avatarOf(me)} size={46} shadow={3} />
@@ -65,33 +64,47 @@ export default async function HomePage({ searchParams }: Props) {
 
       <IncomingRequests initial={incoming} />
 
-      <div data-tour="live">
-        {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard />}
-      </div>
-
-      <div data-tour="connect">
-        <Card href="/connect" tone="mint" className="relative flex items-center gap-[14px] px-4 py-[14px]">
-          {empty && (
-            <Pill tone="sun" rotate={4} className="absolute top-[-14px] right-[14px]" aria-hidden="true">
-              {home.startHere}
-            </Pill>
-          )}
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-button bg-white border-ink shadow-hard-2" style={{ transform: "rotate(-5deg)" }}>
-            <Icon name="qr" size={30} />
-          </span>
-          <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-            <span className="font-display text-[24px] leading-[1.05] font-bold">{home.connect}</span>
-            <span className="text-[13px] font-extrabold">{empty ? home.connectHintEmpty : home.connectHint}</span>
-          </span>
-          <Icon name="chevronRight" size={20} strokeWidth={3} />
-        </Card>
-      </div>
-
-      {invites && (
-        <div data-tour="invite">
-          <InviteCard invites={empty ? { ...invites, invitees: [] } : invites} />
+      {/* Phone: one column. From 834: the live card on the left, Conectar (grown into a tall tile) and the invite on the right. */}
+      <div className="flex flex-col gap-[14px] md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-stretch lg:gap-5">
+        <div data-tour="live">
+          {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard />}
         </div>
-      )}
+
+        <div className="flex flex-col gap-[14px] lg:gap-5">
+          <div data-tour="connect" className="md:flex-1">
+            <Card
+              href="/connect"
+              tone="mint"
+              className="relative flex items-center gap-[14px] px-4 py-[14px] md:h-full md:min-h-[180px] md:flex-col md:items-start md:justify-end md:gap-3 md:p-5"
+            >
+              {empty && (
+                <Pill tone="sun" rotate={4} className="absolute top-[-14px] right-[14px]" aria-hidden="true">
+                  {home.startHere}
+                </Pill>
+              )}
+              <span
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-button bg-white border-ink shadow-hard-2 md:h-[72px] md:w-[72px]"
+                style={{ transform: "rotate(-5deg)" }}
+              >
+                <Icon name="qr" size={30} />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-[2px] md:flex-none">
+                <span className="font-display text-[24px] leading-[1.05] font-bold md:text-[30px]">{home.connect}</span>
+                <span className="text-[13px] font-extrabold md:text-[14px]">{empty ? home.connectHintEmpty : home.connectHint}</span>
+              </span>
+              <span className="flex md:absolute md:top-5 md:right-5">
+                <Icon name="chevronRight" size={20} strokeWidth={3} />
+              </span>
+            </Card>
+          </div>
+
+          {invites && (
+            <div data-tour="invite">
+              <InviteCard invites={empty ? { ...invites, invitees: [] } : invites} />
+            </div>
+          )}
+        </div>
+      </div>
 
       <Suspense>
         <Tour id="home" steps={tour.home} />

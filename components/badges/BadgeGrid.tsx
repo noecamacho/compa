@@ -23,24 +23,26 @@ const badgeState = (status: BadgeStatusT): BadgeState => {
 
 type Props = { badges: BadgeStatusT[] };
 
-// 10 Insignias: the 20 in a 3-column showcase; secret ones show no hint.
+// 10 Insignias: the 20 in a showcase of 3 columns (phone), 4 (tablet) or 5 (desktop); secret ones show no hint.
 export function BadgeGrid({ badges }: Props) {
   const [filter, setFilter] = useState<Filter>("all");
   const shown = badges.filter((status) => filter === "all" || (filter === "earned" ? Boolean(status.earnedAt) : !status.earnedAt));
   return (
     <>
-      <Segmented
-        label={copy.filterLabel}
-        value={filter}
-        onChange={setFilter}
-        options={[
-          { value: "all", label: copy.filters.all },
-          { value: "earned", label: copy.filters.earned },
-          { value: "pending", label: copy.filters.pending },
-        ]}
-      />
+      <div className="md:max-w-[480px]">
+        <Segmented
+          label={copy.filterLabel}
+          value={filter}
+          onChange={setFilter}
+          options={[
+            { value: "all", label: copy.filters.all },
+            { value: "earned", label: copy.filters.earned },
+            { value: "pending", label: copy.filters.pending },
+          ]}
+        />
+      </div>
       {/* Keyed by filter so the tiles rise again, staggered, when the filter changes. */}
-      <div key={filter} className="mx-[-4px] mt-[-4px] grid flex-1 grid-cols-3 gap-3 px-1 pt-1 pb-[30px]">
+      <div key={filter} className="mx-[-4px] mt-[-4px] grid flex-1 auto-rows-min grid-cols-3 gap-3 px-1 pt-1 pb-[30px] md:grid-cols-4 lg:grid-cols-5 lg:gap-4">
         {shown.map((status, index) => {
           const earned = Boolean(status.earnedAt);
           const showBar = !earned && status.progress && !isSecret(status.id);
