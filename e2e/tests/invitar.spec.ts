@@ -47,7 +47,7 @@ test.describe("Invitar", () => {
     expect(shares[1]?.text).toContain(url);
   });
 
-  test("a friend who enters with the link and makes a first connection pays +100 and +50", async ({ pageA, pageB, world, userA, userB, browser, baseURL, contextB }) => {
+  test("a friend who enters with the link and makes a first connection pays +100 and +50", async ({ pageA, pageB, world, userA, userB, browser, contextB }) => {
     await skipTours(contextB);
     await pageA.goto("/invite");
     await expect(pageA.getByText("0 de 3")).toBeVisible();
