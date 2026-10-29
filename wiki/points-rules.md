@@ -22,7 +22,6 @@ Business rules live on the server, never on the client: points, idempotency, the
 
 - `POST /api/connections` creates the connection idempotently and awards points.
 - `POST /api/interactions/:id/approve` approves, shares with both and awards points (+25 to each, p. 18).
-- Superseded 2026-10-29: summaries award no points; points come only from connections (data model M3, `docs/specs/2026-10-29-summaries.md` S2).
 
 Risk "spam to climb the podium" → hourly cap and points only for mutual connections (p. 20).
 
