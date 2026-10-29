@@ -95,7 +95,7 @@ Screen numbers (01–12) are the V2 screens in [DESIGN.md](../../DESIGN.md#scree
 | [F-65](#f-65) | Block or report a person | Missing | Missing | Missing | T-041, T-042 |
 | [F-66](#f-66) | Offline and slow network | Partial | — | — | T-112, T-004 |
 | [F-67](#f-67) | Server 500, 501 or unexpected error | Missing | Partial | — | T-004, T-007 |
-| [F-68](#f-68) | Rate limits hit | Missing | Missing | — | T-036, T-052 |
+| [F-68](#f-68) | Rate limits hit | Partial | Ready | Ready | T-036, T-052 |
 | [F-69](#f-69) | Realtime vs polling updates | Missing | Partial | — | T-031, T-081 |
 | [F-70](#f-70) | Time zones and the event window display | Partial | Partial | Missing | T-024 |
 | [F-71](#f-71) | Overlapping events | Partial | Partial | Ready | T-027 |
@@ -1227,8 +1227,8 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Happy path (intended) | 429 `rate_limited` with `Retry-After` → copy |
 | Alternates | — |
 | Errors | — |
-| Edge cases | No limit exists anywhere (gap analysis §3) |
-| Status | UI Missing · API Missing · DB — |
+| Edge cases | Limited by user id, never IP (a venue shares one NAT). Per minute: 30 scans, 10 transcriptions, 10 drafts; per day: 60 transcriptions; caps: 300 new requests per event, 5 drafts per connection (`lib/api/rate-limits.ts`). Windowed limits count every request and return 429 `rate_limited` with `Retry-After`; the two caps count stored rows and return 429 `limit_reached` with no `Retry-After`. Search is not limited yet (no attendee search route, T-034) |
+| Status | UI Partial (scan and note screens show `common.rateLimited` or `common.limitReached`) · API Ready · DB Ready (`rate_limit_counters`) |
 | E2E coverage | `e2e/system/rate-limits.spec.ts` |
 | Tickets | [T-036](backlog.md#t-036), [T-052](backlog.md#t-052) |
 

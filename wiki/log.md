@@ -190,3 +190,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Shared UI mobile polish
 
 - 16 px touch inputs, tap-highlight off, `select-none` labels, `Button` `fit`, live pill spacing, light/dark `theme-color` ([DESIGN.md](../DESIGN.md) "Native feel on phones").
+
+## [2026-10-29] query | What rate limits apply, and what does a person see?
+
+- T-036 shipped per-user limits keyed by user id (not IP): scans 30/min and 300/event, transcription 10/min and 60/day, drafts 10/min and 5/connection, minute and day counters stored in `rate_limit_counters`. Windowed limits: 429 `rate_limited` with `Retry-After`; the event and connection caps count stored rows and return 429 `limit_reached`. The UI shows `common.rateLimited` / `common.limitReached`. Search is not limited yet (`docs/flows/backlog.md` T-036; `docs/flows/catalog.md` F-68; open question #51).

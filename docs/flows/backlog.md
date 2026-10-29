@@ -605,6 +605,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | --- | --- | --- | --- | --- |
 | backend+infra | P1 | connections+points | T-000, OQ #51 | M |
 
+- **State:** Built (2026-10-29) except the search limit and the e2e spec: limits in `lib/api/rate-limits.ts`, counters in the `rate_limit_counters` table (`drizzle/0007`), the `rateLimit` route option enforced by `defineRoute`, the per-event request cap in `createConnection` and the per-connection draft cap in `draftSummary` (both count stored rows, so only successes count, and return 429 `limit_reached` with no `Retry-After`), copy `common.rateLimited` and `common.limitReached`. The attendee search route (T-034) does not exist yet; add `rateLimit` to it when it lands. The e2e spec waits for the Playwright harness (T-000).
 - **E2E:** `e2e/system/rate-limits.spec.ts`. Scenarios: mock `x-compa-mock-error: rate_limited` shows the copy; real mode: the 31st scan in a minute returns 429 with `Retry-After`.
 - **Files:** `lib/api/define-route.ts` (a `rateLimit` option on the route spec), `lib/api/errors.ts` (new `429 rate_limited` with `Retry-After`), the store (Upstash or Vercel KV via Marketplace, or a Postgres table).
 - **Acceptance:** default limits, adjustable:
