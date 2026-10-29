@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { createElement, useState, type ReactNode } from "react";
+import { settleInChunks } from "@/lib/admin/settle";
 import { ApiClientError } from "@/lib/api/client";
 import { ConfirmDialog, type ConfirmSpec } from "./ConfirmDialog";
 
@@ -10,8 +11,6 @@ import { ConfirmDialog, type ConfirmSpec } from "./ConfirmDialog";
 export type Outcome = { confirm?: ConfirmSpec; done?: string; errors?: Record<string, string> };
 // `summary` gets the items that failed (empty when every one succeeded) and says what happened.
 export type ManyOutcome<T> = { confirm?: ConfirmSpec; summary: (failed: T[]) => string };
-
-const BULK_CHUNK = 3;
 
 const byCode = (error: unknown, errors: Record<string, string>) => (error instanceof ApiClientError ? errors[error.code] : undefined);
 const byStatus = (error: unknown, errors: Record<string, string>) => (error instanceof ApiClientError ? errors[String(error.status)] : undefined);
@@ -68,12 +67,7 @@ export function useAdminAction(failedText: string) {
     setBusy(true);
     setError(null);
     setNotice(null);
-    const failed: T[] = [];
-    for (let start = 0; start < items.length; start += BULK_CHUNK) {
-      const chunk = items.slice(start, start + BULK_CHUNK);
-      const results = await Promise.allSettled(chunk.map(action));
-      failed.push(...chunk.filter((_, index) => results[index]?.status === "rejected"));
-    }
+    const failed = (await settleInChunks(items, action)).failed.map((entry) => entry.item);
     router.refresh();
     if (failed.length) setError(summary(failed));
     else setNotice(summary(failed));
