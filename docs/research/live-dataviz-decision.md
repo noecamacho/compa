@@ -16,7 +16,7 @@ ranking, pulse, feed and finale are fixed slots, so nothing jumps around on a pr
 | Ranking | Top 5 with photos; equal points and connections share a place (1, 1, 3) | `LeaderboardPanel` |
 | State card | Over the loom: "Doors open at 7:00 PM" (upcoming), "Nobody is in yet" / "The loom is ready" (empty), "That's a wrap! 120 people wove 300 connections" (ended) | `StateCard` |
 | Finale | After the close: final podium (1st in the middle, ties marked), then places 4–8; the pulse shows the event's last half hour, polling slows to 15 s | `Podium` |
-| Reconnecting | "Reconnecting… last update 7:42 PM" pill; failed polls back off 3 → 30 s; the tab coming back or the network returning polls at once | `useLiveSnapshot.ts` |
+| Reconnecting | "Reconnecting… data from N s ago" pill (or "The event code changed" after a rotation, from #63); failed polls time out at 8 s and back off 3 → 30 s; out-of-order snapshots are dropped and a stuck one reads as a failure; the tab coming back or the network returning polls at once | `useLiveSnapshot.ts` |
 
 Moods (`moodOf`): `upcoming` and `ended` from the event phase; `empty` with no connection yet; `quiet` after 10 min
 without one; `rush` at 12 or more connections in 5 min (or one per three people in the room); `steady` otherwise.

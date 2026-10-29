@@ -18,7 +18,7 @@
 
 ## Resilience (as built, [conference-load](../docs/research/conference-load.md) findings 19 and 20)
 
-- `useLiveSnapshot` polls every 3 s with one request in flight and an 8 s timeout; a failed poll keeps the last snapshot and shows "Reconnecting… data from N s ago".
+- `useLiveSnapshot` polls every 3 s (15 s after the close, backing off to 30 s on failure) with one request in flight and an 8 s timeout, polls at once when the tab or network returns, drops out-of-order snapshots and treats a stuck one as a failure; a failed poll keeps the last snapshot and shows "Reconnecting… data from N s ago".
 - A 404 (the access code was rotated) keeps the board up with "The event code changed. Open the new screen link from Admin." instead of falling to the not-found door; polling continues.
 - A failed server render of `/e/<code>/live` shows a large outage message (`error.tsx`) that retries every 10 s.
 
@@ -32,7 +32,7 @@ The plan's podium-plus-topics layout was replaced by **Loom+**, chosen after pro
 | Pulse | Connections per minute, last 30 min, with a mood line (steady, rush, quiet, empty, upcoming, final) |
 | Feed | The 4 newest pairs, "Ana ⇄ Luis", names only (p. 6) |
 | Ranking | Top 5; equal points and connections share a place |
-| States | Upcoming, empty and ended cards over the loom; final podium after the close; "Ends in N min" in the last ten minutes; "Reconnecting… last update" when polls fail or stall |
+| States | Upcoming, empty and ended cards over the loom; final podium after the close; "Ends in N min" in the last ten minutes; "Reconnecting… data from N s ago" when polls fail or stall |
 
 Data: polling every 3 s (15 s after the close, backing off to 30 s on failure); the snapshot carries `event.phase`, `startsAt`, `endsAt`, each person's connection count and at most the newest 1,000 connections (`docs/specs/2026-10-29-api.md` §5). Topics are not in the snapshot yet, so there is no topic race. Scenarios and their e2e coverage: `lib/testing/live-scenarios.ts`, `e2e/live/live-board.spec.ts`.
 

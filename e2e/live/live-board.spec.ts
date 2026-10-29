@@ -189,9 +189,9 @@ test.describe("live board scenarios @live @mock", () => {
 test.describe("live board resilience @live @mock", () => {
   test.use({ viewport: VIEWPORTS.laptop, ...inLocale("en-US") });
 
-  test("network loss: reconnecting pill with the last update, backoff, then recovery", async ({ page }) => {
+  test("network loss: reconnecting pill with the age of the data, backoff, then recovery", async ({ page }) => {
     const polls = await openBoard(page, "trickle", 3, { fail: (poll) => poll === 1 || poll === 2 });
-    await expect(page.getByTestId("live-stale")).toContainText("Reconnecting… last update");
+    await expect(page.getByTestId("live-stale")).toContainText(/Reconnecting… data from \d+ s ago/);
     // Two failures back off to 12 s, so the fourth poll must not come 3 s later.
     const gap = (polls[2] ?? 0) - (polls[1] ?? 0);
     expect(gap).toBeGreaterThan(5000);
