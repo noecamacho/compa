@@ -289,6 +289,18 @@ export const userBadges = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.badgeId] })],
 ).enableRLS();
 
+// Per-user request counters for rate limits (lib/server/rate-limit.ts). Only the server writes; RLS hides it from clients.
+export const rateLimitCounters = pgTable(
+  "rate_limit_counters",
+  {
+    // <user id>:<rule name>[:<scope>]
+    key: text("key").notNull(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+    count: integer("count").notNull().default(1),
+  },
+  (t) => [primaryKey({ columns: [t.key, t.windowStart] })],
+).enableRLS();
+
 export const invites = pgTable(
   "invites",
   {

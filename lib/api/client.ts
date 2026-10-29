@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { common } from "../copy/es";
 
 // Typed same-origin fetch for Client Components. The session cookie travels on its own.
 export class ApiClientError extends Error {
@@ -33,4 +34,13 @@ export async function apiCall<T extends z.ZodType>(method: Method, path: string,
   if (!response.ok) throw await toError(response);
   if (response.status === 204) return schema.parse(undefined);
   return schema.parse(await response.json());
+}
+
+const ERROR_COPY: Record<string, string> = { rate_limited: common.rateLimited, limit_reached: common.limitReached };
+
+// Text for a caught error: known codes get their own copy, anything else keeps the server message.
+export function errorText(caught: unknown): string {
+  const known = caught instanceof ApiClientError ? ERROR_COPY[caught.code] : undefined;
+  if (known) return known;
+  return caught instanceof Error ? caught.message : String(caught);
 }

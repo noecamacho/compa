@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { UserRow } from "../../db/schema";
 import type { ErrorSpec } from "./errors";
+import type { RateLimitRule } from "./rate-limits";
 
 // "admin": super admins only, everyone else gets 404 (A11). "automation": a super admin, or the
 // `x-compa-automation` header with TEST_AUTOMATION_SECRET; the handler then gets `user: null`.
@@ -34,6 +35,9 @@ export type SuccessSpec<R extends z.ZodType> = {
   redirect?: string;
 };
 
+// A per-user limit; `scope` narrows the counter to one resource of the request, e.g. one connection.
+export type RouteRateLimit<B extends z.ZodType> = RateLimitRule & { scope?(body: z.output<B>): string };
+
 export type RouteSpec<
   P extends ObjectSchema = EmptySchema,
   Q extends ObjectSchema = EmptySchema,
@@ -56,6 +60,8 @@ export type RouteSpec<
   bodyExample?: z.input<B>;
   success: SuccessSpec<R>;
   errors: readonly ErrorSpec[];
+  // Checked after auth and body validation, before the handler (signed-in users only).
+  rateLimit?: readonly RouteRateLimit<B>[];
 };
 
 // Loose view of any spec, for code that only reads metadata (OpenAPI builder, mock mode).

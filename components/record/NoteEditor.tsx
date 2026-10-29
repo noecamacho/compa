@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Chip";
 import { Muted, SectionLabel } from "@/components/ui/Text";
-import { apiCall } from "@/lib/api/client";
+import { apiCall, errorText } from "@/lib/api/client";
 import { Approved, Draft, type ConnectionDetailT, type DraftT } from "@/lib/api/schemas";
-import { RecorderError, startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
-import { note as copy } from "@/lib/copy/es";
+import { ApiError as UploadError, RecorderError, startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
+import { common, note as copy } from "@/lib/copy/es";
 import { formatClock } from "@/lib/format";
 import { forgetNote, recallNote } from "@/lib/note-draft";
 import { SUMMARY_POINTS } from "@/lib/points";
@@ -66,7 +66,7 @@ export function NoteEditor({ detail }: Props) {
       const draft = await apiCall("POST", "/api/interactions/draft", Draft, { connectionId: detail.connectionId, text });
       setPhase({ kind: "ready", summary: fromDraft(draft, seconds) });
     } catch (caught) {
-      setPhase({ kind: "typing", text, error: caught instanceof Error ? caught.message : copy.failed });
+      setPhase({ kind: "typing", text, error: caught instanceof Error ? errorText(caught) : copy.failed });
     }
   }
 
@@ -82,7 +82,7 @@ export function NoteEditor({ detail }: Props) {
           setPhase({ kind: "transcribing" });
           uploadForTranscript(file)
             .then(({ text }) => draftFrom(text, elapsed))
-            .catch(() => setPhase({ kind: "typing", text: "", error: copy.failed }));
+            .catch((caught: unknown) => setPhase({ kind: "typing", text: "", error: caught instanceof UploadError && caught.code === "rate_limited" ? common.rateLimited : copy.failed }));
         },
       });
       setPhase({ kind: "recording", seconds: 0 });

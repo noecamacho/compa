@@ -50,6 +50,13 @@
       "when": 1793270062767,
       "tag": "0006_notifications_seen_at",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1793270718367,
+      "tag": "0007_rate_limit_counters",
+      "breakpoints": true
     }
   ]
 }

@@ -4,7 +4,7 @@ import type { UserRow } from "../../db/schema";
 import { ApiError, E, errorResponse, toApiError } from "./errors";
 import { isMockRequest, mockResponse } from "./mock";
 import { automationFrom } from "./automation";
-import { isAdminAuth, type Auth, type Handler, type HandlerResult, type ObjectSchema, type RouteSpec } from "./route-spec";
+import { isAdminAuth, type Auth, type Handler, type HandlerResult, type ObjectSchema, type RouteRateLimit, type RouteSpec } from "./route-spec";
 
 type NextContext = { params: Promise<Record<string, string | string[] | undefined>> } | undefined;
 export type RouteHandler = (req: Request, ctx: NextContext) => Promise<Response>;
@@ -46,6 +46,12 @@ async function resolveUser(auth: Auth, req: Request): Promise<UserRow | null> {
   return requireSuperAdmin(await currentUserOrNull());
 }
 
+async function enforceLimits<B extends z.ZodType>(limits: readonly RouteRateLimit<B>[] | undefined, user: UserRow | null, body: z.output<B>) {
+  if (!limits || !user) return;
+  const { enforceRateLimits } = await import("../server/rate-limit");
+  await enforceRateLimits(user.id, limits.map((rule) => ({ rule, scope: rule.scope?.(body) })));
+}
+
 // Per-request mocks (header or ?mock=1) would answer admin paths for anyone; they serve admin routes only on a
 // mock deployment (API_MODE=mock), so in real mode a stranger always meets the same 404 (A11).
 const servesMock = (spec: { auth: Auth }, req: Request): boolean =>
@@ -82,6 +88,7 @@ export function defineRoute<
       // Multipart handlers validate the request themselves so they can read its File fields.
       const body = spec.bodyKind === "multipart" ? {} : parse(spec.body, await readBody(spec, req), "body");
       const input = { req, params, query, body, user } as Parameters<typeof handler>[0];
+      await enforceLimits(spec.rateLimit, user, input.body);
       return toResponse(await handler(input), spec.success.status);
     } catch (error) {
       return errorToResponse(error);

@@ -43,12 +43,17 @@ const errorExample = (error: ErrorSpec) => ({
   value: { error: { code: error.code, message: error.message, ...(error.fields ? { fields: error.fields } : {}) } },
 });
 
+const RETRY_AFTER = z.object({
+  "Retry-After": z.string().meta({ description: "Seconds until the limit window resets; absent for per-event and per-connection caps.", example: "42" }).optional(),
+});
+
 function errorResponses(errors: readonly ErrorSpec[]): ZodOpenApiResponsesObject {
   const responses: ZodOpenApiResponsesObject = {};
   for (const [status, group] of groupByStatus(errors)) {
     const examples = Object.fromEntries(group.map((error) => [error.code, errorExample(error)]));
     const content = { "application/json": { schema: errorSchema(group.map((e) => e.code)), examples } };
-    responses[statusKey(status)] = { description: group.map((e) => e.code).join(", "), content };
+    const headers = status === 429 ? RETRY_AFTER : undefined;
+    responses[statusKey(status)] = { description: group.map((e) => e.code).join(", "), content, headers };
   }
   return responses;
 }

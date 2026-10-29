@@ -107,3 +107,10 @@ describe("defineRoute", () => {
     expect(await response.json()).toEqual({ text: "received" });
   });
 });
+
+test("mock mode serves rate_limited on the scan route (T-036)", async () => {
+  const req = new Request("http://localhost/api/connections", { method: "POST", headers: { "x-compa-mock": "1", "x-compa-mock-error": "rate_limited" } });
+  const response = await defineRoute(routes.createConnection)(req, undefined);
+  expect(response.status).toBe(429);
+  expect((await response.json()).error.code).toBe("rate_limited");
+});
