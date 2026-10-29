@@ -43,6 +43,11 @@ export const notFound = {
   home: "Ir a inicio",
 };
 
+// Shown at the top of every attendee screen while the device has no network.
+export const offline = {
+  banner: "Sin conexión. Lo que hagas se guardará cuando vuelva el internet.",
+};
+
 // What a failed request says on screen (errorText, lib/api/client.ts); server messages are English and never shown.
 export const apiErrors = {
   generic: "No pudimos completar esto. Inténtalo otra vez.",
