@@ -2,20 +2,26 @@ import { RankingView } from "@/components/ranking/RankingView";
 import { Header } from "@/components/ui/Header";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, Leaderboard, Me } from "@/lib/api/schemas";
+import { ConnectionList, Leaderboard, Me, type LeaderboardT } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
 import { common, ranking as copy } from "@/lib/copy/es";
 import type { MonitoLook } from "@/lib/monito/look";
 
+const NO_BOARD: LeaderboardT = { rows: [] };
+
+// Boards are reached through the current event's access code (API spec A10); out of an event they are empty.
+async function loadBoards(code: string | undefined): Promise<[LeaderboardT, LeaderboardT]> {
+  if (!code) return [NO_BOARD, NO_BOARD];
+  return Promise.all([
+    apiGet(`/api/e/${code}/leaderboard?scope=event`, Leaderboard),
+    apiGet(`/api/e/${code}/leaderboard?scope=lifetime`, Leaderboard, { mockExample: "lifetime" }),
+  ]);
+}
+
 // 11 Ranking: both scopes are loaded up front so the toggle is instant.
 export default async function RankingPage() {
   const me = await apiGet("/api/me", Me);
-  const slug = me.currentEvent?.slug ?? "founders-fest";
-  const [event, lifetime, list] = await Promise.all([
-    apiGet(`/api/events/${slug}/leaderboard?scope=event`, Leaderboard),
-    apiGet(`/api/events/${slug}/leaderboard?scope=lifetime`, Leaderboard, { mockExample: "lifetime" }),
-    apiGet("/api/connections", ConnectionList),
-  ]);
+  const [[event, lifetime], list] = await Promise.all([loadBoards(me.currentEvent?.code), apiGet("/api/connections", ConnectionList)]);
   // Monito looks and handles come from my connections; strangers on the podium show the default monito.
   const looks: Record<string, MonitoLook | undefined> = { [me.id]: me.avatar };
   const handles: Record<string, string> = { [me.id]: me.handle };

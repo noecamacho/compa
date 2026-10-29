@@ -10,6 +10,7 @@ import { AudioValidationError, transcribe as transcribeAudio } from "../ai/trans
 import { AudioUploadError, readAudioFile } from "./audio-upload";
 import { SUMMARY_POINTS } from "../points";
 import { broadcast, liveTopic } from "../realtime";
+import { awardBadges } from "./badges";
 import { requireAcceptedMembership } from "./connections";
 import { isUniqueViolation, usersByIds } from "./people";
 
@@ -65,6 +66,8 @@ export async function draftSummary({ user, body }: InputOf<typeof R.draftSummary
       connectionId: row.id,
       authorId: user.id,
       summary: draft.summary,
+      title: draft.title.slice(0, 120),
+      pendingAction: draft.pending_action?.slice(0, 200) ?? null,
       topics: draft.topics,
       nextSteps: draft.next_steps,
       substantive: draft.substantive,
@@ -72,8 +75,8 @@ export async function draftSummary({ user, body }: InputOf<typeof R.draftSummary
     })
     .returning();
   if (!saved) return fail(E.internal);
-  const { summary, topics, next_steps: nextSteps, substantive, fallback } = draft;
-  return { status: 201, body: { interactionId: saved.id, summary, topics, nextSteps, substantive, fallback } };
+  const { summary, topics, next_steps: nextSteps, substantive, fallback, title, pending_action: pendingAction } = draft;
+  return { status: 201, body: { interactionId: saved.id, summary, topics, nextSteps, substantive, fallback, title, pendingAction } };
 }
 
 // ---- POST /api/interactions/:id/approve (M18) ----
@@ -100,7 +103,15 @@ async function markApproved(draft: InteractionRow, body: ApproveInput): Promise<
   try {
     const [row] = await getDb()
       .update(interactions)
-      .set({ summary: body.summary, topics: body.topics, nextSteps: body.nextSteps, points: SUMMARY_POINTS, approvedAt: new Date() })
+      .set({
+        summary: body.summary,
+        topics: body.topics,
+        nextSteps: body.nextSteps,
+        ...(body.title !== undefined ? { title: body.title } : {}),
+        ...(body.pendingAction !== undefined ? { pendingAction: body.pendingAction } : {}),
+        points: SUMMARY_POINTS,
+        approvedAt: new Date(),
+      })
       .where(and(eq(interactions.id, draft.id), isNull(interactions.approvedAt)))
       .returning();
     return row ?? fail(E.alreadyApproved);
@@ -116,13 +127,16 @@ export async function approveSummary({ user, params, body }: InputOf<typeof R.ap
   if (!draft.substantive) return fail(E.notSubstantive);
   const row = await markApproved(draft, body);
   const { event } = await requireAcceptedMembership(row.connectionId, user.id);
-  await broadcast({ topic: liveTopic(event.slug), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } });
+  await awardBadges(user, event, row.id).catch((error: unknown) => console.error("awards failed", error));
+  await broadcast({ topic: liveTopic(event.accessCode), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } });
   const interaction = {
     id: row.id,
     connectionId: row.connectionId,
     summary: row.summary,
     topics: body.topics,
     nextSteps: row.nextSteps,
+    title: row.title ?? undefined,
+    pendingAction: row.pendingAction,
     points: SUMMARY_POINTS,
     approvedAt: (row.approvedAt ?? new Date()).toISOString(),
   };

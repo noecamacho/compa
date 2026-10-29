@@ -1,15 +1,17 @@
 import "server-only";
 import { and, desc, eq, lt, ne, or } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
-import { connections, events, lifetimeScores, type ConnectionRow, type EventRow, type UserRow } from "../../db/schema";
+import { bonusPoints, connections, events, lifetimeScores, type ConnectionRow, type EventRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import type { CardT } from "../api/schemas";
 import { hasEnded, isRunning, statusForViewer } from "../connection-status";
-import { decideKind, pointsFor } from "../points";
+import { decideKind, pointsFor, topicsPointsFor } from "../points";
 import { broadcast, liveTopic, userTopic } from "../realtime";
+import { awardBadges } from "./badges";
 import { ensureCheckedIn, isCheckedIn } from "./events";
+import { awardInvite } from "./invites";
 import { cardFor, cardsFor, findCurrentEvent, findUserByHandle, pairCondition, usersByIds } from "./people";
 
 const eventRef = (event: EventRow) => ({ slug: event.slug, name: event.name });
@@ -27,10 +29,10 @@ async function checkInScanner(user: UserRow, event: EventRow, screenConsent: boo
   await ensureCheckedIn(user, event, true);
 }
 
-async function insertRequest(event: EventRow, requester: UserRow, addressee: UserRow, knew: boolean | undefined) {
+async function insertRequest(event: EventRow, requester: UserRow, addressee: UserRow, knew: boolean | undefined, topics: string[]) {
   const [row] = await getDb()
     .insert(connections)
-    .values({ eventId: event.id, requesterId: requester.id, addresseeId: addressee.id, requesterKnew: knew ?? null })
+    .values({ eventId: event.id, requesterId: requester.id, addresseeId: addressee.id, requesterKnew: knew ?? null, topics })
     .onConflictDoNothing()
     .returning();
   return row;
@@ -50,7 +52,7 @@ export async function createConnection({ user, body }: InputOf<typeof R.createCo
   const now = new Date();
   const event = (await findCurrentEvent(target.id, now)) ?? fail(E.notAtEvent);
   await checkInScanner(user, event, body.screenConsent === true);
-  const inserted = await insertRequest(event, user, target, body.knew);
+  const inserted = await insertRequest(event, user, target, body.knew, body.topics ?? []);
   const row = inserted ?? (await findPairAt(event.id, user.id, target.id)) ?? fail(E.internal);
   const to = await cardFor(user.id, target);
   const status = statusForViewer({ ...row, viewerId: user.id, eventEnded: hasEnded(event, now) });
@@ -155,11 +157,25 @@ async function announceAcceptance(row: ConnectionRow, event: EventRow, requester
   await broadcast(
     { topic: userTopic(requester.id), event: "request.accepted", payload: { connectionId: row.id, kind, points, to } },
     {
-      topic: liveTopic(event.slug),
+      topic: liveTopic(event.accessCode),
       event: "connection.accepted",
       payload: { id: row.id, a: person(requester), b: person(addressee), kind, at: (row.respondedAt ?? new Date()).toISOString() },
     },
   );
+}
+
+// Topics marked by the scanner pay +5 once; invites and badges are checked for both people (V2 points table).
+async function awardExtras(row: ConnectionRow, event: EventRow, requester: UserRow, addressee: UserRow): Promise<void> {
+  const db = getDb();
+  const topics = topicsPointsFor(row.topics);
+  if (topics > 0) {
+    await db
+      .insert(bonusPoints)
+      .values({ userId: requester.id, eventId: event.id, reason: "topics", refId: row.id, points: topics })
+      .onConflictDoNothing();
+  }
+  await Promise.all([awardInvite(requester, event, row.id, db), awardInvite(addressee, event, row.id, db)]);
+  await Promise.all([awardBadges(requester, event, row.id, db), awardBadges(addressee, event, row.id, db)]);
 }
 
 export async function acceptConnection({ user, params, body }: InputOf<typeof R.acceptConnection>): ResultOf<typeof R.acceptConnection> {
@@ -167,6 +183,7 @@ export async function acceptConnection({ user, params, body }: InputOf<typeof R.
   const [requester] = await usersByIds([row.requesterId]);
   if (!requester) return fail(E.internal);
   const from = await cardFor(user.id, requester);
+  await awardExtras(row, event, requester, user).catch((error: unknown) => console.error("awards failed", error));
   await announceAcceptance(row, event, requester, user);
   const kind = row.kind ?? "new";
   return { body: { connectionId: row.id, kind, points: row.points ?? pointsFor(kind), from } };
@@ -225,10 +242,21 @@ function groupByPerson(list: MyConnection[], userId: string): Map<string, MyConn
   return groups;
 }
 
+const FRIEND_RECONNECTIONS = 3;
+
+// "friend" after three reconnections with the same person; otherwise the latest accepted kind (V2Conexiones).
+function personType(items: MyConnection[]): "new" | "reconnection" | "friend" {
+  const accepted = items.filter(({ row }) => row.status === "accepted");
+  const reconnections = accepted.filter(({ row }) => row.kind === "reconnection").length;
+  if (reconnections >= FRIEND_RECONNECTIONS) return "friend";
+  return accepted[0]?.row.kind === "reconnection" ? "reconnection" : "new";
+}
+
 function personHistory(person: CardT, items: MyConnection[], userId: string, now: Date) {
   const meetings = items.map((item) => toMeeting(item, userId, now));
   const totalPoints = meetings.reduce((sum, meeting) => sum + (meeting.points ?? 0), 0);
-  return { person, meetings, lastMetAt: meetings[0]?.at ?? now.toISOString(), totalPoints };
+  const topics = [...new Set(items.flatMap(({ row }) => row.topics))];
+  return { person, meetings, lastMetAt: meetings[0]?.at ?? now.toISOString(), totalPoints, type: personType(items), topics };
 }
 
 async function lifetimePoints(userId: string): Promise<number> {

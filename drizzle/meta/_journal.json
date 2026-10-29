@@ -15,6 +15,20 @@
       "when": 1793263903126,
       "tag": "0001_v2_points_whatsapp",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793264357680,
+      "tag": "0002_v2_model",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793266497139,
+      "tag": "0003_event_access_code",
+      "breakpoints": true
     }
   ]
 }

@@ -46,7 +46,8 @@ export const E = {
   notAuthor: spec(403, "not_author", "Only the author of the summary can approve it."),
   notFound: spec(404, "not_found", "Not found."),
   userNotFound: spec(404, "user_not_found", "No person with that handle."),
-  eventNotFound: spec(404, "event_not_found", "No event with that slug."),
+  // Same body for a malformed, unknown or rotated code: it never hints whether an event exists (A10).
+  eventNotFound: spec(404, "event_not_found", "Event not found."),
   connectionNotFound: spec(404, "connection_not_found", "No connection with that id for you."),
   attendeeNotFound: spec(404, "attendee_not_found", "That person is not checked in to this event."),
   slugTaken: spec(409, "slug_taken", "An event with that slug already exists."),

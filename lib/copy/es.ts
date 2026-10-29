@@ -1,4 +1,5 @@
 // Every string the attendee sees, in Spanish (product decision, wiki/open-questions.md #6). Copy comes from design/compa-v2.
+// The sections the landing and event entry use also exist in English (lib/copy/en.ts); lib/copy/index.ts picks one per locale.
 
 export const common = {
   back: "Regresar",
@@ -13,29 +14,10 @@ export const common = {
   you: "Tú",
 };
 
-export const welcome = {
-  brand: "compa",
-  title: ["Conecta en el evento.", "Recuérdalo después."],
-  steps: [
-    "Conecta con quien conozcas escaneando su QR",
-    "Te quedas con sus redes y de qué hablaron",
-    "Gana puntos y ropa para tu monito por cada conexión",
-  ],
-  modeLabel: "¿Cuenta nueva o ya tienes?",
-  create: "Crear cuenta",
-  signIn: "Ya tengo cuenta",
-  ctaCreate: "Crear cuenta con LinkedIn",
-  ctaSignIn: "Entrar con LinkedIn",
-  noteCreate: "Tomamos tu nombre, puesto, empresa y ciudad. Nunca publicamos nada por ti.",
-  noteSignIn: "Entras directo a tu perfil y tus conexiones.",
-  sampleTopic: "Levantar capital",
-  signInError: "No pudimos entrar con LinkedIn. Inténtalo otra vez.",
-};
-
 export const profile = {
   title: "Tu perfil",
-  subtitle: "Lo jalamos de LinkedIn. Corrige lo que quieras.",
-  fromLinkedIn: "Datos de LinkedIn",
+  subtitle: "Tu nombre viene de LinkedIn. Agrega tu puesto, empresa y ciudad.",
+  fromLinkedIn: "Nombre de LinkedIn",
   name: "Nombre",
   role: "Puesto",
   company: "Empresa",
@@ -86,6 +68,8 @@ export const home = {
   inviteProgress: (done: number, total: number) => `${done} de ${total} amigos invitados`,
   inviteLeft: (left: number) => `faltan ${left}`,
   goldenCapLabel: "Tu monito con la gorra dorada",
+  noEventTitle: "No estás en un evento ahora",
+  noEventHint: "Escanea el QR de tu evento para entrar y ver quién está conectando.",
 };
 
 export const connect = {
@@ -277,4 +261,146 @@ export const time = {
   hoursAgo: (hours: number) => (hours === 1 ? "hace 1 h" : `hace ${hours} h`),
   today: "Hoy",
   clock: (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`,
+};
+
+// compa.lol for everyone (API spec A10). No sign-up: people get in through their event's QR.
+export const landing = {
+  brand: "compa",
+  title: ["Conecta en el evento.", "Recuérdalo después."],
+  lead: "Escanea el QR de quien conozcas, quédate con sus redes y de qué hablaron, y gana puntos para tu monito.",
+  doorTitle: "Solo entras escaneando el QR de tu evento.",
+  doorHint: "Está en la entrada y en la pantalla del evento. Apúntale con la cámara de tu teléfono.",
+  backToEvent: "Volver a mi evento",
+  signInError: "No pudimos entrar con LinkedIn. Escanea el QR de tu evento otra vez.",
+  sceneLabel: "Dos monitos se conectan y ganan +50",
+  sampleTopic: "Levantar capital",
+};
+
+// /e/<code>: the event door.
+export const door = {
+  live: "EN VIVO",
+  invitedTo: "Estás en la puerta de",
+  checkedIn: "personas adentro",
+  connections: "conexiones",
+  cta: "Entrar con LinkedIn",
+  ctaSignedIn: "Entrar al evento",
+  note: "De LinkedIn solo tomamos tu nombre, tu foto y tu correo. Nunca publicamos nada por ti.",
+  notStarted: (hour: string) => `Las puertas abren a las ${hour}. Vuelve a escanear entonces.`,
+  ended: "Este evento ya terminó. Gracias por venir.",
+  watchLive: "Ver la pantalla en vivo",
+};
+
+// /e/<code>/join: check-in with the big-screen notice (A1, M13).
+export const join = {
+  title: "Antes de entrar",
+  notice: "Mientras dure el evento, tu nombre y tu foto aparecen en la pantalla grande. Tus redes y tus notas, no.",
+  accept: "Aceptar y entrar",
+  sending: "Entrando…",
+  cancel: "Ahora no",
+  notRunning: "El evento no está abierto ahora.",
+  failed: "No pudimos registrarte. Inténtalo otra vez.",
+};
+
+// /e/<code>/live: the projected dashboard (A5).
+export const live = {
+  live: "EN VIVO",
+  checkedIn: "personas",
+  connections: "conexiones",
+  newCount: "nuevas",
+  reconnections: "reencuentros",
+  legendNew: "Conexión nueva",
+  legendReconnection: "Reencuentro",
+  leaderboard: "Top conectores",
+  empty: "Aún no hay conexiones. La primera aparece aquí.",
+  scanToJoin: "Escanea para entrar",
+  hint: "Toca a una persona para ver su tarjeta, o el espacio vacío para ver el ranking.",
+  vizLabel: "Red de conexiones del evento",
+  points: "pts",
+  personConnections: "conexiones",
+  rank: "lugar",
+  close: "Ver ranking",
+  loading: "Cargando…",
+  noWebgl: "Este navegador no puede dibujar la red. Los números siguen en vivo.",
+  stale: "Reconectando…",
+};
+
+// Unknown or rotated event code: says nothing about whether the event exists.
+export const eventNotFound = {
+  title: "Este QR no abre ninguna puerta",
+  body: "Revisa que escaneaste el QR de tu evento completo, o pide a quien lo organiza que te lo muestre otra vez.",
+  home: "Ir a compa.lol",
+};
+
+// Progress labels per badge ("7 / 10 te escanearon") and the earned note.
+export const badgeProgress = {
+  labels: {
+    apreton: "tu primera conexión",
+    madrugador: "conecta en la primera hora",
+    cierre: "conecta al final del evento",
+    iman: "te escanearon",
+    maraton: "en una noche",
+    tresdetres: "reencuentros con la misma persona",
+    puente: "presentaciones",
+    duo: "eventos con alguien",
+    ff2026: "asiste a Founders Fest",
+    og: "de los primeros 100",
+    conector100: "conexiones",
+    trotamundos: "ciudades",
+    curioso: "temas distintos",
+    memoria: "notas de voz",
+    quinientos: "del evento",
+    cuatro: "eventos seguidos",
+  } as Record<string, string>,
+  earnedOn: (date: Date) =>
+    new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Mexico_City" }).format(date),
+};
+
+// Leaderboard hints under the progress bar (V2Ranking).
+export const rankingTips = {
+  first: "Vas en primer lugar.",
+  gap: (gap: number) => (gap <= 50 ? "Una conexión nueva (+50) y la pasas." : `Te faltan ${gap} pts: ${Math.ceil(gap / 50)} conexiones nuevas.`),
+};
+
+// Guided onboarding: one spotlight per button, in the order a new person meets them.
+export const tour = {
+  step: (n: number, total: number) => `${n} de ${total}`,
+  skip: "Saltar",
+  back: "Atrás",
+  next: "Siguiente",
+  done: "¡Entendido!",
+  replay: "Guía rápida",
+  home: [
+    { target: "live", title: "Esto es lo que pasa en el evento", body: "Cuántas conexiones van esta noche, quiénes se acaban de conectar y en qué lugar vas tú. Toca la fila de abajo para ver el ranking completo." },
+    { target: "connect", title: "Aquí conectas con la gente", body: "Es el botón principal. Muestra tu QR para que te escaneen, o escanea el de la otra persona. Cada conexión nueva vale +50 pts; un reencuentro, +20." },
+    { target: "invite", title: "Invita a tus amigos", body: "Comparte tu enlace. Cada amigo que entre y haga su primera conexión te da +100 pts, y con tres ganas la gorra dorada para tu monito." },
+    { target: "dock", title: "Tu barra de siempre", body: "Inicio, Conectar (tu QR), tus Conexiones con lo que platicaron, y tu Perfil con puntos, insignias y las redes que compartes." },
+  ],
+  connect: [
+    { target: "mode", title: "Dos formas de conectar", body: "\"Mi QR\" lo enseñas para que te escaneen. \"Escanear\" abre la cámara para leer el QR de la otra persona; si no sale, búscala por nombre." },
+    { target: "qr", title: "Tu QR personal", body: "Cualquier cámara lo lee y abre tu tarjeta en Compa. La otra persona registra la conexión y tú recibes la solicitud para aceptarla." },
+  ],
+  register: [
+    { target: "kind", title: "¿Nueva o reencuentro?", body: "Nueva si es la primera vez que se conectan (+50). Reencuentro si ya se conocían (+20). Si ya aparece en tus conexiones, lo marcamos solos." },
+    { target: "topics", title: "¿De qué hablaron?", body: "Marca hasta tres temas. Te quedan guardados con la persona y suman +5 pts." },
+    { target: "note", title: "Cuéntaselo a Compa", body: "Graba una nota de voz de hasta dos minutos. Compa la resume en un título, tres puntos y un pendiente. Vale +15 pts al guardarla." },
+    { target: "confirm", title: "Manda la solicitud", body: "La otra persona la acepta desde su teléfono y, hasta entonces, nadie ve las redes del otro. Al aceptar, los dos ganan los puntos." },
+  ],
+  me: [
+    { target: "avatar", title: "Tu monito", body: "Así te ven en el evento. Tócalo para cambiarlo; con el tiempo ganas ropa y accesorios por conectar." },
+    { target: "links", title: "Las redes que compartes", body: "Enciende solo las que quieras mostrar. Nadie las ve hasta que acepta una conexión contigo; las apagadas no se muestran a nadie." },
+    { target: "badges", title: "Tus insignias", body: "Las ganas por conectar: la primera, madrugador, maratón… Hay cuatro secretas que no te decimos cómo se ganan." },
+  ],
+  ranking: [
+    { target: "scope", title: "Esta noche o todo el año", body: "El ranking de esta noche cuenta solo el evento actual; el del año suma todos los eventos a los que has ido." },
+    { target: "you", title: "Tú en el ranking", body: "Tu lugar, tus puntos y cuánto te falta para pasar a la persona de arriba. Una conexión nueva suele bastar." },
+  ],
+  incoming: {
+    title: (name: string) => `${name} quiere conectar contigo`,
+    hint: "Toca para ver quién es y aceptar.",
+    view: "Ver",
+  },
+  outsideEvent: {
+    title: "No estás en un evento ahora",
+    body: "Cuando llegues a uno, escanea el QR de la entrada para registrarte y empezar a conectar.",
+  },
 };

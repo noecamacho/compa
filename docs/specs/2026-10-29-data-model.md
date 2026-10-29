@@ -27,6 +27,7 @@ Every decision below was made by the captain in this session.
 | M15 | Interests come from **one global table** we seed, shared by all events. | `lib/topics.ts` constant (p. 17) |
 | M16 | On the big screen, **color encodes connection kind** (new vs reconnection); people are neutral. | Tribe colors |
 | M17 | Bridges, rounds and badges are **out of the data model**. | Bridges (p. 7), P2 extras (p. 3) |
+| M19 | **Events are reached only through an unguessable access code** in the event QR: `events.access_code`, 10 characters from a crypto RNG over `23456789abcdefghjkmnpqrstuvwxyz` (≈ 49 bits, `lib/access-code.ts`), generated on create, unique, rotatable by admins. The QR encodes `https://compa.lol/e/<access_code>`; the slug is for admins only. Migration `0003_event_access_code` backfills existing rows with 12 hex characters from `gen_random_uuid()` (captain decision, 2026-10-29). | Join link `/e/<slug>` |
 | M18 | **AI summaries are back and score**: after a connection is accepted, either person drafts a summary (AI via `lib/ai`), edits and approves it; one approved summary per connection; **+25 to both** (constant `SUMMARY_POINTS`, value taken from `docs/contracts/ai-summaries-api.md`; captain to confirm). Summary text is never on the big screen. | M17 draft; p. 6, p. 18 |
 
 ## 2. Entities
@@ -48,7 +49,7 @@ erDiagram
 | `users` | One person, identified by their LinkedIn account; profile and visibility settings |
 | `interests` | Global list of interests (seeded) |
 | `user_interests` | Which interests a user picked |
-| `events` | An event with a join slug (QR) and a time window |
+| `events` | An event with an admin slug, a secret access code for its QR (M19) and a time window |
 | `event_attendees` | Check-in of a user at an event, with big-screen consent |
 | `connections` | A request between two checked-in attendees of one event, and its outcome |
 
@@ -98,7 +99,8 @@ create table user_interests (
 
 create table events (
   id         uuid primary key default gen_random_uuid(),
-  slug       text not null unique,                    -- join link and QR: /e/<slug>
+  slug       text not null unique,                    -- admin handle only (M19)
+  access_code text not null unique check (access_code ~ '^[a-z0-9]{8,32}$'), -- event QR: /e/<access_code> (M19)
   name       text not null,
   starts_at  timestamptz not null,
   ends_at    timestamptz not null,
