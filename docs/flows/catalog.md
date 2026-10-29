@@ -19,7 +19,7 @@ Each flow has an id `F-xx` and these fields:
   - **Mock-only:** renders only in mock mode.
   - **Missing:** not built.
   - **IP:** built on an unmerged branch.
-- **E2E coverage:** the spec file the flow's Playwright tests live in, and the scenarios to assert. Captain requirement, 2026-10-29; harness in [T-000](backlog.md#t-000). **No e2e spec exists yet, so every flow's e2e status is Missing.**
+- **E2E coverage:** the spec file the flow's Playwright tests live in, and the scenarios to assert. Captain requirement, 2026-10-29; harness in [T-000](backlog.md#t-000). The harness and a smoke spec exist; no flow spec exists yet, so every flow's e2e status is Missing.
 - **Tickets:** links into the [backlog](backlog.md).
 
 Screen numbers (01–12) are the V2 screens in [DESIGN.md](../../DESIGN.md#screens). "Real mode" means without `API_MODE=mock`.

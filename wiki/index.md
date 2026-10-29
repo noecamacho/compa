@@ -57,7 +57,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 - [DESIGN.md](../DESIGN.md) — product and UX design from the V2 handoff: principles, 16 screens with routes, tokens, components, internationalization, states, pending screens, `/live`, decided vs open.
 - [docs/backend-gap-analysis.md](../docs/backend-gap-analysis.md) — V2 vs specs vs code: 35 use cases checked end to end (Ready, Partial, Mock-only, Missing, Conflict), 15 conflicts, edge cases, post-freeze P0/P1/P2 backlog, i18n status.
 - [docs/testing/real-mode.md](../docs/testing/real-mode.md) — testing against the real database: test users without LinkedIn, sign-in-as, the automation header, the Codex Conf 2026 seed, safety rules.
-- [docs/flows/README.md](../docs/flows/README.md) — user flows and build backlog: how agents pick a ticket, definition of done (Playwright e2e per flow), e2e conventions.
+- [docs/flows/README.md](../docs/flows/README.md) — user flows and build backlog: how agents pick a ticket, definition of done (Playwright e2e per flow), the e2e harness (`bun run e2e`, fixtures, tags, CI).
   - [docs/flows/actors-and-permissions.md](../docs/flows/actors-and-permissions.md) — 14 actors, permission matrix, CRUD matrix per entity, 34 missing CRUD operations.
   - [docs/flows/catalog.md](../docs/flows/catalog.md) — 74 user flows (F-01–F-74) with steps, error codes, edge cases, status per layer, e2e coverage and tickets.
   - [docs/flows/edge-cases-and-risks.md](../docs/flows/edge-cases-and-risks.md) — 40 unhandled risks (abuse, AI, privacy, operations, concurrency, security) with tickets.

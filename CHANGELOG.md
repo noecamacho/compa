@@ -26,6 +26,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- Playwright e2e harness (T-000): `bun run e2e` across 390 (Chromium and WebKit), 834, 1440 and 1920 (`e2e/live/**`) in Spanish and English plus reduced motion; `mock`, `realUser`, `testEvent` and `twoUsers` fixtures; `e2e/smoke.spec.ts`; the `E2E` pull-request workflow. Under `API_MODE=mock`, a test-only `compa-mock-error` cookie injects a documented error into server-rendered fetches.
 - Landing hero: a Three.js vignette plays the COMPA story on a small event floor. Pixel-art monitos walk up to each other, one scans the other's QR, speech bubbles show the topic, a mint thread joins them (sky for a reencuentro), and "+50" or "+20 reencuentro" pops with confetti. Threads build up into a network and then fade. The camera follows the mouse, and hovering or tapping a monito makes it jump and say "¡Hola!" / "Hi!". The SVG crowd stays as the server render and the fallback for reduced motion and missing WebGL.
 - Admin console, responsive pass: tables from 768 px and stacked cards on a phone, sticky primary actions, a two-column event page with the QR and actions beside the details, a live preview on the new-event form, inline field validation with a kept draft, consequence dialogs (bottom sheet on a phone) for rotate, end, archive, remove attendee and delete test user, and loading and error states.
 

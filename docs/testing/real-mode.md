@@ -62,7 +62,7 @@ await asUser(anaSession, { baseUrl: BASE, method: "POST", path: `/api/interactio
 
 Then open `/e/<code>/live` for the test event: the edge and the points show there, and nowhere else. The draft step calls OpenAI; skip it when `OPENAI_API_KEY` is not set.
 
-Playwright: `e2e/fixtures/real-mode.ts` gives `testUsers(n)` (created, checked in, deleted after the test) and `signIn(context, user)` (cookies into a browser context). `e2e/real-mode/connect-accept-summary.spec.ts` is the skeleton. Both start running when T-000 adds `@playwright/test`; until then `tsconfig.json` excludes `e2e/` and `bunfig.toml` keeps `bun test` in `lib/`.
+Playwright (`docs/flows/README.md` "E2E tests"): `e2e/fixtures/real-mode.ts` gives `testUsers(n)` (created, checked in, deleted after the test) and `signIn(context, user)`; `realUser`, `testEvent` and `twoUsers` build on them. Run with `TEST_AUTOMATION_SECRET=... bun run e2e`; tests tagged `@real` skip without the secret and never run against compa.lol. `e2e/real-mode/connect-accept-summary.spec.ts` is the skeleton. `bunfig.toml` keeps `bun test` in `lib/`.
 
 ## 5. Clean up
 

@@ -69,13 +69,22 @@ A ticket is done when **all** of these hold:
 
 ## E2E tests
 
-The harness is ticket [T-000](backlog.md#t-000) (P0). Until it merges, write the spec next to your change and mark it `test.fixme` with the ticket id.
+The harness is ticket [T-000](backlog.md#t-000): `playwright.config.ts`, `e2e/fixtures/` and the first spec `e2e/smoke.spec.ts`. Import `test` and `expect` from `e2e/fixtures` (`index.ts` merges every fixture).
+
+```sh
+bun run e2e:install                         # once: Chromium and WebKit with system deps
+API_MODE=mock bun run e2e                   # mock-mode specs; starts `bun run dev` with API_MODE=mock
+TEST_AUTOMATION_SECRET=... bun run e2e      # real-mode specs against a dev server on the test project
+E2E_BASE_URL=https://compa.lol bun run e2e  # read-only @prod specs only
+```
+
+Tag each test: `@mock` needs a server with `API_MODE=mock`, `@real` needs `TEST_AUTOMATION_SECRET` and the seeded test project, `@prod` is read-only and safe against compa.lol. Untagged tests run in every mode. The config drops `@real` on a mock server and `@mock` on a real one, and real-mode fixtures skip themselves without the secret and refuse compa.lol.
 
 Layout, one folder per catalog section:
 
 ```text
 e2e/
-  fixtures/          mock.ts, real-user.ts, test-event.ts, two-users.ts
+  fixtures/          index.ts, mock.ts, real-mode.ts, real-user.ts, test-event.ts, two-users.ts
   onboarding/        landing, signin, profile, monito, deep-links, invite-link
   events/            door, check-in, window
   connect/           my-qr, scan, search, register, voice-note
@@ -102,19 +111,19 @@ Each flow in [catalog.md](catalog.md) names its spec file and the scenarios to a
 | Want | How |
 | --- | --- |
 | Signed-in screens without a database | Start the app with `API_MODE=mock bun run dev`. `hasSession()` then returns true, and server-side `apiGet` sends `x-compa-mock: 1` (`lib/server/session.ts`, `lib/api/server-fetch.ts`) |
-| A documented error on a client call | `page.route('**/api/connections', r => r.continue({ headers: { ...r.request().headers(), 'x-compa-mock': '1', 'x-compa-mock-error': 'not_at_event' } }))` |
+| A documented error on a client call | `mock.mockError('not_at_event', '**/api/connections')` (a `page.route` that adds `x-compa-mock-error`); without the URL every API call gets it. `mock.mockStatus(n)` and `mock.mockExample(name)` work the same way |
 | A named success example | Header `x-compa-mock-example: fallback` on `POST /api/interactions/draft`, or `notSubstantive` |
-| An error on a server-rendered page | Today `server-fetch` forwards only the cookie and `API_MODE`, never the browser's mock headers. [T-000](backlog.md#t-000) adds a test-only cookie forwarded as `x-compa-mock-error`, honored only under `API_MODE=mock` |
+| An error on a server-rendered page | `mock.mockServerError('event_not_found')` sets the test-only cookie `compa-mock-error`; `lib/api/server-fetch.ts` forwards it as `x-compa-mock-error` only under `API_MODE=mock` (`lib/api/mock-cookie.ts`). Every server fetch of that request gets it, so pick a code each of them documents |
 | Network failure or slowness | `context.setOffline(true)`; `page.route(url, r => setTimeout(() => r.continue(), 3000))` |
 
 Asking for an error a route does not document returns `400 mock_error_unknown`. Treat that as a broken test, not a pass.
 
-**Real mode** covers paths that need data. It needs a **seeded test event** and test users in a **separate test Supabase project**, never production.
+**Real mode** covers paths that need data. It needs a **seeded test event** and test users in a **separate test Supabase project**, never production (`docs/testing/real-mode.md`).
 
-- The `realUser` fixture creates a user through the Supabase Admin API with the service-role key and stores the session cookies in `storageState`. **LinkedIn is never called in CI.**
-- The `testEvent` fixture seeds a running event with a known access code. For time-dependent cases it also seeds an ended event and a future event.
-- `twoUsers` gives two browser contexts for request and accept, mutual scans and live updates. Assert with `expect.poll` (5 s cap), never fixed sleeps.
-- Use `page.clock` for event-window and recording-limit cases.
+- `realUser` creates a test user once per worker through the sign-in-as route (`x-compa-automation`, API spec A11), reuses it for the worker's tests, puts its Supabase session cookies in the test's browser context and deletes it at the end. **LinkedIn is never called.**
+- `testEvent` reads the seeded Codex Conf 2026 (slug, access code, join URL) as `@codex-test-admin` and, before each worker, moves its window back to running when it has ended or not started. For time-dependent cases use `page.clock` or a test event whose window is in the past or the future.
+- `twoUsers` gives two fresh test users, each signed in in its own browser context, for request and accept, mutual scans and live updates. Assert with `expect.poll` (5 s cap), never fixed sleeps.
+- `testUsers(n)` and `signIn(context, user)` are the building blocks (`e2e/fixtures/real-mode.ts`).
 
 ### Matrix
 
@@ -123,21 +132,21 @@ Asking for an error a route does not document returns `400 mock_error_unknown`. 
 | Viewport | `mobile-390` (390×844, touch, WebKit and Chromium), `tablet-834` (834×1194), `desktop-1440` (1440×900), `live-1920` (1920×1080, `e2e/live/**` only) | `projects` in `playwright.config.ts` |
 | Locale | Spanish (`locale: "es-MX"`, `Accept-Language: es-MX`) and English (`locale: "en-US"`); spot-check `fr-FR` → English | Project `use.locale` + `extraHTTPHeaders` |
 | Motion | `reducedMotion: "reduce"` variant on `mobile-390` | Project `use.reducedMotion` |
-| Media | Fake camera with a QR video and a fake microphone on Chromium (`--use-fake-device-for-media-stream`, `--use-file-for-fake-video-capture`); denied via `permissions: []` | `launchOptions.args` |
+| Media | Chromium projects launch with a fake camera and microphone (`--use-fake-device-for-media-stream`, `--use-fake-ui-for-media-stream`); a scan spec adds `--use-file-for-fake-video-capture=<qr.y4m>` with `test.use({ launchOptions })`. WebKit gets `permissions: []` for the denied path | `launchOptions.args` |
 | Target | Local `bun run dev` (default), or `E2E_BASE_URL=https://compa.lol` for read-only `@prod` smoke tests | `baseURL`, `--grep @prod` |
 
 ### Artifacts and CI
 
-- The `.github/workflows/e2e.yml` workflow runs on every pull request.
-- On failure it keeps the trace, screenshots, video and the HTML report as artifacts.
-- Real-mode specs run only when the captain has configured the test project's secrets.
+- `.github/workflows/e2e.yml` runs on every pull request. The `mock` job installs Chromium and WebKit and runs the specs against `bun run dev` with `API_MODE=mock`.
+- The `real` job runs `@real` specs only when the captain sets the repository variable `E2E_TEST_BASE_URL` (a deployment on the separate test project) and the secret `E2E_TEST_AUTOMATION_SECRET`.
+- Every test keeps its trace, screenshot and video on failure (`retain-on-failure`, `only-on-failure`); the job uploads them with the HTML report.
 
 ## Counts at a glance
 
 | Measure | Count |
 | --- | --- |
 | Flows | 74. UI layer: 2 Ready, 30 Partial, 12 Mock-only, 19 Missing, 10 IP, 1 no UI |
-| E2E specs existing today | 0 of 74 flows (harness T-000) |
+| E2E specs existing today | Harness and smoke spec (T-000); 0 of 74 flows |
 | Tickets | 86: P0 12, P1 48, P2 26; 11 in progress on the two branches |
 | Missing CRUD operations | 34 |
 | Risks | 40 (8 high impact) |
