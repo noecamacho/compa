@@ -19,6 +19,15 @@ export async function requireUser(): Promise<UserRow> {
   return row ?? fail(E.unauthorized);
 }
 
+// The signed-in person on a public route, or null without a session (never throws).
+export async function currentUserOrNull(): Promise<UserRow | null> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
+  const supabase = await createSupabaseServerClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) return null;
+  return (await findUserByAuthId(data.user.id)) ?? null;
+}
+
 export async function requireAdmin(): Promise<UserRow> {
   const user = await requireUser();
   return user.isAdmin ? user : fail(E.notAdmin);

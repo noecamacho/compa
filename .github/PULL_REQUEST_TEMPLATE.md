@@ -24,6 +24,9 @@
 
 <!-- Commands run and their result. Optional: link to a 10 s GIF or video of the flow. -->
 
+- [ ] Unit tests added or updated (`bun test`)
+- [ ] Playwright e2e specs cover the affected flows: happy path, edge cases, error states; 390/834/1440; es/en (or why not)
+
 ## Wiki impact
 
 - [ ] `wiki/index.md` updated  - [ ] `wiki/log.md` updated  - [ ] No knowledge changed (say why)
