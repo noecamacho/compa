@@ -56,7 +56,7 @@ test.describe("invite in mock mode", () => {
     for (const slot of [2, 3]) await expect(page.getByText(copy.friendSlot(slot), { exact: true })).toBeVisible();
     await expect(page.getByText(copy.cap, { exact: true })).toBeVisible();
     await expect(page.getByText(shownLink(mockLink.url), { exact: true })).toBeVisible();
-    await expect(page.getByTestId("invite-points")).toContainText(copy.pointsAt(mockEvent.name));
+    await expect(page.getByRole("main").getByTestId("invite-points")).toContainText(copy.pointsAt(mockEvent.name));
     await expect(page.getByRole("link", { name: copy.showQr })).toHaveAttribute("href", "/connect");
     await expect(page.getByRole("link", { name: common.close })).toHaveAttribute("href", "/home");
   });
@@ -162,8 +162,8 @@ test.describe("referral code in real mode", () => {
     expect(await invitesOf(ana)).toMatchObject({ link: { code: ana.user.handle, url, event: { code: testEvent.accessCode, name: testEvent.name } }, invitees: [], target: GOLDEN_CAP_INVITES, goldenCap: false });
     await ana.page.goto("/invite");
     await expect(ana.page.getByText(shownLink(url), { exact: true })).toBeVisible();
-    await expect(ana.page.getByTestId("invite-points")).toContainText(copy.pointsAt(testEvent.name));
-    await expect(ana.page.getByText(copy.progress(0, GOLDEN_CAP_INVITES), { exact: true })).toBeVisible();
+    await expect(ana.page.getByRole("main").getByTestId("invite-points")).toContainText(copy.pointsAt(testEvent.name));
+    await expect(ana.page.getByRole("main").getByText(copy.progress(0, GOLDEN_CAP_INVITES), { exact: true })).toBeVisible();
     for (const slot of [1, 2, 3]) await expect(ana.page.getByText(copy.friendSlot(slot), { exact: true })).toBeVisible();
     await ana.page.goto("/home");
     await expect(ana.page.getByRole("link", { name: new RegExp(home.inviteTitle) })).toContainText(home.invitePoints(testEvent.name));
@@ -178,7 +178,7 @@ test.describe("referral code in real mode", () => {
     const url = new URL(`/i/${ana.user.handle}`, baseURL).toString();
     expect(await invitesOf(ana)).toMatchObject({ link: { code: ana.user.handle, url, event: null }, invitees: [], target: GOLDEN_CAP_INVITES });
     await ana.page.goto("/invite");
-    const notice = ana.page.getByTestId("invite-points");
+    const notice = ana.page.getByRole("main").getByTestId("invite-points");
     await expect(notice).toContainText(copy.noPointsTitle);
     await expect(notice).toContainText(copy.noPoints);
     await expect(ana.page.getByRole("button", { name: copy.copy, exact: true })).toBeVisible();
@@ -221,7 +221,7 @@ test.describe("referral code in real mode", () => {
     await expect.poll(() => lifetimePointsOf(inviter), POINTS_POLL).toBe(INVITE_POINTS.inviter);
 
     await inviter.page.goto("/invite");
-    await expect(inviter.page.getByText(copy.progress(1, GOLDEN_CAP_INVITES), { exact: true })).toBeVisible();
+    await expect(inviter.page.getByRole("main").getByText(copy.progress(1, GOLDEN_CAP_INVITES), { exact: true })).toBeVisible();
     await expect(inviter.page.getByText(firstName(friend.user.name), { exact: true })).toBeVisible();
   });
 
@@ -234,8 +234,8 @@ test.describe("referral code in real mode", () => {
     expect((await invitesOf(inviter)).invitees).toMatchObject([{ person: { handle: friend.user.handle }, points: 0 }]);
     expect(await lifetimePointsOf(inviter)).toBe(0);
     await inviter.page.goto("/invite");
-    await expect(inviter.page.getByText(copy.progress(1, GOLDEN_CAP_INVITES), { exact: true })).toBeVisible();
-    await expect(inviter.page.getByText(copy.noPointsShort, { exact: true })).toBeVisible();
+    await expect(inviter.page.getByRole("main").getByText(copy.progress(1, GOLDEN_CAP_INVITES), { exact: true })).toBeVisible();
+    await expect(inviter.page.getByRole("main").getByText(copy.noPointsShort, { exact: true })).toBeVisible();
   });
 
   test("three friends unlock the golden cap: over my photo, on my monito, on the board, and I can hide it @real", async ({ people, baseURL, testEvent }, testInfo) => {
@@ -259,14 +259,15 @@ test.describe("referral code in real mode", () => {
     expect(me.avatar).toEqual(storedLook);
 
     await inviter.page.goto("/invite");
-    const earned = inviter.page.getByTestId("cap-earned");
+    const earned = inviter.page.getByRole("main").getByRole("region", { name: copy.capEarned });
     await expect(earned).toContainText(copy.capEarned);
     await expect(earned.getByRole("img", { name: inviter.user.name })).toBeVisible();
     await expect(earned.locator('[data-accessory="golden_cap"]')).toBeVisible();
 
     // The board and the big screen carry it with the photo.
-    const board = await call(inviter.page.request, "GET", `/api/e/${testEvent.accessCode}/leaderboard`, Leaderboard);
-    expect(board.rows.find((row) => row.handle === inviter.user.handle)?.accessories).toEqual(["golden_cap"]);
+    const boardAccessories = async () =>
+      (await call(inviter.page.request, "GET", `/api/e/${testEvent.accessCode}/leaderboard`, Leaderboard)).rows.find((row) => row.handle === inviter.user.handle)?.accessories;
+    await expect.poll(boardAccessories, POINTS_POLL).toEqual(["golden_cap"]);
 
     // On the monito: the same cap, worn at render time.
     await call(inviter.page.request, "PATCH", "/api/me", Me, { avatarMode: "monito" });

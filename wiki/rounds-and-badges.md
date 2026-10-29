@@ -14,5 +14,6 @@ Badges can give accessories the person wears. The golden cap is the first: earne
 - One registry, `lib/monito/accessories.ts`: the accessory id (`golden_cap`), what it changes on the monito (`ACCESSORY_LOOK`) and where it sits over a round photo as fractions of the photo's size (`ACCESSORY_PLACEMENT`). A new accessory adds one entry to each.
 - The API carries `accessories` on every picture: `Card`, `Me`, leaderboard rows, the `/live` snapshot people and the home live-card pairs. `Avatar` (`components/monito/Avatar.tsx`) puts it on the monito and draws it over the photo (`AccessoryOverlay`, the same pixels as the monito's hat), at every size from a 30 px ranking row to the big screen. The stored photo and monito never change.
 - The person can wear or hide it: the switch on `/invite` (`PATCH /api/me {showAccessories}`, `users.show_accessories`, default on). Hidden, it disappears from every view; it stays earned.
+- Screenshots at 390, 834 and 1440 in Spanish and English: [docs/evidence/referral-codes](../docs/evidence/referral-codes/).
 
 Related: [points-rules](points-rules.md), [mvp-scope](mvp-scope.md).

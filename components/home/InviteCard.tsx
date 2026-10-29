@@ -15,7 +15,7 @@ type Props = { invites: InvitesT };
 // "Invita 3 y gana la gorra dorada" with three progress circles (V2Inicio).
 export function InviteCard({ invites }: Props) {
   const { home } = useCopy();
-  const done = invites.invitees.length;
+  const done = Math.min(invites.invitees.length, invites.target);
   const left = Math.max(0, invites.target - done);
   return (
     <Card href="/invite" tone="sun-soft" className="flex items-center gap-3 px-[14px] py-3">

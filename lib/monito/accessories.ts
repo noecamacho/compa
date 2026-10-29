@@ -13,7 +13,7 @@ export const ACCESSORY_LOOK: Record<Accessory, Partial<MonitoLook>> = { golden_c
 // Where each accessory sits over a round photo, as fractions of the photo's size (left/top of the overlay box, its
 // width, and a tilt), so it scales from a 30 px ranking row to the 1920 px big screen.
 export const ACCESSORY_PLACEMENT: Record<Accessory, { left: number; top: number; width: number; rotate: number }> = {
-  golden_cap: { left: 0.06, top: -0.24, width: 0.98, rotate: -10 },
+  golden_cap: { left: 0.06, top: -0.07, width: 0.88, rotate: -8 },
 };
 
 type Owner = { goldenCapAt: Date | null; showAccessories: boolean };

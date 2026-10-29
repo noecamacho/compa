@@ -1,5 +1,5 @@
 import "server-only";
-import { and, count, eq, inArray, isNotNull, isNull } from "drizzle-orm";
+import { and, asc, count, eq, inArray, isNotNull, isNull } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { bonusPoints, eventAttendees, invites, users, type EventRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
@@ -25,7 +25,7 @@ export async function myInvites({ user }: InputOf<typeof R.myInvites>): ResultOf
   const db = getDb();
   // The code works everywhere; the event only decides whether a friend joining now pays +100.
   const current = await findCurrentEvent(user.id, new Date(), db);
-  const claimed = await db.select().from(invites).where(and(eq(invites.inviterId, user.id), isNotNull(invites.inviteeId)));
+  const claimed = await db.select().from(invites).where(and(eq(invites.inviterId, user.id), isNotNull(invites.inviteeId))).orderBy(asc(invites.createdAt));
   const inviteeIds = claimed.flatMap((row) => (row.inviteeId ? [row.inviteeId] : []));
   const people = inviteeIds.length ? await db.select().from(users).where(inArray(users.id, inviteeIds)) : [];
   const cards = await cardsFor(user.id, people, db);
@@ -84,8 +84,11 @@ export async function claimInvite({ user, params }: InputOf<typeof R.claimInvite
   const [already] = await db.select({ inviterId: invites.inviterId }).from(invites).where(eq(invites.inviteeId, user.id)).limit(1);
   if (!already && (await hasCheckedIn(user, db))) return fail(E.referralNotNew);
   const event = await findCurrentEvent(inviter.id, new Date(), db);
-  if (!already) await recordReferral(inviter, user, event, db);
-  await unlockGoldenCap(inviter, db);
+  // Already referred (by this code or another): nothing to record or unlock.
+  if (!already) {
+    await recordReferral(inviter, user, event, db);
+    await unlockGoldenCap(inviter, db);
+  }
   const card = (await cardsFor(user.id, [inviter], db)).get(inviter.id) ?? fail(E.internal);
   return { body: { code: params.code, inviter: card, event: event ? eventOf(event) : null } };
 }
@@ -96,7 +99,10 @@ export async function claimInvite({ user, params }: InputOf<typeof R.claimInvite
 export async function awardInvite(invitee: UserRow, event: EventRow, connectionId: string, db: Executor = getDb()): Promise<string | null> {
   const [invite] = await db.select().from(invites).where(eq(invites.inviteeId, invitee.id)).limit(1);
   if (!invite || invite.firstConnectionAt) return null;
-  const legacyPayout = invite.code !== null && invite.inviterPoints === 0 && invite.eventId === event.id ? INVITE_POINTS.inviter : 0;
+  const legacyUnpaid = invite.code !== null && invite.inviterPoints === 0;
+  // An old link's promise holds only at its own event: a first connection elsewhere leaves it waiting, as before.
+  if (legacyUnpaid && invite.eventId !== event.id) return null;
+  const legacyPayout = legacyUnpaid ? INVITE_POINTS.inviter : 0;
   // One transaction, so a failure between marking the invite and paying it cannot lose the points (conference-scale finding 13).
   const marked = await db.transaction(async (tx) => {
     const [row] = await tx

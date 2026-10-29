@@ -25,16 +25,18 @@ type InviteCopy = Awaited<ReturnType<typeof requestCopy>>["copy"]["invite"];
 // Earned: my own picture wearing the cap (photo overlay or monito), with the switch to wear or hide it.
 function CapEarned({ me, copy }: { me: MeT; copy: InviteCopy }) {
   return (
-    <Card tone="sun-soft" className="flex items-center gap-[14px] px-4 py-[14px]" data-testid="cap-earned">
-      <span className="flex h-[108px] w-[92px] shrink-0 items-end justify-center rounded-button bg-white pb-[10px] border-ink">
-        <Avatar person={avatarOf(me)} size={68} shadow={2} />
-      </span>
-      <span className="flex min-w-0 flex-1 flex-col gap-[6px]">
-        <span className="font-display text-[22px] leading-[1.1] font-bold">{copy.capEarned}</span>
-        <span className="text-[13px] leading-[1.35] font-extrabold">{me.showAccessories ? copy.capWorn : copy.capHidden}</span>
-        <CapToggle shown={me.showAccessories} />
-      </span>
-    </Card>
+    <section aria-label={copy.capEarned}>
+      <Card tone="sun-soft" className="flex items-center gap-[14px] px-4 py-[14px]">
+        <span className="flex h-[108px] w-[92px] shrink-0 items-end justify-center rounded-button bg-white pb-[10px] border-ink">
+          <Avatar person={avatarOf(me)} size={68} shadow={2} />
+        </span>
+        <span className="flex min-w-0 flex-1 flex-col gap-[6px]">
+          <span className="font-display text-[22px] leading-[1.1] font-bold">{copy.capEarned}</span>
+          <span className="text-[13px] leading-[1.35] font-extrabold">{me.showAccessories ? copy.capWorn : copy.capHidden}</span>
+          <CapToggle shown={me.showAccessories} />
+        </span>
+      </Card>
+    </section>
   );
 }
 

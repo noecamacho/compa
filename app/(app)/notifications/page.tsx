@@ -15,7 +15,7 @@ import { requestLocale } from "@/lib/server/locale";
 
 function NotificationIcon({ item }: { item: NotificationT }) {
   if (item.kind === "badge_earned") return <Icon name="trophy" size={24} />;
-  return <Avatar person={{ name: item.person.name, look: item.person.avatar }} size={42} />;
+  return <Avatar person={{ name: item.person.name, look: item.person.avatar, accessories: item.person.accessories }} size={42} />;
 }
 
 function NotificationCard({ item, locale, all }: { item: NotificationT; locale: Locale; all: ReturnType<typeof copyFor> }) {
