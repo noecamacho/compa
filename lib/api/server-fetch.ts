@@ -1,6 +1,7 @@
 import "server-only";
 import { headers } from "next/headers";
 import type { z } from "zod";
+import { mockHeadersFor } from "./mock-cookie";
 import { MOCK_HEADERS } from "./mock-headers";
 
 // Server Components call the API over HTTP so pages and clients share one contract (lib/api/routes.ts).
@@ -31,8 +32,7 @@ type Options = { mockExample?: string };
 
 export async function apiGet<T extends z.ZodType>(path: string, schema: T, options: Options = {}): Promise<z.output<T>> {
   const { origin, cookie } = await originAndCookies();
-  const requestHeaders: Record<string, string> = { cookie };
-  if (process.env.API_MODE === "mock") requestHeaders[MOCK_HEADERS.mock] = "1";
+  const requestHeaders: Record<string, string> = { cookie, ...mockHeadersFor(cookie) };
   if (options.mockExample) requestHeaders[MOCK_HEADERS.example] = options.mockExample;
   const response = await fetch(`${origin}${path}`, { headers: requestHeaders, cache: "no-store" });
   if (!response.ok) throw await errorFrom(response);
@@ -42,8 +42,7 @@ export async function apiGet<T extends z.ZodType>(path: string, schema: T, optio
 // Fire-and-forget POST from a page (e.g. claiming an invite after sign-in); failures are logged, never shown.
 export async function apiPostQuietly(path: string, body: unknown = {}): Promise<void> {
   const { origin, cookie } = await originAndCookies();
-  const requestHeaders: Record<string, string> = { cookie, "Content-Type": "application/json" };
-  if (process.env.API_MODE === "mock") requestHeaders[MOCK_HEADERS.mock] = "1";
+  const requestHeaders: Record<string, string> = { cookie, "Content-Type": "application/json", ...mockHeadersFor(cookie) };
   const response = await fetch(`${origin}${path}`, { method: "POST", headers: requestHeaders, body: JSON.stringify(body), cache: "no-store" }).catch(() => null);
   if (!response?.ok) console.error("quiet post failed", path, response?.status);
 }
