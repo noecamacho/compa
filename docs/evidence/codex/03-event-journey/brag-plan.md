@@ -30,6 +30,8 @@ Music: Happy Beats / Business Moves Vol. 1 by Sascha Ende, ende.app, CC BY 4.0; 
 
 Audio-reactive extraction helper unavailable (numpy missing); subtle reactive modulation omitted rather than installing scientific dependencies on the loaded PC.
 
+Ranking uses the settled `390-es-reduced.jpg` audit frame, with no onboarding overlay.
+
 ## Grounding and privacy
 
 Mock attendees and figures are fictional, not attendance claims or testimonials. Network study is an existing research prototype, explicitly labeled on screen if used. Public test event screenshot is read-only. Historical mock UI may predate current copy. No production records were created or modified.

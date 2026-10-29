@@ -1,5 +1,7 @@
 # Built with Codex
 
+Open [the local video gallery](index.html) after downloading this directory.
+
 Five bilingual COMPA marketing edits, authored with **GPT-6.1-Sol / high reasoning**, Brag **full** workflow and Hyperframes. Each edit is 20 seconds at 1920×1080, with Spanish and English copy, local music, sound effects and a custom poster.
 
 | Edit | Focus | Video | Share caption |

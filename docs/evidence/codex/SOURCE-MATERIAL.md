@@ -4,7 +4,7 @@ The five edits were authored in Codex using Brag 0.5.0's **full** workflow and H
 
 | Material | Source | Treatment |
 | --- | --- | --- |
-| Attendee home, personal QR, request, saved connections, ranking | `docs/research/ux-audit-parts/attendee/shots/{home,connect,request,connections,ranking}/390-es.jpg` | Existing fictional Founders Fest audit fixtures; cropped bottom debug badge, placed inside animated phone stages |
+| Attendee home, personal QR, request, saved connections, ranking | `docs/research/ux-audit-parts/attendee/shots/{home,connect,request,connections,ranking}/390-es.jpg` | Existing fictional Founders Fest audit fixtures (ranking uses `390-es-reduced.jpg`); cropped bottom debug badge, placed inside animated phone stages |
 | Organizer event console | `docs/research/ux-audit-parts/public-admin/shots/admin-event/1440x900-es.jpg` | Existing mock; cropped to event statistics, attendee list and QR, excluding organizer identity |
 | Organizer event list | `docs/research/ux-audit-parts/public-admin/shots/admin-events/1440x900-es.jpg` | Existing mock screenshot |
 | Live production test event | `https://compa.lol/e/7mkjm9pfb9/live?mock=1` | Read-only screenshot of the existing Codex Conf 2026 test event; 15 people and 5 connections at capture. The page's server fetch does not propagate the query flag, so these are existing test-event records, not a claim of API-mocked SSR |
