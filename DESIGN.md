@@ -18,36 +18,37 @@ Stack: the README suggests Expo + React Native. The repository builds a **Next.j
 
 ## Screens
 
-The README "Flujo" lists 16 screens plus the dock. Routes are **suggestions** for the App Router. The dock in `components/nav/Dock.tsx` already links `/home`, `/connect`, `/connections` and `/me`. API routes are the ones in `lib/api/routes.ts`. The data each screen needs and its gaps are in the [gap analysis](docs/backend-gap-analysis.md).
+The README "Flujo" lists 16 screens plus the dock. The routes are **built** under `app/(app)/` (PR #14, see [wiki/screens](wiki/screens/README.md)); screens under `app/(app)/` require a session. Pages read the API over HTTP and validate responses with zod (`lib/api/server-fetch.ts`, `lib/api/client.ts`), so in mock mode (`API_MODE=mock`) every screen renders. Several screens depend on routes that answer 501 outside mock mode; which ones is in the gap analysis. API routes are the ones in `lib/api/routes.ts`. The data each screen needs and its gaps are in the [gap analysis](docs/backend-gap-analysis.md).
 
-| # | Mock | Suggested route | Purpose | Key components | Data needed (API) | Navigation (mock `href`s) |
+| # | Mock | Route | Purpose | Key components | Data needed (API) | Navigation (mock `href`s) |
 | --- | --- | --- | --- | --- | --- | --- |
 | 01 | `V2Bienvenida` | `/` (signed out) | Logo, 3-step promise, Crear cuenta / Ya tengo cuenta toggle, a single LinkedIn button | `Segmented`, `ButtonLink variant="linkedin"`, `Avatar`, `Pill` | `GET /auth/linkedin?next=` | Crear cuenta → 02; Ya tengo cuenta → 03 |
-| 02 | `V2Perfil` | `/onboarding/profile` (also the edit entry from 09) | LinkedIn data prefilled and editable (name, job title, company, city); network toggles; "Paso 1 de 2" | `Field`, `IconButton` (network toggles), `Button` | `GET /api/me`, `PATCH /api/me`, `PATCH /api/me/visibility` | back → 01; Siguiente → 02b |
-| 02b | `V2Monito` | `/onboarding/monito` (and `/me/monito`) | Monito builder: 5 skins, 4 hair styles, 4 hair colors, 6 shirts, extras cap/glasses/beard, random | `Monito`, `Chip`, `lib/monito/look.ts` builder helpers | storage for the look (missing, see gap analysis) | back → 02; Listo, entrar → 03 |
+| 02 | `V2Perfil` | `/onboarding/profile` (`?from=me` to edit) | LinkedIn data prefilled and editable (name, job title, company, city); network toggles; "Paso 1 de 2" | `Field`, `IconButton` (network toggles), `Button` | `GET /api/me`, `PATCH /api/me`, `PATCH /api/me/visibility` | back → 01; Siguiente → 02b |
+| 02b | `V2Monito` | `/onboarding/monito` (`?from=me` to change) | Monito builder: 5 skins, 4 hair styles, 4 hair colors, 6 shirts, extras cap/glasses/beard, random | `Monito`, `Chip`, `lib/monito/look.ts` builder helpers | storage for the look (missing, see gap analysis) | back → 02; Listo, entrar → 03 |
 | 03 | `V2Inicio` | `/home` | Greeting, bell with count, LIVE card (event, end time, connection count, animated pairs), my rank and points with delta, Conectar, Invite 3 friends card | `Avatar`, `Card`, `Pill`, `Stat`, `Dock` | `GET /api/me` (current event), `GET /api/events/{slug}`, `GET /api/events/{slug}/live`, `GET /api/events/{slug}/leaderboard`, `GET /api/connections` (incoming count) | avatar → 09; rank → 11; Conectar → 04; Invitar → 12 |
 | 03b | `V2InicioVacio` | `/home` (0 connections) | Same Home on the first night: "Tu primera conexión te mete al ranking +50", sticker "Empieza aquí" on Conectar, "faltan 3" | as 03 | as 03 | rank card and Conectar → 04; Invitar → 12 |
 | 04 | `V2Conectar` | `/connect` (`?tab=scan`) | Tabs Mi QR (name + 274 px QR) / Escanear (camera viewfinder, detected person with Conectar, name search fallback); chip Invitar | `Segmented`, `Avatar`, `Button`, `Field`, `Dock` | `GET /api/me` (handle → QR `https://<domain>/u/<handle>`, A8), `GET /api/users/{handle}`, name search (missing) | Invitar → 12; Conectar → 05 |
 | 05 | `V2Registrar` | `/connect/[handle]` (reached from the scanner and from `/u/[handle]`) | Person card, "Ya se conocían" tag, kind (Nueva +50 / Reencuentro +20), "¿De qué hablaron?" chips (+5), optional voice note in the states not recorded / recording / saved (+15), Confirmar · +N pts | `Avatar`, `Card`, `Chip`, `Button`, `lib/audio/recorder.ts` | `GET /api/users/{handle}`, `POST /api/connections` (`knew`, `screenConsent`), `POST /api/transcribe` | back → 04; Confirmar → 06 |
 | 06 | `V2Confirmacion` | `/connections/[id]/done` | Two monitos, big +pts with pop, title, breakdown; "De qué platicaron" (chips + AI summary); "Conecta con [persona]" with their networks as icon buttons; Listo | `Avatar`, `Pill` (`animate-pop`), `Tag`, `IconLink`, `Button` | accept result or `request.accepted`, `POST /api/interactions/draft`, the unlocked `Card.links` | summary → 08b; Listo → 03 |
-| 06b | `V2Solicitud` | `/requests/[id]` (or a sheet over `/home`) | What the scanned person sees: who, rank, 3 numbers (in common, connections, events), people in common, interests, "Al aceptar, los dos ganan +20 pts", Aceptar / Ahora no | `Avatar`, `Card`, `Stat`, `Tag`, `Button` | `GET /api/connections` (`incoming`), `POST /api/connections/{id}/accept` / `decline`, Realtime `request.received` | Aceptar → 06; Ahora no → 03 |
+| 06b | `V2Solicitud` | `/requests/[id]` | What the scanned person sees: who, rank, 3 numbers (in common, connections, events), people in common, interests, "Al aceptar, los dos ganan +20 pts", Aceptar / Ahora no | `Avatar`, `Card`, `Stat`, `Tag`, `Button` | `GET /api/connections` (`incoming`), `POST /api/connections/{id}/accept` / `decline`, Realtime `request.received` | Aceptar → 06; Ahora no → 03 |
 | 07 | `V2Conexiones` | `/connections` | List of connections with a kind filter (Todas / Nueva / Reencuentro / Amigo) and an event chip | `Chip`, `Avatar`, `Card`, `Dock` | `GET /api/connections` (`people[]`, `incoming[]`) | row → 08 |
 | 08 | `V2PerfilOtro` | `/people/[handle]` | A connected person: monito, name, job title, city, points and rank, shelf of 5 badges, relation numbers (reconnections, events together, in common), "La última vez", connections in common | `Avatar`, `BadgeShelf`, `Stat`, `Card` | `GET /api/users/{handle}`, `GET /api/connections` (meetings), summary read (missing) | back → 07; last time → 08b; badges → 10; points → 11 |
 | 08b | `V2NotaVoz` | `/connections/[id]/note` | Note detail: recording state; "Lo que Compa entendió" (one-line title, 3 points, chips, detected follow-up with "Recordar", +15); Guardar / Regrabar / Editar | `Card`, `Tag`, `Button`, recorder | `POST /api/transcribe`, `POST /api/interactions/draft`, `POST /api/interactions/{id}/approve` | Guardar → 08 |
 | 09 | `V2MiPerfil` | `/me` | My monito (tap to change), name, job title, city, points and rank; badge shelf; numbers (new, reconnections, events); 4 network toggles with handle or "oculto"; links to Ranking and Mi monito; QR and edit at the top | `Avatar`, `BadgeShelf`, `StatGrid`, `IconButton`, `Card`, `Dock` | `GET /api/me`, `PATCH /api/me/visibility`, `GET /api/connections` (totals) | monito → 02b; badges → 10; Ranking → 11; edit → 02; QR → 04 |
-| 10 | `V2Insignias` | `/me/badges` (`/people/[handle]/badges` for others) | The 20 badges with a filter Todas / Ganadas / Por ganar, progress bar, "N a punto · N secretas", secrets without hints | `Badge` (`earned` / `locked`), `ProgressBar`, `Chip` | badge state per user (missing) | back → 09 |
-| 11 | `V2Ranking` | `/ranking` (`?scope=night\|year`) | Podium of 3 with confetti, scope toggle Esta noche / Todo el año, "Tú" card with the gap to the next person, the row above you, Conectar ahora | `Avatar`, `Segmented`, `ProgressBar`, `Card` | `GET /api/events/{slug}/leaderboard`; all-year ranking (missing) | people → 08; back → 03; Conectar ahora → 04 |
+| 10 | `V2Insignias` | `/me/badges` (`?of=[handle]` for others) | The 20 badges with a filter Todas / Ganadas / Por ganar, progress bar, "N a punto · N secretas", secrets without hints | `Badge` (`earned` / `locked`), `ProgressBar`, `Chip` | badge state per user (missing) | back → 09 |
+| 11 | `V2Ranking` | `/ranking` (in-page toggle) | Podium of 3 with confetti, scope toggle Esta noche / Todo el año, "Tú" card with the gap to the next person, the row above you, Conectar ahora | `Avatar`, `Segmented`, `ProgressBar`, `Card` | `GET /api/events/{slug}/leaderboard`; all-year ranking (missing) | people → 08; back → 03; Conectar ahora → 04 |
 | 12 | `V2Invitar` | `/invite` | Reward (golden cap for 3 friends), 4 progress slots, invite link with Copiar, share to WhatsApp / Instagram / Más, Mostrar mi QR de invitación | `Monito` (`GOLDEN_CAP`), `Avatar`, `Button` | invites (missing) | back → 03; QR → 04 |
 | — | `DockV2` | layout of 03, 03b, 04, 07, 09 | Pill of 327×66 with Inicio, Conectar, Conexiones and Perfil; the color "drop" travels to the active tab (sky, mint, gum, sun) | `Dock`, `Screen dock` | — | `/home`, `/connect`, `/connections`, `/me` |
 
 Surfaces that the specs require but the handoff does not draw:
 
-| Surface | Suggested route | Source | Notes |
+| Surface | Route | Source | Notes |
 | --- | --- | --- | --- |
-| Personal QR landing | `/u/[handle]` | A1, A8 | The phone's native camera opens this URL. Signed out: LinkedIn → check-in notice → 05. Signed in: straight to 05 |
-| Event check-in | `/e/[slug]` | M9, M13, `POST /api/events/{slug}/check-in` | Must show the notice "your name and photo will appear on the event screen" before `screenConsent: true` |
-| Big screen | `/live/[slug]` | A5, A6 | See [Big screen](#big-screen-live) |
-| Admin: create an event | `/admin/events` | M10, `POST /api/admin/events` | Admins only; plain form, any style |
+| Personal QR landing | `/u/[handle]` (built: redirects to `/connect/[handle]`) | A1, A8 | The phone's native camera opens this URL. Signed in: straight to 05. Signed out it should go LinkedIn → check-in notice → 05, but today the session guard sends it to `/` and the handle is lost |
+| Event check-in | `/e/[slug]` (not built) | M9, M13, `POST /api/events/{slug}/check-in` | Must show the notice "your name and photo will appear on the event screen" before `screenConsent: true` |
+| Big screen | `/live/[slug]` (not built) | A5, A6 | See [Big screen](#big-screen-live) |
+| Admin: create an event | `/admin/events` (not built) | M10, `POST /api/admin/events` | Admins only; plain form, any style |
+| Invite link | `/i/[code]` (built) | V2 `V2Invitar` | Sends to LinkedIn with `next=/onboarding/profile?invite=<code>`; the claim route is mock only |
 
 ## Visual system
 
@@ -121,7 +122,23 @@ All tokens are defined once in `app/globals.css` (`@theme`) and come from README
 | `Badge`, `BadgeShelf` | `components/badges/*.tsx` + `lib/badges/catalog.ts` | The 20 badges, states `earned` / `locked`, tilted shelf of 5 |
 | `Dock` | `components/nav/Dock.tsx` | DockV2 with route-based active tab |
 
-Not built yet: the QR code renderer, the camera scanner, the toast or sheet for incoming requests, the "NUEVA" sticker, skeletons, an error banner, and every page except `/design`.
+Screen components added with the screens (PR #14):
+
+| Component | File | What it covers |
+| --- | --- | --- |
+| `Header` | `components/ui/Header.tsx` | Back button and title row |
+| `Welcome` | `components/welcome/Welcome.tsx` | 01 with the create / sign-in toggle |
+| `ProfileForm`, `LinkToggles`, `MyLinkToggles` | `components/profile/` | 02 form; network toggles (on → `connections`, off → `hidden`) |
+| `MonitoBuilder` | `components/monito/MonitoBuilder.tsx` | 02b builder, saves `avatar` through `PATCH /api/me` |
+| `LiveCard`, `InviteCard` | `components/home/` | Home LIVE card with rising pairs; invite progress |
+| `ConnectTabs`, `ScanPanel`, `RegisterForm` | `components/connect/` | 04 tabs, QR (`qrcode` package), camera scan with `BarcodeDetector`, handle lookup; 05 form |
+| `VoiceNoteButton`, `NoteEditor` | `components/record/` | Recording states on 05; 08b draft, edit and approve |
+| `ConnectionList`, `RequestActions` | `components/connections/` | 07 list and filters; 06b accept / "Ahora no" (decline) |
+| `RankingView` | `components/ranking/RankingView.tsx` | 11 podium, scope toggle, "Tú" card |
+| `BadgeGrid` | `components/badges/BadgeGrid.tsx` | 10 grid and filters |
+| `InviteActions` | `components/invite/InviteActions.tsx` | Copy and share (`navigator.clipboard`, `navigator.share`) |
+
+Not built yet: the `/live` page, the event check-in page, the screen-consent notice, the toast or sheet for incoming requests (the bell is not a link), the "NUEVA" sticker, skeletons, an offline banner, a sign-out button.
 
 ## Internationalization
 
@@ -133,6 +150,7 @@ Captain decision, 2026-10-29: **the app is bilingual, English and Spanish** (res
 - **Formatting:** dates, times ("hasta las 22:00"), relative times ("hace 1 min") and numbers ("1,265 pts") go through `Intl` with the resolved locale. Event times show in the event's time zone ([open question #22](wiki/open-questions.md)).
 - **Layout:** leave about 30 % extra width for text in either language. Buttons, chips, the dock's open label (110 px max in `Dock.tsx`) and stickers must not clip.
 - **Server-rendered copy:** `app/layout.tsx` hard-codes `lang="es"` and a Spanish description, so both must follow the resolved locale.
+- **Status on the branch (2026-10-29):** only `lib/copy/es.ts` exists, and there is no English dictionary. There is no locale detection: pages import `lib/copy/es` directly. `lib/format.ts` hard-codes `es-MX`. Components show the API's English `message` on errors (`RegisterForm`, `RequestActions`, `ProfileForm`, `MonitoBuilder`, `NoteEditor`) instead of mapping the `code`. The remaining work is in the [gap analysis](docs/backend-gap-analysis.md#5-internationalization-backend-impact).
 - **AI language follows the speaker, independent of the UI locale** (captain, 2026-10-29). Transcription keeps the spoken language, detected automatically. The summary and next steps are written in that same language. Topics always come from the fixed DB `interests` list, whatever the language. A Spanish note therefore shows a Spanish summary even to an English UI, and only the labels around it are localized.
 - **Data in both languages:** interest and topic labels and badge names are shown through the dictionary, keyed by `slug` or badge id; `interests.name` stays single-language. Backend impact: [gap analysis §5](docs/backend-gap-analysis.md#5-internationalization-backend-impact).
 
@@ -165,7 +183,7 @@ README "Pendientes conocidos" lists these as not drawn. Each needs a design befo
 
 | Pending | What it must cover | Backend support |
 | --- | --- | --- |
-| Request sent (scanner side) | Wait state after 05 while B decides; optional "we already knew each other" tick; becomes "Connected! +N" live; stays "pending" after a silent decline (M8, A4) | `POST /api/connections`, `PATCH /api/connections/{id}/knew`, `request.accepted` or polling |
+| Request sent (scanner side) | Partly built as the pending branch of `/connections/[id]/done` ("Solicitud enviada a …"). Wait state after 05 while B decides; optional "we already knew each other" tick; becomes "Connected! +N" live; stays "pending" after a silent decline (M8, A4) | `POST /api/connections`, `PATCH /api/connections/{id}/knew`, `request.accepted` or polling |
 | Notifications (the bell on Home) | Incoming requests and acceptances, in the app only, no push (A3) | `GET /api/connections` `incoming`; no notifications store |
 | Camera permission | Ask before opening Escanear, and explain the denied state with a fallback | client only |
 | Home outside an event | `currentEvent: null`: no LIVE card; show the all-year rank and how to check in | `GET /api/me` |
@@ -201,13 +219,13 @@ Decided:
 
 Open (see [open questions](wiki/open-questions.md)):
 
-- Points table: V2 50/20/+5/+15/+100/+50 vs M3/M18 20/10/+25 ([#28](wiki/open-questions.md), [#29](wiki/open-questions.md)).
+- Points table: the code now uses the V2 values (`lib/points.ts`, migration `drizzle/0001_v2_points_whatsapp.sql`: 50/20, +5, +15, +100/+50), while the specs still say M3/M18 (20/10, +25). The captain has to ratify it ([#28](wiki/open-questions.md), [#29](wiki/open-questions.md)).
 - Who sets the kind and topics, and whether the voice note can come before acceptance (`V2Registrar` → `V2Confirmacion` vs M6, A9) ([#30](wiki/open-questions.md)).
 - Networks: V2 LinkedIn, Instagram, WhatsApp, X vs code linkedin, github, x, instagram, web ([#31](wiki/open-questions.md)).
 - Visibility: V2 on/off toggles shown only to connections vs three levels per field (M12) ([#32](wiki/open-questions.md)).
 - Profile fields: city, and job title vs `headline`; what LinkedIn really prefills ([#33](wiki/open-questions.md)).
 - Badges, monito storage, invites and the all-year ranking ([#34](wiki/open-questions.md)–[#37](wiki/open-questions.md)).
-- Topic vocabulary for a founders event ([#38](wiki/open-questions.md)); name search ([#39](wiki/open-questions.md)); the "Amigo" kind ([#40](wiki/open-questions.md)); the voice-note summary shape ([#41](wiki/open-questions.md)); "Ahora no" semantics ([#42](wiki/open-questions.md)).
+- Topic vocabulary for a founders event ([#38](wiki/open-questions.md)); name search ([#39](wiki/open-questions.md)); the "Amigo" kind ([#40](wiki/open-questions.md)); the voice-note summary shape ([#41](wiki/open-questions.md)); "Ahora no" semantics (built as decline, [#42](wiki/open-questions.md)).
 - In-app camera scanning in V2 vs native-camera scanning in ADR-004: both can coexist through `/u/[handle]`.
 - Event time window and time zone ([#22](wiki/open-questions.md)); handle shown or editable ([#26](wiki/open-questions.md)); private Realtime channels ([#27](wiki/open-questions.md)).
 

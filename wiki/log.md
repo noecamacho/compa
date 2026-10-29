@@ -88,3 +88,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | What does V2 need from the backend?
 
 - Rewrote `DESIGN.md` from the V2 handoff (with the bilingual UI decision and "AI language follows the speaker") and added `docs/backend-gap-analysis.md` (34 use cases: 11 Ready, 11 Partial, 7 Missing, 5 Conflict); open question #6 superseded by the bilingual decision; conflicts logged as [open-questions](open-questions.md) #29–#42.
+
+## [2026-10-29] query | Which V2 screens work outside mock mode?
+
+- Re-checked the gap analysis against the V2 screens (PR #14/#17) and PR #15: 35 use cases, 2 Ready, 15 Partial, 13 Mock-only, 4 Missing, 1 Conflict. `GET /api/connections/{id}`, `/api/badges` and `/api/invites/me` answer 501 in real mode and block 06, 06b, 08b, Home, Badges and Invite; `lib/server/*` ignores the new `city`, `avatar`, `topics` and `scope` fields. Open questions #29, #31, #32 and #42 note what the code now does.
