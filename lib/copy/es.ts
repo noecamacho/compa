@@ -614,6 +614,9 @@ export const tour = {
   },
 };
 
+// Counts inside admin copy go through Intl so 1340 reads "1,340" (spec §6.7).
+const num = (value: number) => new Intl.NumberFormat("es-MX").format(value);
+
 // Super-admin console (/admin, API spec A11). Bilingual: lib/copy/en.ts has the English twin.
 export const admin = {
   title: "Admin",
@@ -759,6 +762,54 @@ export const admin = {
       count: (used: number, max: number) => `${used}/${max}`,
     },
     tests: { countRange: "Entre 1 y 50.", countInvalid: "Elige un número entre 1 y 50." },
+    kpi: {
+      running: "En curso",
+      upcoming: "Próximos",
+      checkIns: "Registros",
+      connections: "Conexiones",
+      drafts: "Borradores",
+      people: "Personas",
+      ofLive: (count: number) => `de ${num(count)} activos`,
+      last24h: (count: number) => `+${num(count)} en 24 h`,
+      pending: (count: number) => (count === 1 ? "1 pendiente" : `${num(count)} pendientes`),
+    },
+    phase: { draft: "Borrador", upcoming: "Próximo", running: "En curso", ended: "Terminado", archived: "Archivado" },
+    list: {
+      range: (from: number, to: number, total: number) => `${num(from)}–${num(to)} de ${num(total)}`,
+      prev: "Anterior",
+      next: "Siguiente",
+      pageOf: (page: number, pages: number) => `Página ${num(page)} de ${num(pages)}`,
+      pageSize: "Por página",
+      clearFilters: "Quitar filtros",
+      noMatch: (query: string) => (query ? `Nada coincide con “${query}”.` : "Nada coincide con estos filtros."),
+      pastEnd: (page: number) => `La página ${num(page)} no existe.`,
+      lastPage: "Ir a la última página",
+      truncated: (shown: number, total: number) => `Se muestran los ${num(shown)} más recientes de ${num(total)}.`,
+      pagination: "Paginación",
+    },
+    sort: { name: "Nombre", startsAt: "Fecha", attendees: "Dentro", connections: "Conexiones", createdAt: "Creado", status: "Estado", asc: "Ascendente", desc: "Descendente" },
+    tabs: { overview: "Resumen", people: "Personas", organizers: "Organizadores", settings: "Ajustes", qr: "QR" },
+    menu: {
+      open: "Abrir",
+      copyLink: "Copiar liga de entrada",
+      openLive: "Abrir en vivo",
+      downloadQr: "Descargar QR (SVG)",
+      print: "Imprimir",
+      restore: "Restaurar",
+      more: "Más",
+      moreFor: (name: string) => `Más acciones para ${name}`,
+    },
+    bulk: {
+      selected: (count: number) => (count === 1 ? "1 seleccionado" : `${num(count)} seleccionados`),
+      clear: "Quitar selección",
+      result: (ok: number, failed: number) => `${ok === 1 ? "1 listo" : `${num(ok)} listos`}${failed ? `, ${failed === 1 ? "1 falló" : `${num(failed)} fallaron`}` : ""}`,
+    },
+    nav: {
+      skip: "Saltar al contenido",
+      testAdminBanner: "Admin de prueba: solo ves eventos y personas de prueba.",
+      testAdmin: "ADMIN DE PRUEBA",
+      menu: "Menú",
+    },
   },
   tests: {
     title: "Usuarios de prueba",

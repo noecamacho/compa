@@ -90,6 +90,8 @@ export const notFound: typeof es.notFound = {
   home: "Go home",
 };
 
+const num = (value: number) => new Intl.NumberFormat("en-US").format(value);
+
 export const admin: typeof es.admin = {
   title: "Admin",
   nav: { events: "Events", people: "People", testUsers: "Testing", app: "Back to the app" },
@@ -234,6 +236,54 @@ export const admin: typeof es.admin = {
       count: (used: number, max: number) => `${used}/${max}`,
     },
     tests: { countRange: "Between 1 and 50.", countInvalid: "Pick a number between 1 and 50." },
+    kpi: {
+      running: "Running now",
+      upcoming: "Upcoming",
+      checkIns: "Check-ins",
+      connections: "Connections",
+      drafts: "Drafts",
+      people: "People",
+      ofLive: (count: number) => `of ${num(count)} live`,
+      last24h: (count: number) => `+${num(count)} in 24 h`,
+      pending: (count: number) => `${num(count)} pending`,
+    },
+    phase: { draft: "Draft", upcoming: "Upcoming", running: "Running", ended: "Ended", archived: "Archived" },
+    list: {
+      range: (from: number, to: number, total: number) => `${num(from)}–${num(to)} of ${num(total)}`,
+      prev: "Previous",
+      next: "Next",
+      pageOf: (page: number, pages: number) => `Page ${num(page)} of ${num(pages)}`,
+      pageSize: "Per page",
+      clearFilters: "Clear filters",
+      noMatch: (query: string) => (query ? `Nothing matches “${query}”.` : "Nothing matches these filters."),
+      pastEnd: (page: number) => `Page ${num(page)} doesn't exist.`,
+      lastPage: "Go to the last page",
+      truncated: (shown: number, total: number) => `Showing the newest ${num(shown)} of ${num(total)}.`,
+      pagination: "Pagination",
+    },
+    sort: { name: "Name", startsAt: "Date", attendees: "Inside", connections: "Connections", createdAt: "Created", status: "Status", asc: "Ascending", desc: "Descending" },
+    tabs: { overview: "Overview", people: "People", organizers: "Organizers", settings: "Settings", qr: "QR" },
+    menu: {
+      open: "Open",
+      copyLink: "Copy join link",
+      openLive: "Open live",
+      downloadQr: "Download QR (SVG)",
+      print: "Print",
+      restore: "Restore",
+      more: "More",
+      moreFor: (name: string) => `More actions for ${name}`,
+    },
+    bulk: {
+      selected: (count: number) => `${num(count)} selected`,
+      clear: "Clear selection",
+      result: (ok: number, failed: number) => `${num(ok)} done${failed ? `, ${num(failed)} failed` : ""}`,
+    },
+    nav: {
+      skip: "Skip to content",
+      testAdminBanner: "Test admin: you only see test events and test people.",
+      testAdmin: "TEST ADMIN",
+      menu: "Menu",
+    },
   },
   tests: {
     title: "Test users",
