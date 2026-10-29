@@ -163,3 +163,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | What is needed to send attendee email sign-in links?
 
 - Hosted Supabase projects need custom SMTP or a Send Email hook to send magic links to arbitrary attendee addresses; its built-in email service only sends to team members and is limited to two emails per hour ([Supabase SMTP guide](https://supabase.com/docs/guides/auth/auth-smtp)). The README and API quickstart now state this deployment requirement.
+
+## [2026-10-29] query | Admin console responsive pass
+
+- `/admin` now follows the V2 breakpoints (390/834/1440): tables from md, cards below, consequence dialogs proportional to stakes (`components/admin/ConfirmDialog.tsx`), inline validation in `EventForm`. UI only; no API or data-model change.
