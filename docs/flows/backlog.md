@@ -525,7 +525,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | ui | **P0** | connections+points | T-000, T-030 | S |
-- **State:** Done. The bell links to `/notifications` (T-080) and home polled already; `/connections` now renders incoming on top, `lib/use-poll.ts` pauses on hidden tabs and backs off on errors, and `/requests/[id]` shows the expired copy. The e2e spec waits on T-000 (Playwright not installed); `lib/use-poll.test.ts` covers the poller.
+- **State:** Done. The bell links to `/notifications` (T-080) and home polled already; `/connections` now renders incoming on top, `lib/use-poll.ts` pauses on hidden tabs and backs off on errors, and `/requests/[id]` shows the expired copy. `e2e/requests/incoming.spec.ts` (mock mode) covers the bell, the list, polling and the expired copy; `lib/use-poll.test.ts` covers pause and backoff.
 
 - **E2E:** `e2e/requests/incoming.spec.ts`. Scenarios: bell count and link; incoming list on `/connections`; a request created by a second browser context appears within 4 s by polling; expired request shows `event_ended` copy.
 - **Files:** `app/(app)/home/page.tsx` (the bell is an `IconButton` without `href`), `components/connections/ConnectionList.tsx` (does not render `incoming`), a new client hook `lib/use-poll.ts`.
