@@ -68,3 +68,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Where do environment variables live?
 
 - Captain decision: Vercel is the single place for env values, and the captain adds and rotates the secrets. `.env.example` lists names only; the only GitHub secrets are the three deploy-workflow ones. Recorded in `docs/api-quickstart.md`.
+
+## [2026-10-29] query | Do we keep preview deployments?
+
+- Captain decision: no previews and only one deployment. The Vercel workflow runs only on pushes to `main` and deletes every other deployment after a successful deploy; existing previews and old deployments were deleted by hand.
