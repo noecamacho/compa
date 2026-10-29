@@ -13,8 +13,8 @@ type Props = {
 export function Screen({ children, dock = false, gap = 14, className }: Props) {
   return (
     <main
-      className={`paper-dots relative mx-auto flex min-h-dvh w-full max-w-[390px] flex-col px-[18px] pt-12 ${dock ? "pb-[104px]" : "pb-[30px]"} ${className ?? ""}`}
-      style={{ gap }}
+      className={`paper-dots relative mx-auto flex min-h-dvh w-full max-w-[390px] flex-col px-[18px] pt-12 ${className ?? ""}`}
+      style={{ gap, paddingBottom: dock ? "calc(104px + env(safe-area-inset-bottom))" : "calc(30px + env(safe-area-inset-bottom))" }}
     >
       {children}
     </main>

@@ -105,8 +105,10 @@ export function DockHost() {
       data-tour={shown ? "dock" : undefined}
       aria-hidden={!shown}
       inert={!shown}
-      className="fixed bottom-5 left-1/2 z-10"
+      className="fixed left-1/2 z-30"
       style={{
+        // Clear the iPhone home indicator; 20 px elsewhere.
+        bottom: "max(20px, calc(env(safe-area-inset-bottom) + 8px))",
         transform: shown ? "translate(-50%, 0)" : "translate(-50%, 120px)",
         opacity: shown ? 1 : 0,
         transition: `transform .45s ${EASE}, opacity .3s ease`,

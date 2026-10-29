@@ -4,7 +4,7 @@ import { AlertsBell, IncomingRequests } from "@/components/home/IncomingRequests
 import { InviteCard } from "@/components/home/InviteCard";
 import { LiveCard } from "@/components/home/LiveCard";
 import { Icon } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Tour } from "@/components/tour/Tour";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
@@ -14,6 +14,7 @@ import { apiGet, apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
 import { home, tour } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
+import { StickyBar } from "@/components/ui/StickyBar";
 
 type Props = { searchParams: Promise<{ demo?: string }> };
 
@@ -53,13 +54,13 @@ export default async function HomePage({ searchParams }: Props) {
   const incoming = empty ? [] : list.incoming;
   return (
     <Screen dock>
-      <div className="flex h-[46px] items-center justify-between">
+      <StickyBar className="flex items-center justify-between">
         <Link href="/me" className="flex items-center gap-3 tappable">
-          <Avatar person={{ name: me.name, look: me.avatar }} size={46} shadow={3} />
+          <Avatar person={avatarOf(me)} size={46} shadow={3} />
           <span className="font-display text-[24px] leading-none font-bold">{home.hello(firstName(me.name))}</span>
         </Link>
         <AlertsBell initial={incoming} />
-      </div>
+      </StickyBar>
 
       <IncomingRequests initial={incoming} />
 
