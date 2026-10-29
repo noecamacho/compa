@@ -1,0 +1,270 @@
+// The projected live board under every scenario it must survive (docs/research/live-dataviz.md). Runs against
+// `API_MODE=mock bun run dev`: the server renders the mock snapshot, then the board's 3 s poll is answered here
+// with scripted frames from lib/testing/live-scenarios.ts. No database, no LinkedIn.
+// LIVE_SHOTS=<dir> also writes the screenshots used in the research doc.
+import { expect, test, type Page, type Route } from "@playwright/test";
+import path from "node:path";
+import { SCENARIOS, scenarioFrames, type ScenarioName } from "../../lib/testing/live-scenarios";
+
+const LIVE_PATH = "/e/k7m2p9xq4t/live";
+const POLL = "**/api/e/*/live";
+const VIEWPORTS = { phone: { width: 390, height: 844 }, tablet: { width: 834, height: 1112 }, laptop: { width: 1440, height: 900 }, screen: { width: 1920, height: 1080 } } as const;
+
+type Serve = { fail?: (poll: number) => boolean; frames?: ReturnType<typeof scenarioFrames> };
+
+// Answers the board's polls in order; after the last frame it keeps answering with the last one.
+async function serveScenario(page: Page, name: ScenarioName, options: Serve = {}) {
+  const frames = options.frames ?? scenarioFrames(name);
+  const polls: number[] = [];
+  await page.route(POLL, async (route: Route) => {
+    const poll = polls.length;
+    polls.push(Date.now());
+    if (options.fail?.(poll)) return route.abort("internetdisconnected");
+    const frame = frames[Math.min(poll, frames.length - 1)];
+    return route.fulfill({ json: frame });
+  });
+  return polls;
+}
+
+async function openBoard(page: Page, name: ScenarioName, polls = 1, options: Serve = {}) {
+  const seen = await serveScenario(page, name, options);
+  await page.goto(LIVE_PATH);
+  await expect.poll(() => seen.length, { timeout: 15_000 * polls }).toBeGreaterThanOrEqual(polls);
+  // Let React commit the last answered frame.
+  await page.waitForTimeout(400);
+  return seen;
+}
+
+async function shot(page: Page, name: string) {
+  const dir = process.env.LIVE_SHOTS;
+  await page.screenshot({ path: test.info().outputPath(`${name}.png`) });
+  if (dir) await page.screenshot({ path: path.join(dir, `${name}.jpg`), type: "jpeg", quality: 70 });
+}
+
+async function expectNoHorizontalScroll(page: Page) {
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(overflow).toBeLessThanOrEqual(0);
+}
+
+const counter = (page: Page, label: string) =>
+  page
+    .locator("dl > div")
+    .filter({ has: page.locator("dt", { hasText: new RegExp(`^${label}$`) }) })
+    .locator("dd");
+
+test.describe("live board scenarios @live", () => {
+  test.use({ viewport: VIEWPORTS.screen, locale: "en-US" });
+
+  test("zero: nobody in, the board invites the first person", async ({ page }) => {
+    await openBoard(page, "zero");
+    await expect(page.getByTestId("live-empty")).toContainText("Nobody is in yet");
+    await expect(page.getByTestId("live-pulse")).toHaveAttribute("data-mood", "empty");
+    await expect(page.getByTestId("live-feed")).toContainText("New connections show up here.");
+    await expect(page.getByTestId("live-leaderboard")).toContainText("No connections yet");
+    await shot(page, "zero-1920");
+  });
+
+  test("upcoming: doors-open card and the SOON pill", async ({ page }) => {
+    await openBoard(page, "upcoming");
+    await expect(page.getByTestId("live-upcoming")).toContainText("Doors open at");
+    await expect(page.getByText("SOON")).toBeVisible();
+    await expect(page.getByText("LIVE", { exact: true })).toHaveCount(0);
+    await shot(page, "upcoming-1920");
+  });
+
+  test("one attendee: still empty, the loom is ready", async ({ page }) => {
+    await openBoard(page, "oneAttendee");
+    await expect(page.getByTestId("live-empty")).toContainText("The loom is ready");
+    await expect(counter(page, "people")).toHaveText("1");
+    await shot(page, "one-attendee-1920");
+  });
+
+  test("trickle: counters, feed and pulse follow each poll", async ({ page }) => {
+    const frames = scenarioFrames("trickle");
+    await openBoard(page, "trickle", 3);
+    const shown = Number(await counter(page, "connections").innerText());
+    expect(shown).toBeGreaterThanOrEqual(frames[1]!.counters.connections);
+    await expect(page.getByTestId("live-pulse")).toHaveAttribute("data-mood", "steady");
+    await expect(page.getByTestId("live-feed").locator("li")).toHaveCount(4);
+    await expect(page.getByTestId("live-empty")).toHaveCount(0);
+    await shot(page, "trickle-1920");
+  });
+
+  test("quiet: a nudge instead of a dead screen", async ({ page }) => {
+    await openBoard(page, "quiet");
+    await expect(page.getByTestId("live-pulse")).toHaveAttribute("data-mood", "quiet");
+    await expect(page.getByTestId("live-pulse")).toContainText("say hi to someone new");
+    await shot(page, "quiet-1920");
+  });
+
+  test("rush: the pulse calls it and the feed keeps four rows", async ({ page }) => {
+    await openBoard(page, "rush", 2);
+    await expect(page.getByTestId("live-pulse")).toHaveAttribute("data-mood", "rush");
+    await expect(page.getByTestId("live-pulse")).toContainText("connections in 5 min!");
+    await expect(page.getByTestId("live-feed").locator("li")).toHaveCount(4);
+    await expectNoHorizontalScroll(page);
+    await shot(page, "rush-1920");
+  });
+
+  test("ended: wrap-up card, final podium, ENDED pill", async ({ page }) => {
+    const last = scenarioFrames("ended").at(-1)!;
+    await openBoard(page, "ended");
+    await expect(page.getByTestId("live-ended")).toContainText("That's a wrap!");
+    await expect(page.getByTestId("live-ended")).toContainText(`${last.counters.connections} connections`);
+    await expect(page.getByTestId("live-podium").locator("li")).toHaveCount(3);
+    await expect(page.getByTestId("live-podium")).toContainText(last.people[0]!.name);
+    await expect(page.getByTestId("live-feed")).toHaveCount(0);
+    await expect(page.getByText("ENDED")).toBeVisible();
+    await shot(page, "ended-1920");
+  });
+
+  test("after the event: same wrap-up hours later", async ({ page }) => {
+    await openBoard(page, "afterEvent");
+    await expect(page.getByTestId("live-ended")).toBeVisible();
+    await expect(page.getByTestId("live-pulse")).toHaveAttribute("data-mood", "ended");
+    await shot(page, "after-event-1920");
+  });
+
+  test("ties: equal people share first place", async ({ page }) => {
+    await openBoard(page, "ties");
+    const ranks = await page.getByTestId("live-leaderboard").locator("li button > span:first-child").allInnerTexts();
+    expect(ranks.length).toBeGreaterThan(1);
+    expect(new Set(ranks)).toEqual(new Set(["1"]));
+    await shot(page, "ties-1920");
+  });
+
+  test("reconnects: reconnections counted apart", async ({ page }) => {
+    const last = scenarioFrames("reconnects").at(-1)!;
+    await openBoard(page, "reconnects", 6);
+    await expect(counter(page, "reconnections")).toHaveText(String(last.counters.reconnections));
+    await shot(page, "reconnects-1920");
+  });
+
+  test("long names never push the layout sideways", async ({ page }) => {
+    await openBoard(page, "longNames", 2);
+    await expectNoHorizontalScroll(page);
+    await shot(page, "long-names-1920");
+  });
+
+  test("missing and broken photos fall back to the monito", async ({ page }) => {
+    await openBoard(page, "missingPhotos", 2);
+    await page.waitForLoadState("networkidle");
+    const broken = await page.locator("img").evaluateAll((images) => images.filter((image) => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth === 0).length);
+    expect(broken).toBe(0);
+    await shot(page, "missing-photos-1920");
+  });
+
+  test("thousands: 2,500 people and 4,000+ threads stay responsive", async ({ page }) => {
+    await openBoard(page, "thousands", 2);
+    await expect(counter(page, "people")).toHaveText("2,500");
+    const fps = await page.evaluate(
+      () =>
+        new Promise<number>((resolve) => {
+          let frames = 0;
+          const start = performance.now();
+          const step = (now: number) => {
+            frames++;
+            if (now - start < 2000) return requestAnimationFrame(step);
+            resolve((frames * 1000) / (now - start));
+          };
+          requestAnimationFrame(step);
+        }),
+    );
+    test.info().annotations.push({ type: "fps", description: fps.toFixed(1) });
+    console.log(`thousands fps: ${fps.toFixed(1)}`);
+    // Headless software WebGL (SwiftShader) draws an empty ring at ~22 fps on CI-class machines, far below a venue
+    // laptop's GPU; this guards against a frozen page (it was 0.2 fps before the instanced loom), not a frame target.
+    expect(fps).toBeGreaterThan(2);
+    await shot(page, "thousands-1920");
+  });
+});
+
+test.describe("live board resilience @live", () => {
+  test.use({ viewport: VIEWPORTS.laptop, locale: "en-US" });
+
+  test("network loss: reconnecting pill with the last update, backoff, then recovery", async ({ page }) => {
+    const polls = await openBoard(page, "trickle", 3, { fail: (poll) => poll === 1 || poll === 2 });
+    await expect(page.getByTestId("live-stale")).toContainText("Reconnecting… last update");
+    // Two failures back off to 12 s, so the fourth poll must not come 3 s later.
+    const gap = (polls[2] ?? 0) - (polls[1] ?? 0);
+    expect(gap).toBeGreaterThan(5000);
+    await expect.poll(() => polls.length, { timeout: 20_000 }).toBeGreaterThanOrEqual(4);
+    await expect(page.getByTestId("live-stale")).toHaveCount(0);
+  });
+
+  test("an older snapshot never replaces a newer one", async ({ page }) => {
+    const frames = scenarioFrames("rush");
+    const newest = frames.at(-1)!;
+    await openBoard(page, "rush", 2, { frames: [newest, frames[0]!] });
+    await expect(counter(page, "connections")).toHaveText(String(newest.counters.connections));
+  });
+
+  test("a stuck snapshot (same time twice) reads as stale", async ({ page }) => {
+    const frame = scenarioFrames("trickle")[0]!;
+    await openBoard(page, "trickle", 3, { frames: [frame, frame, frame] });
+    await expect(page.getByTestId("live-stale")).toBeVisible();
+  });
+
+  test("the last ten minutes show an ends-in pill", async ({ page }) => {
+    const frames = scenarioFrames("trickle").map((frame) => ({
+      ...frame,
+      event: { ...frame.event, endsAt: new Date(Date.parse(frame.generatedAt) + 8 * 60_000).toISOString() },
+    }));
+    await openBoard(page, "trickle", 1, { frames });
+    await expect(page.getByTestId("live-closing")).toHaveText("Ends in 8 min");
+  });
+
+  test("the tab coming back polls at once", async ({ page }) => {
+    const polls = await openBoard(page, "trickle", 1);
+    const before = polls.length;
+    await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+    await expect.poll(() => polls.length, { timeout: 1500 }).toBeGreaterThan(before);
+  });
+
+  test("tap a leaderboard row for the person card, close back to the board", async ({ page }) => {
+    await openBoard(page, "trickle");
+    await page.getByTestId("live-leaderboard").locator("li button").first().click();
+    await expect(page.getByTestId("live-person")).toBeVisible();
+    await page.getByRole("button", { name: "Show leaderboard" }).click();
+    await expect(page.getByTestId("live-leaderboard")).toBeVisible();
+  });
+
+  test("a failing person card says so instead of spinning", async ({ page }) => {
+    await page.route("**/api/e/*/live/people/*", (route) => route.fulfill({ status: 500, json: { error: { code: "internal", message: "boom" } } }));
+    await openBoard(page, "trickle");
+    await page.getByTestId("live-leaderboard").locator("li button").first().click();
+    await expect(page.getByTestId("live-person")).toContainText("Reconnecting…");
+  });
+});
+
+test.describe("live board reduced motion @live", () => {
+  test.use({ viewport: VIEWPORTS.laptop, locale: "en-US", reducedMotion: "reduce" });
+
+  test("feed rows and pulse bars do not animate", async ({ page }) => {
+    await openBoard(page, "rush", 2);
+    const durations = await page.getByTestId("live-feed").locator("li").evaluateAll((items) => items.map((item) => parseFloat(getComputedStyle(item).animationDuration)));
+    expect(durations.every((duration) => duration < 0.01)).toBe(true);
+  });
+});
+
+for (const [size, viewport] of Object.entries(VIEWPORTS)) {
+  for (const locale of ["es-MX", "en-US"] as const) {
+    test.describe(`live board ${size} ${locale} @live`, () => {
+      test.use({ viewport, locale });
+      for (const name of ["zero", "rush", "ended", "longNames"] as const satisfies readonly ScenarioName[]) {
+        test(`${name} fits without sideways scroll`, async ({ page }) => {
+          await openBoard(page, name, 2);
+          await expectNoHorizontalScroll(page);
+          await expect(page.getByTestId("live-pulse")).toBeVisible();
+          if (locale === "es-MX") await expect(page.locator("main")).toHaveAttribute("lang", "es");
+          if (size !== "screen" && locale === "en-US") await shot(page, `${name}-${viewport.width}`);
+        });
+      }
+    });
+  }
+}
+
+test("every scenario frame passes the snapshot schema", async () => {
+  const { LiveSnapshot } = await import("../../lib/api/schemas");
+  for (const name of SCENARIOS) for (const frame of scenarioFrames(name)) LiveSnapshot.parse(frame);
+});
