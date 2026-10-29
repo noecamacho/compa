@@ -276,3 +276,14 @@
     opacity: 1 !important;
   }
 }
+
+/* Admin event QR print (admin spec §5.3, edge case 37): the event page portals [data-admin-print] into <body>; printing
+   shows that sheet alone. Pages without the sheet print as usual. */
+@media print {
+  body:has(> [data-admin-print]) > :not([data-admin-print]) {
+    display: none !important;
+  }
+  body > [data-admin-print] {
+    display: flex !important;
+  }
+}
