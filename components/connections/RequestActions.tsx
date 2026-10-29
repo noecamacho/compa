@@ -5,7 +5,7 @@ import { useState } from "react";
 import { z } from "zod";
 import { Icon } from "@/components/icons";
 import { Button } from "@/components/ui/Button";
-import { apiCall } from "@/lib/api/client";
+import { apiCall, errorMessage } from "@/lib/api/client";
 import { Accepted } from "@/lib/api/schemas";
 import { common, request as copy } from "@/lib/copy/es";
 
@@ -24,7 +24,7 @@ export function RequestActions({ connectionId }: Props) {
       await apiCall("POST", `/api/connections/${connectionId}/accept`, Accepted, {});
       router.push(`/connections/${connectionId}/done`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(errorMessage(caught));
       setBusy(null);
     }
   }
@@ -40,7 +40,11 @@ export function RequestActions({ connectionId }: Props) {
 
   return (
     <div className="mt-auto flex flex-col gap-3">
-      {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
+      {error && (
+        <span role="alert" className="text-center text-[12px] font-extrabold text-coral">
+          {error}
+        </span>
+      )}
       <Button variant="primary" onClick={accept} disabled={busy !== null}>
         <Icon name="check" size={20} strokeWidth={3} />
         {busy === "accept" ? copy.accepting : copy.accept}
