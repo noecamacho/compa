@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/icons";
 import { Avatar } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
-import type { LiveSnapshotT, MeT } from "@/lib/api/schemas";
+import type { EventDoorT, LiveRecentT, MeT } from "@/lib/api/schemas";
 import { useCopy, useLocale } from "@/components/LocaleProvider";
 import { formatHour, formatPoints } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
@@ -19,16 +19,8 @@ const SPARKS: { color: string; icon: IconName }[] = [
 ];
 
 // The last three accepted pairs rise one after another (README: 7.5 s loop).
-function pairsFrom(snapshot: LiveSnapshotT, looks: Map<string, MonitoLook | undefined>): Pair[] {
-  const byId = new Map(snapshot.people.map((person) => [person.id, person]));
-  return snapshot.connections
-    .slice(-3)
-    .reverse()
-    .flatMap((link) => {
-      const a = byId.get(link.a);
-      const b = byId.get(link.b);
-      return a && b ? [{ a: { name: a.name, look: looks.get(a.id) }, b: { name: b.name, look: looks.get(b.id) } }] : [];
-    });
+function pairsFrom(recent: LiveRecentT, looks: Map<string, MonitoLook | undefined>): Pair[] {
+  return recent.pairs.map(({ a, b }) => ({ a: { name: a.name, look: looks.get(a.id) }, b: { name: b.name, look: looks.get(b.id) } }));
 }
 
 const first = (name: string) => name.split(" ")[0] ?? name;
@@ -49,12 +41,12 @@ export function OutsideEventCard() {
   );
 }
 
-type Props = { snapshot: LiveSnapshotT; me: MeT; endsAt: string; looks: Map<string, MonitoLook | undefined>; empty: boolean };
+type Props = { recent: LiveRecentT; event: EventDoorT; me: MeT; looks: Map<string, MonitoLook | undefined>; empty: boolean };
 
-export function LiveCard({ snapshot, me, endsAt, looks, empty }: Props) {
+export function LiveCard({ recent, event, me, looks, empty }: Props) {
   const { common, home } = useCopy();
   const locale = useLocale();
-  const pairs = pairsFrom(snapshot, looks);
+  const pairs = pairsFrom(recent, looks);
   const rank = me.scores?.event.rank ?? null;
   const points = me.scores?.event.points ?? 0;
   return (
@@ -64,10 +56,10 @@ export function LiveCard({ snapshot, me, endsAt, looks, empty }: Props) {
           <span className="animate-beat h-2 w-2 rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
           {common.live}
         </Pill>
-        <span className="text-[13px] font-extrabold">{home.until(snapshot.event.name, formatHour(locale, endsAt))}</span>
+        <span className="text-[13px] font-extrabold">{home.until(event.name, formatHour(locale, event.endsAt))}</span>
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="font-display text-[44px] leading-none font-bold">{snapshot.counters.connections}</span>
+        <span className="font-display text-[44px] leading-none font-bold">{event.counters.connections}</span>
         <span className="font-display text-[18px] font-semibold">{home.connectionsTonight}</span>
       </div>
       <div role="img" aria-label={home.pairsNow} className="relative h-[150px] overflow-hidden rounded-button bg-sky-soft border-ink">

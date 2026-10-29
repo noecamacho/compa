@@ -606,6 +606,19 @@ export const liveSnapshot = route({
   errors: [E.eventNotFound],
 });
 
+export const liveRecent = route({
+  id: "liveRecent",
+  method: "get",
+  path: "/api/e/{code}/live/recent",
+  summary: "Newest pairs",
+  description: `${CODE_GATED} The three most recent accepted connections with both names, newest first, for the home live card; cached for at most 1 s (A6).`,
+  tags: ["live"],
+  auth: "public",
+  params: S.EventCodeParams,
+  success: { status: 200, description: "Newest pairs.", schema: S.LiveRecent, example: X.liveRecent },
+  errors: [E.eventNotFound],
+});
+
 export const livePerson = route({
   id: "livePerson",
   method: "get",
@@ -819,6 +832,7 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   acceptConnection,
   declineConnection,
   liveSnapshot,
+  liveRecent,
   livePerson,
   leaderboard,
   transcribe,

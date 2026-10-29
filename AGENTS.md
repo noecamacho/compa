@@ -55,6 +55,8 @@ Follow `docs/engineering-standards.md`: SOLID, KISS, DRY, **no nesting** (guard 
 
 **Tests with every change.** Unit tests (`bun test`) for logic, and preferably a **Playwright e2e spec** under `e2e/` that confirms the user flows the change touches: the happy path, every edge case and every error state (use mock mode `x-compa-mock` / `x-compa-mock-error` for error paths). Cover the 390, 834 and 1440 viewports and both locales (`es`, `en`). The flows and their scenarios are listed in `docs/flows/catalog.md`. Details: `docs/engineering-standards.md` → Testing.
 
+Server Components read the API through `lib/api/server-fetch.ts`, which runs the route handler in-process: a page that reads a new route must add it to `lib/server/in-process-routes.ts` (an unlisted path falls back to a slow HTTP self-fetch and logs a warning). Client polling goes through `lib/use-poll.ts`, never a bare `setInterval`.
+
 Product rules from the plan, binding once application code exists (`wiki/agent-contract.md`, `ARCHITECTURE.md`): business rules and OpenAI calls only on the server; every write validated with zod; connections and points idempotent; responsive (mobile first at 390, tablet 834, desktop 1440; `/live` at 1920×1080); sign-in is LinkedIn OIDC or an email magic link (`docs/specs/2026-10-29-data-model.md` M2); UI bilingual (`es*` locale → Spanish, else English); `bun run lint && bun run typecheck && bun run build` before finishing. Stack is fixed by the team: Next.js + strict TypeScript + Tailwind on Bun (package manager and runtime: `bun install`, `bun add`, `bun run`, commit `bun.lock`, never pnpm or npm), Supabase for data, Vercel for hosting.
 
 ## 5. Git rules

@@ -10,8 +10,8 @@ import { pushTo } from "./push";
 // One notification for one person: the Realtime poke to their private channel and the Web Push alert (T-080, T-081).
 export type Notice = { userId: string; message: UserMessage; push: PushNotice };
 
-// Realtime is awaited, so an open app hears about it before the actor's response returns; Web Push goes out after the
-// response, so a slow push service never delays the tap that caused it.
+// Realtime and Web Push both go out after the response (`broadcast` defers itself, lib/realtime.ts), so a slow Realtime
+// or push service never delays the tap that caused it (conference-scale finding 13).
 export async function notify(...notices: Notice[]): Promise<void> {
   if (notices.length === 0) return;
   after(() => Promise.all(notices.map((notice) => pushTo(notice.userId, notice.push))));

@@ -9,8 +9,8 @@ import { Tour } from "@/components/tour/Tour";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, Notifications, type ConnectionListT, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
-import { apiGet, apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
+import { ConnectionList, EventDoor, Invites, LiveRecent, Me, Notifications, type ConnectionListT, type EventDoorT, type LiveRecentT } from "@/lib/api/schemas";
+import { apiGet, apiGetSafe } from "@/lib/api/server-fetch";
 import { copyFor, type Dictionary } from "@/lib/copy";
 import { firstName } from "@/lib/format";
 import { requestLocale } from "@/lib/server/locale";
@@ -21,13 +21,14 @@ type Props = { searchParams: Promise<{ demo?: string }> };
 
 const NO_CONNECTIONS: ConnectionListT = { incoming: [], people: [], totals: { points: 0, connections: 0, people: 0 } };
 
-type Live = { snapshot: LiveSnapshotT; event: EventDoorT };
+type Live = { recent: LiveRecentT; event: EventDoorT };
 
-// The live card needs the current event; its code comes from /api/me (API spec A10).
+// The live card needs the current event; its code comes from /api/me (API spec A10). It reads the door (counters) and
+// the newest pairs, never the full big-screen snapshot. A failure hides the card, not the whole screen.
 async function loadLive(code: string | undefined): Promise<Live | null> {
   if (!code) return null;
-  const [snapshot, event] = await Promise.all([apiGet(`/api/e/${code}/live`, LiveSnapshot), apiGet(`/api/e/${code}`, EventDoor)]);
-  return { snapshot, event };
+  const [recent, event] = await Promise.all([apiGetSafe(`/api/e/${code}/live/recent`, LiveRecent), apiGetSafe(`/api/e/${code}`, EventDoor)]);
+  return recent && event ? { recent, event } : null;
 }
 
 function NoEventCard({ home }: { home: Dictionary["home"] }) {
@@ -47,7 +48,7 @@ export default async function HomePage({ searchParams }: Props) {
   const [live, listOrNull, invites, notificationList, locale] = await Promise.all([
     loadLive(me.currentEvent?.code),
     apiGetSafe("/api/connections", ConnectionList),
-    apiGetOrNull("/api/invites/me", Invites),
+    apiGetSafe("/api/invites/me", Invites),
     apiGetSafe("/api/notifications", Notifications),
     requestLocale(),
   ]);
@@ -73,7 +74,7 @@ export default async function HomePage({ searchParams }: Props) {
       {/* Phone: one column. From 834: the live card on the left, Conectar (grown into a tall tile) and the invite on the right. */}
       <div className="flex flex-col gap-[14px] md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-stretch lg:gap-5">
         <div data-tour="live">
-          {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard home={home} />}
+          {live ? <LiveCard recent={live.recent} event={live.event} me={me} looks={looks} empty={empty} /> : <NoEventCard home={home} />}
         </div>
 
         <div className="flex flex-col gap-[14px] lg:gap-5">
