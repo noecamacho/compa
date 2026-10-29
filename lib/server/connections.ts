@@ -9,6 +9,7 @@ import type * as R from "../api/routes";
 import type { CardT } from "../api/schemas";
 import { hasEnded, isRunning, statusForViewer } from "../connection-status";
 import { decideKind, pointsFor, topicsPointsFor } from "../points";
+import { afterResponse } from "../after-response";
 import { broadcast, liveTopic, userTopic } from "../realtime";
 import { badgeNotices, inviteeNotice, notify, type Notice } from "./notify";
 import { awardBadges } from "./badges";
@@ -217,11 +218,16 @@ export async function acceptConnection({ user, params, body }: InputOf<typeof R.
   const [requester] = await usersByIds([row.requesterId]);
   if (!requester) return fail(E.internal);
   const from = await cardFor(user.id, requester);
-  const extras = await awardExtras(row, event, requester, user).catch((error: unknown) => {
-    console.error("awards failed", error);
-    return [];
+  // Off the response path: badges read every connection both people have (conference-scale finding 13).
+  // The requester hears "accepted" first; invite and badge notices follow once the awards are stored.
+  afterResponse("awards", async () => {
+    await announceAcceptance(row, event, requester, user, []);
+    const extras = await awardExtras(row, event, requester, user).catch((error: unknown) => {
+      console.error("awards failed", error);
+      return [];
+    });
+    await notify(...extras);
   });
-  await announceAcceptance(row, event, requester, user, extras);
   const kind = row.kind ?? "new";
   return { body: { connectionId: row.id, kind, points: row.points ?? pointsFor(kind), from } };
 }

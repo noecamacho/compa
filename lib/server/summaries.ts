@@ -10,6 +10,7 @@ import { draftSummary as draftWithAi } from "../ai/draft-summary";
 import { AudioValidationError, transcribe as transcribeAudio } from "../ai/transcribe";
 import { AudioUploadError, readAudioFile } from "./audio-upload";
 import { SUMMARY_POINTS } from "../points";
+import { afterResponse } from "../after-response";
 import { broadcast, liveTopic } from "../realtime";
 import { awardBadges } from "./badges";
 import { badgeNotices, notify } from "./notify";
@@ -139,14 +140,9 @@ export async function approveSummary({ user, params, body }: InputOf<typeof R.ap
   if (!draft.substantive) return fail(E.notSubstantive);
   const row = await markApproved(draft, body);
   const { event } = await requireAcceptedMembership(row.connectionId, user.id);
-  const badges = await awardBadges(user, event, row.id).catch((error: unknown) => {
-    console.error("awards failed", error);
-    return [];
-  });
-  await Promise.all([
-    notify(...badgeNotices(user.id, badges)),
-    broadcast({ topic: liveTopic(event.accessCode), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } }),
-  ]);
+  // Off the response path: badges read every connection the author has (conference-scale finding 13).
+  afterResponse("awards", async () => notify(...badgeNotices(user.id, await awardBadges(user, event, row.id))));
+  await broadcast({ topic: liveTopic(event.accessCode), event: "summary.approved", payload: { connectionId: row.connectionId, topics: body.topics } });
   const interaction = {
     id: row.id,
     connectionId: row.connectionId,

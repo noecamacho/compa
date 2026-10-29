@@ -1,5 +1,6 @@
 // Supabase Realtime Broadcast from the server (API spec §8). No-ops when Supabase env is missing,
 // so local dev and mock mode work without it. A failed broadcast never fails the request.
+import { afterResponse } from "./after-response";
 import type { CardT, ConnectionKindT } from "./api/schemas";
 import type { BadgeId } from "./badges/catalog";
 
@@ -28,9 +29,16 @@ function realtimeConfig() {
   return url && key ? { endpoint: `${url}/realtime/v1/api/broadcast`, key } : null;
 }
 
+// Sent after the response (lib/after-response.ts): a slow or down Realtime used to add up to 1.5 s to every check-in,
+// scan, accept and approval (conference-scale finding 13). Resolves at once; callers may still await it.
 export async function broadcast(...messages: BroadcastMessage[]): Promise<void> {
+  if (messages.length === 0) return;
+  afterResponse("realtime broadcast", () => send(messages));
+}
+
+async function send(messages: BroadcastMessage[]): Promise<void> {
   const config = realtimeConfig();
-  if (!config || messages.length === 0) return;
+  if (!config) return;
   const body = { messages: messages.map((m) => ({ ...m, private: m.topic.startsWith("user:") })) };
   try {
     const response = await fetch(config.endpoint, {
