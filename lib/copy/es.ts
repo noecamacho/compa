@@ -291,7 +291,7 @@ export const landing = {
   backToEvent: "Volver a mi evento",
   goToAccount: "Ir a mi cuenta",
   signIn: "Entrar con LinkedIn",
-  signInNote: "¿Nuevo o ya tienes cuenta? Es el mismo botón. Solo tomamos tu nombre, foto y correo.",
+  signInNote: "Sirve para crear tu cuenta o volver a entrar. Nunca publicamos nada por ti.",
   signInError: "No pudimos iniciar tu sesión. Inténtalo de nuevo.",
   sceneLabel: "Dos monitos se conectan y ganan +50",
   sampleTopic: "Levantar capital",

@@ -11,7 +11,7 @@ export const landing: typeof es.landing = {
   backToEvent: "Back to my event",
   goToAccount: "Go to my account",
   signIn: "Sign in with LinkedIn",
-  signInNote: "New here or coming back? Same button. We only take your name, photo and email.",
+  signInNote: "One button to sign up or sign back in. We never post anything for you.",
   signInError: "We couldn't sign you in. Please try again.",
   sceneLabel: "Two monitos connect and earn +50",
   sampleTopic: "Raising capital",
