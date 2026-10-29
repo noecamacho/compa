@@ -7,6 +7,9 @@ export const OUTFITS = ["plain", "stripes", "compa", "hoodie", "event", "suit"] 
 export const HATS = ["none", "cap", "beanie", "crown"] as const;
 export const FACES = ["none", "glasses", "sunglasses", "mustache"] as const;
 export const EXTRAS = ["none", "badge", "medal", "cape"] as const;
+// Hombre / Mujer / Otro on 02b (team decision, beyond the V2 handoff); only "woman" changes the drawing (a skirt).
+export const BODIES = ["man", "woman", "other"] as const;
+export type Body = (typeof BODIES)[number];
 
 const hex = z.string().regex(/^#[0-9A-Fa-f]{6}$/);
 
@@ -24,6 +27,8 @@ export const MonitoLook = z.object({
   face: z.enum(FACES),
   beard: z.boolean(),
   extra: z.enum(EXTRAS),
+  // Optional so looks saved before this option still parse.
+  body: z.enum(BODIES).optional(),
   accent: hex.optional(),
   capeColor: hex.optional(),
   lanyardColor: hex.optional(),
@@ -82,7 +87,11 @@ export const SHIRT_OPTIONS = [
 export const EXTRA_OPTIONS = ["cap", "glasses", "beard"] as const;
 export type ExtraOption = (typeof EXTRA_OPTIONS)[number];
 
+// Picking a body suggests a hair style; every option stays changeable.
+export const BODY_HAIR: Record<Body, (typeof HAIR_OPTIONS)[number]> = { man: "short", woman: "long", other: "bun" };
+
 export type BuilderState = {
+  body: Body;
   skin: string;
   hair: MonitoLook["hair"];
   hairColor: string;
@@ -91,6 +100,7 @@ export type BuilderState = {
 };
 
 export const DEFAULT_BUILDER: BuilderState = {
+  body: "other",
   skin: DEFAULT_LOOK.skin,
   hair: "short",
   hairColor: DEFAULT_LOOK.hairColor,
@@ -101,6 +111,7 @@ export const DEFAULT_BUILDER: BuilderState = {
 export function lookFromBuilder(state: BuilderState, base: MonitoLook = DEFAULT_LOOK): MonitoLook {
   return {
     ...base,
+    body: state.body,
     skin: state.skin,
     hair: state.hair,
     hairColor: state.hairColor,
@@ -114,6 +125,7 @@ export function lookFromBuilder(state: BuilderState, base: MonitoLook = DEFAULT_
 export function builderFromLook(look: MonitoLook): BuilderState {
   const hair = HAIR_OPTIONS.find((option) => option === look.hair) ?? "short";
   return {
+    body: look.body ?? "other",
     skin: look.skin,
     hair,
     hairColor: look.hairColor,
@@ -124,8 +136,10 @@ export function builderFromLook(look: MonitoLook): BuilderState {
 
 const pick = <T>(list: readonly T[], random: () => number): T => list[Math.floor(random() * list.length)] as T;
 
-export function randomBuilder(random: () => number = Math.random): BuilderState {
+// Random keeps the chosen body: the dice changes the look, not who you are.
+export function randomBuilder(body: Body = "other", random: () => number = Math.random): BuilderState {
   return {
+    body,
     skin: pick(SKIN_OPTIONS, random).hex,
     hair: pick(HAIR_OPTIONS, random),
     hairColor: pick(HAIR_COLOR_OPTIONS, random).hex,
