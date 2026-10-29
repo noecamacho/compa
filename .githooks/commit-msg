@@ -1,0 +1,5 @@
+#!/bin/sh
+# Rejects commit messages that break docs/git-workflow.md (format, length, AI attribution, language).
+set -u
+ROOT=$(git rev-parse --show-toplevel)
+exec "$ROOT/scripts/check-commit-message.sh" "$1"
