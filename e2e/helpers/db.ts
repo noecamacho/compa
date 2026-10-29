@@ -2,6 +2,7 @@
 // per test ("world"), and reads of points, badges and connections. Every world cleans up after itself, so tests
 // run in parallel without resetting the whole database.
 import postgres from "postgres";
+import { generateAccessCode } from "../../lib/access-code";
 import { slugify } from "../../lib/slug";
 import type { Links, VisibilitySettings } from "../../lib/profile-fields";
 import { DEFAULT_VISIBILITY } from "../../lib/profile-fields";
@@ -56,9 +57,10 @@ async function insertEvent(ownerId: string, window: EventWindow = {}): Promise<T
   const endsAt = window.endsAt ?? new Date(now + 12 * HOUR_MS);
   const slug = `e2e-${token()}`;
   const name = window.name ?? `Founders Fest E2E ${slug.slice(-4)}`;
+  // The access code is a Drizzle-side default (db/schema.ts), so raw inserts generate it themselves.
   const [row] = await sql()<{ id: string; access_code: string }[]>`
-    insert into events (slug, name, starts_at, ends_at, created_by)
-    values (${slug}, ${name}, ${startsAt}, ${endsAt}, ${ownerId})
+    insert into events (slug, name, starts_at, ends_at, created_by, access_code)
+    values (${slug}, ${name}, ${startsAt}, ${endsAt}, ${ownerId}, ${generateAccessCode()})
     returning id, access_code`;
   if (!row) throw new Error("event insert failed");
   return { id: row.id, slug, name, accessCode: row.access_code, startsAt, endsAt };

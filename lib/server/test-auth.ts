@@ -33,7 +33,8 @@ const TestProfile = z.object({
 export type TestProfile = z.infer<typeof TestProfile>;
 
 export const testProfileFromQuery = (url: string): TestProfile | null => {
-  const params = Object.fromEntries(new URL(url).searchParams);
+  // The consent form submits every field; an empty one means "LinkedIn did not send it".
+  const params = Object.fromEntries([...new URL(url).searchParams].filter(([, value]) => value.trim() !== ""));
   const parsed = TestProfile.safeParse(params);
   return parsed.success ? parsed.data : null;
 };
