@@ -22,11 +22,20 @@ export class ApiFetchError extends Error {
   }
 }
 
-async function originAndCookies(): Promise<{ origin: string; cookie: string; requestId: string | null }> {
+async function originAndCookies(): Promise<{ origin: string; cookie: string; requestId: string | null; incoming: Headers }> {
   const h = await headers();
   const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
   const proto = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return { origin: `${proto}://${host}`, cookie: h.get("cookie") ?? "", requestId: h.get(REQUEST_ID_HEADER) };
+  return { origin: `${proto}://${host}`, cookie: h.get("cookie") ?? "", requestId: h.get(REQUEST_ID_HEADER), incoming: h };
+}
+
+const FORWARDED_MOCK_HEADERS = [MOCK_HEADERS.error, MOCK_HEADERS.status, MOCK_HEADERS.example] as const;
+
+// On a mock deployment, the page request's mock headers pick the example or error of every API call it makes, so
+// e2e can force empty and error states on server-rendered pages.
+export function forwardedMockHeaders(incoming: Headers): Record<string, string> {
+  const present = FORWARDED_MOCK_HEADERS.filter((name) => incoming.has(name));
+  return Object.fromEntries(present.map((name) => [name, incoming.get(name) ?? ""]));
 }
 
 async function errorFrom(response: Response): Promise<ApiFetchError> {
@@ -56,8 +65,10 @@ type Answer = { ok: true; json: unknown } | { ok: false; error: ApiFetchError };
 
 // One call per path per render: the layout, the page and currentMe() share a single /api/me.
 const getOnce = cache(async (path: string, mockExample: string | undefined): Promise<Answer> => {
-  const { origin, cookie, requestId } = await originAndCookies();
-  const extra: Record<string, string> = mockExample ? { [MOCK_HEADERS.example]: mockExample } : {};
+  const { origin, cookie, requestId, incoming } = await originAndCookies();
+  // A fixed example (the /api/me gate) is never overridden by the page request.
+  const forwarded = process.env.API_MODE === "mock" && !mockExample ? forwardedMockHeaders(incoming) : {};
+  const extra: Record<string, string> = mockExample ? { [MOCK_HEADERS.example]: mockExample } : forwarded;
   const response = await dispatch("GET", path, { headers: requestHeaders(cookie, requestId, extra) }, origin);
   if (!response.ok) return { ok: false, error: await errorFrom(response) };
   return { ok: true, json: await response.json() };
