@@ -183,8 +183,18 @@ test.describe("invite in real mode", () => {
     await expect(inviter.page.getByRole("link", { name: new RegExp(home.inviteTitle) })).toContainText(home.inviteLeft(0));
   });
 
+  test("a second claim of a used link never unlinks the first friend @real", async ({ people }) => {
+    const [inviter, first, second] = await people([{}, {}, {}]);
+    if (!inviter || !first || !second) throw new Error("test users not created");
+    const code = await openInvite(inviter);
+    await claim(first, code);
+    await claim(second, code);
+    const invites = await invitesOf(inviter);
+    expect(invites.invitees.map((invitee) => invitee.person.handle)).toEqual([first.user.handle]);
+  });
+
   test("two friends who claim the same shared link both count @real", async ({ people }) => {
-    test.fixme(true, "BUG: claimInvite overwrites invitee_id on the one open invite row, so a second claim of a shared link unlinks the first friend");
+    test.fixme(true, "OPEN QUESTION 59 (wiki/open-questions.md): a used link links nobody else; crediting later friends is undecided (farming risk)");
     const [inviter, first, second] = await people([{}, {}, {}]);
     if (!inviter || !first || !second) throw new Error("test users not created");
     const code = await openInvite(inviter);

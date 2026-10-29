@@ -28,7 +28,7 @@ const detections = (page: Page) => page.evaluate(() => Number(Reflect.get(global
 
 async function openScanner(page: Page): Promise<void> {
   await page.goto("/connect?tab=scan");
-  await expect(page.getByText(connect.aim)).toBeVisible();
+  await expect(page.getByText(connect.camera.scanning)).toBeVisible();
 }
 
 test.describe("connect: scan with the camera", () => {
@@ -96,8 +96,8 @@ test.describe("connect: no camera", () => {
 
   test("a denied camera says so and keeps the name search and my QR @mock", async ({ page }) => {
     await page.goto("/connect?tab=scan");
-    await expect(page.getByText(connect.cameraUnavailable)).toBeVisible();
-    await expect(page.getByText(connect.aim)).toHaveCount(0);
+    await expect(page.getByText(connect.camera.denied)).toBeVisible();
+    await expect(page.getByText(connect.camera.scanning)).toHaveCount(0);
     await expect(page.getByRole("searchbox", { name: connect.searchLabel })).toBeVisible();
     await page.getByRole("button", { name: connect.myQr }).click();
     await expect(page).toHaveURL(/\/connect$/);

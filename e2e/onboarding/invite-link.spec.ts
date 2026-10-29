@@ -59,6 +59,7 @@ test.describe("invite link", () => {
   });
 
   test("two friends who open the same link both count for the inviter @real", async ({ twoUsers, testUsers, signIn, browser }) => {
+    test.fixme(true, "OPEN QUESTION 59 (wiki/open-questions.md): a used link links nobody else; crediting later friends is undecided (farming risk)");
     const [inviter, first] = twoUsers;
     const { code } = await invitesOf(inviter.page.request);
     await openProfileWithInvite(first.page, code);
