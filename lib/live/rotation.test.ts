@@ -3,11 +3,11 @@ import { DEFAULT_ROTATE_SECONDS, VIZ_IDS, firstViz, nextViz, rotationFrom } from
 
 describe("rotationFrom", () => {
   test("rotates every 30 s by default", () => {
-    expect(rotationFrom("")).toEqual({ pinned: null, seconds: DEFAULT_ROTATE_SECONDS });
+    expect(rotationFrom("")).toEqual({ pinned: null, seconds: DEFAULT_ROTATE_SECONDS, explicit: false });
   });
 
   test("a pinned visualization never rotates", () => {
-    expect(rotationFrom("?viz=race&rotate=10")).toEqual({ pinned: "race", seconds: 0 });
+    expect(rotationFrom("?viz=race&rotate=10")).toEqual({ pinned: "race", seconds: 0, explicit: true });
   });
 
   test("rotate=0 stops, small periods are raised to 5 s", () => {
@@ -17,7 +17,7 @@ describe("rotationFrom", () => {
   });
 
   test("malformed values fall back to the defaults", () => {
-    expect(rotationFrom("?viz=<script>&rotate=abc")).toEqual({ pinned: null, seconds: DEFAULT_ROTATE_SECONDS });
+    expect(rotationFrom("?viz=<script>&rotate=abc")).toEqual({ pinned: null, seconds: DEFAULT_ROTATE_SECONDS, explicit: false });
     expect(rotationFrom("?rotate=99999").seconds).toBe(DEFAULT_ROTATE_SECONDS);
   });
 });

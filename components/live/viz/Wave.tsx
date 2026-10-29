@@ -59,8 +59,10 @@ function ingest(scene: Scene, snapshot: LiveSnapshotT, calm: boolean): void {
   scene.snapshot = snapshot;
   scene.target.set(pulse(snapshot));
   scene.targetCount = recentCount(snapshot);
+  // Calm mode repaints only when the set of connections changed, so an unchanged room stays pixel-still.
+  if (calm && !first && fresh.news + fresh.reconnections === 0) return;
   if (first || calm) {
-    scene.heartbeat.seed(historySlots(snapshot));
+    scene.heartbeat.seed(historySlots(snapshot), calm);
     scene.bars.set(scene.target);
     scene.shownCount = scene.targetCount;
     return;

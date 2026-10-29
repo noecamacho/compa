@@ -286,12 +286,14 @@ for (const locale of ["es-MX", "en-US"] as const) {
   });
 }
 
-// Two captures of the stage 700 ms apart: different bytes mean something moved.
+// Two captures of the stage 700 ms apart: different bytes mean the view itself moved. Overlays that change on their
+// own (the reconnecting pill, state cards, the rotation strip) are masked out.
 async function stageMoves(page: Page): Promise<boolean> {
   const stage = page.getByTestId("live-stage");
-  const before = await stage.screenshot({ animations: "allow" });
+  const mask = [page.getByTestId("live-stale"), page.getByTestId("live-viz-indicator"), page.locator('[data-testid="live-empty"], [data-testid="live-ended"], [data-testid="live-upcoming"]')];
+  const before = await stage.screenshot({ animations: "allow", mask });
   await page.waitForTimeout(700);
-  const after = await stage.screenshot({ animations: "allow" });
+  const after = await stage.screenshot({ animations: "allow", mask });
   return !before.equals(after);
 }
 
@@ -376,7 +378,8 @@ test.describe("live visualizations, reduced motion @live @mock", () => {
 
   for (const id of VIZ_IDS) {
     test(`${id} holds still`, async ({ page }) => {
-      await openBoard(page, "trickle", 1, { query: `?viz=${id}` });
+      // One frame repeated (time still moves): no new data may land between the two captures.
+      await openBoard(page, "trickle", 1, { query: `?viz=${id}`, frames: scenarioFrames("trickle").slice(-1) });
       await expect(viewIn(page, id)).toBeVisible();
       await page.waitForTimeout(800);
       expect(await stageMoves(page)).toBe(false);

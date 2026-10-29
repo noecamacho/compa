@@ -47,7 +47,8 @@ const GHOSTS_PER_RING = [6, 10, 14, 18, 22] as const;
 const COMET_MS = 1000;
 const PULSE_MS = 900;
 const MAX_COMETS = 20;
-const HIT_RADIUS_PX = 18;
+// Generous enough for the rim of a top-ten dot (radius up to 20) and its label.
+const HIT_RADIUS_PX = 28;
 const TAP_SLOP_PX = 8;
 const BIG_SCREEN_PX = 700;
 
@@ -385,8 +386,11 @@ export default function Orbit(props: VizProps) {
     const start = down.current;
     down.current = null;
     if (!start || Math.hypot(event.clientX - start.x, event.clientY - start.y) >= TAP_SLOP_PX) return;
-    const box = event.currentTarget.getBoundingClientRect();
-    onSelect(nearestDot(layout.dots, event.clientX - box.left, event.clientY - box.top, HIT_RADIUS_PX)?.id ?? null);
+    // The box can be scaled mid cross-fade; dots live in layout pixels.
+    const canvas = event.currentTarget;
+    const box = canvas.getBoundingClientRect();
+    const scale = canvas.clientWidth / Math.max(1, box.width);
+    onSelect(nearestDot(layout.dots, (event.clientX - box.left) * scale, (event.clientY - box.top) * scale, HIT_RADIUS_PX)?.id ?? null);
   };
 
   return (

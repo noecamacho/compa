@@ -79,11 +79,13 @@ function sparkle(particles: Particles, emitter: Emitter, x: number, y: number): 
 // Sparks come from wherever the bar's end is right now, so they ride the growing bar.
 function emitFromBars(emitters: Emitter[], bars: Els, particles: Particles, root: HTMLElement, dt: number): void {
   const origin = root.getBoundingClientRect();
+  // Rects are scaled mid cross-fade; the overlay canvas draws in layout pixels.
+  const scale = root.offsetWidth / Math.max(1, origin.width);
   for (const emitter of emitters) {
     emitter.left -= dt;
     const box = bars.get(emitter.id)?.getBoundingClientRect();
     if (!box) continue;
-    sparkle(particles, emitter, box.right - origin.left, box.top + box.height / 2 - origin.top);
+    sparkle(particles, emitter, (box.right - origin.left) * scale, (box.top + box.height / 2 - origin.top) * scale);
   }
 }
 

@@ -8,10 +8,17 @@ const POOL = 320;
 
 export class Particles {
   private items: Particle[] = [];
+  // When full, a new spawn replaces the next slot in turn (the oldest, roughly) instead of shifting the array.
+  private cursor = 0;
 
   spawn(spawn: Spawn): void {
-    if (this.items.length >= POOL) this.items.shift();
-    this.items.push({ vx: 0, vy: 0, ttl: 1.2, size: 3, gravity: 0, ...spawn, life: 0 });
+    const particle = { vx: 0, vy: 0, ttl: 1.2, size: 3, gravity: 0, ...spawn, life: 0 };
+    if (this.items.length < POOL) {
+      this.items.push(particle);
+      return;
+    }
+    this.items[this.cursor] = particle;
+    this.cursor = (this.cursor + 1) % POOL;
   }
 
   // A burst of `count` sparks flying out from one point, for an arrival.
@@ -27,14 +34,18 @@ export class Particles {
     return this.items.length;
   }
 
+  // Moves every particle and compacts the living ones in place: no new array per frame.
   step(dt: number): void {
+    let alive = 0;
     for (const particle of this.items) {
       particle.life += dt;
       particle.vy += particle.gravity * dt;
       particle.x += particle.vx * dt;
       particle.y += particle.vy * dt;
+      if (particle.life < particle.ttl) this.items[alive++] = particle;
     }
-    this.items = this.items.filter((particle) => particle.life < particle.ttl);
+    this.items.length = alive;
+    this.cursor %= Math.max(1, alive);
   }
 
   // Ink-outlined dots that fade and shrink as they age, in the V2 sticker style.

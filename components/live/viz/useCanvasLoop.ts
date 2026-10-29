@@ -28,10 +28,11 @@ export function useCanvasLoop(draw: (frame: Frame) => void, animate: boolean, de
     let frame = 0;
     let last = performance.now();
     const resize = () => {
-      const box = canvas.getBoundingClientRect();
+      // Layout size, not getBoundingClientRect: a view mounts mid cross-fade (scaled), and a transform never fires the
+      // ResizeObserver, so a scaled measure would stay blurry and offset taps for good.
       const ratio = pixelRatio();
-      width = Math.max(1, box.width);
-      height = Math.max(1, box.height);
+      width = Math.max(1, canvas.clientWidth);
+      height = Math.max(1, canvas.clientHeight);
       canvas.width = Math.round(width * ratio);
       canvas.height = Math.round(height * ratio);
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);

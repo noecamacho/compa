@@ -92,8 +92,10 @@ export class Heartbeat {
     if (kind === RECONNECTION) this.pendingReconnection += count;
   }
 
-  // Replace the whole trace with the baseline and one spike per busy history slot.
-  seed(slots: readonly Slot[]): void {
+  // Replace the whole trace with the baseline and one spike per busy history slot. `fromStart` draws the baseline from
+  // time zero, so a calm (reduced-motion) reseed of the same data paints the same picture.
+  seed(slots: readonly Slot[], fromStart = false): void {
+    if (fromStart) this.clock = 0;
     this.oldest = 0;
     this.carry = 0;
     this.pendingNew = 0;

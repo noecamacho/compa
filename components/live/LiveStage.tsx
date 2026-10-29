@@ -59,11 +59,12 @@ function initialStage(): Shown {
   return { current, leaving: null, rotation, available: [...VIZ_IDS] };
 }
 
-function useStage(): [Shown | null, (id: VizId) => void] {
+function useStage(reducedMotion: boolean): [Shown | null, (id: VizId) => void] {
   const [shown, setShown] = useState<Shown | null>(initialStage);
 
   const current = shown?.current;
-  const seconds = shown?.rotation.seconds ?? 0;
+  // Reduced motion: no hard cut every 30 s unless the URL asked for a period.
+  const seconds = !shown || (reducedMotion && !shown.rotation.explicit) ? 0 : shown.rotation.seconds;
   useEffect(() => {
     if (!current) return;
     writeLast(current);
@@ -85,7 +86,7 @@ function useStage(): [Shown | null, (id: VizId) => void] {
       if (!state) return state;
       const available = state.available.filter((other) => other !== id);
       if (available.length === 0) return state;
-      return { ...state, available, current: state.current === id ? nextViz(id, available) : state.current, leaving: null };
+      return { ...state, available, current: state.current === id ? firstViz(readLast(), Math.random(), available) : state.current, leaving: null };
     });
 
   return [shown, drop];
@@ -107,7 +108,7 @@ function Indicator({ shown, locale, reducedMotion }: { shown: Shown; locale: Loc
         <li key={id} className={`relative overflow-hidden rounded-full px-2 text-[12px] font-extrabold lg:text-[clamp(12px,0.8vw,18px)] ${id === shown.current ? "bg-sun" : "text-ink/60"}`}>
           {names[id]}
           {id === shown.current && seconds > 0 && !reducedMotion && (
-            <span key={`${id}-${shown.leaving}`} className="absolute bottom-0 left-0 h-[3px] bg-ink" style={{ animation: `viz-progress ${seconds}s linear forwards` }} />
+            <span key={id} className="absolute bottom-0 left-0 h-[3px] bg-ink" style={{ animation: `viz-progress ${seconds}s linear forwards` }} />
           )}
         </li>
       ))}
@@ -118,7 +119,7 @@ function Indicator({ shown, locale, reducedMotion }: { shown: Shown; locale: Loc
 // The stage behind the counters: one visualization at a time, a new one on every load and every 30 s by default.
 export default function LiveStage({ locale, ...rest }: Props) {
   const reducedMotion = usePrefersReducedMotion();
-  const [shown, drop] = useStage();
+  const [shown, drop] = useStage(reducedMotion);
   if (!shown) return null;
   const props: VizProps = { ...rest, reducedMotion };
   const layers = shown.leaving && !reducedMotion ? [shown.leaving, shown.current] : [shown.current];

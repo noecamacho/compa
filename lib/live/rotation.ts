@@ -16,13 +16,14 @@ const VizQuery = z.object({
   rotate: z.coerce.number().int().min(0).max(MAX_ROTATE_SECONDS).optional().catch(undefined),
 });
 
-export type Rotation = { pinned: VizId | null; seconds: number };
+// `explicit`: the URL set the period, which then holds even under reduced motion.
+export type Rotation = { pinned: VizId | null; seconds: number; explicit: boolean };
 
 export function rotationFrom(search: string): Rotation {
   const params = Object.fromEntries(new URLSearchParams(search));
   const { viz, rotate } = VizQuery.parse(params);
   const seconds = rotate === undefined ? DEFAULT_ROTATE_SECONDS : rotate === 0 ? 0 : Math.max(MIN_ROTATE_SECONDS, rotate);
-  return { pinned: viz ?? null, seconds: viz ? 0 : seconds };
+  return { pinned: viz ?? null, seconds: viz ? 0 : seconds, explicit: rotate !== undefined };
 }
 
 export const isVizId = (value: unknown): value is VizId => VIZ_IDS.some((id) => id === value);
