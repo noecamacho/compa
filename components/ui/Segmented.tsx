@@ -11,15 +11,30 @@ type Props<T extends string> = {
   height?: number;
 };
 
-// White tray with 4 px padding and ink pill for the active option (V2Bienvenida, V2Conectar, V2Ranking, V2Insignias).
+const GAP = 4;
+const EASE = "cubic-bezier(.34,1.3,.5,1)";
+
+// White tray with 4 px padding and an ink pill that slides to the active option (V2Bienvenida, V2Conectar, V2Ranking, V2Insignias).
 export function Segmented<T extends string>({ options, value, onChange, label, height = 40 }: Props<T>) {
+  const count = options.length;
+  const activeIndex = Math.max(0, options.findIndex((option) => option.value === value));
   return (
     <div
       role="group"
       aria-label={label}
-      className="grid gap-1 rounded-button bg-white p-1 border-ink shadow-hard-3"
-      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+      className="relative grid rounded-button bg-white p-1 border-ink shadow-hard-3"
+      style={{ gridTemplateColumns: `repeat(${count}, minmax(0, 1fr))`, gap: GAP }}
     >
+      <span
+        aria-hidden="true"
+        className="absolute top-1 left-1 rounded-chip bg-ink"
+        style={{
+          height,
+          width: `calc((100% - ${8 + (count - 1) * GAP}px) / ${count})`,
+          transform: `translateX(calc(${activeIndex} * (100% + ${GAP}px)))`,
+          transition: `transform .4s ${EASE}`,
+        }}
+      />
       {options.map((option) => {
         const on = option.value === value;
         return (
@@ -28,12 +43,12 @@ export function Segmented<T extends string>({ options, value, onChange, label, h
             type="button"
             aria-pressed={on}
             onClick={() => onChange(option.value)}
-            className="cursor-pointer rounded-chip border-0 font-display font-bold"
+            className="relative z-[1] cursor-pointer rounded-chip border-0 bg-transparent font-display font-bold"
             style={{
               height,
               fontSize: height >= 40 ? 15 : 14,
-              background: on ? "#1E1B2E" : "transparent",
               color: on ? "#FFF6E5" : "#1E1B2E",
+              transition: "color .25s ease",
             }}
           >
             {option.label}

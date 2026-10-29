@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 const CLASSES =
-  "box-border flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[14px] bg-white p-0 text-ink border-ink shadow-hard-3";
+  "box-border flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[14px] bg-white p-0 text-ink border-ink shadow-hard-3 pressable";
 
 type LinkProps = { href: string; label: string; children: ReactNode; className?: string };
 

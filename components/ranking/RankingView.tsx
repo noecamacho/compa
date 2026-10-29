@@ -36,7 +36,7 @@ function Column({ row, place, look, handle, delay }: { row: Row | undefined; pla
   const block = BLOCKS[place];
   if (!row) return <span />;
   return (
-    <Link href={handle ? `/people/${handle}` : "/ranking"} className="animate-podium flex min-w-0 flex-col items-center justify-end gap-[6px]" style={{ animationDelay: `${delay}s` }}>
+    <Link href={handle ? `/people/${handle}` : "/ranking"} className="animate-podium flex min-w-0 flex-col items-center justify-end gap-[6px] tappable" style={{ animationDelay: `${delay}s` }}>
       {place === 1 && (
         <svg width="44" height="34" viewBox="0 0 44 34" aria-hidden="true" className="mb-[-6px]">
           <path d="M4 30 L2 8 L14 18 L22 2 L30 18 L42 8 L40 30 Z" fill="#FFD93D" stroke="#1E1B2E" strokeWidth="2.5" strokeLinejoin="round" />
@@ -84,7 +84,8 @@ export function RankingView({ me, boards, looks, handles }: Props) {
           ]}
         />
       </div>
-      <div className="relative grid h-[372px] grid-cols-3 items-end gap-2 px-1">
+      {/* Keyed by scope so the podium rises again when switching tonight / all year. */}
+      <div key={scope} className="relative grid h-[372px] grid-cols-3 items-end gap-2 px-1">
         {CONFETTI.map((piece, index) => (
           <span
             key={index}
@@ -99,7 +100,7 @@ export function RankingView({ me, boards, looks, handles }: Props) {
       </div>
       <span aria-hidden="true" className="mx-1 mt-[-12px] block h-0" style={{ borderTop: "3px solid #1E1B2E" }} />
 
-      <div data-tour="you" className="mt-[2px] flex flex-col gap-[10px] rounded-[20px] bg-gum-soft px-[14px] py-3 shadow-hard-4" style={{ border: "3px solid #1E1B2E" }}>
+      <div key={`you-${scope}`} data-tour="you" className="animate-rise mt-[2px] flex flex-col gap-[10px] rounded-[20px] bg-gum-soft px-[14px] py-3 shadow-hard-4" style={{ border: "3px solid #1E1B2E", animationDelay: ".2s" }}>
         <div className="flex items-center gap-3">
           <Avatar person={avatarOf(me)} size={50} />
           <span className="flex min-w-0 flex-1 flex-col">
@@ -122,7 +123,7 @@ export function RankingView({ me, boards, looks, handles }: Props) {
       </div>
 
       {mine?.above && (
-        <Link href={handles[mine.above.userId] ? `/people/${handles[mine.above.userId]}` : "/ranking"} className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2">
+        <Link href={handles[mine.above.userId] ? `/people/${handles[mine.above.userId]}` : "/ranking"} className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable">
           <span className="w-[30px] font-display text-[15px] font-bold text-muted">#{mine.above.rank}</span>
           <Avatar person={{ name: mine.above.name, look: looks[mine.above.userId] }} size={30} />
           <span className="flex-1 truncate text-[14px] font-extrabold">{mine.above.name}</span>

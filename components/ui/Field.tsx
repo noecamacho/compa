@@ -11,7 +11,7 @@ export function Field({ id, label, className, ...rest }: Props) {
       </label>
       <input
         id={id}
-        className="box-border block h-11 w-full rounded-[12px] bg-white px-3 font-body text-[14px] font-bold text-ink outline-none border-ink focus:shadow-[0_0_0_4px_#6BE4A3]"
+        className="box-border block h-11 w-full rounded-[12px] bg-white px-3 font-body text-[14px] font-bold text-ink outline-none border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
         {...rest}
       />
     </div>

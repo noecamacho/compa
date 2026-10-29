@@ -42,8 +42,9 @@ export function Card({ children, tone = "white", size = "md", href, className, s
   const classes = `box-border block border-ink ${SIZE_CLASS[size]} ${className ?? ""}`;
   const merged = { background: TONE_BG[tone], ...style };
   if (href) {
+    const feedback = size === "flat" ? "tappable" : "pressable";
     return (
-      <Link href={href} className={classes} style={merged} aria-label={ariaLabel} data-tour={dataTour}>
+      <Link href={href} className={`${classes} ${feedback}`} style={merged} aria-label={ariaLabel} data-tour={dataTour}>
         {children}
       </Link>
     );

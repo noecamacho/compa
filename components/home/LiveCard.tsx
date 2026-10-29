@@ -86,7 +86,7 @@ export function LiveCard({ snapshot, me, endsAt, looks, empty }: Props) {
       </div>
       <Link
         href={empty ? "/connect" : "/ranking"}
-        className="flex h-11 items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2"
+        className="flex h-11 items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable"
       >
         <Icon name="trophy" size={20} strokeWidth={2.4} />
         <span className="flex-1 text-[14px] font-extrabold">

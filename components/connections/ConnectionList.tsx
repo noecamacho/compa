@@ -42,15 +42,17 @@ export function ConnectionList({ people }: Props) {
           </Chip>
         ))}
       </div>
-      <div className="flex flex-col gap-[10px]">
-        {shown.length === 0 && <Muted className="text-center text-[13px] font-bold">{copy.empty}</Muted>}
-        {shown.map((entry) => {
+      {/* Keyed by filter so the rows rise again, staggered, every time the list changes. */}
+      <div key={filter} className="flex flex-col gap-[10px]">
+        {shown.length === 0 && <Muted className="animate-fade-in text-center text-[13px] font-bold">{copy.empty}</Muted>}
+        {shown.map((entry, index) => {
           const type = typeOf(entry);
           return (
             <Link
               key={entry.person.id}
               href={`/people/${entry.person.handle}`}
-              className="flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3"
+              className="animate-rise flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3 pressable"
+              style={{ animationDelay: `${Math.min(index, 8) * 0.04}s` }}
             >
               <Avatar person={avatarOf(entry.person)} size={46} />
               <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
