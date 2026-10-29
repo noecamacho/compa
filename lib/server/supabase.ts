@@ -16,14 +16,21 @@ export async function createSupabaseServerClient() {
   return createServerClient(requireEnv("NEXT_PUBLIC_SUPABASE_URL"), requireEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY"), {
     cookies: {
       getAll: () => store.getAll(),
-      setAll: (list) => list.forEach(({ name, value, options }) => store.set(name, value, options)),
+      // Server Components cannot set cookies; a refreshed session is persisted by route handlers instead (Supabase SSR pattern).
+      setAll: (list) => {
+        try {
+          list.forEach(({ name, value, options }) => store.set(name, value, options));
+        } catch {}
+      },
     },
   });
 }
 
-// Errors that mean "no valid session": missing, expired or forged JWT, or a refresh token Auth rejected (4xx).
+// Errors that mean "no valid session": missing, expired, forged or unreadable JWT, or a refresh token Auth rejected (4xx).
 // Anything else (network, timeout, 5xx, 429) means Auth could not answer, which is not the same as signed out.
 export function isSignedOutError(error: unknown): boolean {
+  // A cookie whose JWT payload is not JSON fails to decode; it will never verify, so it is no session.
+  if (error instanceof SyntaxError) return true;
   if (!isAuthError(error)) return false;
   if (error.name === "AuthSessionMissingError" || error.name === "AuthInvalidJwtError") return true;
   const status = error.status ?? 0;

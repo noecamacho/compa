@@ -23,8 +23,7 @@ describe("sharedRanking (conference-scale finding 2)", () => {
       if (loads === 1) throw new Error("db down");
       return board(loads);
     };
-    expect(sharedRanking("k2", load, 1_000)).rejects.toThrow("db down");
-    await Bun.sleep(0);
+    await expect(sharedRanking("k2", load, 1_000)).rejects.toThrow("db down");
     expect((await sharedRanking("k2", load, 1_001))[0]?.points).toBe(2);
   });
 });

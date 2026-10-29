@@ -5,7 +5,7 @@ import { ApiError } from "../api/errors";
 // authUserId reads the session through a Supabase client; each test decides what getClaims answers.
 let answer: () => Promise<unknown> = async () => ({ data: null, error: null });
 mock.module("server-only", () => ({}));
-mock.module("next/headers", () => ({ cookies: async () => ({ getAll: () => [], set: () => undefined }) }));
+mock.module("next/headers", () => ({ cookies: async () => ({ getAll: () => [], set: () => undefined }), headers: async () => new Headers() }));
 mock.module("@supabase/ssr", () => ({ createServerClient: () => ({ auth: { getClaims: () => answer() } }) }));
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://127.0.0.1:54321";
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= "anon";
@@ -37,8 +37,10 @@ describe("authUserId (conference-scale finding 1)", () => {
     expect(await statusOf(authUserId())).toBe(503);
   });
 
-  test("only Auth errors can mean signed out", () => {
+  test("only Auth errors and an undecodable JWT can mean signed out", async () => {
     expect(isSignedOutError(new Error("boom"))).toBe(false);
     expect(isSignedOutError(null)).toBe(false);
+    answer = async () => Promise.reject(new SyntaxError("Unexpected token"));
+    expect(await authUserId()).toBeNull();
   });
 });

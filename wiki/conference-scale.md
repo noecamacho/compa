@@ -11,9 +11,9 @@ What breaks when COMPA runs live at a conference (hundreds to thousands of phone
 | 3 | `/home` polls 2 endpoints every 3 s, no backoff or hidden-tab pause | 40 req/min per phone | Shared poller with backoff, pause, timeout; merge endpoints | Open |
 | 4 | Supavisor client cap | `EMAXCONN` beyond 200 clients (Nano/Micro); app pool `max: 5`, no `idle_timeout` | `max: 3, idle_timeout: 20, connect_timeout: 5`; upsize compute for the day | Open |
 | 5 | Pages fetch their own API over HTTP; `/home` pulls the live snapshot | 50 concurrent `/home` renders wedged all instances | Call `lib/server/*` directly or `cache()`; light live-card endpoint; `error.tsx` | Open |
-| 6 | Deploy workflow deletes old deployments | No Instant Rollback | Keep the last N deployments; freeze `main` during the event | Open |
+| 6 | Deploy workflow deleted old deployments | No Instant Rollback | Keep the last 10 deployments; freeze `main` during the event ([event-day-runbook](event-day-runbook.md)) | Fixed |
 | 9 | Live snapshot unbounded, selected full user rows | 1.15 MB at 1k people / 6k links; 4.5 MB Vercel limit near 3k / 20k | Columns `id, name, photo_url` only; the 1,000 most recent links; counters from `count()`; each person carries `connections` (`lib/server/live.ts`) | Fixed |
-| 14 | Missing indexes | Amplifies 2 and 3 | Migration `0008_conference_scale_indexes` | Fixed |
+| 14 | Missing indexes | Amplifies 2 and 3 | Migration `0009_conference_scale_indexes` | Fixed |
 | 21 | Event door `GET /api/e/{code}` uncached, 2 counts per hit | Every door scan hits Postgres | Same 1 s CDN cache as `/live` (`LIVE_CACHE`, `lib/server/events.ts`) | Fixed |
 
 Verified correct under concurrency: double-tap accept (one 200, one 409), mutual scans (one row), double check-in, 300 people scanning one speaker (no lock contention; scores are views, so there are no hot rows).
@@ -22,7 +22,8 @@ Verified correct under concurrency: double-tap accept (one 200, one 409), mutual
 
 - `getClaims()` proves the access token was valid when issued; a server-side sign-out is seen when the token expires (1 h). Standard Supabase guidance for server checks.
 - Signed out (401, or a redirect to sign-in in layouts) only for: no session, an expired or forged JWT, or a refresh token Auth rejected with a 4xx other than 429.
-- Anything else (network, timeout, 5xx, 429) is `503 auth_unavailable`. Layouts and `currentMe()` throw instead of redirecting, so an outage never sends a signed-in person back through LinkedIn. Public routes (`currentUserOrNull`) answer anonymously.
+- Anything else (network, timeout, 5xx, 429) is `503 auth_unavailable`. Layouts and `currentMe()` throw (to `app/error.tsx`) instead of redirecting, so an outage never sends a signed-in person back through LinkedIn. `currentMe()` reads only a 401 or 404 from `/api/me` as a visitor. Public routes (`currentUserOrNull`) answer anonymously.
+- Server Components cannot write cookies, so `setAll` ignores that failure (the Supabase SSR pattern) instead of turning a token refresh during a render into a 503. Persisting refreshed sessions on page loads (`proxy.ts`) is finding 8, still open.
 - Local verification needs an asymmetric signing key; with HS256 `getClaims()` falls back to calling Auth. Local stack: `supabase gen signing-key --algorithm ES256`, wrapped in a JSON array, and `signing_keys_path` in `supabase/config.toml`.
 
 ## Platform limits that matter on the day

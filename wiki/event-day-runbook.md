@@ -28,6 +28,7 @@ Fallback when no target is usable: revert on `main`, wait for CI, migrate and bu
 | A user's report | Error screens show `Ref: <digest>`; every API error response has an `x-request-id` header | Search the Vercel logs for that value. Route errors log `requestId` (Vercel's `x-vercel-id`); render errors log `digest` too. |
 | Function errors and duration per route | Vercel → Observability | Built in on Pro; no extra service. |
 | Database CPU and connections | Supabase dashboard → Reports | Upsize compute when connections or CPU saturate. |
+| `503 auth_unavailable` or `auth unavailable` in the logs | Vercel → Logs; Supabase → Auth logs | Supabase Auth could not answer (outage, overload or rate limit). People stay signed in and should retry; check the Supabase status page and the Auth rate limits ([conference-scale](conference-scale.md)). |
 
 Only 5xx are logged on routes; 4xx are expected business answers (see `lib/api/errors.ts`).
 
@@ -35,4 +36,4 @@ Only 5xx are logged on routes; 4xx are expected business answers (see `lib/api/e
 
 `app/error.tsx` covers pages outside the signed-in app, `app/(app)/error.tsx` the attendee screens, `app/admin/error.tsx` the console, and `app/global-error.tsx` a crash of the root layout itself (inline styles, no global CSS). Each offers a retry.
 
-Related: [risks](risks.md), [delivery-checklist](delivery-checklist.md), [live-dashboard](live-dashboard.md).
+Related: [risks](risks.md), [conference-scale](conference-scale.md), [delivery-checklist](delivery-checklist.md), [live-dashboard](live-dashboard.md).
