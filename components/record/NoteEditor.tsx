@@ -7,19 +7,31 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Chip";
 import { Muted, SectionLabel } from "@/components/ui/Text";
-import { apiCall } from "@/lib/api/client";
+import { apiCall, errorMessage } from "@/lib/api/client";
 import { Approved, Draft, type ConnectionDetailT, type DraftT } from "@/lib/api/schemas";
 import { RecorderError, startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
 import { note as copy } from "@/lib/copy/es";
 import { formatClock } from "@/lib/format";
 import { forgetNote, recallNote } from "@/lib/note-draft";
 import { SUMMARY_POINTS } from "@/lib/points";
+import { TOPICS, type Topic } from "@/lib/topics";
 
 type Summary = { interactionId: string; title: string; bullets: string[]; topics: string[]; pendingAction: string | null; seconds: number | null; approved: boolean };
 
 type Phase = { kind: "recording"; seconds: number } | { kind: "transcribing" } | { kind: "typing"; text: string; error: string | null } | { kind: "ready"; summary: Summary };
 
 const WAVE = [30, 54, 76, 46, 68, 34, 58, 80, 42, 64, 28];
+
+const isTopic = (value: string): value is Topic => (TOPICS as readonly string[]).includes(value);
+
+// "Recordar": a calendar event with the pending action, so the follow-up leaves Compa with the person.
+const reminderUrl = (action: string, other: string): string => {
+  const url = new URL("https://calendar.google.com/calendar/render");
+  url.searchParams.set("action", "TEMPLATE");
+  url.searchParams.set("text", action);
+  url.searchParams.set("details", `Compa · ${other}`);
+  return url.toString();
+};
 
 const fromInteraction = (interaction: NonNullable<ConnectionDetailT["interaction"]>): Summary => ({
   interactionId: interaction.id,
@@ -65,7 +77,7 @@ export function NoteEditor({ detail }: Props) {
       const draft = await apiCall("POST", "/api/interactions/draft", Draft, { connectionId: detail.connectionId, text });
       setPhase({ kind: "ready", summary: fromDraft(draft, seconds) });
     } catch (caught) {
-      setPhase({ kind: "typing", text, error: caught instanceof Error ? caught.message : copy.failed });
+      setPhase({ kind: "typing", text, error: `${copy.failed} ${errorMessage(caught)}`.trim() });
     }
   }
 
@@ -86,7 +98,7 @@ export function NoteEditor({ detail }: Props) {
       });
       setPhase({ kind: "recording", seconds: 0 });
     } catch (caught) {
-      setPhase({ kind: "typing", text: "", error: caught instanceof RecorderError ? copy.failed : String(caught) });
+      setPhase({ kind: "typing", text: "", error: caught instanceof RecorderError ? copy.micUnavailable : copy.failed });
     }
   }
 
@@ -96,7 +108,8 @@ export function NoteEditor({ detail }: Props) {
     try {
       await apiCall("POST", `/api/interactions/${summary.interactionId}/approve`, Approved, {
         summary: summary.bullets.join(" "),
-        topics: [],
+        // The draft's topics are kept; only vocabulary topics (lib/topics.ts) are accepted by the API.
+        topics: summary.topics.filter(isTopic),
         nextSteps: summary.pendingAction ? [summary.pendingAction] : [],
         title: summary.title,
         pendingAction: summary.pendingAction,
@@ -104,7 +117,7 @@ export function NoteEditor({ detail }: Props) {
       forgetNote(detail.connectionId);
       router.push(`/people/${detail.other.handle}`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(errorMessage(caught));
       setSaving(false);
     }
   }
@@ -148,7 +161,11 @@ export function NoteEditor({ detail }: Props) {
       <div key="typing" className="animate-fade-in flex flex-1 flex-col gap-4">
         <Card className="flex flex-col gap-3 p-4">
           <SectionLabel>{copy.question}</SectionLabel>
-          {phase.error && <Muted className="text-[12px] font-extrabold">{phase.error}</Muted>}
+          {phase.error && (
+            <span role="alert" className="text-[12px] font-extrabold text-muted">
+              {phase.error}
+            </span>
+          )}
           <textarea
             value={phase.text}
             onChange={(event) => setPhase({ ...phase, text: event.target.value })}
@@ -211,9 +228,14 @@ export function NoteEditor({ detail }: Props) {
             <SectionLabel>{copy.pendingLabel}</SectionLabel>
             <span className="text-[14px] font-extrabold">{summary.pendingAction}</span>
           </span>
-          <button type="button" className="h-8 cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable">
+          <a
+            href={reminderUrl(summary.pendingAction, detail.other.name)}
+            target="_blank"
+            rel="noreferrer"
+            className="flex h-8 cursor-pointer items-center rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable"
+          >
             {copy.remind}
-          </button>
+          </a>
         </div>
       )}
 
@@ -223,7 +245,11 @@ export function NoteEditor({ detail }: Props) {
       </div>
 
       <div className="mt-auto flex flex-col gap-3">
-        {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
+        {error && (
+          <span role="alert" className="text-center text-[12px] font-extrabold text-coral">
+            {error}
+          </span>
+        )}
         {summary.approved ? (
           <Button variant="primary" onClick={() => router.push(`/people/${detail.other.handle}`)}>
             {copy.save}

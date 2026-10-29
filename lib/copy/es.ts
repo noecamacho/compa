@@ -189,6 +189,7 @@ export const note = {
   edit: "Editar",
   transcribing: "Compa está escuchando…",
   failed: "No pudimos resumir la nota. Escribe de qué hablaron:",
+  micUnavailable: "No pudimos usar el micrófono. Escribe de qué hablaron:",
   notePlaceholder: "Escribe de qué hablaron",
   draftButton: "Resumir",
 };
