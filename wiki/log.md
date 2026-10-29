@@ -213,3 +213,8 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] change | Conference-scale fixes: auth, scores, live payload, indexes, door cache
 
 - Findings 1, 2, 9, 14 and 21 of [docs/research/conference-load.md](../docs/research/conference-load.md) fixed: local JWT verification with `getClaims()` and `503 auth_unavailable` on Auth outages; per-person lifetime points and 3 s shared rankings; live snapshot limited to public columns and the 1,000 most recent links; migration `0009` indexes; 1 s CDN cache on the event door. New page [conference-scale](conference-scale.md) with fix status; pointers from [risks](risks.md), [delivery-checklist](delivery-checklist.md), [architecture-stack](architecture-stack.md), [points-rules](points-rules.md) and [event-day-runbook](event-day-runbook.md).
+
+## [2026-10-29] change | Client and projector resilience at conference scale
+
+- Fixed findings 10, 16, 17, 19 and 20 of [conference-load](../docs/research/conference-load.md): jsQR scanner fallback with clear camera messages, invite claim and creation races, client request timeouts and Spanish errors with kept audio, and a live screen that survives code rotation and outages. Pages updated: [risks](risks.md), [delivery-checklist](delivery-checklist.md), [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (findings 10, 16, 17, 19, 20 marked fixed), ADR-004 in `ARCHITECTURE.md`; new open questions #58 and #59.
+

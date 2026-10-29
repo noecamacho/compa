@@ -387,13 +387,13 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | --- | --- |
 | Actor | Checked-in attendee |
 | Entry | `/connect?tab=scan` |
-| Pre | A camera and `BarcodeDetector` |
-| Happy path | `getUserMedia` → detect a QR every 500 ms → `handleFromQr` → `GET /api/users/{handle}` → person row → Conectar → 05 |
+| Pre | A camera (`BarcodeDetector`, or the lazily loaded jsQR decoder on Safari and Firefox) |
+| Happy path | `getUserMedia` → decode a frame every 300 ms, one at a time → `handleFromQr` → `GET /api/users/{handle}` → person row → Conectar → 05 |
 | Alternates | Native camera path (F-11) |
-| Errors | `user_not_found` → `connect.notFound` |
-| Edge cases | iOS Safari has no `BarcodeDetector` [Inference], so the viewfinder shows but never detects (T-033). An event QR scanned in the app is not recognized. Repeated detection is guarded by `if (!found)`. The camera is not stopped on tab hide |
-| Status | UI Partial · API Ready · DB Ready |
-| E2E coverage | `e2e/connect/scan.spec.ts`: Chromium with a fake video of a `/u/<handle>` QR → the person row appears → Conectar → 05; WebKit fallback decoder (after T-033) |
+| Errors | `user_not_found` → `connect.notFound`; a network failure → `errorText` copy, and the same QR may be read again after 3 s |
+| Edge cases | Without `BarcodeDetector` (iOS Safari, Firefox) jsQR decodes a 640 px frame (conference-load finding 10). An event QR scanned in the app is not recognized. Each handle is looked up once. The camera is not stopped on tab hide |
+| Status | UI Ready · API Ready · DB Ready |
+| E2E coverage | `e2e/client-resilience.spec.ts`: a faked camera stream of a `/u/<handle>` QR with `BarcodeDetector` removed → the person row appears (Chromium and WebKit) |
 | Tickets | [T-033](backlog.md#t-033) |
 
 <a id="f-18"></a>
@@ -405,11 +405,11 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | `/connect?tab=scan` |
 | Pre | Permission denied, or no `mediaDevices` |
 | Happy path | — |
-| Alternates | Viewfinder label `connect.cameraUnavailable`, plus the name search |
+| Alternates | Viewfinder sentence per cause (`connect.camera`: denied, no camera, camera busy, unsupported, no decoder) pointing to the phone's camera app, plus the name search |
 | Errors | — |
 | Edge cases | No pre-prompt explaining why (DESIGN.md pending "Camera permission"). The permission is denied permanently in Safari settings. An insecure context (http on a LAN) |
-| Status | UI Partial · API — · DB — |
-| E2E coverage | `e2e/connect/scan.spec.ts`: `permissions: []` → unavailable copy, search visible, a "show my QR" action; es and en |
+| Status | UI Ready · API — · DB — |
+| E2E coverage | `e2e/client-resilience.spec.ts`: a refused `getUserMedia` (`NotAllowedError`) → `connect.camera.denied` |
 | Tickets | [T-033](backlog.md#t-033) |
 
 <a id="f-19"></a>
@@ -618,10 +618,10 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Pre | Pending, event running |
 | Happy path | `GET /api/connections/{id}` + `GET /api/users/{handle}` → card, numbers, interests → Aceptar → `POST …/accept { knew? }` → kind and points to both → `request.accepted` + `connection.accepted` broadcasts → 06 |
 | Alternates | Tick "we already knew each other" → reconnection |
-| Errors | 403 `forbidden` (the requester tries), 404 `connection_not_found`, 409 `not_pending`, 409 `event_ended` → *raw msg* (`RequestActions`) |
+| Errors | 403 `forbidden` (the requester tries), 404 `connection_not_found`, 409 `not_pending`, 409 `event_ended` → Spanish copy (`errorText`, `apiErrors`); no answer in 15 s → timeout copy |
 | Edge cases | **The page loads through the 501 detail on `main`.** The copy says "+20 each", but the server awards the kind points (T-038). A double tap is guarded by `FOR UPDATE` + a status guard. The view `event_scores` credits both people |
 | Status | UI Mock-only · API Ready · DB Ready |
-| E2E coverage | `e2e/requests/accept-decline.spec.ts`: accept → 06 with +50 (new) or +20 (reconnection); double click → one award; mock `not_pending` and `event_ended` copy; requester opening `/requests/<id>` → no buttons |
+| E2E coverage | `e2e/requests/accept-decline.spec.ts`: accept → 06 with +50 (new) or +20 (reconnection); double click → one award; mock `not_pending` and `event_ended` copy; requester opening `/requests/<id>` → no buttons. `e2e/client-resilience.spec.ts` (mock): a hung accept → timeout copy and the button re-enabled; `event_ended` → Spanish copy |
 | Tickets | [T-030](backlog.md#t-030), [T-038](backlog.md#t-038) |
 
 <a id="f-32"></a>
@@ -632,12 +632,12 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Actor | Addressee |
 | Entry | `/requests/<id>` → Ahora no |
 | Pre | Pending |
-| Happy path | `POST …/decline` → 204 → `/home`. The requester keeps seeing pending until the end, then expired (M8) |
+| Happy path | `POST …/decline` → 204 → `/home` (a failed decline stays with the reason; `not_pending` counts as done). The requester keeps seeing pending until the end, then expired (M8) |
 | Alternates | Treat it as dismiss instead (OQ #42) |
 | Errors | as F-31 |
 | Edge cases | The pair cannot connect again at this event (M8; reverse scan OQ #23). The decline never appears in broadcasts or on the big screen |
 | Status | UI Mock-only · API Ready · DB Ready |
-| E2E coverage | `e2e/requests/accept-decline.spec.ts`: decline → Home; the requester (second context) still sees pending, then expired after `page.clock` passes `ends_at`; no decline wording anywhere for the requester |
+| E2E coverage | `e2e/requests/accept-decline.spec.ts`: decline → Home; the requester (second context) still sees pending, then expired after `page.clock` passes `ends_at`; no decline wording anywhere for the requester. `e2e/client-resilience.spec.ts` (mock): an offline decline stays on `/requests/<id>` with `apiErrors.codes.network_error` |
 | Tickets | [T-030](backlog.md#t-030), [T-039](backlog.md#t-039) |
 
 <a id="f-33"></a>
@@ -948,10 +948,10 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Pre | The event exists |
 | Happy path | `GET /api/e/{code}/live` (1 s shared cache) → network visualization (`components/live/Loom.tsx`), counters (checked in, connections, new, reconnections), color by kind (M16) |
 | Alternates | Realtime `event:<slug>:live` messages (the topic is still keyed by slug in `lib/realtime.ts`) |
-| Errors | Unknown code → not found |
+| Errors | Unknown code → not found. A 404 after the page loaded (code rotated) keeps the board with `live.codeChanged`; a failed or hung poll (8 s timeout) shows `live.staleFor`; a failed render retries every 10 s (`error.tsx`) |
 | Edge cases | On `main`, `/live/<slug>` returns 404 and `/api/events/<slug>/live` is public by guessable slug (probed 200; T-092). Name and photo only, never email or a decline (A6) |
 | Status | UI **IP** · API **IP** · DB **IP** |
-| E2E coverage | `e2e/live/big-screen.spec.ts` (`live-1920` project): counters match the seeded data; a new accept in another context adds an edge within 3 s; unknown code → not found; no email in the DOM or the network payloads |
+| E2E coverage | `e2e/live/big-screen.spec.ts` (`live-1920` project): counters match the seeded data; a new accept in another context adds an edge within 3 s; unknown code → not found; no email in the DOM or the network payloads. `e2e/live/projector-resilience.spec.ts` (mock): a 404 poll keeps the board with the code-changed pill; a hung poll shows the stale pill with one request in flight, then clears |
 | Tickets | [T-090](backlog.md#t-090), [T-092](backlog.md#t-092) |
 
 <a id="f-52"></a>

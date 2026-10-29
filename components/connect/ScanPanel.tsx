@@ -5,52 +5,110 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Muted } from "@/components/ui/Text";
-import { apiCall } from "@/lib/api/client";
+import { ApiClientError, apiCall, errorText } from "@/lib/api/client";
 import { UserProfile, type CardT } from "@/lib/api/schemas";
 import { connect as copy } from "@/lib/copy/es";
 import { slugify } from "@/lib/slug";
 import { HIT_AREA } from "@/components/ui/hit-area";
 
-// Minimal typing for the Barcode Detection API (Chrome, Android); Safari has none (ARCHITECTURE.md ADR-004).
+// Minimal typing for the Barcode Detection API (Chrome, Android). Safari and Firefox have none, so jsQR decodes
+// frames there instead (ARCHITECTURE.md ADR-004); it is loaded only on those browsers.
 type Detector = { detect(source: HTMLVideoElement): Promise<{ rawValue: string }[]> };
-type DetectorConstructor = new (options: { formats: string[] }) => Detector;
+type DetectorConstructor = { new (options: { formats: string[] }): Detector; getSupportedFormats?: () => Promise<string[]> };
 const detectorConstructor = (): DetectorConstructor | null =>
   "BarcodeDetector" in globalThis ? (globalThis as unknown as { BarcodeDetector: DetectorConstructor }).BarcodeDetector : null;
+
+// Reads every QR in the current video frame.
+type Decode = (video: HTMLVideoElement) => Promise<string[]>;
+
+const SCAN_MS = 300;
+const RETRY_LOOKUP_MS = 3000;
+// jsQR works on a downscaled frame: fast on an old iPhone and still sharp enough for a QR filling the frame.
+const SCAN_WIDTH = 640;
 
 // A personal QR encodes <origin>/u/<handle>.
 export const handleFromQr = (raw: string): string | null => raw.match(/\/u\/([a-z0-9-]{2,32})(?:[/?#]|$)/)?.[1] ?? null;
 
-function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onHandle: (handle: string) => void) {
-  const [available, setAvailable] = useState(true);
+export type CameraStatus = "starting" | "scanning" | "denied" | "no_camera" | "unsupported" | "no_decoder" | "failed";
+
+// getUserMedia rejects with a DOMException whose name says why.
+export function cameraStatusFor(errorName: string): CameraStatus {
+  if (errorName === "NotAllowedError" || errorName === "SecurityError") return "denied";
+  if (errorName === "NotFoundError" || errorName === "OverconstrainedError") return "no_camera";
+  return "failed";
+}
+
+async function nativeDecoder(): Promise<Decode | null> {
+  const Native = detectorConstructor();
+  if (!Native) return null;
+  const formats = (await Native.getSupportedFormats?.().catch(() => [])) ?? ["qr_code"];
+  if (!formats.includes("qr_code")) return null;
+  const detector = new Native({ formats: ["qr_code"] });
+  return async (video) => (await detector.detect(video)).map((code) => code.rawValue);
+}
+
+async function jsDecoder(): Promise<Decode> {
+  const { default: jsQR } = await import("jsqr");
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d", { willReadFrequently: true });
+  return async (video) => {
+    if (!context || !video.videoWidth) return [];
+    const scale = Math.min(1, SCAN_WIDTH / video.videoWidth);
+    canvas.width = Math.round(video.videoWidth * scale);
+    canvas.height = Math.round(video.videoHeight * scale);
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const frame = context.getImageData(0, 0, canvas.width, canvas.height);
+    const code = jsQR(frame.data, frame.width, frame.height, { inversionAttempts: "dontInvert" });
+    return code ? [code.data] : [];
+  };
+}
+
+const errorName = (error: unknown): string => (error instanceof Error ? error.name : "");
+
+// onHandle lives in a ref so a re-render (every keystroke in the search box) never restarts the camera.
+function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onHandle: (handle: string) => void): CameraStatus {
+  const [status, setStatus] = useState<CameraStatus>("starting");
+  const handleRef = useRef(onHandle);
+  useEffect(() => {
+    handleRef.current = onHandle;
+  });
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || !navigator.mediaDevices?.getUserMedia) return setAvailable(false);
+    if (!video || !navigator.mediaDevices?.getUserMedia) return setStatus("unsupported");
+    let active = true;
     let stream: MediaStream | null = null;
-    let timer: ReturnType<typeof setInterval> | null = null;
-    const Detector = detectorConstructor();
-    navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: "environment" } })
-      .then((media) => {
-        stream = media;
-        video.srcObject = media;
-        return video.play();
-      })
-      .then(() => {
-        if (!Detector) return;
-        const detector = new Detector({ formats: ["qr_code"] });
-        timer = setInterval(async () => {
-          const codes = await detector.detect(video).catch(() => []);
-          const handle = codes.map((code) => handleFromQr(code.rawValue)).find(Boolean);
-          if (handle) onHandle(handle);
-        }, 500);
-      })
-      .catch(() => setAvailable(false));
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    // One decode at a time: the next frame is read only after the previous one settles.
+    const scan = async (decode: Decode) => {
+      const codes = await decode(video).catch(() => []);
+      if (!active) return;
+      const handle = codes.map(handleFromQr).find(Boolean);
+      if (handle) handleRef.current(handle);
+      timer = setTimeout(() => void scan(decode), SCAN_MS);
+    };
+    const start = async () => {
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      } catch (error) {
+        return setStatus(cameraStatusFor(errorName(error)));
+      }
+      if (!active) return stream.getTracks().forEach((track) => track.stop());
+      video.srcObject = stream;
+      await video.play().catch(() => undefined);
+      const decode = await nativeDecoder().then((native) => native ?? jsDecoder()).catch(() => null);
+      if (!active) return;
+      if (!decode) return setStatus("no_decoder");
+      setStatus("scanning");
+      void scan(decode);
+    };
+    void start();
     return () => {
-      if (timer) clearInterval(timer);
+      active = false;
+      if (timer) clearTimeout(timer);
       stream?.getTracks().forEach((track) => track.stop());
     };
-  }, [videoRef, onHandle]);
-  return available;
+  }, [videoRef]);
+  return status;
 }
 
 const CORNER = "absolute h-[34px] w-[34px] border-mint";
@@ -60,21 +118,29 @@ export function ScanPanel() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [found, setFound] = useState<CardT | null>(null);
   const [query, setQuery] = useState("");
-  const [notFound, setNotFound] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
+  // One lookup per handle: the camera reads the same QR several times a second.
+  const lastHandle = useRef<string | null>(null);
 
   async function lookUp(handle: string) {
     try {
       const profile = await apiCall("GET", `/api/users/${handle}`, UserProfile);
       setFound(profile.card);
-      setNotFound(false);
-    } catch {
-      setNotFound(true);
+      setLookupError(null);
+    } catch (caught) {
+      const missing = caught instanceof ApiClientError && caught.status === 404;
+      setLookupError(missing ? copy.notFound : errorText(caught));
+      // A network failure may pass: let the same QR be read again in a moment.
+      if (!missing) setTimeout(() => (lastHandle.current = null), RETRY_LOOKUP_MS);
     }
   }
 
-  const available = useCamera(videoRef, (handle) => {
-    if (!found) void lookUp(handle);
+  const status = useCamera(videoRef, (handle) => {
+    if (found || lastHandle.current === handle) return;
+    lastHandle.current = handle;
+    void lookUp(handle);
   });
+  const available = status === "starting" || status === "scanning";
 
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,8 +152,9 @@ export function ScanPanel() {
     <div className="flex flex-col gap-3">
       <div className="relative h-[360px] overflow-hidden rounded-[28px] bg-ink border-ink" style={{ boxShadow: "4px 4px 0 #6F6A7E" }}>
         <video ref={videoRef} muted playsInline className="absolute inset-0 h-full w-full object-cover opacity-80" />
-        <span className="absolute top-[14px] right-0 left-0 text-center text-[12px] font-extrabold tracking-[1.2px] text-paper uppercase">
-          {available ? copy.aim : copy.cameraUnavailable}
+        {/* A camera problem is a sentence to read, not a label: no caps, so the longer hint stays legible. */}
+        <span role="status" className={`absolute top-[14px] right-0 left-0 px-4 text-center font-extrabold text-paper ${available ? "text-[12px] tracking-[1.2px] uppercase" : "text-[13px] leading-[1.35]"}`}>
+          {copy.camera[status]}
         </span>
         {/* A fixed 205×220 frame, centered, so the corners stay square however wide the viewfinder gets. */}
         <span aria-hidden="true" className="absolute top-12 left-1/2 h-[220px] w-[205px] -translate-x-1/2">
@@ -131,7 +198,7 @@ export function ScanPanel() {
           className="box-border block h-12 w-full rounded-[14px] bg-white pr-[14px] pl-11 font-body text-[15px] font-bold text-ink outline-none placeholder:text-muted border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
         />
       </form>
-      {notFound && <Muted className="text-center text-[12px] font-extrabold">{copy.notFound}</Muted>}
+      {lookupError && <Muted className="text-center text-[12px] font-extrabold">{lookupError}</Muted>}
     </div>
   );
 }

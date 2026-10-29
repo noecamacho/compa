@@ -8,7 +8,7 @@ import { Header } from "@/components/ui/Header";
 import { IconButton } from "@/components/ui/IconButton";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
-import { apiCall } from "@/lib/api/client";
+import { apiCall, errorText } from "@/lib/api/client";
 import { Me, type AvatarModeT, type MeT } from "@/lib/api/schemas";
 import { monito as copy } from "@/lib/copy/es";
 import {
@@ -116,7 +116,7 @@ export function MonitoBuilder({ me, next, back, onboarding }: Props) {
       await apiCall("PATCH", "/api/me", Me, { avatar: look, avatarMode: usePhoto ? "photo" : "monito" });
       router.push(next);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : String(caught));
+      setError(errorText(caught));
       setSaving(false);
     }
   }

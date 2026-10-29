@@ -42,7 +42,8 @@ Each entry: context, decision, consequences, source.
 - Consequences: the client never holds an API key; the AI never decides points or permissions (p. 11); fallbacks keep the flow alive when the AI fails (p. 12).
 
 ### ADR-004 QR is a URL; scanning uses the native camera
-- Decision: generate with `qrcode`; no in-app scanner because Safari has no `BarcodeDetector` (p. 8).
+- Decision: generate with `qrcode`; the QR opens `/u/<handle>`, so any camera app works. The plan had no in-app scanner because Safari has no `BarcodeDetector` (p. 8).
+- As built: `/connect?tab=scan` has an in-app scanner that uses `BarcodeDetector` where it exists and lazily loads `jsqr` (pure JS, no WebAssembly or CDN fetch) on Safari and Firefox ([conference-load](docs/research/conference-load.md) finding 10).
 - Consequences: `/c/[handle]` must work with and without a session (p. 5); HTTPS and a short domain are required (p. 8).
 
 ### ADR-005 zod schemas shared by client and server

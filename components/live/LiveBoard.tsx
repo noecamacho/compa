@@ -81,7 +81,7 @@ function Legend({ copy }: { copy: LiveCopy }) {
 export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale }: Props) {
   const locale = useLocale(serverLocale);
   const copy = copyFor(locale).live;
-  const { snapshot, stale } = useLiveSnapshot(code, initial);
+  const { snapshot, stale, gone, staleForS } = useLiveSnapshot(code, initial);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [unavailable, setUnavailable] = useState(false);
   const rows = useMemo(() => boardRows(snapshot), [snapshot]);
@@ -116,7 +116,9 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
           )}
           {stale && (
             <span role="status" className="absolute top-2 right-2">
-              <Pill tone="sun-soft">{copy.stale}</Pill>
+              <Pill tone="sun-soft" className="whitespace-normal! py-1 lg:text-[clamp(12px,1.1vw,26px)]" style={{ height: "auto", minHeight: 28 }}>
+                {gone ? copy.codeChanged : copy.staleFor(staleForS)}
+              </Pill>
             </span>
           )}
         </section>
