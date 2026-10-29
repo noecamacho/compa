@@ -66,6 +66,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 - [docs/research/live-dataviz.md](../docs/research/live-dataviz.md) — live data-viz research: simulator, big-screen and phone concepts, DV/DP tickets.
 - [docs/research/conference-load.md](../docs/research/conference-load.md) — conference load test: measurements, 22 ranked infrastructure findings, runbook and the reproduction script.
 - [docs/research/ux-audit.md](../docs/research/ux-audit.md) — whole-app UX and edge-case audit at all breakpoints; 139 findings, UX-A/UX-P tickets.
+- [Codex evidence](../docs/evidence/codex/README.md) — five bilingual marketing edits, editable compositions, session evidence, sources and verification limits.
 - [CHANGELOG.md](../CHANGELOG.md) — Keep a Changelog history.
 - [docs/api-quickstart.md](../docs/api-quickstart.md) — local mock requests, backend setup, and email sign-in requirements for hosted Supabase.
 - [docs/engineering-standards.md](../docs/engineering-standards.md) — SOLID, KISS, DRY, no nesting, clean code.

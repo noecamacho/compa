@@ -237,3 +237,11 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] change | English for every attendee screen
 
 - All attendee screens, states, errors, toasts, notifications and badge names now exist in English next to Spanish. `lib/copy/en.ts` mirrors every section of `lib/copy/es.ts`; `lib/copy/copy.test.ts` fails on a missing key, an untranslated string or a direct single-locale import. Locale reaches Client Components through `components/LocaleProvider.tsx` (`useCopy()`) and Server Components through `requestCopy()`. Errors map from the API `code` (`lib/api/error-text.ts`). See [DESIGN.md](../DESIGN.md) "Internationalization". The Supabase magic-link email template is configured in the Supabase dashboard (not in this repo); push alerts (#60) take their text from the same dictionary and locale as the /notifications list. `/design` stays Spanish.
+
+## [2026-10-29] query | Codex marketing evidence
+
+Added five bilingual, 20-second marketing compositions using Brag full and Hyperframes, with actual Codex process/session evidence, mock attendee UI, the existing Codex Conf test event, a labeled network research prototype and an event QR poster. Sources, licenses and verification limits are recorded in [the evidence index](../docs/evidence/codex/README.md); this satisfies the concrete-artifact portion of [hackathon requirements](hackathon-requirements.md#evidence-of-codex-use-s-8-s-14), pending submission review. No real JSConf event is featured and no production data was written.
+
+## [2026-10-29] query | Should generated video evidence be linted?
+
+- `eslint.config.mjs` excludes `docs/evidence/**` so the vendored GSAP render runtime is preserved without application lint rules. The follow-up `bun run lint` passed with two existing research-prototype warnings; details in [video verification](../docs/evidence/codex/verification.md).

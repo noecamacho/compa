@@ -1,0 +1,1 @@
+3135926 jue oct 29 08:57:08 2026 codex --model gpt-6.1-sol -c model_reasoning_effort="high" --dangerously-bypass-approvals-and-sandbox

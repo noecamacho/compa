@@ -1,0 +1,42 @@
+[
+  {
+    "edit": "01-problem",
+    "file": "01-problem/brag.mp4",
+    "bytes": 4800430,
+    "seconds": 20,
+    "sha256": "cd6677328d8664565f8d2d65ec2d955316d8ffec6a2fe995f2339c1317f7f370",
+    "contrastChecks": 38
+  },
+  {
+    "edit": "02-qr-solution",
+    "file": "02-qr-solution/brag.mp4",
+    "bytes": 4227021,
+    "seconds": 20,
+    "sha256": "fe642da808968bf416327b441eeeb98ad8cf89d0af1e1a1834c54c99b158a1ea",
+    "contrastChecks": 38
+  },
+  {
+    "edit": "03-event-journey",
+    "file": "03-event-journey/brag.mp4",
+    "bytes": 4441114,
+    "seconds": 20,
+    "sha256": "46891b473d29d915f7d05d759a8678a2269bf68e6e092ba3994027c55785c716",
+    "contrastChecks": 38
+  },
+  {
+    "edit": "04-live-bigscreen",
+    "file": "04-live-bigscreen/brag.mp4",
+    "bytes": 6260044,
+    "seconds": 20,
+    "sha256": "7b2793f2c6cfe1c026409818b6b9e5eb29418c1fb0a193a35c1d53732dc69dbd",
+    "contrastChecks": 36
+  },
+  {
+    "edit": "05-organizer",
+    "file": "05-organizer/brag.mp4",
+    "bytes": 2759594,
+    "seconds": 20,
+    "sha256": "60ded2d91fb3d97d8b414c8a4089e588e74c83bd6e807f251644132ebb1e867d",
+    "contrastChecks": 36
+  }
+]
