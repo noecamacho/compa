@@ -1,5 +1,5 @@
 // Profile field vocabulary shared by the database schema, the API schemas and the visibility filter (M11, M12).
-export const LINK_KEYS = ["linkedin", "github", "x", "instagram", "web"] as const;
+export const LINK_KEYS = ["linkedin", "github", "x", "instagram", "whatsapp", "web"] as const;
 export type LinkKey = (typeof LINK_KEYS)[number];
 export type Links = Partial<Record<LinkKey, string>>;
 
@@ -17,5 +17,5 @@ export const DEFAULT_VISIBILITY: VisibilitySettings = {
   headline: "public",
   company: "public",
   interests: "public",
-  links: { linkedin: "connections", github: "connections", x: "connections", instagram: "connections", web: "connections" },
+  links: { linkedin: "connections", github: "connections", x: "connections", instagram: "connections", whatsapp: "connections", web: "connections" },
 };

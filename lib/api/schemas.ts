@@ -2,6 +2,8 @@
 // Types are inferred from these schemas; lib/api/routes.ts wires them into the OpenAPI document.
 import "zod-openapi";
 import { z } from "zod";
+import { BADGE_IDS } from "../badges/catalog";
+import { MonitoLook } from "../monito/look";
 import { LINK_KEYS, VISIBILITY_LEVELS } from "../profile-fields";
 import { TOPICS } from "../topics";
 
@@ -29,6 +31,7 @@ export const VisibilitySettings = z
       github: Visibility,
       x: Visibility,
       instagram: Visibility,
+      whatsapp: Visibility,
       web: Visibility,
     }),
   })
@@ -36,18 +39,34 @@ export const VisibilitySettings = z
 
 export const EventRef = z.object({ slug: eventSlug, name: z.string() }).meta({ id: "EventRef" });
 
+export const Avatar = MonitoLook.meta({ id: "MonitoLook", description: "The person's pixel-art monito (design/compa-v2/README.md)." });
+export const BadgeId = z.enum(BADGE_IDS).meta({ id: "BadgeId" });
+
+// Fields the V2 screens read; optional until the handlers fill them (design handoff, follow-up PR).
 export const Card = z
   .object({
     id: uuid,
     handle,
     name: z.string(),
     photoUrl: z.string().nullable(),
+    avatar: Avatar.optional(),
     headline: z.string().optional(),
     company: z.string().optional(),
+    city: z.string().optional(),
     interests: z.array(z.string()).optional(),
     links: Links.optional(),
   })
   .meta({ id: "Card", description: "Another person as the viewer may see them (visibility filter, API spec §6)." });
+
+export const Standing = z
+  .object({ rank: z.int().nullable(), points: z.int() })
+  .meta({ id: "Standing", description: "Points and position; rank is null when the person has no points yet." });
+
+export const Scores = z.object({ event: Standing, lifetime: Standing }).meta({ id: "Scores" });
+
+export const ProfileStats = z
+  .object({ newConnections: z.int(), reconnections: z.int(), events: z.int() })
+  .meta({ id: "ProfileStats" });
 
 export const Me = Card.extend({
   email: z.string().nullable(),
@@ -56,10 +75,21 @@ export const Me = Card.extend({
   photoEdited: z.boolean(),
   isAdmin: z.boolean(),
   currentEvent: EventRef.nullable(),
+  stats: ProfileStats.optional(),
+  scores: Scores.optional(),
+  badges: z.array(BadgeId).optional().meta({ description: "Earned badges, most recent first." }),
 }).meta({ id: "Me" });
 
 export const Interest = z.object({ id: z.int(), slug: z.string(), name: z.string() }).meta({ id: "Interest" });
 export const InterestList = z.array(Interest);
+
+export const Relationship = z
+  .object({ reconnections: z.int(), eventsTogether: z.int(), mutual: z.array(Card) })
+  .meta({ id: "Relationship", description: "The viewer and this person: how often they met and whom they both know." });
+
+export const LastInteraction = z
+  .object({ connectionId: uuid, title: z.string(), topics: z.array(z.string()), at: isoDate })
+  .meta({ id: "LastInteraction" });
 
 export const UserProfile = z
   .object({
@@ -68,6 +98,11 @@ export const UserProfile = z
       .object({ status: ConnectionStatusForMe, kind: ConnectionKind.optional(), eventSlug })
       .optional()
       .meta({ description: "Your relation with this person at their current event, if any." }),
+    scores: Scores.optional(),
+    stats: ProfileStats.optional(),
+    badges: z.array(BadgeId).optional(),
+    relationship: Relationship.optional(),
+    lastInteraction: LastInteraction.nullable().optional(),
   })
   .meta({ id: "UserProfile" });
 
@@ -79,6 +114,8 @@ export const PatchMeBody = z
     photoUrl: z.url().max(500).nullable().optional(),
     headline: optionalText(120),
     company: optionalText(80),
+    city: optionalText(80),
+    avatar: Avatar.optional(),
     links: z
       .partialRecord(LinkKey, z.string().trim().max(200))
       .optional()
@@ -115,11 +152,15 @@ export const CheckIn = z
   .object({ event: EventRef, checkedInAt: isoDate, alreadyCheckedIn: z.boolean() })
   .meta({ id: "CheckIn" });
 
+const Topic = z.enum(TOPICS);
+
 export const CreateConnectionBody = z
   .object({
     toHandle: handle,
     knew: z.boolean().optional(),
     screenConsent: z.literal(true).optional(),
+    // Free labels from the chips on the register screen; the summary vocabulary (lib/topics.ts) is a separate list.
+    topics: z.array(z.string().trim().min(1).max(40)).max(3).optional().meta({ description: "What they talked about, picked by the scanner (+5)." }),
   })
   .meta({ id: "CreateConnectionBody" });
 
@@ -151,9 +192,74 @@ export const Meeting = z
   })
   .meta({ id: "Meeting" });
 
+// "friend" is derived: three or more reconnections with the same person (V2Conexiones filter).
+export const PersonType = z.enum(["new", "reconnection", "friend"]).meta({ id: "PersonType" });
+
 export const PersonHistory = z
-  .object({ person: Card, meetings: z.array(Meeting), lastMetAt: isoDate, totalPoints: z.int() })
+  .object({
+    person: Card,
+    meetings: z.array(Meeting),
+    lastMetAt: isoDate,
+    totalPoints: z.int(),
+    type: PersonType.optional(),
+    topics: z.array(z.string()).optional(),
+  })
   .meta({ id: "PersonHistory" });
+
+export const PointsBreakdown = z
+  .object({ kind: z.int(), topics: z.int(), note: z.int(), total: z.int() })
+  .meta({ id: "PointsBreakdown" });
+
+export const InteractionSummary = z
+  .object({
+    id: uuid,
+    title: z.string(),
+    summary: z.string(),
+    bullets: z.array(z.string()),
+    topics: z.array(z.string()),
+    pendingAction: z.string().nullable(),
+    durationSec: z.int().nullable(),
+    approvedAt: isoDate.nullable(),
+  })
+  .meta({ id: "InteractionSummary" });
+
+export const ConnectionDetail = z
+  .object({
+    connectionId: uuid,
+    status: ConnectionStatusForMe,
+    kind: ConnectionKind.optional(),
+    direction: z.enum(["sent", "received"]),
+    event: EventRef,
+    other: Card,
+    topics: z.array(z.string()),
+    points: PointsBreakdown,
+    interaction: InteractionSummary.nullable(),
+    at: isoDate,
+  })
+  .meta({ id: "ConnectionDetail" });
+
+export const BadgeProgress = z.object({ current: z.int(), total: z.int(), label: z.string() }).meta({ id: "BadgeProgress" });
+
+export const BadgeStatus = z
+  .object({
+    id: BadgeId,
+    earnedAt: isoDate.nullable(),
+    earnedNote: z.string().nullable().meta({ description: "How it was earned, e.g. 'Con Valeria'." }),
+    progress: BadgeProgress.nullable(),
+  })
+  .meta({ id: "BadgeStatus" });
+
+export const BadgeList = z.object({ badges: z.array(BadgeStatus), earned: z.int(), total: z.int() }).meta({ id: "BadgeList" });
+
+export const Invitee = z
+  .object({ person: Card, firstConnectionAt: isoDate.nullable(), points: z.int() })
+  .meta({ id: "Invitee" });
+
+export const Invites = z
+  .object({ code: z.string(), url: z.url(), invitees: z.array(Invitee), target: z.int(), goldenCap: z.boolean() })
+  .meta({ id: "Invites" });
+
+export const ClaimedInvite = z.object({ code: z.string(), inviter: Card }).meta({ id: "ClaimedInvite" });
 
 export const ConnectionList = z
   .object({
@@ -195,15 +301,26 @@ export const LeaderboardRow = z
     connections: z.int(),
   })
   .meta({ id: "LeaderboardRow" });
-export const Leaderboard = z.object({ rows: z.array(LeaderboardRow) }).meta({ id: "Leaderboard" });
-export const LeaderboardQuery = z.object({ limit: z.coerce.number().int().min(1).max(100).default(20) });
+export const LeaderboardMe = z
+  .object({
+    rank: z.int().nullable(),
+    points: z.int(),
+    above: LeaderboardRow.nullable(),
+    gap: z.int().meta({ description: "Points needed to pass the row above; 0 when first." }),
+    tip: z.string().nullable(),
+  })
+  .meta({ id: "LeaderboardMe" });
+export const Leaderboard = z.object({ rows: z.array(LeaderboardRow), me: LeaderboardMe.optional() }).meta({ id: "Leaderboard" });
+export const LeaderboardScope = z.enum(["event", "lifetime"]).meta({ id: "LeaderboardScope" });
+export const LeaderboardQuery = z.object({
+  limit: z.coerce.number().int().min(1).max(100).default(20),
+  scope: LeaderboardScope.default("event"),
+});
 
 export const TranscribeBody = z
   .object({ audio: z.string().meta({ format: "binary", description: "webm, mp4, m4a, mpeg or wav; up to 15 MB" }) })
   .meta({ id: "TranscribeBody" });
 export const Transcript = z.object({ text: z.string() }).meta({ id: "Transcript" });
-
-const Topic = z.enum(TOPICS);
 
 export const DraftBody = z
   .object({ connectionId: uuid, text: z.string().trim().min(1).max(4000) })
@@ -216,6 +333,8 @@ export const Draft = z
     nextSteps: z.array(z.string()).max(3),
     substantive: z.boolean(),
     fallback: z.boolean(),
+    title: z.string().optional().meta({ description: "One-line title (V2NotaVoz)." }),
+    pendingAction: z.string().nullable().optional().meta({ description: "A follow-up the AI detected, e.g. an introduction to make." }),
   })
   .meta({ id: "Draft" });
 
@@ -224,6 +343,8 @@ export const ApproveBody = z
     summary: z.string().trim().min(1).max(1200),
     topics: z.array(Topic).max(4),
     nextSteps: z.array(z.string().trim().min(1).max(200)).max(3),
+    title: z.string().trim().max(120).optional(),
+    pendingAction: z.string().trim().max(200).nullable().optional(),
   })
   .meta({ id: "ApproveBody" });
 export const Approved = z
@@ -245,6 +366,7 @@ export const SlugParams = z.object({ slug: eventSlug });
 export const HandleParams = z.object({ handle });
 export const IdParams = z.object({ id: uuid });
 export const LivePersonParams = z.object({ slug: eventSlug, userId: uuid });
+export const CodeParams = z.object({ code: z.string().regex(/^[a-z0-9-]{2,40}$/) });
 export const NextQuery = z.object({
   next: z.string().optional().meta({ description: "Relative path to return to, e.g. `/u/luis` or `/e/founders-fest`." }),
 });
@@ -254,5 +376,17 @@ export const ErrorFields = z.record(z.string(), z.array(z.string()));
 
 export type CardT = z.infer<typeof Card>;
 export type MeT = z.infer<typeof Me>;
+export type UserProfileT = z.infer<typeof UserProfile>;
+export type ConnectionListT = z.infer<typeof ConnectionList>;
+export type PersonHistoryT = z.infer<typeof PersonHistory>;
+export type ConnectionDetailT = z.infer<typeof ConnectionDetail>;
+export type LeaderboardT = z.infer<typeof Leaderboard>;
+export type LeaderboardScopeT = z.infer<typeof LeaderboardScope>;
+export type BadgeListT = z.infer<typeof BadgeList>;
+export type BadgeStatusT = z.infer<typeof BadgeStatus>;
+export type InvitesT = z.infer<typeof Invites>;
+export type LiveSnapshotT = z.infer<typeof LiveSnapshot>;
+export type DraftT = z.infer<typeof Draft>;
+export type VisibilitySettingsT = z.infer<typeof VisibilitySettings>;
 export type ConnectionStatusForMeT = z.infer<typeof ConnectionStatusForMe>;
 export type ConnectionKindT = z.infer<typeof ConnectionKind>;

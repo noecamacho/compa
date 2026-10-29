@@ -16,6 +16,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- The sixteen V2 attendee screens (`app/`), Spanish copy in `lib/copy/es.ts`, typed API fetch helpers for pages and clients, four mock-only V2 routes (connection detail, badges, invites), the V2 points table in `lib/points.ts` and migration `0001` (connections check 50/20, `whatsapp` link).
 - V2 design system from the `design/compa-v2` handoff: paper/ink theme tokens and keyframes in `app/globals.css`, Fredoka and Nunito via `next/font`, the pixel-art monito (`lib/monito`, `components/monito`), the 20 badges (`lib/badges`, `components/badges`), the travelling-pill dock (`components/nav/Dock.tsx`), UI primitives in `components/ui` and a visual QA gallery at `/design`.
 - GitHub Actions deploy to Vercel (`.github/workflows/vercel.yml`): production on every push to `main`, a preview with a PR comment on every pull request. Vercel's native git deploys are off because Vercel Pro blocks commits from authors outside the Vercel team.
 - API scaffold: Next.js App Router on Bun, Drizzle schema and init migration for the 2026-10-29 data model (with RLS on every table), an interests seed, every API-spec route with zod validation, an OpenAPI 3.1 document (`/api/openapi.json`, `/api/docs`, `openapi.json`), mock mode on every route (`API_MODE=mock`, `x-compa-mock`, error simulation) and real handlers for profile, events, connections, live and summaries. See `docs/api-quickstart.md`.
