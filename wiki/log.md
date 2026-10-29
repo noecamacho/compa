@@ -27,3 +27,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-28] query | Which license does COMPA use?
 
 - The captain chose MIT; `LICENSE` added. Updated `open-questions` #14 (license resolved, repository visibility still open).
+
+## [2026-10-29] query | AI core for transcription and summaries
+
+- `lib/ai/*` implements `ai-jobs`: Spanish transcription, Structured Outputs summary, verbatim fallback (p. 12). `lib/topics.ts` ships a 41-topic placeholder list until `open-questions` #4 is settled.
