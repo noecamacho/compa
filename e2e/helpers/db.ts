@@ -161,11 +161,13 @@ export async function userRow(user: TestUser): Promise<Record<string, unknown>> 
 
 // ---- Writes used to set up scenarios ----
 
-export async function acceptedConnection(world: World, requester: TestUser, addressee: TestUser, kind: "new" | "reconnection" = "new", topics: string[] = [], at: Date = new Date()): Promise<string> {
+// An accepted connection at the world's event, or at `event` (a past one, for lifetime scores and friends).
+export async function acceptedConnection(world: World, requester: TestUser, addressee: TestUser, kind: "new" | "reconnection" = "new", topics: string[] = [], at: Date = new Date(), event: TestEvent = world.event): Promise<string> {
   const points = kind === "new" ? 50 : 20;
+  await sql()`insert into event_attendees (event_id, user_id, checked_in_at, screen_consent_at) values (${event.id}, ${requester.id}, ${at}, ${at}), (${event.id}, ${addressee.id}, ${at}, ${at}) on conflict do nothing`;
   const [row] = await sql()<{ id: string }[]>`
     insert into connections (event_id, requester_id, addressee_id, status, kind, points, topics, created_at, responded_at)
-    values (${world.event.id}, ${requester.id}, ${addressee.id}, 'accepted', ${kind}, ${points}, ${sql().array(topics)}, ${at}, ${at})
+    values (${event.id}, ${requester.id}, ${addressee.id}, 'accepted', ${kind}, ${points}, ${sql().array(topics)}, ${at}, ${at})
     returning id`;
   if (!row) throw new Error("connection insert failed");
   return row.id;
