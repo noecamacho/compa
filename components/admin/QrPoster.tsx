@@ -4,7 +4,6 @@ import type { CSSProperties } from "react";
 import { Monito } from "@/components/monito/Monito";
 import { confettiPieces, type ConfettiPiece } from "@/lib/admin/poster";
 import { copyFor, type Dictionary } from "@/lib/copy";
-import { landing } from "@/lib/copy/es";
 import type { Locale } from "@/lib/i18n";
 import { SAMPLE_IDS, SAMPLE_PEOPLE } from "@/lib/monito/sample-people";
 import { FullscreenButton } from "./FullscreenButton";
@@ -44,7 +43,7 @@ export function QrPoster({ locale, name, slug, joinUrl, svg }: Props) {
       </div>
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-[max(14px,3vmin)] px-4 py-[max(12px,2.5vmin)] landscape:flex-row landscape:gap-[6vmin] landscape:px-[5vmin]">
         <section className="flex min-w-0 flex-col items-center gap-[max(10px,2vmin)] text-center landscape:max-w-[min(48vw,105vmin)] landscape:items-start landscape:text-left">
-          <Image src="/brand/compa-logo.png" width={925} height={1024} alt={landing.brand} priority className="h-[clamp(60px,14vmin,480px)] w-auto" />
+          <Image src="/brand/compa-logo.png" width={925} height={1024} alt={copyFor(locale).landing.brand} priority className="h-[clamp(60px,14vmin,480px)] w-auto" />
           <h1 className="m-0 font-display text-[clamp(18px,3.4vmin,120px)] leading-[1.1] font-bold [overflow-wrap:anywhere]">{name}</h1>
           <div className="grid w-full">
             {LANGS.map((lang) => (
