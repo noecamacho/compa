@@ -13,7 +13,7 @@ import { ensureCheckedIn } from "./events";
 
 // ---- GET /api/admin/users ----
 
-const escapeLike = (text: string): string => text.replace(/[\\%_]/g, (char) => `\\${char}`);
+export const escapeLike = (text: string): string => text.replace(/[\\%_]/g, (char) => `\\${char}`);
 
 function searchFilter(admin: UserRow, query: InputOf<typeof R.searchUsers>["query"]): SQL | undefined {
   const pattern = query.q ? `%${escapeLike(query.q)}%` : undefined;

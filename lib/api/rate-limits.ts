@@ -1,10 +1,11 @@
-// Per-user limits on scans and the AI routes (backlog T-036, open question #51). Change a number here to adjust it.
+// Per-user limits on scans, name searches and the AI routes (backlog T-036, open question #51). Change a number here to adjust it.
 export type RateWindow = "minute" | "day";
 
 export type RateLimitRule = { name: string; limit: number; per: RateWindow };
 
 export const LIMITS = {
   scanPerMinute: { name: "scan-minute", limit: 30, per: "minute" },
+  searchPerMinute: { name: "search-minute", limit: 30, per: "minute" },
   transcribePerMinute: { name: "transcribe-minute", limit: 10, per: "minute" },
   transcribePerDay: { name: "transcribe-day", limit: 60, per: "day" },
   draftPerMinute: { name: "draft-minute", limit: 10, per: "minute" },

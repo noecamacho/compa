@@ -231,6 +231,7 @@ export const connect = {
     failed: "No pudimos abrir la cámara (¿otra app la usa?). Usa la app de cámara o busca por nombre.",
   },
   notFound: "No encontramos a nadie con ese nombre.",
+  invalidQr: "Ese QR no es de Compa. Escanea el QR personal de alguien.",
 };
 
 export const register = {

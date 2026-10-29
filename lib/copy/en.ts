@@ -465,6 +465,7 @@ export const connect: typeof es.connect = {
     failed: "We couldn't open the camera (is another app using it?). Use the camera app or search by name.",
   },
   notFound: "We couldn't find anyone with that name.",
+  invalidQr: "That QR isn't from Compa. Scan someone's personal QR.",
 };
 
 export const register: typeof es.register = {
