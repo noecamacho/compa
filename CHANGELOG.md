@@ -4,6 +4,10 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Changed
+
+- Mobile polish on shared UI: 16 px inputs on touch (no iOS focus zoom), no tap-highlight flash, non-selectable button and pill labels, `Button`/`ButtonLink` `fit` prop for content width, tighter EN VIVO pill spacing, light and dark `theme-color`.
+
 ### Fixed
 
 - Sign-in keeps the deep link: a signed-out visitor opening any app screen (for example `/connections`) or onboarding step now goes to `/auth/linkedin?next=<path>` and comes back to that screen, instead of landing on `/` and losing the path. A new `proxy.ts` passes the requested path to layouts as `x-pathname`; unsafe paths still fall back through `safeNext` (T-011).

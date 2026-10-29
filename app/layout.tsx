@@ -14,7 +14,10 @@ export const metadata: Metadata = {
   twitter: { card: "summary_large_image", title: "Compa", description: "Conecta en el evento. Recuérdalo después." },
 };
 
-export const viewport: Viewport = { themeColor: "#FFF6E5", width: "device-width", initialScale: 1, viewportFit: "cover" };
+export const viewport: Viewport = { themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#FFF6E5" },
+    { media: "(prefers-color-scheme: dark)", color: "#1E1B2E" },
+  ], width: "device-width", initialScale: 1, viewportFit: "cover" };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

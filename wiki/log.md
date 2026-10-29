@@ -186,3 +186,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] change | Landing hero in Three.js
 
 - The landing hero (`components/landing/Crowd.tsx`) now plays a looping Three.js connection story (`components/landing/hero-scene.ts`, timeline in `lib/landing/hero-timeline.ts`); the SVG crowd remains the SSR, reduced-motion and no-WebGL fallback.
+
+## [2026-10-29] query | Shared UI mobile polish
+
+- 16 px touch inputs, tap-highlight off, `select-none` labels, `Button` `fit`, live pill spacing, light/dark `theme-color` ([DESIGN.md](../DESIGN.md) "Native feel on phones").

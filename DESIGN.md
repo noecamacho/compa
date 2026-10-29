@@ -56,6 +56,10 @@ Every view works at **390** (phone, primary), **834** (tablet) and **1440+** (de
 
 Attendee app (`app/(app)`, onboarding): `Screen` takes `width="wide"` (dashboards: content 354 → 770 → 1040) or `width="focus"` (one task: 354 → 576 → 600). From 834, Home puts the live card beside a tall Conectar tile, Me and PerfilOtro split into two columns, Ranking puts the podium beside "Tú", the monito builder keeps the preview beside the options, Connections uses 2 then 3 columns and Badges 4 then 5. From 1024 the bottom dock becomes the left rail of the Figma `Dock layout=rail` and stays on every attendee screen; super admins find "Admin" at its foot (the /me row stays on phones).
 
+### Native feel on phones (2026-10-29)
+
+Text inputs are 16 px on touch devices (`app/globals.css`, `Field`) so iOS Safari never zooms on focus; the tap highlight is off (the `pressable` sink is the feedback); `Button` and `Pill` labels are `select-none` and `nowrap`; `Button` fills its row by default and takes `fit` to hug its label; `theme-color` follows the light and dark scheme.
+
 ## Visual system
 
 All tokens are defined once in `app/globals.css` (`@theme`) and come from README "Sistema visual". Fonts load in `app/layout.tsx` (`next/font/google`). The live reference page is `/design` (`app/design/page.tsx`).

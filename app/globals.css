@@ -146,6 +146,8 @@
   body {
     /* No rubber-band on iOS: it dragged the pinned header and the dock along with the page. */
     overscroll-behavior-y: none;
+    /* No grey flash on tap; the pressable sink is the feedback. */
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     background: var(--color-paper);
@@ -156,6 +158,15 @@
   }
   svg {
     flex-shrink: 0;
+  }
+}
+
+/* Unlayered on purpose: beats every Tailwind size utility. iOS Safari zooms on focus below 16 px. */
+@media (pointer: coarse) {
+  input:not([type="checkbox"], [type="radio"], [type="hidden"]),
+  select,
+  textarea {
+    font-size: 16px;
   }
 }
 

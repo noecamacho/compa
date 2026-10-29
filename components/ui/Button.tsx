@@ -14,20 +14,22 @@ type Look = {
   variant?: Variant;
   // 54 px main button (README); 46 px for secondary rows; 56 on the welcome screen.
   height?: number;
+  // Hug the label instead of filling the row.
+  fit?: boolean;
   className?: string;
 };
 
-const classesFor = (className?: string) =>
-  `box-border flex w-full cursor-pointer items-center justify-center gap-2 rounded-button px-5 font-display text-[16px] font-bold whitespace-nowrap border-ink shadow-hard-4 pressable disabled:cursor-default disabled:opacity-60 ${className ?? ""}`;
+const classesFor = (className?: string, fit?: boolean) =>
+  `box-border flex ${fit ? "w-auto" : "w-full"} cursor-pointer select-none items-center justify-center gap-2 rounded-button px-5 font-display text-[16px] font-bold whitespace-nowrap border-ink shadow-hard-4 pressable disabled:cursor-default disabled:opacity-60 ${className ?? ""}`;
 
 const styleFor = ({ variant = "secondary", height = 54 }: Look) => ({ height, ...VARIANT_STYLE[variant] });
 
 type LinkProps = Look & { href: string; children: ReactNode };
 
 // Main button: full width, radius 16, border 2.5, hard shadow 4×4, Fredoka 700 16 (README).
-export function ButtonLink({ href, children, className, ...look }: LinkProps) {
+export function ButtonLink({ href, children, className, fit, ...look }: LinkProps) {
   return (
-    <Link href={href} className={classesFor(className)} style={styleFor(look)}>
+    <Link href={href} className={classesFor(className, fit)} style={styleFor(look)}>
       {children}
     </Link>
   );
@@ -35,9 +37,9 @@ export function ButtonLink({ href, children, className, ...look }: LinkProps) {
 
 type ButtonProps = Look & ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode };
 
-export function Button({ variant, height, className, children, ...rest }: ButtonProps) {
+export function Button({ variant, height, className, fit, children, ...rest }: ButtonProps) {
   return (
-    <button type="button" className={classesFor(className)} style={styleFor({ variant, height })} {...rest}>
+    <button type="button" className={classesFor(className, fit)} style={styleFor({ variant, height })} {...rest}>
       {children}
     </button>
   );
