@@ -48,3 +48,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Do AI summaries score?
 
 - Captain: summaries are back with points. Data-model M18 adds `interactions` (one approved per connection, +25 to both, value from `docs/contracts/ai-summaries-api.md`, pending confirmation); API A9 reuses the contract's routes. Open question #25 resolved.
+
+## [2026-10-29] query | Summary language
+
+- Team decision: transcription and summaries in Spanish; resolved `open-questions` #6 and #3 (models `gpt-4o-mini-transcribe` and `gpt-5.4-mini`). Updated `ai-jobs`, `DESIGN.md`.
