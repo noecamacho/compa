@@ -144,6 +144,18 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Captain decision: yes. The landing offers "Entrar con LinkedIn" for sign-up and sign-in (then `/home`); events stay exclusive because joining needs the QR link. API spec A10a records the amendment; the sign-out warning no longer says the QR is needed to come back.
 
+## [2026-10-29] query | Must every attendee build a monito, and can it show gender?
+
+- Team decision (Sebastián): yes. The (app) layout sends anyone without a saved look to 02b and back (`MonitoGate`, `?next=`); onboarding moved to its own `(onboarding)` route group. The look gains an optional `body` (Hombre / Mujer / Otro), drawn as a skirt for Mujer; it lives in `users.avatar` jsonb, so no migration and no separate gender field. Recorded in [DESIGN.md](../DESIGN.md) 02b and `docs/flows/catalog.md` F-08.
+
+## [2026-10-29] query | How do super admins and real-mode tests work?
+
+- Captain requirement implemented on `feat/COMPA-TBD-super-admin-test-harness`: `users.role` and `/admin` (404 for everyone else), editable event details, organizers, and the real-mode test harness (test users, sign-in-as, automation header, Codex Conf 2026 seed). Specs: data model M20, API spec A11; method in `docs/testing/real-mode.md`. OQ #52 and #56 updated, #57 added.
+
+## [2026-10-29] query | Why did compa.lol go down?
+
+- PR #40 merged with a typecheck error (a teammate change made the monito body required). The Vercel build failed, and the keep-one-deployment cleanup still deleted the working deployment, so the site served 404 until the fix (PR #41) deployed. Now: PR checks gate merges, the deploy runs lint/typecheck/tests first, and cleanup only runs when the new deployment is READY.
+
 ## [2026-10-29] query | What is needed to send attendee email sign-in links?
 
 - Hosted Supabase projects need custom SMTP or a Send Email hook to send magic links to arbitrary attendee addresses; its built-in email service only sends to team members and is limited to two emails per hour ([Supabase SMTP guide](https://supabase.com/docs/guides/auth/auth-smtp)). The README and API quickstart now state this deployment requirement.

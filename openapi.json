@@ -36,6 +36,14 @@
     {
       "name": "summaries",
       "description": "AI summaries (M18, A9)"
+    },
+    {
+      "name": "admin",
+      "description": "Super-admin console; 404 for everyone else (A11)"
+    },
+    {
+      "name": "testing",
+      "description": "Real-mode test harness: test users and sessions (A11, docs/testing/real-mode.md)"
     }
   ],
   "paths": {
@@ -513,6 +521,8 @@
                       "nameEdited": false,
                       "photoEdited": false,
                       "isAdmin": false,
+                      "role": "user",
+                      "isTest": false,
                       "currentEvent": {
                         "code": "k7m2p9xq4t",
                         "name": "Founders Fest GDL"
@@ -593,6 +603,8 @@
                       "nameEdited": false,
                       "photoEdited": false,
                       "isAdmin": false,
+                      "role": "user",
+                      "isTest": false,
                       "currentEvent": {
                         "code": "k7m2p9xq4t",
                         "name": "Founders Fest GDL"
@@ -613,6 +625,88 @@
                         }
                       },
                       "badges": []
+                    }
+                  },
+                  "superAdmin": {
+                    "summary": "A super admin: /admin opens (A11)",
+                    "value": {
+                      "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                      "handle": "diego-ramirez",
+                      "name": "Diego Ramírez",
+                      "photoUrl": null,
+                      "avatar": {
+                        "skin": "#F5C9A3",
+                        "hair": "short",
+                        "hairColor": "#5A3825",
+                        "outfit": "event",
+                        "shirt": "#6CC4FF",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none",
+                        "accent": "#FFD93D"
+                      },
+                      "headline": "Cofounder",
+                      "company": "Kuali",
+                      "city": "Guadalajara, Jalisco",
+                      "interests": [
+                        "Startups",
+                        "Product",
+                        "AI Products"
+                      ],
+                      "links": {
+                        "linkedin": "https://www.linkedin.com/in/diegoramirez",
+                        "instagram": "https://www.instagram.com/diego.rmz"
+                      },
+                      "email": "diego@kuali.mx",
+                      "visibility": {
+                        "headline": "public",
+                        "company": "public",
+                        "interests": "public",
+                        "links": {
+                          "linkedin": "connections",
+                          "github": "connections",
+                          "x": "hidden",
+                          "instagram": "connections",
+                          "whatsapp": "hidden",
+                          "web": "connections"
+                        }
+                      },
+                      "nameEdited": false,
+                      "photoEdited": false,
+                      "isAdmin": true,
+                      "role": "super_admin",
+                      "isTest": false,
+                      "currentEvent": {
+                        "code": "k7m2p9xq4t",
+                        "name": "Founders Fest GDL"
+                      },
+                      "stats": {
+                        "newConnections": 42,
+                        "reconnections": 16,
+                        "events": 7
+                      },
+                      "scores": {
+                        "event": {
+                          "rank": 6,
+                          "points": 1265
+                        },
+                        "lifetime": {
+                          "rank": 14,
+                          "points": 5110
+                        }
+                      },
+                      "badges": [
+                        "apreton",
+                        "tresdetres",
+                        "ff2026",
+                        "madrugador",
+                        "og"
+                      ]
                     }
                   }
                 }
@@ -779,6 +873,8 @@
                   "nameEdited": false,
                   "photoEdited": false,
                   "isAdmin": false,
+                  "role": "user",
+                  "isTest": false,
                   "currentEvent": {
                     "code": "k7m2p9xq4t",
                     "name": "Founders Fest GDL"
@@ -1559,10 +1655,266 @@
       }
     },
     "/api/admin/events": {
+      "get": {
+        "operationId": "listAdminEvents",
+        "summary": "All events (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Newest first; archived events only with `archived=1` or `status=archived`.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "description": "Only events in this status.",
+              "$ref": "#/components/schemas/EventStatus"
+            },
+            "description": "Only events in this status."
+          },
+          {
+            "in": "query",
+            "name": "archived",
+            "schema": {
+              "default": "0",
+              "description": "`1` includes archived events.",
+              "type": "string",
+              "enum": [
+                "0",
+                "1"
+              ]
+            },
+            "description": "`1` includes archived events."
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Events with their counts.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "events": [
+                    {
+                      "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
+                      "slug": "founders-fest",
+                      "name": "Founders Fest GDL",
+                      "accessCode": "k7m2p9xq4t",
+                      "joinUrl": "https://compa.lol/e/k7m2p9xq4t",
+                      "startsAt": "2026-10-29T16:00:00.000Z",
+                      "endsAt": "2026-10-30T04:00:00.000Z",
+                      "isRunning": true,
+                      "status": "live",
+                      "isTest": false,
+                      "description": "Founders, operators and investors from Guadalajara, one night.",
+                      "venueName": "Casa Jalisco",
+                      "address": "Av. Chapultepec 480",
+                      "city": "Guadalajara",
+                      "country": "México",
+                      "websiteUrl": "https://foundersfest.example.com",
+                      "timezone": "America/Mexico_City",
+                      "schedule": [
+                        {
+                          "date": "2026-10-29",
+                          "start": "10:00",
+                          "end": "22:00"
+                        },
+                        {
+                          "date": "2026-10-29",
+                          "start": "18:00",
+                          "end": "18:45",
+                          "title": "Keynote"
+                        }
+                      ],
+                      "createdAt": "2026-10-20T12:00:00.000Z",
+                      "counts": {
+                        "attendees": 340,
+                        "connections": 218,
+                        "pending": 12,
+                        "organizers": 2
+                      }
+                    },
+                    {
+                      "id": "a3e4f5a6-b7c8-4d9e-8f0a-1b2c3d4e5f04",
+                      "slug": "codex-conf-2026",
+                      "name": "Codex Conf 2026",
+                      "accessCode": "c0dexc0nf26",
+                      "joinUrl": "https://compa.lol/e/c0dexc0nf26",
+                      "startsAt": "2026-10-29T16:00:00.000Z",
+                      "endsAt": "2026-10-30T04:00:00.000Z",
+                      "isRunning": true,
+                      "status": "live",
+                      "isTest": true,
+                      "description": "The shared test event for real-mode tests. Test people only.",
+                      "venueName": "The test lab",
+                      "address": "Av. Chapultepec 480",
+                      "city": "Guadalajara",
+                      "country": "México",
+                      "websiteUrl": "https://foundersfest.example.com",
+                      "timezone": "America/Mexico_City",
+                      "schedule": [],
+                      "createdAt": "2026-10-20T12:00:00.000Z",
+                      "counts": {
+                        "attendees": 13,
+                        "connections": 4,
+                        "pending": 2,
+                        "organizers": 1
+                      }
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEventList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "post": {
         "operationId": "createEvent",
-        "summary": "Create an event (admins)",
+        "summary": "Create an event (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Only name, slug and window are required; details, schedule, status (default `live`) and `isTest` are optional.",
         "tags": [
+          "admin",
           "events"
         ],
         "security": [
@@ -1593,10 +1945,12 @@
                 "name": "Founders Fest GDL",
                 "slug": "founders-fest",
                 "startsAt": "2026-10-29T16:00:00.000Z",
-                "endsAt": "2026-10-30T04:00:00.000Z"
+                "endsAt": "2026-10-30T04:00:00.000Z",
+                "timezone": "America/Mexico_City",
+                "venueName": "Casa Jalisco"
               },
               "schema": {
-                "$ref": "#/components/schemas/CreateEventBody"
+                "$ref": "#/components/schemas/AdminCreateEventBody"
               }
             }
           }
@@ -1687,8 +2041,8 @@
               }
             }
           },
-          "401": {
-            "description": "unauthorized",
+          "404": {
+            "description": "not_found",
             "content": {
               "application/json": {
                 "schema": {
@@ -1700,7 +2054,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
-                            "unauthorized"
+                            "not_found"
                           ]
                         },
                         "message": {
@@ -1732,70 +2086,12 @@
                   "additionalProperties": false
                 },
                 "examples": {
-                  "unauthorized": {
-                    "summary": "Sign in with LinkedIn to continue.",
+                  "not_found": {
+                    "summary": "Not found.",
                     "value": {
                       "error": {
-                        "code": "unauthorized",
-                        "message": "Sign in with LinkedIn to continue."
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "properties": {
-                        "code": {
-                          "type": "string",
-                          "enum": [
-                            "forbidden"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "fields": {
-                          "type": "object",
-                          "propertyNames": {
-                            "type": "string"
-                          },
-                          "additionalProperties": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "message"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                },
-                "examples": {
-                  "forbidden": {
-                    "summary": "Only COMPA admins can create events.",
-                    "value": {
-                      "error": {
-                        "code": "forbidden",
-                        "message": "Only COMPA admins can create events."
+                        "code": "not_found",
+                        "message": "Not found."
                       }
                     }
                   }
@@ -1864,12 +2160,735 @@
         }
       }
     },
+    "/api/admin/events/{slug}": {
+      "get": {
+        "operationId": "getAdminEvent",
+        "summary": "One event with every detail (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11).",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The event.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "event": {
+                    "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
+                    "slug": "founders-fest",
+                    "name": "Founders Fest GDL",
+                    "accessCode": "k7m2p9xq4t",
+                    "joinUrl": "https://compa.lol/e/k7m2p9xq4t",
+                    "startsAt": "2026-10-29T16:00:00.000Z",
+                    "endsAt": "2026-10-30T04:00:00.000Z",
+                    "isRunning": true,
+                    "status": "live",
+                    "isTest": false,
+                    "description": "Founders, operators and investors from Guadalajara, one night.",
+                    "venueName": "Casa Jalisco",
+                    "address": "Av. Chapultepec 480",
+                    "city": "Guadalajara",
+                    "country": "México",
+                    "websiteUrl": "https://foundersfest.example.com",
+                    "timezone": "America/Mexico_City",
+                    "schedule": [
+                      {
+                        "date": "2026-10-29",
+                        "start": "10:00",
+                        "end": "22:00"
+                      },
+                      {
+                        "date": "2026-10-29",
+                        "start": "18:00",
+                        "end": "18:45",
+                        "title": "Keynote"
+                      }
+                    ],
+                    "createdAt": "2026-10-20T12:00:00.000Z",
+                    "counts": {
+                      "attendees": 340,
+                      "connections": 218,
+                      "pending": 12,
+                      "organizers": 2
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEventBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "operationId": "patchAdminEvent",
+        "summary": "Edit an event (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). `null` clears a detail. The merged window must keep endsAt after startsAt, and schedule days must fall inside it in the event time zone. `status: ended` also closes the window now.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "venueName": "Casa Jalisco",
+                "timezone": "America/Mexico_City",
+                "schedule": [
+                  {
+                    "date": "2026-10-29",
+                    "start": "10:00",
+                    "end": "22:00"
+                  }
+                ]
+              },
+              "schema": {
+                "$ref": "#/components/schemas/PatchEventBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The updated event.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "event": {
+                    "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
+                    "slug": "founders-fest",
+                    "name": "Founders Fest GDL",
+                    "accessCode": "k7m2p9xq4t",
+                    "joinUrl": "https://compa.lol/e/k7m2p9xq4t",
+                    "startsAt": "2026-10-29T16:00:00.000Z",
+                    "endsAt": "2026-10-30T04:00:00.000Z",
+                    "isRunning": true,
+                    "status": "live",
+                    "isTest": false,
+                    "description": "Founders, operators and investors from Guadalajara, one night.",
+                    "venueName": "Casa Jalisco",
+                    "address": "Av. Chapultepec 480",
+                    "city": "Guadalajara",
+                    "country": "México",
+                    "websiteUrl": "https://foundersfest.example.com",
+                    "timezone": "America/Mexico_City",
+                    "schedule": [
+                      {
+                        "date": "2026-10-29",
+                        "start": "10:00",
+                        "end": "22:00"
+                      },
+                      {
+                        "date": "2026-10-29",
+                        "start": "18:00",
+                        "end": "18:45",
+                        "title": "Keynote"
+                      }
+                    ],
+                    "createdAt": "2026-10-20T12:00:00.000Z",
+                    "counts": {
+                      "attendees": 340,
+                      "connections": 218,
+                      "pending": 12,
+                      "organizers": 2
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEventBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/events/{slug}/end": {
+      "post": {
+        "operationId": "endAdminEvent",
+        "summary": "End an event now (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Sets endsAt to now and status to `ended`; pending requests then read as expired.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ended event.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "event": {
+                    "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
+                    "slug": "founders-fest",
+                    "name": "Founders Fest GDL",
+                    "accessCode": "k7m2p9xq4t",
+                    "joinUrl": "https://compa.lol/e/k7m2p9xq4t",
+                    "startsAt": "2026-10-29T16:00:00.000Z",
+                    "endsAt": "2026-10-30T04:00:00.000Z",
+                    "isRunning": false,
+                    "status": "ended",
+                    "isTest": false,
+                    "description": "Founders, operators and investors from Guadalajara, one night.",
+                    "venueName": "Casa Jalisco",
+                    "address": "Av. Chapultepec 480",
+                    "city": "Guadalajara",
+                    "country": "México",
+                    "websiteUrl": "https://foundersfest.example.com",
+                    "timezone": "America/Mexico_City",
+                    "schedule": [
+                      {
+                        "date": "2026-10-29",
+                        "start": "10:00",
+                        "end": "22:00"
+                      },
+                      {
+                        "date": "2026-10-29",
+                        "start": "18:00",
+                        "end": "18:45",
+                        "title": "Keynote"
+                      }
+                    ],
+                    "createdAt": "2026-10-20T12:00:00.000Z",
+                    "counts": {
+                      "attendees": 340,
+                      "connections": 218,
+                      "pending": 12,
+                      "organizers": 2
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEventBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/events/{slug}/archive": {
+      "post": {
+        "operationId": "archiveAdminEvent",
+        "summary": "Archive an event (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Soft delete: the door, live and leaderboard routes return 404; check-ins, connections and points are kept. PATCH `status` brings it back.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The archived event.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "event": {
+                    "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
+                    "slug": "founders-fest",
+                    "name": "Founders Fest GDL",
+                    "accessCode": "k7m2p9xq4t",
+                    "joinUrl": "https://compa.lol/e/k7m2p9xq4t",
+                    "startsAt": "2026-10-29T16:00:00.000Z",
+                    "endsAt": "2026-10-30T04:00:00.000Z",
+                    "isRunning": false,
+                    "status": "archived",
+                    "isTest": false,
+                    "description": "Founders, operators and investors from Guadalajara, one night.",
+                    "venueName": "Casa Jalisco",
+                    "address": "Av. Chapultepec 480",
+                    "city": "Guadalajara",
+                    "country": "México",
+                    "websiteUrl": "https://foundersfest.example.com",
+                    "timezone": "America/Mexico_City",
+                    "schedule": [
+                      {
+                        "date": "2026-10-29",
+                        "start": "10:00",
+                        "end": "22:00"
+                      },
+                      {
+                        "date": "2026-10-29",
+                        "start": "18:00",
+                        "end": "18:45",
+                        "title": "Keynote"
+                      }
+                    ],
+                    "createdAt": "2026-10-20T12:00:00.000Z",
+                    "counts": {
+                      "attendees": 340,
+                      "connections": 218,
+                      "pending": 12,
+                      "organizers": 2
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AdminEventBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/admin/events/{slug}/rotate-code": {
       "post": {
         "operationId": "rotateEventCode",
-        "summary": "Rotate an event's access code (admins)",
-        "description": "Issues a new code; the old QR, door and live links stop working at once (A10). Check-ins are kept.",
+        "summary": "Rotate an event's access code (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Issues a new code; the old QR, door and live links stop working at once (A10). Check-ins are kept.",
         "tags": [
+          "admin",
           "events"
         ],
         "security": [
@@ -1917,124 +2936,8 @@
               }
             }
           },
-          "401": {
-            "description": "unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "properties": {
-                        "code": {
-                          "type": "string",
-                          "enum": [
-                            "unauthorized"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "fields": {
-                          "type": "object",
-                          "propertyNames": {
-                            "type": "string"
-                          },
-                          "additionalProperties": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "message"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                },
-                "examples": {
-                  "unauthorized": {
-                    "summary": "Sign in with LinkedIn to continue.",
-                    "value": {
-                      "error": {
-                        "code": "unauthorized",
-                        "message": "Sign in with LinkedIn to continue."
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "object",
-                      "properties": {
-                        "code": {
-                          "type": "string",
-                          "enum": [
-                            "forbidden"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "fields": {
-                          "type": "object",
-                          "propertyNames": {
-                            "type": "string"
-                          },
-                          "additionalProperties": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          }
-                        }
-                      },
-                      "required": [
-                        "code",
-                        "message"
-                      ],
-                      "additionalProperties": false
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "additionalProperties": false
-                },
-                "examples": {
-                  "forbidden": {
-                    "summary": "Only COMPA admins can create events.",
-                    "value": {
-                      "error": {
-                        "code": "forbidden",
-                        "message": "Only COMPA admins can create events."
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          },
           "404": {
-            "description": "event_not_found",
+            "description": "not_found, event_not_found",
             "content": {
               "application/json": {
                 "schema": {
@@ -2046,6 +2949,7 @@
                         "code": {
                           "type": "string",
                           "enum": [
+                            "not_found",
                             "event_not_found"
                           ]
                         },
@@ -2078,12 +2982,2352 @@
                   "additionalProperties": false
                 },
                 "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
                   "event_not_found": {
                     "summary": "Event not found.",
                     "value": {
                       "error": {
                         "code": "event_not_found",
                         "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/events/{slug}/attendees": {
+      "get": {
+        "operationId": "listAttendees",
+        "summary": "An event's attendees with counts (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Newest check-in first, test users included and counted apart.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attendees.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "attendees": [
+                    {
+                      "user": {
+                        "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
+                        "handle": "ana-garza-k3p9",
+                        "name": "Ana Garza",
+                        "photoUrl": null,
+                        "headline": "Cofounder & CEO",
+                        "company": "Rutea",
+                        "city": "Monterrey, Nuevo León",
+                        "email": "ana-garza-k3p9@test.compa.lol",
+                        "role": "user",
+                        "isTest": true,
+                        "createdAt": "2026-10-29T15:00:00.000Z"
+                      },
+                      "checkedInAt": "2026-10-29T17:02:31.000Z",
+                      "addedByAdmin": true,
+                      "points": 50,
+                      "connections": 1
+                    },
+                    {
+                      "user": {
+                        "id": "9d2e3f4a-5b6c-4d7e-9f8a-0b1c2d3e4f03",
+                        "handle": "bruno-vega-7tq2",
+                        "name": "Bruno Vega",
+                        "photoUrl": null,
+                        "headline": "Staff Engineer",
+                        "company": "Codex Labs",
+                        "city": "Monterrey, Nuevo León",
+                        "email": "bruno-vega-7tq2@test.compa.lol",
+                        "role": "user",
+                        "isTest": true,
+                        "createdAt": "2026-10-29T15:00:00.000Z"
+                      },
+                      "checkedInAt": "2026-10-29T17:05:00.000Z",
+                      "addedByAdmin": false,
+                      "points": 50,
+                      "connections": 1
+                    }
+                  ],
+                  "counts": {
+                    "attendees": 13,
+                    "connections": 4,
+                    "pending": 2,
+                    "organizers": 1,
+                    "testUsers": 13
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AdminAttendeeList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "addAttendee",
+        "summary": "Check someone in on their behalf (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Screen consent is recorded as admin-assigned. Repeat-safe. A test user only joins a test event.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "userId": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/AddAttendeeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Already checked in.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "attendee": {
+                    "user": {
+                      "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
+                      "handle": "ana-garza-k3p9",
+                      "name": "Ana Garza",
+                      "photoUrl": null,
+                      "headline": "Cofounder & CEO",
+                      "company": "Rutea",
+                      "city": "Monterrey, Nuevo León",
+                      "email": "ana-garza-k3p9@test.compa.lol",
+                      "role": "user",
+                      "isTest": true,
+                      "createdAt": "2026-10-29T15:00:00.000Z"
+                    },
+                    "checkedInAt": "2026-10-29T17:02:31.000Z",
+                    "addedByAdmin": true,
+                    "points": 50,
+                    "connections": 1
+                  },
+                  "alreadyCheckedIn": false
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AddedAttendee"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Checked in.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "attendee": {
+                    "user": {
+                      "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
+                      "handle": "ana-garza-k3p9",
+                      "name": "Ana Garza",
+                      "photoUrl": null,
+                      "headline": "Cofounder & CEO",
+                      "company": "Rutea",
+                      "city": "Monterrey, Nuevo León",
+                      "email": "ana-garza-k3p9@test.compa.lol",
+                      "role": "user",
+                      "isTest": true,
+                      "createdAt": "2026-10-29T15:00:00.000Z"
+                    },
+                    "checkedInAt": "2026-10-29T17:02:31.000Z",
+                    "addedByAdmin": true,
+                    "points": 50,
+                    "connections": 1
+                  },
+                  "alreadyCheckedIn": false
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AddedAttendee"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found, user_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found",
+                            "user_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  },
+                  "user_not_found": {
+                    "summary": "No person with that handle.",
+                    "value": {
+                      "error": {
+                        "code": "user_not_found",
+                        "message": "No person with that handle."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "test_user_not_allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "test_user_not_allowed"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "test_user_not_allowed": {
+                    "summary": "Test users can only join test events.",
+                    "value": {
+                      "error": {
+                        "code": "test_user_not_allowed",
+                        "message": "Test users can only join test events."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/events/{slug}/attendees/{userId}": {
+      "delete": {
+        "operationId": "removeAttendee",
+        "summary": "Remove someone from an event (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Also removes that person's connections at this event (and the points they carried).",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed."
+          },
+          "404": {
+            "description": "not_found, event_not_found, user_not_found, attendee_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found",
+                            "user_not_found",
+                            "attendee_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  },
+                  "user_not_found": {
+                    "summary": "No person with that handle.",
+                    "value": {
+                      "error": {
+                        "code": "user_not_found",
+                        "message": "No person with that handle."
+                      }
+                    }
+                  },
+                  "attendee_not_found": {
+                    "summary": "That person is not checked in to this event.",
+                    "value": {
+                      "error": {
+                        "code": "attendee_not_found",
+                        "message": "That person is not checked in to this event."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/events/{slug}/organizers": {
+      "get": {
+        "operationId": "listOrganizers",
+        "summary": "An event's organizers (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11).",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organizers, first assigned first.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "organizers": [
+                    {
+                      "user": {
+                        "id": "6a0f6c1e-1b2d-4c3e-8f4a-5b6c7d8e9f01",
+                        "handle": "noe-camacho",
+                        "name": "Noe Camacho",
+                        "photoUrl": null,
+                        "headline": "Captain",
+                        "company": "COMPA",
+                        "city": "Guadalajara",
+                        "email": "noe@example.com",
+                        "role": "super_admin",
+                        "isTest": false,
+                        "createdAt": "2026-10-28T20:00:00.000Z"
+                      },
+                      "role": "owner",
+                      "createdAt": "2026-10-29T15:00:00.000Z"
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizerList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "setOrganizer",
+        "summary": "Assign an organizer (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Repeat-safe; assigning again changes the role.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "userId": "6a0f6c1e-1b2d-4c3e-8f4a-5b6c7d8e9f01",
+                "role": "owner"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/SetOrganizerBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The organizer.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "organizer": {
+                    "user": {
+                      "id": "6a0f6c1e-1b2d-4c3e-8f4a-5b6c7d8e9f01",
+                      "handle": "noe-camacho",
+                      "name": "Noe Camacho",
+                      "photoUrl": null,
+                      "headline": "Captain",
+                      "company": "COMPA",
+                      "city": "Guadalajara",
+                      "email": "noe@example.com",
+                      "role": "super_admin",
+                      "isTest": false,
+                      "createdAt": "2026-10-28T20:00:00.000Z"
+                    },
+                    "role": "owner",
+                    "createdAt": "2026-10-29T15:00:00.000Z"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizerBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found, user_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found",
+                            "user_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  },
+                  "user_not_found": {
+                    "summary": "No person with that handle.",
+                    "value": {
+                      "error": {
+                        "code": "user_not_found",
+                        "message": "No person with that handle."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/events/{slug}/organizers/{userId}": {
+      "delete": {
+        "operationId": "removeOrganizer",
+        "summary": "Remove an organizer (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11).",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z0-9-]{2,48}$"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "userId",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Removed."
+          },
+          "404": {
+            "description": "not_found, event_not_found, user_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found",
+                            "user_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  },
+                  "user_not_found": {
+                    "summary": "No person with that handle.",
+                    "value": {
+                      "error": {
+                        "code": "user_not_found",
+                        "message": "No person with that handle."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "operationId": "searchUsers",
+        "summary": "Search people (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). By name, handle, email or company; `test` includes, excludes or isolates test users.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Matches name, handle, email or company (case-insensitive).",
+              "type": "string",
+              "maxLength": 80
+            },
+            "description": "Matches name, handle, email or company (case-insensitive)."
+          },
+          {
+            "in": "query",
+            "name": "test",
+            "schema": {
+              "default": "include",
+              "type": "string",
+              "enum": [
+                "include",
+                "exclude",
+                "only"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching people, by name.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "users": [
+                    {
+                      "id": "6a0f6c1e-1b2d-4c3e-8f4a-5b6c7d8e9f01",
+                      "handle": "noe-camacho",
+                      "name": "Noe Camacho",
+                      "photoUrl": null,
+                      "headline": "Captain",
+                      "company": "COMPA",
+                      "city": "Guadalajara",
+                      "email": "noe@example.com",
+                      "role": "super_admin",
+                      "isTest": false,
+                      "createdAt": "2026-10-28T20:00:00.000Z"
+                    },
+                    {
+                      "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
+                      "handle": "ana-garza-k3p9",
+                      "name": "Ana Garza",
+                      "photoUrl": null,
+                      "headline": "Cofounder & CEO",
+                      "company": "Rutea",
+                      "city": "Monterrey, Nuevo León",
+                      "email": "ana-garza-k3p9@test.compa.lol",
+                      "role": "user",
+                      "isTest": true,
+                      "createdAt": "2026-10-29T15:00:00.000Z"
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/test-users": {
+      "post": {
+        "operationId": "createTestUsers",
+        "summary": "Create mock test users (super admins, automation)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Also opens with the `x-compa-automation` header (TEST_AUTOMATION_SECRET) for test runners. Creates the Supabase auth row (email `<handle>@test.compa.lol`, no password) and a full profile, never LinkedIn. Send `users` to set fields, or `count` + `preset` to generate. `checkInTo` must be a test event.",
+        "tags": [
+          "admin",
+          "testing"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          },
+          {
+            "automationSecret": []
+          }
+        ],
+        "x-compa-auth": "automation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "count": 3,
+                "preset": "random",
+                "seed": 42,
+                "checkInTo": "codex-conf-2026"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/CreateTestUsersBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The created test users.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "users": [
+                    {
+                      "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
+                      "handle": "ana-garza-k3p9",
+                      "name": "Ana Garza",
+                      "photoUrl": null,
+                      "headline": "Cofounder & CEO",
+                      "company": "Rutea",
+                      "city": "Monterrey, Nuevo León",
+                      "email": "ana-garza-k3p9@test.compa.lol",
+                      "role": "user",
+                      "isTest": true,
+                      "createdAt": "2026-10-29T15:00:00.000Z",
+                      "interests": [
+                        "Startups",
+                        "Product"
+                      ],
+                      "links": {
+                        "linkedin": "https://www.linkedin.com/in/ana-garza-k3p9"
+                      },
+                      "avatarMode": "monito",
+                      "currentEvent": {
+                        "code": "c0dexc0nf26",
+                        "name": "Codex Conf 2026"
+                      }
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/TestUserList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, event_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "event_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "event_not_found": {
+                    "summary": "Event not found.",
+                    "value": {
+                      "error": {
+                        "code": "event_not_found",
+                        "message": "Event not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "handle_taken, not_test_event",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "handle_taken",
+                            "not_test_event"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "handle_taken": {
+                    "summary": "Someone already has that handle.",
+                    "value": {
+                      "error": {
+                        "code": "handle_taken",
+                        "message": "Someone already has that handle."
+                      }
+                    }
+                  },
+                  "not_test_event": {
+                    "summary": "Test users can only be checked in to a test event.",
+                    "value": {
+                      "error": {
+                        "code": "not_test_event",
+                        "message": "Test users can only be checked in to a test event."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "harness_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "harness_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "harness_unavailable": {
+                    "summary": "The test harness needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+                    "value": {
+                      "error": {
+                        "code": "harness_unavailable",
+                        "message": "The test harness needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "operationId": "listTestUsers",
+        "summary": "List test users (super admins, automation)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Also opens with the `x-compa-automation` header (TEST_AUTOMATION_SECRET) for test runners. Newest first; never returns a real person.",
+        "tags": [
+          "admin",
+          "testing"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          },
+          {
+            "automationSecret": []
+          }
+        ],
+        "x-compa-auth": "automation",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "handlePrefix",
+            "schema": {
+              "description": "Only handles that start with this, e.g. a run id.",
+              "type": "string",
+              "pattern": "^[a-z0-9-]{1,32}$"
+            },
+            "description": "Only handles that start with this, e.g. a run id."
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Test users.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "users": [
+                    {
+                      "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
+                      "handle": "ana-garza-k3p9",
+                      "name": "Ana Garza",
+                      "photoUrl": null,
+                      "headline": "Cofounder & CEO",
+                      "company": "Rutea",
+                      "city": "Monterrey, Nuevo León",
+                      "email": "ana-garza-k3p9@test.compa.lol",
+                      "role": "user",
+                      "isTest": true,
+                      "createdAt": "2026-10-29T15:00:00.000Z",
+                      "interests": [
+                        "Startups",
+                        "Product"
+                      ],
+                      "links": {
+                        "linkedin": "https://www.linkedin.com/in/ana-garza-k3p9"
+                      },
+                      "avatarMode": "monito",
+                      "currentEvent": {
+                        "code": "c0dexc0nf26",
+                        "name": "Codex Conf 2026"
+                      }
+                    }
+                  ]
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/TestUserList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/test-users/{id}": {
+      "delete": {
+        "operationId": "deleteTestUser",
+        "summary": "Delete a test user (super admins, automation)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Also opens with the `x-compa-automation` header (TEST_AUTOMATION_SECRET) for test runners. Removes the auth row and, by cascade, the profile, check-ins, connections, summaries and points. A real person's id reads as unknown.",
+        "tags": [
+          "admin",
+          "testing"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          },
+          {
+            "automationSecret": []
+          }
+        ],
+        "x-compa-auth": "automation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Deleted."
+          },
+          "404": {
+            "description": "not_found, test_user_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "test_user_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "test_user_not_found": {
+                    "summary": "No test user with that id.",
+                    "value": {
+                      "error": {
+                        "code": "test_user_not_found",
+                        "message": "No test user with that id."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "harness_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "harness_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "harness_unavailable": {
+                    "summary": "The test harness needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+                    "value": {
+                      "error": {
+                        "code": "harness_unavailable",
+                        "message": "The test harness needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/test-users/{id}/session": {
+      "post": {
+        "operationId": "createTestSession",
+        "summary": "Sign in as a test user (super admins, automation)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Also opens with the `x-compa-automation` header (TEST_AUTOMATION_SECRET) for test runners. Sets the Supabase session cookies for that test user on this response, replacing the caller's session. Refused (404) for anyone not flagged `is_test`.",
+        "tags": [
+          "admin",
+          "testing"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          },
+          {
+            "automationSecret": []
+          }
+        ],
+        "x-compa-auth": "automation",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signed in; cookies in `Set-Cookie`.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "user": {
+                    "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
+                    "handle": "ana-garza-k3p9",
+                    "name": "Ana Garza"
+                  },
+                  "expiresAt": "2026-10-29T18:00:00.000Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/TestSession"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found, test_user_not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found",
+                            "test_user_not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
+                      }
+                    }
+                  },
+                  "test_user_not_found": {
+                    "summary": "No test user with that id.",
+                    "value": {
+                      "error": {
+                        "code": "test_user_not_found",
+                        "message": "No test user with that id."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "session_failed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "session_failed"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "session_failed": {
+                    "summary": "Supabase did not issue a session for the test user.",
+                    "value": {
+                      "error": {
+                        "code": "session_failed",
+                        "message": "Supabase did not issue a session for the test user."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "harness_unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "harness_unavailable"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "harness_unavailable": {
+                    "summary": "The test harness needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.",
+                    "value": {
+                      "error": {
+                        "code": "harness_unavailable",
+                        "message": "The test harness needs NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY."
                       }
                     }
                   }
@@ -2484,7 +5728,7 @@
             }
           },
           "409": {
-            "description": "event_not_running",
+            "description": "event_not_running, test_user_not_allowed",
             "content": {
               "application/json": {
                 "schema": {
@@ -2496,7 +5740,8 @@
                         "code": {
                           "type": "string",
                           "enum": [
-                            "event_not_running"
+                            "event_not_running",
+                            "test_user_not_allowed"
                           ]
                         },
                         "message": {
@@ -2534,6 +5779,15 @@
                       "error": {
                         "code": "event_not_running",
                         "message": "The event is not running right now."
+                      }
+                    }
+                  },
+                  "test_user_not_allowed": {
+                    "summary": "Test users can only join test events.",
+                    "value": {
+                      "error": {
+                        "code": "test_user_not_allowed",
+                        "message": "Test users can only join test events."
                       }
                     }
                   }
@@ -2866,7 +6120,7 @@
             }
           },
           "409": {
-            "description": "self_connection, not_at_event, consent_required",
+            "description": "self_connection, not_at_event, consent_required, test_user_not_allowed",
             "content": {
               "application/json": {
                 "schema": {
@@ -2880,7 +6134,8 @@
                           "enum": [
                             "self_connection",
                             "not_at_event",
-                            "consent_required"
+                            "consent_required",
+                            "test_user_not_allowed"
                           ]
                         },
                         "message": {
@@ -2936,6 +6191,15 @@
                       "error": {
                         "code": "consent_required",
                         "message": "Accept that your name and photo appear on the event screen, then retry with screenConsent: true."
+                      }
+                    }
+                  },
+                  "test_user_not_allowed": {
+                    "summary": "Test users can only join test events.",
+                    "value": {
+                      "error": {
+                        "code": "test_user_not_allowed",
+                        "message": "Test users can only join test events."
                       }
                     }
                   }
@@ -7329,7 +10593,17 @@
           "hidden"
         ]
       },
-      "CreateEventBody": {
+      "EventStatus": {
+        "type": "string",
+        "enum": [
+          "draft",
+          "live",
+          "ended",
+          "archived"
+        ],
+        "description": "`draft` and `archived` close every public route; `ended` closes the window."
+      },
+      "AdminCreateEventBody": {
         "type": "object",
         "properties": {
           "name": {
@@ -7350,6 +10624,89 @@
             "type": "string",
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "venueName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "websiteUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timezone": {
+            "description": "IANA time zone, e.g. `America/Mexico_City`.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/Schedule"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatus"
+          },
+          "isTest": {
+            "description": "A test event: the only kind test users may join.",
+            "type": "boolean"
           }
         },
         "required": [
@@ -7358,6 +10715,379 @@
           "startsAt",
           "endsAt"
         ]
+      },
+      "Schedule": {
+        "maxItems": 40,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "start": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "date",
+            "start",
+            "end"
+          ]
+        }
+      },
+      "PatchEventBody": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "venueName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "address": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "websiteUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timezone": {
+            "description": "IANA time zone, e.g. `America/Mexico_City`.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/Schedule"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatus"
+          },
+          "isTest": {
+            "description": "A test event: the only kind test users may join.",
+            "type": "boolean"
+          }
+        }
+      },
+      "AddAttendeeBody": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "SetOrganizerBody": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "role": {
+            "default": "organizer",
+            "$ref": "#/components/schemas/OrganizerRole"
+          }
+        },
+        "required": [
+          "userId"
+        ]
+      },
+      "OrganizerRole": {
+        "type": "string",
+        "enum": [
+          "owner",
+          "organizer",
+          "staff"
+        ]
+      },
+      "CreateTestUsersBody": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "description": "How many to generate when `users` is absent (default 1).",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50
+          },
+          "preset": {
+            "default": "random",
+            "$ref": "#/components/schemas/TestPreset"
+          },
+          "seed": {
+            "description": "Makes generated profiles repeatable.",
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "users": {
+            "minItems": 1,
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestProfileInput"
+            }
+          },
+          "checkInTo": {
+            "description": "Slug of a test event to check everyone in to (consent admin-assigned).",
+            "type": "string",
+            "pattern": "^[a-z0-9-]{2,48}$"
+          }
+        }
+      },
+      "TestPreset": {
+        "type": "string",
+        "enum": [
+          "random",
+          "founder",
+          "engineer",
+          "designer",
+          "investor"
+        ],
+        "description": "Profile generator flavor; `random` mixes all of them."
+      },
+      "TestProfileInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "handle": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{2,32}$"
+          },
+          "headline": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 120
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "company": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 80
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "interests": {
+            "maxItems": 10,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "description": "Interest slug or name, e.g. `agents`."
+            }
+          },
+          "links": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string",
+              "enum": [
+                "linkedin",
+                "github",
+                "x",
+                "instagram",
+                "whatsapp",
+                "web"
+              ]
+            },
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          "visibility": {
+            "type": "object",
+            "properties": {
+              "headline": {
+                "type": "string",
+                "enum": [
+                  "public",
+                  "connections",
+                  "hidden"
+                ]
+              },
+              "company": {
+                "type": "string",
+                "enum": [
+                  "public",
+                  "connections",
+                  "hidden"
+                ]
+              },
+              "interests": {
+                "type": "string",
+                "enum": [
+                  "public",
+                  "connections",
+                  "hidden"
+                ]
+              },
+              "links": {
+                "type": "object",
+                "propertyNames": {
+                  "type": "string",
+                  "enum": [
+                    "linkedin",
+                    "github",
+                    "x",
+                    "instagram",
+                    "whatsapp",
+                    "web"
+                  ]
+                },
+                "additionalProperties": {
+                  "type": "string",
+                  "enum": [
+                    "public",
+                    "connections",
+                    "hidden"
+                  ]
+                }
+              }
+            }
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/MonitoLook"
+          },
+          "avatarMode": {
+            "$ref": "#/components/schemas/AvatarMode"
+          },
+          "photoUrl": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "role": {
+            "description": "`super_admin` makes a test admin, limited to test events and test people.",
+            "$ref": "#/components/schemas/UserRole"
+          }
+        },
+        "description": "Every field is optional; the generator fills the rest."
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "user",
+          "super_admin"
+        ],
+        "description": "`super_admin` opens /admin and /api/admin/* (A11); everyone else gets 404 there."
       },
       "CheckInBody": {
         "type": "object",
@@ -7608,7 +11338,15 @@
             "type": "boolean"
           },
           "isAdmin": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Deprecated: `role === \"super_admin\"`."
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "isTest": {
+            "type": "boolean",
+            "description": "A synthetic real-mode test user (docs/testing/real-mode.md)."
           },
           "currentEvent": {
             "anyOf": [
@@ -7645,6 +11383,8 @@
           "nameEdited",
           "photoEdited",
           "isAdmin",
+          "role",
+          "isTest",
           "currentEvent"
         ],
         "additionalProperties": false
@@ -8034,6 +11774,171 @@
         ],
         "additionalProperties": false
       },
+      "AdminEventList": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminEvent"
+            }
+          }
+        },
+        "required": [
+          "events"
+        ],
+        "additionalProperties": false
+      },
+      "AdminEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "slug": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{2,48}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "accessCode": {
+            "type": "string",
+            "pattern": "^[a-z0-9]{8,32}$",
+            "description": "Event access code from the event QR (`/e/<code>`)."
+          },
+          "joinUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "startsAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "endsAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "isRunning": {
+            "type": "boolean"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EventStatus"
+          },
+          "isTest": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "venueName": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "websiteUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "timezone": {
+            "type": "string"
+          },
+          "schedule": {
+            "$ref": "#/components/schemas/ScheduleOutput"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "counts": {
+            "$ref": "#/components/schemas/EventCounts"
+          }
+        },
+        "required": [
+          "id",
+          "slug",
+          "name",
+          "accessCode",
+          "joinUrl",
+          "startsAt",
+          "endsAt",
+          "isRunning",
+          "status",
+          "isTest",
+          "description",
+          "venueName",
+          "address",
+          "city",
+          "country",
+          "websiteUrl",
+          "timezone",
+          "schedule",
+          "createdAt",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "EventCounts": {
+        "type": "object",
+        "properties": {
+          "attendees": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "connections": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "pending": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "organizers": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "attendees",
+          "connections",
+          "pending",
+          "organizers"
+        ],
+        "additionalProperties": false
+      },
       "CreatedEvent": {
         "type": "object",
         "properties": {
@@ -8094,6 +11999,18 @@
         ],
         "additionalProperties": false
       },
+      "AdminEventBody": {
+        "type": "object",
+        "properties": {
+          "event": {
+            "$ref": "#/components/schemas/AdminEvent"
+          }
+        },
+        "required": [
+          "event"
+        ],
+        "additionalProperties": false
+      },
       "RotatedCode": {
         "type": "object",
         "properties": {
@@ -8118,6 +12035,407 @@
           "slug"
         ],
         "additionalProperties": false
+      },
+      "AdminAttendeeList": {
+        "type": "object",
+        "properties": {
+          "attendees": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminAttendee"
+            }
+          },
+          "counts": {
+            "type": "object",
+            "properties": {
+              "attendees": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "connections": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "pending": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "organizers": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "testUsers": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "attendees",
+              "connections",
+              "pending",
+              "organizers",
+              "testUsers"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "attendees",
+          "counts"
+        ],
+        "additionalProperties": false
+      },
+      "AdminAttendee": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/AdminUser"
+          },
+          "checkedInAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "addedByAdmin": {
+            "type": "boolean",
+            "description": "Checked in by a super admin; consent was admin-assigned."
+          },
+          "points": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "connections": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "user",
+          "checkedInAt",
+          "addedByAdmin",
+          "points",
+          "connections"
+        ],
+        "additionalProperties": false
+      },
+      "AdminUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "handle": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{2,32}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "headline": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "company": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "isTest": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "id",
+          "handle",
+          "name",
+          "photoUrl",
+          "headline",
+          "company",
+          "city",
+          "email",
+          "role",
+          "isTest",
+          "createdAt"
+        ],
+        "additionalProperties": false,
+        "description": "A person as a super admin sees them: account fields included, never LinkedIn claims."
+      },
+      "AddedAttendee": {
+        "type": "object",
+        "properties": {
+          "attendee": {
+            "$ref": "#/components/schemas/AdminAttendee"
+          },
+          "alreadyCheckedIn": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "attendee",
+          "alreadyCheckedIn"
+        ],
+        "additionalProperties": false
+      },
+      "OrganizerList": {
+        "type": "object",
+        "properties": {
+          "organizers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Organizer"
+            }
+          }
+        },
+        "required": [
+          "organizers"
+        ],
+        "additionalProperties": false
+      },
+      "Organizer": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/AdminUser"
+          },
+          "role": {
+            "$ref": "#/components/schemas/OrganizerRole"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "user",
+          "role",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "OrganizerBody": {
+        "type": "object",
+        "properties": {
+          "organizer": {
+            "$ref": "#/components/schemas/Organizer"
+          }
+        },
+        "required": [
+          "organizer"
+        ],
+        "additionalProperties": false
+      },
+      "AdminUserList": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUser"
+            }
+          }
+        },
+        "required": [
+          "users"
+        ],
+        "additionalProperties": false
+      },
+      "TestUserList": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TestUser"
+            }
+          }
+        },
+        "required": [
+          "users"
+        ],
+        "additionalProperties": false
+      },
+      "TestUser": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "handle": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]{2,32}$"
+          },
+          "name": {
+            "type": "string"
+          },
+          "photoUrl": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "headline": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "company": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "isTest": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          },
+          "interests": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "links": {
+            "$ref": "#/components/schemas/Links"
+          },
+          "avatarMode": {
+            "$ref": "#/components/schemas/AvatarMode"
+          },
+          "currentEvent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/CurrentEvent"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "handle",
+          "name",
+          "photoUrl",
+          "headline",
+          "company",
+          "city",
+          "email",
+          "role",
+          "isTest",
+          "createdAt",
+          "interests",
+          "links",
+          "avatarMode",
+          "currentEvent"
+        ],
+        "additionalProperties": false
+      },
+      "TestSession": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "handle": {
+                "type": "string",
+                "pattern": "^[a-z0-9-]{2,32}$"
+              },
+              "name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "handle",
+              "name"
+            ],
+            "additionalProperties": false
+          },
+          "expiresAt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "user",
+          "expiresAt"
+        ],
+        "additionalProperties": false,
+        "description": "The Supabase session cookies come in `Set-Cookie`; tokens never appear in the body."
       },
       "EventDoor": {
         "type": "object",
@@ -9424,6 +13742,37 @@
         ],
         "additionalProperties": false,
         "description": "The person's pixel-art monito (design/compa-v2/README.md)."
+      },
+      "ScheduleOutput": {
+        "maxItems": 40,
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "date": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "start": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "end": {
+              "type": "string",
+              "pattern": "^([01]\\d|2[0-3]):[0-5]\\d$"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 80
+            }
+          },
+          "required": [
+            "date",
+            "start",
+            "end"
+          ],
+          "additionalProperties": false
+        }
       }
     },
     "parameters": {
@@ -9474,6 +13823,12 @@
         "in": "cookie",
         "name": "sb-<project-ref>-auth-token",
         "description": "Supabase Auth session cookie set by `/auth/callback` (LinkedIn OIDC). Same-origin fetch sends it."
+      },
+      "automationSecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-compa-automation",
+        "description": "Test runners only: the value of TEST_AUTOMATION_SECRET. Opens the test-user routes; off when the variable is unset."
       }
     }
   }

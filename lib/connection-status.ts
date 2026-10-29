@@ -17,7 +17,12 @@ export function statusForViewer({ status, requesterId, viewerId, eventEnded }: S
   return eventEnded ? "expired" : "pending";
 }
 
-export const isRunning = (event: { startsAt: Date; endsAt: Date }, now: Date): boolean =>
-  event.startsAt <= now && now < event.endsAt;
+type Lifecycle = { status?: "draft" | "live" | "ended" | "archived" };
 
-export const hasEnded = (event: { endsAt: Date }, now: Date): boolean => now >= event.endsAt;
+// Only a `live` event runs inside its window; draft, ended and archived never do (M20).
+export const isRunning = (event: { startsAt: Date; endsAt: Date } & Lifecycle, now: Date): boolean =>
+  (event.status ?? "live") === "live" && event.startsAt <= now && now < event.endsAt;
+
+// Ended or archived events are over even before their window closes, so pending requests expire.
+export const hasEnded = (event: { endsAt: Date } & Lifecycle, now: Date): boolean =>
+  now >= event.endsAt || event.status === "ended" || event.status === "archived";

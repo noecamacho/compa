@@ -84,6 +84,13 @@ function paintBody({ set, row }: Painter): void {
   row(19, 3, 12, "o");
 }
 
+// "woman" flares the pants into a skirt (in the pants color) with bare legs below.
+function paintSkirt({ set, row }: Painter, body: MonitoLook["body"]): void {
+  if (body !== "woman") return;
+  set(16, 3, "o"); row(16, 4, 11, "p"); set(16, 12, "o");
+  row(17, 5, 6, "s"); row(17, 9, 10, "s");
+}
+
 function paintOutfit({ set, row, recolor }: Painter, outfit: MonitoLook["outfit"]): void {
   if (outfit === "stripes") { recolor(12, "T"); recolor(14, "T"); }
   if (outfit === "compa") { set(12, 7, "T"); set(12, 8, "T"); set(13, 7, "T"); set(13, 8, "T"); }
@@ -194,6 +201,7 @@ export function grid(look: MonitoLook): Grid {
   const g: Grid = Array.from({ length: GRID_HEIGHT }, () => new Array<Cell>(GRID_WIDTH).fill("."));
   const p = painter(g);
   paintBody(p);
+  paintSkirt(p, look.body);
   paintOutfit(p, look.outfit);
   paintHair(p, look.hair);
   paintHat(p, look.hat);

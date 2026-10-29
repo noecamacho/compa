@@ -240,8 +240,8 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Actor | Signed-in attendee |
 | Entry | `/onboarding/monito` |
 | Pre | 02 done |
-| Happy path | Builder (5 skins, 4 hair styles, 4 hair colors, 6 shirts, extras, random) → `PATCH /api/me { avatar }` → `/home`. IP: `avatar_mode` is `photo` by default (the LinkedIn photo copied to Storage) or `monito` |
-| Alternates | Skip → default look (`DEFAULT_LOOK`) |
+| Happy path | Builder (body Hombre/Mujer/Otro, 5 skins, 4 hair styles, 4 hair colors, 6 shirts, extras, random) → `PATCH /api/me { avatar, avatarMode }` → `next` or `/home`. The look is always saved, also with the LinkedIn photo mode. Mandatory: the (app) layout renders `MonitoGate`, which sends anyone whose `avatar` is empty to `/onboarding/monito?next=<path>`; onboarding lives in its own `(onboarding)` route group so the gate cannot loop. IP: `avatar_mode` is `photo` by default (the LinkedIn photo copied to Storage) or `monito` |
+| Alternates | No skip: leaving 02b and opening any app screen comes back to it |
 | Errors | Save failed → *raw msg* (`MonitoBuilder`); should keep the local choice and retry |
 | Edge cases | On `main` the server ignores `avatar`, so everyone shows the default monito (gap analysis U4). Stored jsonb is untrusted; IP `parseLook` drops an invalid look. No LinkedIn photo → the monito is the only option |
 | Status | UI Mock-only · API Mock-only (IP) · DB Missing (IP) |

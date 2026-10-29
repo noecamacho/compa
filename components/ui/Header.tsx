@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Icon } from "@/components/icons";
 import { common } from "@/lib/copy/es";
 import { IconLink } from "./IconButton";
+import { StickyBar } from "./StickyBar";
 
 type Props = {
   back?: string;
@@ -25,7 +26,7 @@ export function Header({ back, close, title, titleSize = 20, right }: Props) {
     <span className="w-11" />
   );
   return (
-    <div className="flex items-center justify-between">
+    <StickyBar className="flex items-center justify-between">
       {left}
       {title && (
         <h1 className="m-0 font-display font-bold" style={{ fontSize: titleSize }}>
@@ -33,6 +34,6 @@ export function Header({ back, close, title, titleSize = 20, right }: Props) {
         </h1>
       )}
       {right ?? <span className="w-11" />}
-    </div>
+    </StickyBar>
   );
 }

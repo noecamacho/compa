@@ -12,6 +12,8 @@ import { apiCall } from "@/lib/api/client";
 import { Me, type AvatarModeT, type MeT } from "@/lib/api/schemas";
 import { monito as copy } from "@/lib/copy/es";
 import {
+  BODIES,
+  BODY_HAIR,
   EXTRA_OPTIONS,
   HAIR_COLOR_OPTIONS,
   HAIR_OPTIONS,
@@ -109,7 +111,8 @@ export function MonitoBuilder({ me, next, back, onboarding }: Props) {
     setSaving(true);
     setError(null);
     try {
-      await apiCall("PATCH", "/api/me", Me, usePhoto ? { avatarMode: "photo" } : { avatar: look, avatarMode: "monito" });
+      // The look is always saved: everyone gets a monito, even when the LinkedIn photo is what others see.
+      await apiCall("PATCH", "/api/me", Me, { avatar: look, avatarMode: usePhoto ? "photo" : "monito" });
       router.push(next);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : String(caught));
@@ -124,11 +127,9 @@ export function MonitoBuilder({ me, next, back, onboarding }: Props) {
         title={copy.title}
         titleSize={22}
         right={
-          usePhoto ? undefined : (
-            <IconButton label={copy.random} onClick={() => setState(randomBuilder())}>
-              <Icon name="dice" size={20} />
-            </IconButton>
-          )
+          <IconButton label={copy.random} onClick={() => setState(randomBuilder(state.body))}>
+            <Icon name="dice" size={20} />
+          </IconButton>
         }
       />
       <div role="radiogroup" aria-label={copy.choiceLabel} className="grid grid-cols-2 gap-[10px]">
@@ -137,51 +138,51 @@ export function MonitoBuilder({ me, next, back, onboarding }: Props) {
       </div>
       <div className="flex items-center gap-4 rounded-card bg-sun-soft px-4 py-3 border-ink shadow-hard-4">
         <span className="flex h-[150px] w-[124px] shrink-0 items-end justify-center rounded-[18px] bg-white pb-[6px] border-ink">
-          {usePhoto ? (
-            <span className="animate-fade-in flex h-full w-full items-center justify-center">
-              <Avatar person={{ name: me.name, photoUrl: me.photoUrl, avatarMode: "photo" }} size={104} shadow={3} />
-            </span>
-          ) : (
-            // Keyed by the look so the monito bounces every time an option changes.
-            <span key={JSON.stringify(look)} className="animate-bump block origin-bottom">
-              <Monito look={look} px={7} label={copy.labelOwn} />
-            </span>
-          )}
+          {/* Keyed by the look so the monito bounces every time an option changes. */}
+          <span key={JSON.stringify(look)} className="animate-bump block origin-bottom">
+            <Monito look={look} px={7} label={copy.labelOwn} />
+          </span>
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-[6px]">
-          <span className="font-display text-[22px] leading-[1.1] font-bold">{me.name}</span>
-          <Muted className="text-[13px] leading-[1.35] font-bold">{copy.hint}</Muted>
+          <span className="flex items-center gap-2">
+            {usePhoto && <Avatar person={{ name: me.name, photoUrl: me.photoUrl, avatarMode: "photo" }} size={32} shadow={2} />}
+            <span className="font-display text-[22px] leading-[1.1] font-bold">{me.name}</span>
+          </span>
+          <Muted className="text-[13px] leading-[1.35] font-bold">{usePhoto ? copy.hintPhoto : copy.hint}</Muted>
         </span>
       </div>
-      {!usePhoto && (
-        <div className="flex flex-col gap-2 rounded-button bg-white px-3 py-[10px] border-ink shadow-hard-3">
-          <Row label={copy.skin} first>
-            {SKIN_OPTIONS.map((option) => (
-              <Swatch key={option.key} hex={option.hex} name={copy.skinNames[option.key]} checked={state.skin === option.hex} onPick={() => setState({ ...state, skin: option.hex })} />
-            ))}
-          </Row>
-          <Row label={copy.hair}>
-            {HAIR_OPTIONS.map((option) => (
-              <OptionChip key={option} role="radio" label={copy.hairNames[option]} on={state.hair === option} onClick={() => setState({ ...state, hair: option })} />
-            ))}
-          </Row>
-          <Row label={copy.hairColor}>
-            {HAIR_COLOR_OPTIONS.map((option) => (
-              <Swatch key={option.key} hex={option.hex} name={copy.hairColorNames[option.key]} checked={state.hairColor === option.hex} onPick={() => setState({ ...state, hairColor: option.hex })} />
-            ))}
-          </Row>
-          <Row label={copy.shirt}>
-            {SHIRT_OPTIONS.map((option) => (
-              <Swatch key={option.key} hex={option.hex} name={copy.shirtNames[option.key]} checked={state.shirt === option.hex} onPick={() => setState({ ...state, shirt: option.hex })} />
-            ))}
-          </Row>
-          <Row label={copy.extras}>
-            {EXTRA_OPTIONS.map((option) => (
-              <OptionChip key={option} label={copy.extraNames[option]} on={state.extras[option]} onClick={() => toggleExtra(option)} />
-            ))}
-          </Row>
-        </div>
-      )}
+      <div className="flex flex-col gap-2 rounded-button bg-white px-3 py-[10px] border-ink shadow-hard-3">
+        <Row label={copy.body} first>
+          {BODIES.map((option) => (
+            <OptionChip key={option} role="radio" label={copy.bodyNames[option]} on={state.body === option} onClick={() => setState({ ...state, body: option, hair: BODY_HAIR[option] })} />
+          ))}
+        </Row>
+        <Row label={copy.skin}>
+          {SKIN_OPTIONS.map((option) => (
+            <Swatch key={option.key} hex={option.hex} name={copy.skinNames[option.key]} checked={state.skin === option.hex} onPick={() => setState({ ...state, skin: option.hex })} />
+          ))}
+        </Row>
+        <Row label={copy.hair}>
+          {HAIR_OPTIONS.map((option) => (
+            <OptionChip key={option} role="radio" label={copy.hairNames[option]} on={state.hair === option} onClick={() => setState({ ...state, hair: option })} />
+          ))}
+        </Row>
+        <Row label={copy.hairColor}>
+          {HAIR_COLOR_OPTIONS.map((option) => (
+            <Swatch key={option.key} hex={option.hex} name={copy.hairColorNames[option.key]} checked={state.hairColor === option.hex} onPick={() => setState({ ...state, hairColor: option.hex })} />
+          ))}
+        </Row>
+        <Row label={copy.shirt}>
+          {SHIRT_OPTIONS.map((option) => (
+            <Swatch key={option.key} hex={option.hex} name={copy.shirtNames[option.key]} checked={state.shirt === option.hex} onPick={() => setState({ ...state, shirt: option.hex })} />
+          ))}
+        </Row>
+        <Row label={copy.extras}>
+          {EXTRA_OPTIONS.map((option) => (
+            <OptionChip key={option} label={copy.extraNames[option]} on={state.extras[option]} onClick={() => toggleExtra(option)} />
+          ))}
+        </Row>
+      </div>
       <div className="mt-auto flex flex-col gap-[10px]">
         {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
         <Button variant="primary" onClick={save} disabled={saving}>

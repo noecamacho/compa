@@ -142,6 +142,11 @@
 }
 
 @layer base {
+  html,
+  body {
+    /* No rubber-band on iOS: it dragged the pinned header and the dock along with the page. */
+    overscroll-behavior-y: none;
+  }
   body {
     background: var(--color-paper);
     color: var(--color-ink);

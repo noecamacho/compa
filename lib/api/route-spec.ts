@@ -2,7 +2,13 @@ import { z } from "zod";
 import type { UserRow } from "../../db/schema";
 import type { ErrorSpec } from "./errors";
 
-export type Auth = "public" | "user" | "admin";
+// "admin": super admins only, everyone else gets 404 (A11). "automation": a super admin, or the
+// `x-compa-automation` header with TEST_AUTOMATION_SECRET; the handler then gets `user: null`.
+export type Auth = "public" | "user" | "admin" | "automation";
+
+export const isAdminAuth = (auth: Auth): boolean => auth === "admin" || auth === "automation";
+
+type UserFor<A extends Auth> = A extends "public" ? null : A extends "automation" ? UserRow | null : UserRow;
 export type Method = "get" | "post" | "patch" | "delete";
 export type BodyKind = "none" | "json" | "multipart";
 
@@ -81,7 +87,7 @@ export type HandlerInput<P extends ObjectSchema, Q extends ObjectSchema, B exten
   params: z.output<P>;
   query: z.output<Q>;
   body: z.output<B>;
-  user: A extends "public" ? null : UserRow;
+  user: UserFor<A>;
 };
 
 export type HandlerResult<R extends z.ZodType> = Response | { status?: number; body?: z.input<R>; headers?: HeadersInit };

@@ -65,13 +65,13 @@ export async function usersByIds(ids: string[], db: Executor = getDb()): Promise
   return db.select().from(users).where(inArray(users.id, ids));
 }
 
-// A2: the most recent event the person checked in to whose window contains now.
+// A2: the most recent live event the person checked in to whose window contains now (draft, ended, archived never count).
 export async function findCurrentEvent(userId: string, now: Date, db: Executor = getDb()): Promise<EventRow | undefined> {
   const [row] = await db
     .select({ event: events })
     .from(eventAttendees)
     .innerJoin(events, eq(events.id, eventAttendees.eventId))
-    .where(and(eq(eventAttendees.userId, userId), lte(events.startsAt, now), gt(events.endsAt, now)))
+    .where(and(eq(eventAttendees.userId, userId), eq(events.status, "live"), lte(events.startsAt, now), gt(events.endsAt, now)))
     .orderBy(desc(eventAttendees.checkedInAt))
     .limit(1);
   return row?.event;
