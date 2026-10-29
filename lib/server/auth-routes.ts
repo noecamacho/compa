@@ -25,7 +25,7 @@ export async function authLinkedin({ req, query }: InputOf<typeof R.authLinkedin
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "linkedin_oidc",
-    options: { redirectTo: callback.toString(), scopes: "openid profile email" },
+    options: { redirectTo: callback.toString() }, // Supabase already requests openid profile email for linkedin_oidc
   });
   if (error || !data.url) return failedSignIn(req);
   return redirect(data.url);
