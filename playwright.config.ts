@@ -9,6 +9,7 @@ const chromium = { ...devices["Desktop Chrome"], deviceScaleFactor: 1, hasTouch:
 
 export default defineConfig({
   testDir: "./e2e/tests",
+  globalSetup: "./e2e/global-setup.ts",
   fullyParallel: true,
   retries: 1,
   workers: process.env.CI ? 2 : 4,

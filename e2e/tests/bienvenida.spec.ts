@@ -26,7 +26,8 @@ test.describe("Bienvenida", () => {
     await page.goto(`/e/${world.event.accessCode}`);
     await page.getByRole("link", { name: "Entrar con LinkedIn" }).click();
     await expect(page).toHaveTitle("LinkedIn de prueba");
-    await allowLinkedIn(page, { name: "Lucía Fernández", headline: "Head of Product", company: "Nido", city: "Ciudad de México", email: "lucia@nido.mx" });
+    // A distinct account per run: the test sign-in maps one email to one person, so parallel viewports must not share it.
+    await allowLinkedIn(page, { name: "Lucía Fernández", headline: "Head of Product", company: "Nido", city: "Ciudad de México", email: `lucia-${Date.now()}-${Math.random().toString(36).slice(2, 7)}@nido.mx` });
 
     await expect(page).toHaveURL(`/e/${world.event.accessCode}/join`);
     await expect(page.getByRole("heading", { name: "Antes de entrar" })).toBeVisible();
