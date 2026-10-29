@@ -16,3 +16,4 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - `.github/PULL_REQUEST_TEMPLATE.md` that every PR must use.
 - Git hooks in `.githooks/` (`commit-msg`, `pre-commit`, `pre-push`), `scripts/setup.sh`, the shared checker `scripts/check-commit-message.sh`, agent hook configs in `.claude/settings.json` and `.codex/hooks.json` (commit rules and no pushes to `main`), and tests in `tests/hooks/`.
 - `repomix.config.json`, `.serena/project.yml` and `.gitignore`.
+- MIT `LICENSE`, required for the hackathon submission.

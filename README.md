@@ -8,3 +8,7 @@ Networking companion for conferences: fill in a profile once, connect by scannin
 - Setup: `scripts/setup.sh` (add `--install` to install missing agent tools).
 
 No application code yet; the build is tracked by the Epic draft in [docs/jira/compa-bootstrap-ticket.md](docs/jira/compa-bootstrap-ticket.md).
+
+## License
+
+[MIT](LICENSE).

@@ -18,3 +18,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 - Created: `sources/build-day-slides`, `hackathon-requirements`.
 - Updated: `timeline` (event and submission deadlines now sourced), `delivery-checklist` (submission items the plan lacks), `open-questions` (#1 resolved by the deck, #14 extended, #19 added on Codex evidence), `glossary`, `index`.
 - Hook change: `raw/README.md` is exempt from the `raw/` immutability check so the source index can grow.
+
+## [2026-10-28] query | Which license does COMPA use?
+
+- The captain chose MIT; `LICENSE` added. Updated `open-questions` #14 (license resolved, repository visibility still open).
