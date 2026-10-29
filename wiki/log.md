@@ -77,6 +77,14 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Added `design/compa-v2/` (README, 16 screen mocks, 4 components) as the visual source of truth for the attendee screens, and ported its four components to React/SVG (`lib/monito`, `lib/badges`, `components/`). The handoff's points table (50 new / 20 reconnection / +5 topics / +15 voice note / +100 and +50 per invited friend) differs from data model M3 and M18; the migration is tracked in a follow-up PR and the "+20 for accepting" line is logged in [open-questions](open-questions.md) #28.
 
+## [2026-10-29] query | Which language does the AI write in?
+
+- Captain decision: transcription keeps the spoken language (auto-detected) and the summary and next steps use the note's language; topics are always classified with the fixed vocabulary that seeds `interests`. Replaces the Spanish-only team decision in `ai-jobs`.
+
+## [2026-10-29] ingest | V2 attendee screens
+
+- The sixteen V2 screens live under `app/` (routes in [screens/README](screens/README.md)); pages read the API over HTTP with zod on the response, so mock mode serves every screen. New routes `GET /api/connections/{id}`, `GET /api/badges`, `GET /api/invites/me` and `POST /api/invites/{code}/claim` are registered (mock only until the points model lands). `lib/points.ts` now carries the V2 table (50/20, +5 topics, +15 note, +100/+50 invites) and migration `0001` moves the connections points check and adds `whatsapp` to the link vocabulary. [points-rules](points-rules.md) still describes the plan's table and needs the V2 rewrite with the data model follow-up.
+
 ## [2026-10-29] query | What does V2 need from the backend?
 
 - Rewrote `DESIGN.md` from the V2 handoff (with the bilingual UI decision and "AI language follows the speaker") and added `docs/backend-gap-analysis.md` (34 use cases: 11 Ready, 11 Partial, 7 Missing, 5 Conflict); open question #6 superseded by the bilingual decision; conflicts logged as [open-questions](open-questions.md) #29–#42.

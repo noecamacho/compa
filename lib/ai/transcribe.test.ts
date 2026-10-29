@@ -55,9 +55,9 @@ describe("transcribe", () => {
     await expect(transcribe(big, client)).rejects.toMatchObject({ reason: "size" });
   });
 
-  test("returns the text from the client and asks for Spanish", async () => {
+  test("returns the text and lets the model detect the spoken language", async () => {
     const { client, calls } = fakeClient("hola");
     expect(await transcribe(wav(), client)).toBe("hola");
-    expect(calls[0]).toMatchObject({ language: "es" });
+    expect(calls[0]).not.toHaveProperty("language");
   });
 });

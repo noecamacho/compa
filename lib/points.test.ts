@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CONNECTION_POINTS, decideKind, pointsFor, SUMMARY_POINTS } from "./points";
+import { CONNECTION_POINTS, decideKind, INVITE_POINTS, pointsFor, SUMMARY_POINTS, TOPICS_POINTS, topicsPointsFor } from "./points";
 
 const none = { metAtEarlierEvent: false, requesterKnew: null, addresseeKnew: null };
 
@@ -21,9 +21,17 @@ describe("decideKind (M4)", () => {
   });
 });
 
-test("points follow kind (M3) and summaries add 25 (M18)", () => {
-  expect(pointsFor("new")).toBe(20);
-  expect(pointsFor("reconnection")).toBe(10);
-  expect(CONNECTION_POINTS).toEqual({ new: 20, reconnection: 10 });
-  expect(SUMMARY_POINTS).toBe(25);
+test("points follow the V2 design table", () => {
+  expect(pointsFor("new")).toBe(50);
+  expect(pointsFor("reconnection")).toBe(20);
+  expect(CONNECTION_POINTS).toEqual({ new: 50, reconnection: 20 });
+  expect(SUMMARY_POINTS).toBe(15);
+  expect(TOPICS_POINTS).toBe(5);
+  expect(INVITE_POINTS).toEqual({ inviter: 100, invitee: 50 });
+});
+
+test("topics score once, whatever their number", () => {
+  expect(topicsPointsFor([])).toBe(0);
+  expect(topicsPointsFor(["IA"])).toBe(5);
+  expect(topicsPointsFor(["IA", "Proptech", "Fintech"])).toBe(5);
 });

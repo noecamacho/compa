@@ -52,7 +52,13 @@ export const getMe = route({
   summary: "My profile",
   tags: ["profile"],
   auth: "user",
-  success: { status: 200, description: "The signed-in person.", schema: S.Me, example: X.me },
+  success: {
+    status: 200,
+    description: "The signed-in person.",
+    schema: S.Me,
+    example: X.me,
+    examples: { empty: { summary: "First night, no connections yet", value: X.meEmpty } },
+  },
   errors: WITH_USER,
 });
 
@@ -65,7 +71,7 @@ export const patchMe = route({
   tags: ["profile"],
   auth: "user",
   body: S.PatchMeBody,
-  bodyExample: { headline: "CTO en Tramita", links: { github: "@luciafdz" }, interestIds: [29, 39] },
+  bodyExample: { headline: "Cofounder", company: "Kuali", city: "Guadalajara, Jalisco", links: { instagram: "@diego.rmz" } },
   success: { status: 200, description: "The updated profile.", schema: S.Me, example: X.me },
   errors: [E.invalidInput, E.unauthorized],
 });
@@ -108,8 +114,8 @@ export const getUser = route({
     status: 200,
     description: "The card as you may see it.",
     schema: S.UserProfile,
-    example: { card: X.mateoConnected, connection: { status: "accepted", kind: "reconnection", eventSlug: X.founders.slug } },
-    examples: { stranger: { summary: "No connection yet", value: { card: X.mateoPublic } } },
+    example: X.valeriaProfile,
+    examples: { stranger: { summary: "No connection yet", value: { card: X.valeriaPublic } } },
   },
   errors: [E.unauthorized, E.userNotFound],
 });
@@ -170,13 +176,13 @@ export const createConnection = route({
   tags: ["connections"],
   auth: "user",
   body: S.CreateConnectionBody,
-  bodyExample: { toHandle: "mateo-garcia", knew: false, screenConsent: true },
+  bodyExample: { toHandle: "valeria-ochoa", knew: true, screenConsent: true, topics: ["Levantar capital", "Proptech"] },
   success: {
     status: 201,
     description: "Request sent.",
     alsoStatus: { status: 200, description: "The pair already has a connection at this event." },
     schema: S.ConnectionRequest,
-    example: { connectionId: X.ids.connection, status: "pending", event: X.founders, to: X.mateoPublic },
+    example: { connectionId: X.ids.connection, status: "pending", event: X.founders, to: X.valeriaPublic },
   },
   errors: [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired],
 });
@@ -213,7 +219,7 @@ export const acceptConnection = route({
   path: "/api/connections/{id}/accept",
   summary: "Addressee: accept a request",
   description:
-    "`reconnection` (+10) when the pair connected at an earlier event or either person ticked `knew`; otherwise `new` (+20), to both (M3, M4).",
+    "`reconnection` (+20) when the pair connected at an earlier event or either person ticked `knew`; otherwise `new` (+50), to both (design handoff points table).",
   tags: ["connections"],
   auth: "user",
   params: S.IdParams,
@@ -223,11 +229,11 @@ export const acceptConnection = route({
     status: 200,
     description: "Connected.",
     schema: S.Accepted,
-    example: { connectionId: X.ids.connection, kind: "new", points: 20, from: X.mateoConnected },
+    example: { connectionId: X.ids.connection, kind: "new", points: 50, from: X.valeriaConnected },
     examples: {
       reconnection: {
         summary: "They met at an earlier event",
-        value: { connectionId: X.ids.connection, kind: "reconnection", points: 10, from: X.mateoConnected },
+        value: { connectionId: X.ids.connection, kind: "reconnection", points: 20, from: X.valeriaConnected },
       },
     },
   },
@@ -272,7 +278,7 @@ export const livePerson = route({
     status: 200,
     description: "Card with event points, connection count and rank.",
     schema: S.LivePersonCard,
-    example: { card: X.mateoPublic, points: 30, connections: 2, rank: 2 },
+    example: { card: X.valeriaPublic, points: 1980, connections: 24, rank: 1 },
   },
   errors: [E.eventNotFound, E.attendeeNotFound],
 });
@@ -287,7 +293,13 @@ export const leaderboard = route({
   auth: "public",
   params: S.SlugParams,
   query: S.LeaderboardQuery,
-  success: { status: 200, description: "Ranked rows.", schema: S.Leaderboard, example: X.leaderboard },
+  success: {
+    status: 200,
+    description: "Ranked rows, plus `me` when signed in (V2Ranking).",
+    schema: S.Leaderboard,
+    example: X.leaderboard,
+    examples: { lifetime: { summary: "scope=lifetime: all events", value: X.leaderboardLifetime } },
+  },
   errors: [E.invalidInput, E.eventNotFound],
 });
 
@@ -319,7 +331,7 @@ export const draftSummary = route({
   tags: ["summaries"],
   auth: "user",
   body: S.DraftBody,
-  bodyExample: { connectionId: X.ids.connection, text: "Hablamos de pasar el panel de Vue a React, me pasa su repo de Next." },
+  bodyExample: { connectionId: X.ids.connection, text: "Valeria está cerrando su serie A y quiere que la presente con Andrea." },
   success: {
     status: 201,
     description: "A new editable draft.",
@@ -328,7 +340,7 @@ export const draftSummary = route({
     examples: {
       fallback: {
         summary: "The AI failed; the text is kept verbatim",
-        value: { ...X.draft, summary: "Hablamos de pasar el panel de Vue a React, me pasa su repo de Next.", topics: [], nextSteps: [], fallback: true },
+        value: { ...X.draft, summary: "Valeria está cerrando su serie A y quiere que la presente con Andrea.", topics: [], nextSteps: [], fallback: true },
       },
       notSubstantive: {
         summary: "The note does not describe a conversation",
@@ -343,7 +355,7 @@ export const approveSummary = route({
   id: "approveSummary",
   method: "post",
   path: "/api/interactions/{id}/approve",
-  summary: "Approve a summary (+25 to both)",
+  summary: "Approve a summary (+15 to the author)",
   description: "Only the draft's author. One approved summary per connection; replay returns 409 (M18).",
   tags: ["summaries"],
   auth: "user",
@@ -359,13 +371,68 @@ export const approveSummary = route({
         id: X.ids.interaction,
         connectionId: X.ids.connection,
         ...X.approveBody,
-        points: 25,
+        points: 15,
         approvedAt: "2026-10-29T18:20:00.000Z",
       },
-      pointsAwarded: 25,
+      pointsAwarded: 15,
     },
   },
   errors: [E.invalidInput, E.unauthorized, E.notAuthor, E.notFound, E.notSubstantive, E.alreadyApproved],
+});
+
+export const getConnection = route({
+  id: "getConnection",
+  method: "get",
+  path: "/api/connections/{id}",
+  summary: "One connection as I see it",
+  description: "Points breakdown, topics and the voice-note summary (V2Confirmacion, V2Solicitud, V2NotaVoz). Members only.",
+  tags: ["connections"],
+  auth: "user",
+  params: S.IdParams,
+  success: {
+    status: 200,
+    description: "The connection.",
+    schema: S.ConnectionDetail,
+    example: X.connectionDetail,
+    examples: { incoming: { summary: "A pending request someone sent me", value: X.incomingDetail } },
+  },
+  errors: [E.unauthorized, E.connectionNotFound],
+});
+
+export const listBadges = route({
+  id: "listBadges",
+  method: "get",
+  path: "/api/badges",
+  summary: "My badges",
+  description: "The 20 badges with earned date or progress; secret ones carry no progress (V2Insignias).",
+  tags: ["profile"],
+  auth: "user",
+  success: { status: 200, description: "Catalog with my status.", schema: S.BadgeList, example: X.badgeList },
+  errors: WITH_USER,
+});
+
+export const myInvites = route({
+  id: "myInvites",
+  method: "get",
+  path: "/api/invites/me",
+  summary: "My invite link and invitees",
+  tags: ["profile"],
+  auth: "user",
+  success: { status: 200, description: "Code, link and progress to the golden cap.", schema: S.Invites, example: X.invites },
+  errors: WITH_USER,
+});
+
+export const claimInvite = route({
+  id: "claimInvite",
+  method: "post",
+  path: "/api/invites/{code}/claim",
+  summary: "Join through a friend's invite",
+  description: "Called once after sign-in; the inviter earns +100 and you +50 when your first connection is accepted.",
+  tags: ["profile"],
+  auth: "user",
+  params: S.CodeParams,
+  success: { status: 200, description: "Linked to the inviter.", schema: S.ClaimedInvite, example: { code: X.invites.code, inviter: X.diego } },
+  errors: [E.unauthorized, E.notFound],
 });
 
 export const ROUTES: readonly AnyRouteSpec[] = [
@@ -391,4 +458,8 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   transcribe,
   draftSummary,
   approveSummary,
+  getConnection,
+  listBadges,
+  myInvites,
+  claimInvite,
 ];
