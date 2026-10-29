@@ -1,11 +1,12 @@
 import "server-only";
-import { and, desc, eq, gt, isNotNull, lte } from "drizzle-orm";
+import { and, desc, eq, gt, isNotNull, lte, sql } from "drizzle-orm";
 import { getDb } from "../../db/client";
 import { connections, events, invites, userBadges, users } from "../../db/schema";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import type { NotificationT } from "../api/schemas";
 import { BADGES, BADGE_IDS, type BadgeId } from "../badges/catalog";
+import { broadcast, userTopic } from "../realtime";
 import { cardsFor } from "./people";
 
 function isBadgeId(value: string): value is BadgeId {
@@ -80,7 +81,20 @@ export async function listNotifications({ user }: InputOf<typeof R.listNotificat
   return { body: { notifications, unseenCount: notifications.filter((item) => item.unseen).length } };
 }
 
+// Never moves backwards (a stale tab) nor past now (a future timestamp would hide alerts that have not happened yet).
+export const nextSeenAt = (current: Date | null, seenThrough: Date, now: Date): Date => {
+  const clamped = seenThrough > now ? now : seenThrough;
+  return current && current > clamped ? current : clamped;
+};
+
 export async function markNotificationsSeen({ user, body }: InputOf<typeof R.markNotificationsSeen>): ResultOf<typeof R.markNotificationsSeen> {
-  await getDb().update(users).set({ notificationsSeenAt: new Date(body.seenThrough) }).where(eq(users.id, user.id));
+  const seenAt = nextSeenAt(user.notificationsSeenAt, new Date(body.seenThrough), new Date());
+  // greatest() in the same statement, so two tabs posting at once cannot store the older mark.
+  await getDb()
+    .update(users)
+    .set({ notificationsSeenAt: sql`greatest(coalesce(${users.notificationsSeenAt}, ${seenAt}), ${seenAt})` })
+    .where(eq(users.id, user.id));
+  // Other open tabs and devices clear their bell at once.
+  await broadcast({ topic: userTopic(user.id), event: "notifications.seen", payload: { seenThrough: seenAt.toISOString() } });
   return { status: 204 };
 }

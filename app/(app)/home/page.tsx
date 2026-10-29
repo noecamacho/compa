@@ -54,7 +54,8 @@ export default async function HomePage({ searchParams }: Props) {
   const list = listOrNull ?? NO_CONNECTIONS;
   const empty = demo === "empty" || list.totals.connections === 0;
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
-  const incoming = empty ? [] : list.incoming;
+  // A first-night person (no connections yet) still sees requests to them; only the demo preview hides them.
+  const incoming = demo === "empty" ? [] : list.incoming;
   return (
     <Screen dock>
       <StickyBar className="flex items-center justify-between">

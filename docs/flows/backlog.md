@@ -1039,6 +1039,8 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 <a id="t-080"></a>
 ### T-080 · Notifications list and seen state
 
+**Status:** Done (list and seen state in PR #45; live bell, toast and Web Push on `fm/compa-notifications`).
+
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | backend+ui | P1 | connections+points | T-000, T-031 | M |
@@ -1053,6 +1055,8 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 
 <a id="t-081"></a>
 ### T-081 · Realtime Authorization for private user channels
+
+**Status:** Done on `fm/compa-notifications` (migration `0011_realtime_user_channels`, `components/notifications/LiveNotifications.tsx`, `e2e/notifications/live.spec.ts`).
 
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |

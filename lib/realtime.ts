@@ -1,6 +1,7 @@
 // Supabase Realtime Broadcast from the server (API spec §8). No-ops when Supabase env is missing,
 // so local dev and mock mode work without it. A failed broadcast never fails the request.
 import type { CardT, ConnectionKindT } from "./api/schemas";
+import type { BadgeId } from "./badges/catalog";
 
 type LivePersonRef = { id: string; name: string; photoUrl: string | null };
 type EventRefT = { slug: string; name: string };
@@ -8,6 +9,9 @@ type EventRefT = { slug: string; name: string };
 export type BroadcastMessage =
   | { topic: `user:${string}`; event: "request.received"; payload: { connectionId: string; from: CardT; event: EventRefT } }
   | { topic: `user:${string}`; event: "request.accepted"; payload: { connectionId: string; kind: ConnectionKindT; points: number; to: CardT } }
+  | { topic: `user:${string}`; event: "invitee.connected"; payload: { invitee: CardT } }
+  | { topic: `user:${string}`; event: "badge.earned"; payload: { badgeId: BadgeId; badgeName: string } }
+  | { topic: `user:${string}`; event: "notifications.seen"; payload: { seenThrough: string } }
   | {
       topic: `event:${string}:live`;
       event: "connection.accepted";
@@ -40,6 +44,9 @@ export async function broadcast(...messages: BroadcastMessage[]): Promise<void> 
     console.error("realtime broadcast failed", error);
   }
 }
+
+export type UserMessage = Extract<BroadcastMessage, { topic: `user:${string}` }>;
+export type UserEventName = UserMessage["event"];
 
 export const userTopic = (userId: string) => `user:${userId}` as const;
 // Keyed by the access code, not the slug, so only people with the event QR can follow the public channel (A10).

@@ -10,6 +10,7 @@ import type { CardT } from "../api/schemas";
 import { hasEnded, isRunning, statusForViewer } from "../connection-status";
 import { decideKind, pointsFor, topicsPointsFor } from "../points";
 import { broadcast, liveTopic, userTopic } from "../realtime";
+import { badgeNotices, inviteeNotice, notify, type Notice } from "./notify";
 import { awardBadges } from "./badges";
 import { ensureCheckedIn, isCheckedIn } from "./events";
 import { awardInvite } from "./invites";
@@ -82,10 +83,10 @@ export async function createConnection({ user, body }: InputOf<typeof R.createCo
 
 async function announceRequest(row: ConnectionRow, requester: UserRow, event: EventRow): Promise<void> {
   const from = await cardFor(null, requester);
-  await broadcast({
-    topic: userTopic(row.addresseeId),
-    event: "request.received",
-    payload: { connectionId: row.id, from, event: eventRef(event) },
+  await notify({
+    userId: row.addresseeId,
+    message: { topic: userTopic(row.addresseeId), event: "request.received", payload: { connectionId: row.id, from, event: eventRef(event) } },
+    push: { kind: "request", connectionId: row.id, personName: from.name, eventName: event.name },
   });
 }
 
@@ -169,23 +170,29 @@ async function acceptInTransaction(id: string, userId: string, knew: boolean | u
   });
 }
 
-async function announceAcceptance(row: ConnectionRow, event: EventRow, requester: UserRow, addressee: UserRow): Promise<void> {
+async function announceAcceptance(row: ConnectionRow, event: EventRow, requester: UserRow, addressee: UserRow, extras: Notice[]): Promise<void> {
   const kind = row.kind ?? "new";
   const points = row.points ?? pointsFor(kind);
   const to = await cardFor(requester.id, addressee);
   const person = (u: UserRow) => ({ id: u.id, name: u.name, photoUrl: u.photoUrl });
-  await broadcast(
-    { topic: userTopic(requester.id), event: "request.accepted", payload: { connectionId: row.id, kind, points, to } },
-    {
+  const accepted: Notice = {
+    userId: requester.id,
+    message: { topic: userTopic(requester.id), event: "request.accepted", payload: { connectionId: row.id, kind, points, to } },
+    push: { kind: "accepted", connectionId: row.id, personName: to.name, eventName: event.name },
+  };
+  await Promise.all([
+    notify(accepted, ...extras),
+    broadcast({
       topic: liveTopic(event.accessCode),
       event: "connection.accepted",
       payload: { id: row.id, a: person(requester), b: person(addressee), kind, at: (row.respondedAt ?? new Date()).toISOString() },
-    },
-  );
+    }),
+  ]);
 }
 
 // Topics marked by the scanner pay +5 once; invites and badges are checked for both people (V2 points table).
-async function awardExtras(row: ConnectionRow, event: EventRow, requester: UserRow, addressee: UserRow): Promise<void> {
+// Returns what to tell people: an inviter whose invitee just connected, and every badge earned.
+async function awardExtras(row: ConnectionRow, event: EventRow, requester: UserRow, addressee: UserRow): Promise<Notice[]> {
   const db = getDb();
   const topics = topicsPointsFor(row.topics);
   if (topics > 0) {
@@ -194,8 +201,15 @@ async function awardExtras(row: ConnectionRow, event: EventRow, requester: UserR
       .values({ userId: requester.id, eventId: event.id, reason: "topics", refId: row.id, points: topics })
       .onConflictDoNothing();
   }
-  await Promise.all([awardInvite(requester, event, row.id, db), awardInvite(addressee, event, row.id, db)]);
-  await Promise.all([awardBadges(requester, event, row.id, db), awardBadges(addressee, event, row.id, db)]);
+  const invited = await Promise.all([awardInvite(requester, event, row.id, db), awardInvite(addressee, event, row.id, db)]);
+  const [requesterBadges, addresseeBadges] = await Promise.all([awardBadges(requester, event, row.id, db), awardBadges(addressee, event, row.id, db)]);
+  const inviteNotices = await Promise.all(
+    [requester, addressee].flatMap((invitee, index) => {
+      const inviterId = invited[index];
+      return inviterId ? [inviteeNotice(inviterId, invitee)] : [];
+    }),
+  );
+  return [...inviteNotices, ...badgeNotices(requester.id, requesterBadges), ...badgeNotices(addressee.id, addresseeBadges)];
 }
 
 export async function acceptConnection({ user, params, body }: InputOf<typeof R.acceptConnection>): ResultOf<typeof R.acceptConnection> {
@@ -203,8 +217,11 @@ export async function acceptConnection({ user, params, body }: InputOf<typeof R.
   const [requester] = await usersByIds([row.requesterId]);
   if (!requester) return fail(E.internal);
   const from = await cardFor(user.id, requester);
-  await awardExtras(row, event, requester, user).catch((error: unknown) => console.error("awards failed", error));
-  await announceAcceptance(row, event, requester, user);
+  const extras = await awardExtras(row, event, requester, user).catch((error: unknown) => {
+    console.error("awards failed", error);
+    return [];
+  });
+  await announceAcceptance(row, event, requester, user, extras);
   const kind = row.kind ?? "new";
   return { body: { connectionId: row.id, kind, points: row.points ?? pointsFor(kind), from } };
 }

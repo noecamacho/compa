@@ -4,25 +4,14 @@ import { Avatar } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Screen } from "@/components/ui/Screen";
 import { Muted } from "@/components/ui/Text";
+import { PushToggle } from "@/components/notifications/PushToggle";
+import { RefreshOnNotification } from "@/components/notifications/RefreshOnNotification";
 import { Notifications as NotificationsSchema, type NotificationT } from "@/lib/api/schemas";
 import { apiGet, apiPostQuietly } from "@/lib/api/server-fetch";
 import { copyFor, formatTime } from "@/lib/copy";
 import type { Locale } from "@/lib/i18n";
+import { notificationHref, notificationText } from "@/lib/notifications/present";
 import { requestLocale } from "@/lib/server/locale";
-
-function notificationText(item: NotificationT, copy: ReturnType<typeof copyFor>["notifications"]): string {
-  if (item.kind === "request") return copy.request(item.person.name, item.eventName);
-  if (item.kind === "accepted") return copy.accepted(item.person.name, item.eventName);
-  if (item.kind === "invitee_connected") return copy.inviteeConnected(item.person.name);
-  return copy.badgeEarned(item.badgeName);
-}
-
-function notificationHref(item: NotificationT): string {
-  if (item.kind === "request") return `/requests/${item.connectionId}`;
-  if (item.kind === "accepted") return "/connections";
-  if (item.kind === "invitee_connected") return "/invite";
-  return "/me/badges";
-}
 
 function NotificationIcon({ item }: { item: NotificationT }) {
   if (item.kind === "badge_earned") return <Icon name="trophy" size={24} />;
@@ -56,6 +45,8 @@ export default async function NotificationsPage() {
         </Link>
         <h1 className="m-0 font-display text-[28px] leading-none font-bold">{copy.title}</h1>
       </div>
+      <RefreshOnNotification />
+      <PushToggle locale={locale} />
       {result.notifications.length === 0 ? (
         <Card tone="sky-soft" className="flex flex-col gap-1 px-4 py-[14px]">
           <span className="font-display text-[20px] leading-tight font-bold">{copy.emptyTitle}</span>

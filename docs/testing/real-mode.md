@@ -72,6 +72,24 @@ curl -sS -X DELETE "$BASE/api/admin/test-users/<id>" -H "x-compa-automation: $TE
 
 Deleting removes the auth row; the profile, check-ins, connections, summaries and points go by cascade. `GET /api/admin/test-users?handlePrefix=<prefix>` lists what a run created when handles share a prefix.
 
+## 6. Local e2e (two people, live)
+
+Run the live specs against a local Supabase stack, never production. From any scratch folder outside the repo:
+
+```sh
+supabase init && supabase start -x studio,imgproxy,mailpit,edge-runtime,logflare,vector,storage-api,postgres-meta,supavisor
+```
+
+Put its `DB_URL`, `API_URL`, `ANON_KEY` and `SERVICE_ROLE_KEY` in an env file outside git as `DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY`, plus `TEST_AUTOMATION_SECRET`, a VAPID pair (`bunx web-push generate-vapid-keys`, `VAPID_SUBJECT=mailto:…`) and `PUSH_ALLOWED_ORIGINS=http://127.0.0.1:3199` (the mock push service the spec starts). Then, with that file sourced:
+
+```sh
+bun run db:migrate && SEED_TEST_EVENT=1 bun run db:seed
+hr-heavy bun run build && hr-heavy bunx next start -p 3107
+E2E_BASE_URL=http://localhost:3107 bun run e2e e2e/notifications --project=desktop-1440-en
+```
+
+`e2e/notifications/live.spec.ts` opens two browser contexts (390 px English, 1440 px Spanish): A confirms a scan of B, B's toast, bell and push arrive in under 2 s, B accepts, A's pending screen flips with +20 in under 2 s. It also proves another person's private channel and an anonymous join are refused, that polling delivers when the Realtime websocket is blocked, and that a decline sends nothing. Real browser push services are not reached: the spec registers a subscription whose endpoint is its own mock service and checks the encrypted, VAPID-signed POST.
+
 ## Known limits
 
 - `test.compa.lol` must not receive mail. Since email sign-in exists, whoever controls that mailbox could request a link for a test address. [Unverified: DNS has no MX for it.]

@@ -497,6 +497,35 @@ export const markNotificationsSeen = route({
   errors: WITH_USER,
 });
 
+export const savePushSubscription = route({
+  id: "savePushSubscription",
+  method: "post",
+  path: "/api/push/subscriptions",
+  summary: "Turn on push alerts for this browser",
+  description:
+    "Stores the browser's Web Push subscription for the signed-in person. Repeat-safe by endpoint; an endpoint saved by someone else moves to you (shared device). Only browser push services are accepted.",
+  tags: ["notifications"],
+  auth: "user",
+  body: S.PushSubscriptionBody,
+  bodyExample: X.pushSubscription,
+  success: { status: 204, description: "The subscription is saved.", schema: NoBody },
+  errors: [E.invalidInput, E.unauthorized],
+});
+
+export const deletePushSubscription = route({
+  id: "deletePushSubscription",
+  method: "delete",
+  path: "/api/push/subscriptions",
+  summary: "Turn off push alerts for this browser",
+  description: "Deletes your subscription with this endpoint. Repeat-safe: an unknown endpoint also answers 204.",
+  tags: ["notifications"],
+  auth: "user",
+  body: S.PushUnsubscribeBody,
+  bodyExample: X.pushUnsubscribe,
+  success: { status: 204, description: "The subscription is gone.", schema: NoBody },
+  errors: WITH_USER,
+});
+
 export const setKnew = route({
   id: "setKnew",
   method: "patch",
@@ -769,6 +798,8 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   listConnections,
   listNotifications,
   markNotificationsSeen,
+  savePushSubscription,
+  deletePushSubscription,
   setKnew,
   acceptConnection,
   declineConnection,

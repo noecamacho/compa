@@ -6919,6 +6919,284 @@
         }
       }
     },
+    "/api/push/subscriptions": {
+      "post": {
+        "operationId": "savePushSubscription",
+        "summary": "Turn on push alerts for this browser",
+        "description": "Stores the browser's Web Push subscription for the signed-in person. Repeat-safe by endpoint; an endpoint saved by someone else moves to you (shared device). Only browser push services are accepted.",
+        "tags": [
+          "notifications"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "endpoint": "https://fcm.googleapis.com/fcm/send/dQw4w9WgXcQ:APA91bExample",
+                "keys": {
+                  "p256dh": "BNcRdreALRFXTkOOUHK1EtK2wtaz5Ry4YfYCA_0QTpQtUbVlUls0VJXg7A8u-Ts1XbjhazAkj7I99e8QcYP7DkM",
+                  "auth": "tBHItJI5svbpez7KI4CCXg"
+                },
+                "locale": "es"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/PushSubscriptionBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The subscription is saved."
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deletePushSubscription",
+        "summary": "Turn off push alerts for this browser",
+        "description": "Deletes your subscription with this endpoint. Repeat-safe: an unknown endpoint also answers 204.",
+        "tags": [
+          "notifications"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "endpoint": "https://fcm.googleapis.com/fcm/send/dQw4w9WgXcQ:APA91bExample"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/PushUnsubscribeBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "The subscription is gone."
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/connections/{id}/knew": {
       "patch": {
         "operationId": "setKnew",
@@ -11440,6 +11718,62 @@
         },
         "required": [
           "seenThrough"
+        ]
+      },
+      "PushSubscriptionBody": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri"
+          },
+          "keys": {
+            "type": "object",
+            "properties": {
+              "p256dh": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9_-]+=*$"
+              },
+              "auth": {
+                "type": "string",
+                "minLength": 16,
+                "maxLength": 256,
+                "pattern": "^[A-Za-z0-9_-]+=*$"
+              }
+            },
+            "required": [
+              "p256dh",
+              "auth"
+            ]
+          },
+          "locale": {
+            "description": "Language of the pushed text; defaults to English.",
+            "type": "string",
+            "enum": [
+              "es",
+              "en"
+            ]
+          }
+        },
+        "required": [
+          "endpoint",
+          "keys"
+        ]
+      },
+      "PushUnsubscribeBody": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string",
+            "maxLength": 2048,
+            "format": "uri"
+          }
+        },
+        "required": [
+          "endpoint"
         ]
       },
       "KnewBody": {
