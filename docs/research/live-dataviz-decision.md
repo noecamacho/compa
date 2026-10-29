@@ -46,7 +46,7 @@ idle state, podium, finale, keep the loom).
   (hairlines past 400 threads); at most 24 threads animate at once. Draw calls stay flat whatever the room size.
   2,500 people and 4,000 connections went from 0.2 fps to the software-renderer ceiling in headless Chromium; with
   reduced motion and nothing drawing, the loom stops rendering.
-- **Snapshot:** carries at most the newest 1,500 connections (`LIVE_LINK_LIMIT`); counters still count all. Each person
+- **Snapshot:** carries at most the newest 1,000 connections (`LIVE_LINK_LIMIT`, also landed in #62); counters still count all. Each person
   now carries their connection count, so ties and ranks stay right when links are capped. The event's `phase`,
   `startsAt` and `endsAt` are in the snapshot (research DV-1, first part).
 - **Order:** a snapshot older than the one on screen (a CDN serving a stale copy) never replaces it.
@@ -67,7 +67,7 @@ at 390, 834, 1440 and 1920 in `es` and `en` with no sideways scroll. Screens: [l
 
 - Topic race (needs topics in the snapshot, DV-1/DV-5), a 600 px idle QR (DV-3), the 30 s mode dwell (DV-2),
   "=4" tie captions in the main ranking, an SVG fallback without WebGL, per-minute counts from the server when more
-  than 1,500 connections land within 30 minutes.
+  than 1,000 connections land within 30 minutes.
 - Colorblind safety: mint versus bubblegum is weak for deuteranopes; every color is labeled, and DESIGN.md already
   suggests sky for reconnections.
 - Not verified on a real projector or phone GPU; fps numbers come from headless software rendering.

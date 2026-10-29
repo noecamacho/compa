@@ -13,7 +13,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Changed
 
 - The deploy workflow keeps the 10 newest production deployments (it used to delete all others), so Vercel Instant Rollback works.
-- The live board's loom draws thousands of people and connections smoothly (instanced pegs, merged threads), and the snapshot carries at most the newest 1,500 connections; counters still count all.
+- The live board's loom draws thousands of people and connections smoothly (instanced pegs, merged threads).
 - Live board polling backs off when the network fails, polls at once when the tab or network comes back, never steps back to an older snapshot and flags a stuck one as reconnecting.
 - Mobile polish on shared UI: 16 px inputs on touch (no iOS focus zoom), no tap-highlight flash, non-selectable button and pill labels, `Button`/`ButtonLink` `fit` prop for content width, tighter EN VIVO pill spacing, light and dark `theme-color`.
 - Profile editing: every network (LinkedIn, WhatsApp, Instagram, X, GitHub, website) has its own brand icon and name, a field that takes a handle, a WhatsApp number or a link with inline validation, and a labelled "Quitar" with "Deshacer" instead of an unlabelled cross. Each item (role, company, each link) has "Todos", "Conexiones" (only after the connection is accepted) or "Solo yo", with a live preview of the profile before and after connecting, in onboarding and in "Editar perfil". `/me` lists your links with their level; the other person's screen shows the links you may see.

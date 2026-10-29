@@ -34,7 +34,7 @@ The plan's podium-plus-topics layout was replaced by **Loom+**, chosen after pro
 | Ranking | Top 5; equal points and connections share a place |
 | States | Upcoming, empty and ended cards over the loom; final podium after the close; "Ends in N min" in the last ten minutes; "Reconnecting… last update" when polls fail or stall |
 
-Data: polling every 3 s (15 s after the close, backing off to 30 s on failure); the snapshot carries `event.phase`, `startsAt`, `endsAt`, each person's connection count and at most the newest 1,500 connections (`docs/specs/2026-10-29-api.md` §5). Topics are not in the snapshot yet, so there is no topic race. Scenarios and their e2e coverage: `lib/testing/live-scenarios.ts`, `e2e/live/live-board.spec.ts`.
+Data: polling every 3 s (15 s after the close, backing off to 30 s on failure); the snapshot carries `event.phase`, `startsAt`, `endsAt`, each person's connection count and at most the newest 1,000 connections (`docs/specs/2026-10-29-api.md` §5). Topics are not in the snapshot yet, so there is no topic race. Scenarios and their e2e coverage: `lib/testing/live-scenarios.ts`, `e2e/live/live-board.spec.ts`.
 
 ## Privacy (p. 13)
 
