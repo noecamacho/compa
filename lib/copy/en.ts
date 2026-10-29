@@ -80,6 +80,10 @@ export const eventNotFound: typeof es.eventNotFound = {
   home: "Go to compa.lol",
 };
 
+export const offline: typeof es.offline = {
+  banner: "You're offline. What you do is saved when the internet is back.",
+};
+
 export const notFound: typeof es.notFound = {
   title: "There's nothing here",
   body: "That person, connection or page doesn't exist or is no longer available.",

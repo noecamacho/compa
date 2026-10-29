@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { offline as copy } from "@/lib/copy/es";
+import { useCopy } from "@/components/LocaleProvider";
 
 const subscribe = (onChange: () => void) => {
   window.addEventListener("online", onChange);
@@ -14,6 +14,7 @@ const subscribe = (onChange: () => void) => {
 
 // A clear state for every screen while the device has no network: a status strip at the top (no spinner, no blank page).
 export function OfflineBanner() {
+  const copy = useCopy().offline;
   const online = useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
   if (online) return null;
   return (

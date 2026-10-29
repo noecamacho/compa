@@ -1,6 +1,5 @@
 // Unknown routes get one bilingual way back; the app shows a status strip while the device is offline.
 import { copyFor } from "../lib/copy";
-import { offline } from "../lib/copy/es";
 import { localeFromAcceptLanguage } from "../lib/i18n";
 import { expect, test } from "./fixtures";
 
@@ -12,7 +11,8 @@ test.describe("not found and offline", () => {
     await expect(page.getByRole("link", { name: copy.home })).toBeVisible();
   });
 
-  test("going offline shows the strip and coming back removes it @mock", async ({ page, context }) => {
+  test("going offline shows the strip and coming back removes it @mock", async ({ page, context }, testInfo) => {
+    const { offline } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale));
     await page.goto("/home");
     await expect(page.getByText(offline.banner)).toHaveCount(0);
     await context.setOffline(true);
