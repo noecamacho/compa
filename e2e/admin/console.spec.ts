@@ -50,11 +50,15 @@ test.describe("admin console", () => {
   test("shell: skip link and the nav for this width reach every section @mock", async ({ page }, testInfo) => {
     const { viewport, copy, phone } = setup(testInfo);
     await open(page, "/admin");
+    // The loading skeleton (app/admin/loading.tsx) has its own shell and main; skip from the streamed page, not from it.
+    await expect(page.getByRole("heading", { level: 1, name: copy.events.title })).toBeVisible();
+    // The active element, not toBeFocused: parallel workers share one browser, so the window itself may lack focus.
+    const activeId = () => page.evaluate(() => document.activeElement?.id || document.activeElement?.getAttribute("href"));
     await page.keyboard.press("Tab");
-    const skip = page.getByRole("link", { name: copy.ui.nav.skip });
-    await expect(skip).toBeFocused();
+    await expect.poll(activeId).toBe("#admin-main");
+    await expect(page.getByRole("link", { name: copy.ui.nav.skip })).toHaveAttribute("href", "#admin-main");
     await page.keyboard.press("Enter");
-    await expect(page.locator("#admin-main")).toBeFocused();
+    await expect.poll(activeId).toBe("admin-main");
 
     // Bottom tabs below 768, an 80 px rail to 1279, a 248 px sidebar from 1280.
     const aside = page.locator("aside").first();
