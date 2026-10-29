@@ -1,13 +1,21 @@
 // Home (03 Inicio, 03b InicioVacio): every card and link, the empty and outside-event variants, live polling and the
-// guided tour. The home copy is Spanish-only (lib/copy/index.ts), so both locales assert lib/copy/es; the bell is bilingual.
+// guided tour, in the project's locale.
 import { connectionList, eventDoor, ids, me, paola } from "../../lib/api/examples";
 import { copyFor } from "../../lib/copy";
-import { home, tour } from "../../lib/copy/es";
 import { firstName, formatHour, formatPoints } from "../../lib/format";
 import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { acceptedConnection, expect, expectErrorScreen, sendRequest, skipTours, test } from "../profiles/helpers";
 
 const bellLabel = (locale: string | undefined, count: number) => copyFor(localeFromAcceptLanguage(locale)).notifications.bellLabel(count);
+const liveCopy = (locale: string | undefined) => copyFor(localeFromAcceptLanguage(locale)).home;
+
+// Each worker runs one test at a time, so the copy can follow the running project's locale.
+let locale = localeFromAcceptLanguage("es");
+let { home, tour } = copyFor(locale);
+test.beforeEach(({}, testInfo) => {
+  locale = localeFromAcceptLanguage(testInfo.project.use.locale);
+  ({ home, tour } = copyFor(locale));
+});
 
 test.describe("home in mock mode", () => {
   test.beforeEach(async ({ page }) => skipTours(page));
@@ -17,10 +25,10 @@ test.describe("home in mock mode", () => {
     await expect(page.getByRole("link", { name: home.hello(firstName(me.name)) })).toHaveAttribute("href", "/me");
     await expect(page.getByRole("link", { name: bellLabel(testInfo.project.use.locale, 3) })).toHaveAttribute("href", "/notifications");
     await expect(page.getByRole("link", { name: tour.incoming.title(firstName(paola.name)) })).toHaveAttribute("href", `/requests/${ids.connection3}`);
-    await expect(page.getByText(home.until(eventDoor.name, formatHour("es", eventDoor.endsAt)))).toBeVisible();
+    await expect(page.getByText(home.until(eventDoor.name, formatHour(locale, eventDoor.endsAt)))).toBeVisible();
     await expect(page.getByText(String(eventDoor.counters.connections), { exact: true })).toBeVisible();
-    await expect(page.getByRole("img", { name: home.pairsNow })).toContainText(home.pair("Valeria", "Rodrigo"));
-    const [before, rank, after] = home.rank(6, formatPoints("es", 1265));
+    await expect(page.getByRole("link", { name: liveCopy(testInfo.project.use.locale).seeLiveLabel(eventDoor.name) })).toHaveAttribute("href", `/e/${eventDoor.code}/live`);
+    const [before, rank, after] = home.rank(6, formatPoints(locale, 1265));
     await expect(page.getByRole("link", { name: `${before}${rank}${after}` })).toHaveAttribute("href", "/ranking");
     await expect(page.getByRole("link", { name: new RegExp(home.connectHint) })).toHaveAttribute("href", "/connect");
     const invite = page.getByRole("link", { name: new RegExp(home.inviteTitle) });
@@ -53,6 +61,27 @@ test.describe("home in mock mode", () => {
     await expect(page.getByRole("link", { name: new RegExp(`${home.firstConnection}.*\\+50`) })).toHaveAttribute("href", "/connect");
     await expect(page.getByRole("link", { name: new RegExp(home.inviteTitle) })).toContainText(home.inviteLeft(3));
     await expect(page.getByRole("link", { name: tour.incoming.title(firstName(paola.name)) })).toHaveCount(0);
+  });
+
+  test("the live card is the moving board and one tap opens the live view @mock", async ({ page }, testInfo) => {
+    const copy = liveCopy(testInfo.project.use.locale);
+    await page.goto("/home");
+    const card = page.getByRole("link", { name: copy.seeLiveLabel(eventDoor.name) });
+    await expect(card).toContainText(copy.seeLive);
+    await expect(card.getByTestId("live-stage")).toBeVisible();
+    await card.click();
+    await expect(page).toHaveURL(new RegExp(`/e/${eventDoor.code}/live$`));
+    await expect(page.getByRole("heading", { name: eventDoor.name })).toBeVisible();
+  });
+
+  test("a failed snapshot keeps the card and its door counters, still tappable @mock", async ({ page }, testInfo) => {
+    const copy = liveCopy(testInfo.project.use.locale);
+    await page.route("**/api/e/*/live", (route) => route.fulfill({ status: 503, json: { error: { code: "unavailable", message: "down" } } }));
+    await page.goto("/home");
+    const card = page.getByRole("link", { name: copy.seeLiveLabel(eventDoor.name) });
+    await expect(card).toContainText(String(eventDoor.counters.connections));
+    await expect(card.getByTestId("live-stage")).toHaveCount(0);
+    await expect(card).toHaveAttribute("href", `/e/${eventDoor.code}/live`);
   });
 
   test("polling drops an answered request and clears the bell @mock", async ({ page }, testInfo) => {
@@ -150,7 +179,7 @@ test.describe("home in real mode", () => {
     // Rankings are cached per server instance for 3 s (wiki/conference-scale.md): reload until the new points show.
     await expect(async () => {
       await ana.page.goto("/home");
-      await expect(ana.page.getByRole("link", { name: /Vas en el #\d+ con 50 pts/ })).toHaveAttribute("href", "/ranking", { timeout: 2_000 });
+      await expect(ana.page.getByRole("link", { name: new RegExp(home.rank(0, "50").join("").replace("#0", "#\\d+")) })).toHaveAttribute("href", "/ranking", { timeout: 2_000 });
     }).toPass({ timeout: 15_000 });
     await expect(ana.page.getByText(home.startHere)).toHaveCount(0);
     await expect(ana.page.getByRole("link", { name: new RegExp(home.connectHint) })).toBeVisible();
