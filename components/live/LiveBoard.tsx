@@ -6,8 +6,10 @@ import { Pill } from "@/components/ui/Pill";
 import type { LiveSnapshotT } from "@/lib/api/schemas";
 import { copyFor, formatNumber, type Dictionary } from "@/lib/copy";
 import { browserLocale, type Locale } from "@/lib/i18n";
+import { boardRows, closingMinutes, moodOf } from "@/lib/live/live-model";
+import { Feed, Podium, Pulse, StateCard, stateCardFor } from "./LiveActivity";
 import type { LoomData } from "./loom-scene";
-import { LeaderboardPanel, PersonPanel, boardRows } from "./LivePanels";
+import { LeaderboardPanel, PersonPanel } from "./LivePanels";
 import { useLiveSnapshot } from "./useLiveSnapshot";
 
 const Loom = dynamic(() => import("./Loom"), { ssr: false });
@@ -35,7 +37,7 @@ function Counters({ snapshot, copy, locale }: { snapshot: LiveSnapshotT; copy: L
     <dl className="m-0 grid w-full grid-cols-2 gap-3 sm:grid-cols-4 md:w-auto md:flex-1 lg:flex-none lg:gap-[1vw]">
       {COUNTERS.map(({ key, tone }) => (
         <div key={key} className="flex flex-col-reverse rounded-[18px] px-4 py-2 border-ink shadow-hard-3 lg:min-w-[9vw] lg:px-[1vw] lg:py-[0.8vh]" style={{ background: tone }}>
-          <dt className="text-[13px] font-extrabold lg:text-[clamp(13px,0.9vw,22px)]">{copy[key]}</dt>
+          <dt className="text-[13px] font-extrabold lg:text-[clamp(13px,1.1vw,28px)]">{copy[key]}</dt>
           <dd className="m-0 font-display text-[32px] leading-none font-bold tabular-nums lg:text-[clamp(32px,3.2vw,76px)]">
             {formatNumber(locale, snapshot.counters[key])}
           </dd>
@@ -67,7 +69,7 @@ function Legend({ copy }: { copy: LiveCopy }) {
   return (
     <ul className="m-0 flex list-none flex-wrap gap-2 p-0">
       {items.map((item) => (
-        <li key={item.label} className="flex items-center gap-2 rounded-chip bg-white px-3 py-1 text-[13px] font-extrabold border-ink shadow-hard-2 lg:text-[clamp(13px,0.9vw,20px)]">
+        <li key={item.label} className="flex items-center gap-2 rounded-chip bg-white px-3 py-1 text-[13px] font-extrabold border-ink shadow-hard-2 lg:text-[clamp(13px,1.1vw,26px)]">
           <span aria-hidden="true" className="h-[6px] w-6 rounded-full" style={{ background: item.color, outline: "2px solid #1E1B2E" }} />
           {item.label}
         </li>
@@ -87,6 +89,10 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
   const rows = useMemo(() => boardRows(snapshot), [snapshot]);
   const data: LoomData = useMemo(() => ({ people: snapshot.people, links: snapshot.connections }), [snapshot]);
   const selected = selectedId && rows.some((row) => row.id === selectedId) ? selectedId : null;
+  const mood = moodOf(snapshot);
+  const card = stateCardFor(mood, snapshot, locale);
+  const ended = mood === "ended";
+  const closing = closingMinutes(snapshot);
 
   return (
     <main lang={locale} className="paper-dots flex min-h-dvh w-full flex-col gap-4 overflow-x-hidden px-4 py-4 sm:px-6 lg:h-dvh lg:gap-[1.6vh] lg:px-[2vw] lg:py-[2vh]">
@@ -94,10 +100,20 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
         <div className="flex min-w-0 flex-1 basis-full flex-col gap-1 lg:basis-auto">
           <span className="flex items-center gap-2">
             <span className="font-display text-[22px] leading-none font-bold lg:text-[clamp(22px,1.7vw,40px)]">compa</span>
-            {snapshot.event.isRunning && (
+            {snapshot.event.phase === "running" && (
               <Pill tone="coral" rotate={-2}>
                 <span className="animate-beat h-2 w-2 rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
                 {copy.live}
+              </Pill>
+            )}
+            {closing !== null && (
+              <Pill tone="coral-soft" className="animate-beat">
+                <span data-testid="live-closing">{copy.endsIn(formatNumber(locale, closing))}</span>
+              </Pill>
+            )}
+            {snapshot.event.phase !== "running" && (
+              <Pill tone={snapshot.event.phase === "ended" ? "sun" : "sky-soft"} rotate={-2}>
+                {snapshot.event.phase === "ended" ? copy.ended : copy.soon}
               </Pill>
             )}
           </span>
@@ -114,23 +130,26 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
           ) : (
             <Loom data={data} selectedId={selected} label={copy.vizLabel} onSelect={setSelectedId} onUnavailable={() => setUnavailable(true)} />
           )}
+          {card && !selected && <StateCard {...card} />}
           {stale && (
-            <span role="status" className="absolute top-2 right-2">
+            <span role="status" className="absolute top-2 right-2" data-testid="live-stale">
               <Pill tone="sun-soft" className="whitespace-normal! py-1 lg:text-[clamp(12px,1.1vw,26px)]" style={{ height: "auto", minHeight: 28 }}>
                 {gone ? copy.codeChanged : copy.staleFor(staleForS)}
               </Pill>
             </span>
           )}
         </section>
-        {selected ? (
-          <PersonPanel code={code} id={selected} locale={locale} onClose={() => setSelectedId(null)} />
-        ) : (
-          <LeaderboardPanel rows={rows} locale={locale} onSelect={setSelectedId} />
-        )}
+        <div className="flex min-h-0 flex-col gap-4 lg:gap-[1.6vh]">
+          {ended && rows.length > 0 && <Podium rows={rows} locale={locale} onSelect={setSelectedId} />}
+          {selected && <PersonPanel code={code} id={selected} locale={locale} onClose={() => setSelectedId(null)} />}
+          {!selected && !(ended && rows.length <= 3) && <LeaderboardPanel rows={rows} locale={locale} onSelect={setSelectedId} from={ended ? 3 : 0} limit={ended ? 5 : 6} />}
+          {!ended && <Feed snapshot={snapshot} locale={locale} limit={4} />}
+        </div>
       </div>
 
-      <footer className="flex flex-wrap items-center justify-between gap-3">
+      <footer className="flex flex-wrap items-center justify-between gap-3 lg:flex-nowrap">
         <Legend copy={copy} />
+        <Pulse snapshot={snapshot} mood={mood} locale={locale} />
         <span className="text-[13px] font-extrabold text-muted lg:text-[clamp(13px,0.85vw,20px)]">{copy.hint}</span>
       </footer>
     </main>

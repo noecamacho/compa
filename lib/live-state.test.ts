@@ -3,7 +3,7 @@ import type { LiveSnapshotT } from "./api/schemas";
 import { nextLiveState, type LiveState } from "./live-state";
 
 const snapshot = (name: string): LiveSnapshotT => ({
-  event: { code: "abcdef2345", name, isRunning: true },
+  event: { code: "abcdef2345", name, isRunning: true, phase: "running", startsAt: "2026-10-29T10:00:00.000Z", endsAt: "2026-10-29T14:00:00.000Z" },
   people: [],
   connections: [],
   counters: { checkedIn: 0, connections: 0, newCount: 0, reconnections: 0 },
