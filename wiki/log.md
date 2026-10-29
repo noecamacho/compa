@@ -111,3 +111,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | How do people reach an event?
 
 - Captain decision: only through the unguessable access code in the event QR, `compa.lol/e/<code>` (data model M19, API spec A10). Public event routes moved to `/api/e/{code}/…` with one indistinguishable 404 for any wrong code; slugs are admin-only; admins rotate codes with `POST /api/admin/events/{slug}/rotate-code`. `compa.lol` is a landing page with no sign-up; Spanish for `es*` languages, English otherwise. Migration `0003_event_access_code` backfills existing events. Resolves open question #2 (domain) and annotates #6 (language).
+
+## [2026-10-29] ingest | Guided onboarding and request inbox
+
+- Added the spotlight tour (`components/tour/Tour.tsx`): the screen dims except one element and a card explains it, step by step, once per screen (home, connect, register, profile, ranking) and again from "Guía rápida" in the profile or `?tour=1`. Home now shows incoming requests as cards and polls `GET /api/connections` every 3 s (bell links to the newest); the confirmation screen refreshes when a pending request is answered; `/u/[handle]` keeps the handle through LinkedIn sign-in; `/` forwards a signed-in person to `/home`; home renders outside an event. Closes gap-analysis U1, U7, U10, U15 and U16.

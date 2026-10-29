@@ -1,15 +1,17 @@
 import Link from "next/link";
+import { Suspense } from "react";
+import { AlertsBell, IncomingRequests } from "@/components/home/IncomingRequests";
 import { InviteCard } from "@/components/home/InviteCard";
 import { LiveCard } from "@/components/home/LiveCard";
 import { Icon } from "@/components/icons";
 import { Avatar } from "@/components/monito/Avatar";
+import { Tour } from "@/components/tour/Tour";
 import { Card } from "@/components/ui/Card";
-import { IconButton } from "@/components/ui/IconButton";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
-import { apiGet } from "@/lib/api/server-fetch";
-import { home } from "@/lib/copy/es";
+import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
+import { home, tour } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
 import type { MonitoLook } from "@/lib/monito/look";
 
@@ -41,11 +43,11 @@ export default async function HomePage({ searchParams }: Props) {
   const [live, list, invites] = await Promise.all([
     loadLive(me.currentEvent?.code),
     apiGet("/api/connections", ConnectionList),
-    apiGet("/api/invites/me", Invites),
+    apiGetOrNull("/api/invites/me", Invites),
   ]);
   const empty = demo === "empty" || list.totals.connections === 0;
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
-  const alerts = list.incoming.length;
+  const incoming = empty ? [] : list.incoming;
   return (
     <Screen dock>
       <div className="flex h-[46px] items-center justify-between">
@@ -53,38 +55,42 @@ export default async function HomePage({ searchParams }: Props) {
           <Avatar person={{ name: me.name, look: me.avatar }} size={46} shadow={3} />
           <span className="font-display text-[24px] leading-none font-bold">{home.hello(firstName(me.name))}</span>
         </Link>
-        <IconButton label={home.alerts(empty ? 0 : alerts)} className="relative">
-          <Icon name="bell" />
-          {!empty && alerts > 0 && (
-            <span
-              aria-hidden="true"
-              className="absolute top-[-9px] right-[-9px] flex h-[22px] w-[22px] items-center justify-center rounded-full bg-coral font-display text-[11px] font-bold border-ink"
-            >
-              {alerts}
-            </span>
-          )}
-        </IconButton>
+        <AlertsBell initial={incoming} />
       </div>
 
-      {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard />}
+      <IncomingRequests initial={incoming} />
 
-      <Card href="/connect" tone="mint" className="relative flex items-center gap-[14px] px-4 py-[14px]">
-        {empty && (
-          <Pill tone="sun" rotate={4} className="absolute top-[-14px] right-[14px]" aria-hidden="true">
-            {home.startHere}
-          </Pill>
-        )}
-        <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-button bg-white border-ink shadow-hard-2" style={{ transform: "rotate(-5deg)" }}>
-          <Icon name="qr" size={30} />
-        </span>
-        <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
-          <span className="font-display text-[24px] leading-[1.05] font-bold">{home.connect}</span>
-          <span className="text-[13px] font-extrabold">{empty ? home.connectHintEmpty : home.connectHint}</span>
-        </span>
-        <Icon name="chevronRight" size={20} strokeWidth={3} />
-      </Card>
+      <div data-tour="live">
+        {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard />}
+      </div>
 
-      <InviteCard invites={empty ? { ...invites, invitees: [] } : invites} />
+      <div data-tour="connect">
+        <Card href="/connect" tone="mint" className="relative flex items-center gap-[14px] px-4 py-[14px]">
+          {empty && (
+            <Pill tone="sun" rotate={4} className="absolute top-[-14px] right-[14px]" aria-hidden="true">
+              {home.startHere}
+            </Pill>
+          )}
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-button bg-white border-ink shadow-hard-2" style={{ transform: "rotate(-5deg)" }}>
+            <Icon name="qr" size={30} />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col gap-[2px]">
+            <span className="font-display text-[24px] leading-[1.05] font-bold">{home.connect}</span>
+            <span className="text-[13px] font-extrabold">{empty ? home.connectHintEmpty : home.connectHint}</span>
+          </span>
+          <Icon name="chevronRight" size={20} strokeWidth={3} />
+        </Card>
+      </div>
+
+      {invites && (
+        <div data-tour="invite">
+          <InviteCard invites={empty ? { ...invites, invitees: [] } : invites} />
+        </div>
+      )}
+
+      <Suspense>
+        <Tour id="home" steps={tour.home} />
+      </Suspense>
     </Screen>
   );
 }
