@@ -7,15 +7,15 @@ import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { isRunning } from "../connection-status";
 import { copyFor } from "../copy";
+import { LIVE_LINK_LIMIT } from "../live/live-model";
 import { requestLocale } from "./locale";
 import { currentUserOrNull } from "./auth";
-import { connectionsOfRealPeople, LIVE_CACHE, requireEventByCode } from "./events";
+import { connectionsOfRealPeople, LIVE_CACHE, phaseOf, requireEventByCode } from "./events";
 import { cardFor, usersByIds } from "./people";
 import { onBoard, rankedAtEvent, rankedLifetime, type Ranked } from "./scores";
 
-// The snapshot carries the most recent links only, so its size stays flat as the room connects (about 1.15 MB at
-// 1,000 people and 6k links before the cap; Vercel refuses bodies over 4.5 MB). Counters still count every link.
-const LIVE_LINKS = 1000;
+// The snapshot carries the most recent links only (LIVE_LINK_LIMIT), so its size stays flat as the room connects
+// (about 1.15 MB at 1,000 people and 6k links before the cap; Vercel refuses bodies over 4.5 MB). Counters count all.
 
 const acceptedAt = (event: EventRow) =>
   and(eq(connections.eventId, event.id), eq(connections.status, "accepted"), connectionsOfRealPeople(event));
@@ -25,8 +25,9 @@ async function recentLinks(event: EventRow) {
     .select({ id: connections.id, a: connections.requesterId, b: connections.addresseeId, kind: connections.kind, respondedAt: connections.respondedAt, createdAt: connections.createdAt })
     .from(connections)
     .where(acceptedAt(event))
-    .orderBy(sql`${connections.respondedAt} desc nulls last`)
-    .limit(LIVE_LINKS);
+    // The id breaks ties so the link at the cut never flickers in and out between polls.
+    .orderBy(sql`${connections.respondedAt} desc nulls last`, sql`${connections.id} desc`)
+    .limit(LIVE_LINK_LIMIT);
   return rows.reverse();
 }
 
@@ -55,7 +56,14 @@ export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): 
     reconnections: totals.reconnections,
   };
   const body = {
-    event: { code: event.accessCode, name: event.name, isRunning: isRunning(event, now) },
+    event: {
+      code: event.accessCode,
+      name: event.name,
+      isRunning: isRunning(event, now),
+      phase: phaseOf(event, now),
+      startsAt: event.startsAt.toISOString(),
+      endsAt: event.endsAt.toISOString(),
+    },
     people,
     connections: links,
     counters,

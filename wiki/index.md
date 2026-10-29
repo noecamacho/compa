@@ -26,7 +26,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
   - [screens/connection](screens/connection.md) — "Connected with…" card and the record or summarize choice.
   - [screens/summary](screens/summary.md) — dictate or write, AI draft, approve.
   - [screens/connections](screens/connections.md) — list of connections, pending summaries first.
-- [live-dashboard](live-dashboard.md) — the projected `/live` layout, data feeds and privacy limits.
+- [live-dashboard](live-dashboard.md) — the projected `/live` layout, data feeds and privacy limits; as built: Loom+ with pulse, feed and state cards.
 - [points-rules](points-rules.md) — the points table, hourly cap and idempotency rules.
 - [topics-vocabulary](topics-vocabulary.md) — the fixed list of about 40 topics and where it is used.
 - [rounds-and-badges](rounds-and-badges.md) — P2 rounds, badges, tribe scoreboard and "ask your event".
@@ -65,6 +65,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
   - [docs/flows/backlog.md](../docs/flows/backlog.md) — 86 agent-ready tickets (T-000–T-122; 12 P0, 48 P1, 26 P2) by epic, with e2e scenarios.
 - [docs/research/live-dataviz.md](../docs/research/live-dataviz.md) — live data-viz research: simulator, big-screen and phone concepts, DV/DP tickets.
 - [docs/research/conference-load.md](../docs/research/conference-load.md) — conference load test: measurements, 22 ranked infrastructure findings, runbook and the reproduction script.
+- [docs/research/live-dataviz-decision.md](../docs/research/live-dataviz-decision.md) — the live board that shipped (Loom+): four concepts scored, scale work, scenario screenshots.
 - [docs/research/ux-audit.md](../docs/research/ux-audit.md) — whole-app UX and edge-case audit at all breakpoints; 139 findings, UX-A/UX-P tickets.
 - [Codex evidence](../docs/evidence/codex/README.md) — five bilingual marketing edits, editable compositions, session evidence, sources and verification limits.
 - [CHANGELOG.md](../CHANGELOG.md) — Keep a Changelog history.

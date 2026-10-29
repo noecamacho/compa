@@ -3,6 +3,7 @@ import { GRID_HEIGHT, GRID_WIDTH } from "@/lib/monito/grid";
 import { DEFAULT_LOOK, type MonitoLook } from "@/lib/monito/look";
 import { SAMPLE_PEOPLE, circleColorFor, type SampleId } from "@/lib/monito/sample-people";
 import { Monito } from "./Monito";
+import { Photo } from "./Photo";
 
 type Person = { name: string; look?: MonitoLook | null; bg?: string; photoUrl?: string | null; avatarMode?: AvatarMode };
 
@@ -33,20 +34,13 @@ function resolve(who: SampleId | undefined, person: Person | undefined): Resolve
 
 const ring = (shadow: number) => ({ boxShadow: shadow ? `${shadow}px ${shadow}px 0 #1E1B2E` : "none" });
 
-// The LinkedIn photo in the same round frame (border and hard shadow) as the monito head.
-function Photo({ src, name, size, shadow, className }: { src: string; name: string; size: number; shadow: number; className?: string }) {
-  return (
-    <span className={`relative block shrink-0 ${className ?? ""}`} style={{ width: size, height: size }}>
-      {/* eslint-disable-next-line @next/next/no-img-element -- remote photos from LinkedIn or Storage, any host */}
-      <img src={src} alt={name} width={size} height={size} referrerPolicy="no-referrer" className="absolute inset-0 box-border block h-full w-full rounded-full border-ink object-cover" style={ring(shadow)} />
-    </span>
-  );
-}
-
 // Ported from design/compa-v2/componentes/Avatar.dc.html: the head is centred in a circle that crops the body.
 export function Avatar({ who, person, size = 40, px = 0, shadow = 0, className }: Props) {
   const { name, look, bg, photo } = resolve(who, person);
-  if (photo) return <Photo src={photo} name={name} size={px > 0 ? GRID_WIDTH * px : size} shadow={px > 0 ? 4 : shadow} className={className} />;
+  if (photo) {
+    const fallback = <Avatar person={{ name, look, bg }} size={size} px={px} shadow={shadow} className={className} />;
+    return <Photo src={photo} name={name} size={px > 0 ? GRID_WIDTH * px : size} shadow={px > 0 ? 4 : shadow} className={className} fallback={fallback} />;
+  }
   if (px > 0) return <Monito look={look} px={px} label={name} className={className} />;
   const cellPx = Math.round((size / 15) * 10) / 10;
   const bodyWidth = GRID_WIDTH * cellPx;

@@ -19,5 +19,5 @@ export default async function LivePage({ params }: Props) {
   if (!snapshot) notFound();
   const url = joinUrl(origin, snapshot.event.code);
   const qrSvg = await QRCode.toString(url, { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#1E1B2E", light: "#FFFFFF" } });
-  return <LiveBoard code={snapshot.event.code} initial={snapshot} qrSvg={qrSvg} joinUrl={url} locale={locale} />;
+  return <LiveBoard key={snapshot.event.code} code={snapshot.event.code} initial={snapshot} qrSvg={qrSvg} joinUrl={url} locale={locale} />;
 }

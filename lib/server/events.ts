@@ -52,7 +52,7 @@ export const toEventBody = (event: EventRow, now = new Date()) => ({
   isRunning: isRunning(event, now),
 });
 
-const phaseOf = (event: EventRow, now: Date) => {
+export const phaseOf = (event: EventRow, now: Date) => {
   if (isRunning(event, now)) return "running" as const;
   return now < event.startsAt ? ("upcoming" as const) : ("ended" as const);
 };

@@ -213,7 +213,7 @@ export const incomingDetail: z.input<typeof S.ConnectionDetail> = {
 };
 
 export const liveSnapshot: z.input<typeof S.LiveSnapshot> = {
-  event: { ...foundersDoor, isRunning: true },
+  event: { ...foundersDoor, isRunning: true, phase: "running", startsAt: event.startsAt, endsAt: event.endsAt },
   people: [
     { id: ids.valeria, name: valeriaPublic.name, photoUrl: null, points: 1980, connections: 24 },
     { id: ids.rodrigo, name: rodrigo.name, photoUrl: null, points: 1720, connections: 20 },

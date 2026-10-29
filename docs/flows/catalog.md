@@ -990,7 +990,7 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Errors | — |
 | Edge cases | Production `founders-fest` has 0 attendees today (probed) |
 | Status | UI **IP** · API Ready · DB Ready |
-| E2E coverage | `e2e/live/big-screen.spec.ts`: empty event → empty-state copy, no JS errors |
+| E2E coverage | `e2e/live/big-screen.spec.ts`: empty event → empty-state copy, no JS errors. Mock scenarios **covered** by `e2e/live/live-board.spec.ts`: zero, upcoming, one attendee, quiet, ended, after the event |
 | Tickets | [T-090](backlog.md#t-090), [T-028](backlog.md#t-028) |
 
 <a id="f-53"></a>
@@ -1006,7 +1006,7 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Errors | Snapshot fetch failures → keep the last snapshot, reconnect |
 | Edge cases | The snapshot sends every attendee and every edge on each poll (`lib/server/live.ts`). Photos 404 when LinkedIn URLs expire (OQ #21). Memory growth over hours. Screen sleep |
 | Status | UI **IP** · API Partial · DB Ready |
-| E2E coverage | `e2e/live/big-screen.spec.ts` `@load`: 500 seeded nodes → frame budget; 3 failed polls → "reconnecting" → recovers |
+| E2E coverage | `e2e/live/big-screen.spec.ts` `@load`: 500 seeded nodes → frame budget; 3 failed polls → "reconnecting" → recovers. Mock scenarios **covered** by `e2e/live/live-board.spec.ts`: 2,500 people and 4,000 links stay responsive; failed polls → "Reconnecting… last update" with backoff → recovers; stuck and out-of-order snapshots |
 | Tickets | [T-091](backlog.md#t-091), [T-093](backlog.md#t-093) |
 
 <a id="f-54"></a>
@@ -1022,7 +1022,7 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Errors | `attendee_not_found` |
 | Edge cases | Public fields only (viewer anonymous) |
 | Status | UI **IP** · API Ready · DB Ready |
-| E2E coverage | `e2e/live/big-screen.spec.ts`: click a node → the card shows public fields only; empty click → the leaderboard order matches the API |
+| E2E coverage | `e2e/live/big-screen.spec.ts`: click a node → the card shows public fields only; empty click → the leaderboard order matches the API. Mock scenarios **covered** by `e2e/live/live-board.spec.ts`: leaderboard row → card → back; failing card → message; ties share a place |
 | Tickets | [T-090](backlog.md#t-090) |
 
 ## Admin and organizer
