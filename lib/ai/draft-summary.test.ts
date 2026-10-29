@@ -1,6 +1,9 @@
-import { beforeEach, describe, expect, test } from "bun:test";
-import { draftSummary, type SummaryClient } from "./draft-summary";
+import { beforeEach, describe, expect, mock, test } from "bun:test";
+import type { SummaryClient } from "./draft-summary";
 import type { SummaryOutput } from "./summary-schema";
+
+mock.module("server-only", () => ({}));
+const { draftSummary } = await import("./draft-summary");
 
 const input = { text: "  Hablamos de agentes con LLMs.  ", author: "Ana", other: "Luis" };
 const fallback = {

@@ -90,4 +90,20 @@ describe("defineRoute", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("x-limit")).toBe("20");
   });
+
+  test("multipart handlers can read uploaded files", async () => {
+    const route = defineRoute({ ...routes.transcribe, auth: "public" as const }, async ({ req }) => {
+      const form = await req.formData();
+      return { body: { text: form.get("audio") instanceof File ? "received" : "missing" } };
+    });
+    const form = new FormData();
+    form.append("audio", new File(["sound"], "audio.webm", { type: "audio/webm" }));
+
+    const response = await route(new Request("http://localhost/api/transcribe", { method: "POST", body: form }), {
+      params: Promise.resolve({}),
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ text: "received" });
+  });
 });
