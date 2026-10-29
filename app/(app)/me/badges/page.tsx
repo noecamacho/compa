@@ -16,7 +16,7 @@ export default async function BadgesPage({ searchParams }: Props) {
   const close = list.badges.filter((status) => !status.earnedAt && status.progress && status.progress.current / status.progress.total >= 0.6).length;
   const secret = list.badges.filter((status) => !status.earnedAt && isSecret(status.id)).length;
   return (
-    <Screen className="pb-0">
+    <Screen>
       <Header back={of ? `/people/${of}` : "/me"} title={copy.title} />
       <div className="flex flex-col gap-2">
         <div className="flex items-baseline justify-between">

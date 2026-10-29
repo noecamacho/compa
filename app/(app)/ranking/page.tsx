@@ -32,7 +32,7 @@ export default async function RankingPage() {
     handles[entry.person.id] = entry.person.handle;
   }
   return (
-    <Screen gap={12} className="pb-6">
+    <Screen gap={12}>
       <Header
         back="/home"
         title={copy.title}

@@ -171,3 +171,18 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] ingest | Live data-viz and UX audit research
 
 - Added `docs/research/` (simulator, 20 prototypes, ~1,000 screenshots, two audits) and 59 draft tickets (DV, DP, UX-A, UX-P) referenced from `docs/flows/backlog.md`. Key gaps: `LiveSnapshot` lacks time window, topics and anonymous flag; attendee screens use a 390 px column on every device. No product code changed.
+## [2026-10-29] query | Responsive public pages and landing CTA
+
+- Landing, event door, join, not found and live reviewed at 390/834/1440 (live 1280/1920) in both locales; LinkedIn sign-in is the landing's single primary action (`app/page.tsx`, `components/brand/LinkedInMark.tsx`), event entry screens share one frame (`components/event/layout.ts`). DESIGN.md breakpoints unchanged.
+
+## [2026-10-29] query | Does sign-in keep the deep link?
+
+- T-011: yes. `proxy.ts` sets `x-pathname`; the `(app)` and onboarding layouts redirect signed-out visitors to `/auth/linkedin?next=<path>` via `signInForRequest` (`lib/server/session.ts`); `safeNext` moved to `lib/safe-next.ts` unchanged (`docs/flows/backlog.md` T-011).
+
+## [2026-10-29] query | How does the attendee app adapt to tablet and desktop?
+
+- `components/ui/Screen.tsx` has two widths (`wide` 390/834/1120, `focus` 390/640/680); from 834 dashboard screens switch to two columns, from 1024 the dock is a left rail (`DockRail`) and `--rail` offsets the content. 390 stays pixel-identical. Summary in `DESIGN.md` "Responsive breakpoints".
+
+## [2026-10-29] change | Landing hero in Three.js
+
+- The landing hero (`components/landing/Crowd.tsx`) now plays a looping Three.js connection story (`components/landing/hero-scene.ts`, timeline in `lib/landing/hero-timeline.ts`); the SVG crowd remains the SSR, reduced-motion and no-WebGL fallback.

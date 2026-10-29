@@ -18,7 +18,7 @@ export default async function NotePage({ params }: Props) {
   if (!detail) notFound();
   const kind = detail.kind === "reconnection" ? connections.types.reconnection : connections.types.new;
   return (
-    <Screen gap={16}>
+    <Screen gap={16} width="focus">
       <Header back={`/people/${detail.other.handle}`} title={copy.title} />
       <div className="flex items-center gap-3">
         <Avatar person={avatarOf(detail.other)} size={46} />

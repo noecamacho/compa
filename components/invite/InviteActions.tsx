@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { invite as copy } from "@/lib/copy/es";
+import { HIT_AREA } from "@/components/ui/hit-area";
 
 type Props = { url: string };
 
@@ -36,7 +37,7 @@ export function InviteActions({ url }: Props) {
         <button
           type="button"
           onClick={copyLink}
-          className="h-[30px] cursor-pointer rounded-[10px] px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable"
+          className={`${HIT_AREA} h-[30px] cursor-pointer rounded-[10px] px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable`}
           style={{ background: copied ? "#6BE4A3" : "#FFFFFF" }}
         >
           {copied ? copy.copied : copy.copy}

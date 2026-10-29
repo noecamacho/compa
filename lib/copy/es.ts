@@ -14,6 +14,24 @@ export const common = {
   you: "Tú",
 };
 
+// Main navigation: the bottom dock on phones and tablets, the left rail from 1024 (DockV2, Figma "Dock layout=rail").
+export const dock = {
+  label: "Navegación principal",
+  home: "Compa, ir al inicio",
+  tabs: { home: "Inicio", connect: "Conectar", connections: "Conexiones", me: "Perfil" },
+  admin: "Admin",
+  adminHint: "Consola",
+};
+
+// Shared screen states for the attendee app (app/(app)/loading.tsx, app/(app)/error.tsx).
+export const screenState = {
+  loading: "Cargando…",
+  errorTitle: "Algo se atoró",
+  errorBody: "No pudimos cargar esta pantalla. Revisa tu conexión e inténtalo otra vez.",
+  retry: "Reintentar",
+  goHome: "Ir al inicio",
+};
+
 export const profile = {
   title: "Tu perfil",
   subtitle: "Tu nombre viene de LinkedIn. Agrega tu puesto, empresa y ciudad.",
@@ -169,6 +187,9 @@ export const connections = {
   filters: { all: "Todas", new: "Nuevas", reconnection: "Reencuentros", friend: "Amigos" },
   types: { new: "Nueva", reconnection: "Reencuentro", friend: "Amigo" },
   empty: "Todavía no tienes conexiones. Escanea a la primera persona que conozcas.",
+  emptyTitle: "Aquí vivirá tu gente",
+  emptyCta: "Ir a Conectar",
+  emptyFiltered: "Nadie en este filtro todavía.",
 };
 
 export const person = {
@@ -303,10 +324,12 @@ export const landing = {
   backToEvent: "Volver a mi evento",
   goToAccount: "Ir a mi cuenta",
   signIn: "Entrar con LinkedIn",
-  signInNote: "¿Nuevo o ya tienes cuenta? Es el mismo botón. Solo tomamos tu nombre, foto y correo.",
+  signInNote: "Sirve para crear tu cuenta o volver a entrar. Nunca publicamos nada por ti.",
   signInError: "No pudimos iniciar tu sesión. Inténtalo de nuevo.",
   sceneLabel: "Dos monitos se conectan y ganan +50",
   sampleTopic: "Levantar capital",
+  // The animated hero (components/landing/HeroScene.tsx): more topics, the hover greeting and the reconnection badge.
+  scene: { topics: ["Diseño de producto", "IA en producción"], hello: "¡Hola!", reconnection: "reencuentro" },
 };
 
 // /e/<code>: the event door.

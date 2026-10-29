@@ -46,7 +46,7 @@ export default async function ConfirmationPage({ params }: Props) {
   const title = pending ? copy.titlePending(first(other.name)) : detail.kind === "new" ? copy.titleNew(first(other.name)) : copy.titleReconnection(first(other.name));
   const links = Object.entries(other.links ?? {}).filter(([key]) => NETWORK_STYLE[key as LinkKey]);
   return (
-    <Screen>
+    <Screen width="focus">
       {pending && <PendingWatcher connectionId={detail.connectionId} />}
       <Header close="/home" />
       <div className="flex flex-col items-center gap-3">
@@ -88,7 +88,7 @@ export default async function ConfirmationPage({ params }: Props) {
         </Card>
       )}
 
-      <Card className="animate-rise mt-auto flex flex-col gap-[10px] px-4 py-[14px]" style={{ animationDelay: ".55s" }}>
+      <Card className="animate-rise mt-auto flex flex-col gap-[10px] px-4 py-[14px] md:mt-0" style={{ animationDelay: ".55s" }}>
         <span className="flex items-center gap-[10px]">
           <Avatar person={avatarOf(other)} size={32} />
           <span className="flex min-w-0 flex-1 flex-col gap-[1px]">

@@ -6,6 +6,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Sign-in keeps the deep link: a signed-out visitor opening any app screen (for example `/connections`) or onboarding step now goes to `/auth/linkedin?next=<path>` and comes back to that screen, instead of landing on `/` and losing the path. A new `proxy.ts` passes the requested path to layouts as `x-pathname`; unsafe paths still fall back through `safeNext` (T-011).
 - Badges: `GET /api/badges` no longer fails for signed-in users (a raw date in the sign-up count broke the query), so the badge screen and awarding work again; badges still to earn show their own art, faded with a lock, and only secret ones stay grey.
 
 ### Documentation
@@ -14,7 +15,10 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- Landing hero: a Three.js vignette plays the COMPA story on a small event floor. Pixel-art monitos walk up to each other, one scans the other's QR, speech bubbles show the topic, a mint thread joins them (sky for a reencuentro), and "+50" or "+20 reencuentro" pops with confetti. Threads build up into a network and then fade. The camera follows the mouse, and hovering or tapping a monito makes it jump and say "¡Hola!" / "Hi!". The SVG crowd stays as the server render and the fallback for reduced motion and missing WebGL.
 - Admin console, responsive pass: tables from 768 px and stacked cards on a phone, sticky primary actions, a two-column event page with the QR and actions beside the details, a live preview on the new-event form, inline field validation with a kept draft, consequence dialogs (bottom sheet on a phone) for rotate, end, archive, remove attendee and delete test user, and loading and error states.
+
+- Attendee app is responsive at 390, 834 and 1440: the 390 layout is unchanged; from 834 Home, Me, profiles, Ranking and the monito builder use two columns, Connections and Badges use wider grids, and one-task screens center at reading width; from 1024 the dock becomes a left rail (with the Admin link for super admins). New loading skeleton and error screen with retry, a real empty state on Connections, and 44 px tap areas on chips, toggles and swatches.
 - Monito builder: a "Soy" row with Hombre, Mujer and Otro (Mujer draws a skirt and suggests long hair), stored in the look; building a monito is now required before using the app, also when signing in with a LinkedIn photo.
 - Super-admin console at `/admin` (390, 834 and 1440, Spanish and English): list, create and edit events (description, venue, address, city, country, website, IANA time zone, schedule, status, test flag), the join QR and link, rotate code, end now, archive; attendees with counts, check-in on someone's behalf (consent recorded as admin-assigned), organizers per event; people search. New `/api/admin/*` routes (API spec A11). `GET /api/me` returns `role` and `isTest`.
 - Real-mode test harness: synthetic test users (`users.is_test`, no LinkedIn) with generated profiles, `POST /api/admin/test-users/{id}/session` to sign in as one, the `x-compa-automation` header for test runners (`TEST_AUTOMATION_SECRET`), the seeded test event Codex Conf 2026 (`SEED_TEST_EVENT=1`), and `docs/testing/real-mode.md`.
@@ -41,6 +45,8 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Require explicit screen consent before writing an event check-in; accept multipart transcription uploads with server-side size and two-minute duration limits.
 
 ### Changed
+
+- Landing: "Entrar con LinkedIn" / "Sign in with LinkedIn" is now the one primary action, with the LinkedIn mark and a short reassurance line, above the fold on a 390 phone and pinned to the bottom edge on shorter screens; the event-QR hint became a quiet secondary row. Public pages (landing, event door, join, not found, live) reflow at 390, 834 and 1440 (live also at 1280 and 1920) with safe-area padding, grouped content on tablets and desktops, and a 16 px email field so iOS does not zoom.
 
 - Safer deploys: pull requests run lint, typecheck, tests and build (`.github/workflows/checks.yml`); the production deploy runs the same gates first and only deletes older deployments when the new one is READY.
 - On phones the top row (avatar, greeting and bell on Home; back and title elsewhere) stays pinned while scrolling, the dock respects the iPhone safe area, and overscroll no longer drags them. Home, incoming requests and the live person card now show the LinkedIn photo or the monito the person chose.

@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { HIT_AREA } from "./hit-area";
 
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
@@ -15,7 +16,7 @@ export function Chip({ children, pressed = false, background = "#FFFFFF", presse
     <button
       type="button"
       aria-pressed={pressed}
-      className={`box-border inline-flex h-[34px] shrink-0 cursor-pointer items-center justify-center gap-[6px] rounded-[12px] px-3 font-body text-[13px] font-extrabold whitespace-nowrap border-ink shadow-hard-2 pressable ${className ?? ""}`}
+      className={`${HIT_AREA} box-border inline-flex h-[34px] shrink-0 cursor-pointer items-center justify-center gap-[6px] rounded-[12px] px-3 font-body text-[13px] font-extrabold whitespace-nowrap border-ink shadow-hard-2 pressable ${className ?? ""}`}
       style={{ background: pressed ? pressedBackground : background, color: pressed ? pressedColor : "#1E1B2E", ...style }}
       {...rest}
     >

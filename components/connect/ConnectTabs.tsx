@@ -7,6 +7,7 @@ import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
 import { Screen } from "@/components/ui/Screen";
+import { HIT_AREA } from "@/components/ui/hit-area";
 import { Segmented } from "@/components/ui/Segmented";
 import { Muted } from "@/components/ui/Text";
 import { Tour } from "@/components/tour/Tour";
@@ -35,12 +36,12 @@ export function ConnectTabs({ me, qrSvg }: Props) {
     router.replace(next === "qr" ? "/connect" : "/connect?tab=scan");
   };
   return (
-    <Screen dock>
+    <Screen dock width="focus">
       <div className="flex h-11 items-center justify-between">
         <h1 className="m-0 font-display text-[28px] leading-[1.1] font-bold">{copy.title}</h1>
         <Link
           href="/invite"
-          className="inline-flex h-[34px] items-center gap-[6px] rounded-chip bg-sun-soft px-3 text-[13px] font-extrabold whitespace-nowrap border-ink shadow-hard-2 pressable"
+          className={`${HIT_AREA} inline-flex h-[34px] items-center gap-[6px] rounded-chip bg-sun-soft px-3 text-[13px] font-extrabold whitespace-nowrap border-ink shadow-hard-2 pressable`}
         >
           <Icon name="plus" size={14} strokeWidth={3} />
           {copy.invite}
@@ -59,7 +60,7 @@ export function ConnectTabs({ me, qrSvg }: Props) {
       </div>
       {tab === "qr" ? (
         <div key="qr" className="animate-fade-in flex flex-col items-center gap-3">
-          <Card size="sm" className="flex w-[315px] items-center gap-3 px-[14px] py-[10px]">
+          <Card size="sm" className="flex w-[315px] items-center gap-3 px-[14px] py-[10px] md:w-[358px]">
             <Avatar person={avatarOf(me)} size={46} />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="font-display text-[18px] leading-[1.2] font-bold">{me.name}</span>
@@ -70,7 +71,7 @@ export function ConnectTabs({ me, qrSvg }: Props) {
             <div
               role="img"
               aria-label={copy.qrLabel(me.name)}
-              className="h-[274px] w-[274px] [&>svg]:h-full [&>svg]:w-full"
+              className="h-[274px] w-[274px] md:h-[320px] md:w-[320px] [&>svg]:h-full [&>svg]:w-full"
               dangerouslySetInnerHTML={{ __html: qrSvg }}
             />
           </Card>

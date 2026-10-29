@@ -47,7 +47,9 @@ function markSeen(id: string): void {
   }
 }
 
-const findTarget = (name: string): HTMLElement | null => document.querySelector<HTMLElement>(`[data-tour="${name}"]`);
+// A target can exist twice (the bottom dock and the desktop rail); the visible one wins.
+const findTarget = (name: string): HTMLElement | null =>
+  [...document.querySelectorAll<HTMLElement>(`[data-tour="${name}"]`)].find((element) => element.getClientRects().length > 0) ?? null;
 
 function measure(element: HTMLElement): Box {
   const rect = element.getBoundingClientRect();

@@ -39,7 +39,7 @@ export function RequestActions({ connectionId }: Props) {
   }
 
   return (
-    <div className="mt-auto flex flex-col gap-3">
+    <div className="mt-auto flex flex-col gap-3 md:mt-4">
       {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
       <Button variant="primary" onClick={accept} disabled={busy !== null}>
         <Icon name="check" size={20} strokeWidth={3} />

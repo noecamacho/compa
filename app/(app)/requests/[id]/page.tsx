@@ -28,7 +28,7 @@ export default async function RequestPage({ params }: Props) {
   const stats = profile?.stats;
   const interests = other.interests ?? [];
   return (
-    <Screen>
+    <Screen width="focus">
       <Header
         close="/home"
         right={
