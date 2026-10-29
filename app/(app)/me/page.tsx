@@ -46,8 +46,8 @@ export default async function MePage() {
             <span className="flex h-[140px] w-[132px] shrink-0 items-end justify-center rounded-card bg-sky-soft pb-[6px] border-ink shadow-hard-4">
               <Avatar person={avatarOf(me)} px={6} />
             </span>
-            <span className="flex min-w-0 flex-1 flex-col gap-2">
-              <span className="font-display text-[26px] leading-[1.05] font-bold">{me.name}</span>
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <h1 className="m-0 font-display text-[26px] leading-[1.05] font-bold">{me.name}</h1>
               <Muted className="text-[14px] leading-[1.3] font-bold">
                 {[me.headline, me.company].filter(Boolean).join(" · ")}
                 <br />
@@ -62,7 +62,7 @@ export default async function MePage() {
                   {copy.testUser}
                 </Pill>
               )}
-            </span>
+            </div>
           </Link>
 
           <Card className="order-3 md:order-none">
