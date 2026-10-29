@@ -7,8 +7,10 @@ const owner: CardSource = {
   handle: "lucia-fernandez",
   name: "Lucía Fernández",
   photoUrl: "https://example.com/lucia.jpg",
+  avatar: null,
   headline: "CTO en Tramita",
   company: "Tramita",
+  city: "Guadalajara",
   interests: ["Agents", "Startups"],
   links: { linkedin: "https://www.linkedin.com/in/lucia", github: "https://github.com/lucia", x: "https://x.com/lucia" },
   visibility: {
@@ -41,6 +43,7 @@ describe("toCard", () => {
       name: "Lucía Fernández",
       photoUrl: "https://example.com/lucia.jpg",
       headline: "CTO en Tramita",
+      city: "Guadalajara",
       links: { github: "https://github.com/lucia" },
     });
   });

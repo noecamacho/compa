@@ -278,3 +278,33 @@ export const time = {
   today: "Hoy",
   clock: (seconds: number) => `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`,
 };
+
+// Progress labels per badge ("7 / 10 te escanearon") and the earned note.
+export const badgeProgress = {
+  labels: {
+    apreton: "tu primera conexión",
+    madrugador: "conecta en la primera hora",
+    cierre: "conecta al final del evento",
+    iman: "te escanearon",
+    maraton: "en una noche",
+    tresdetres: "reencuentros con la misma persona",
+    puente: "presentaciones",
+    duo: "eventos con alguien",
+    ff2026: "asiste a Founders Fest",
+    og: "de los primeros 100",
+    conector100: "conexiones",
+    trotamundos: "ciudades",
+    curioso: "temas distintos",
+    memoria: "notas de voz",
+    quinientos: "del evento",
+    cuatro: "eventos seguidos",
+  } as Record<string, string>,
+  earnedOn: (date: Date) =>
+    new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Mexico_City" }).format(date),
+};
+
+// Leaderboard hints under the progress bar (V2Ranking).
+export const rankingTips = {
+  first: "Vas en primer lugar.",
+  gap: (gap: number) => (gap <= 50 ? "Una conexión nueva (+50) y la pasas." : `Te faltan ${gap} pts: ${Math.ceil(gap / 50)} conexiones nuevas.`),
+};

@@ -76,3 +76,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] ingest | V2 attendee screens
 
 - The sixteen V2 screens live under `app/` (routes in [screens/README](screens/README.md)); pages read the API over HTTP with zod on the response, so mock mode serves every screen. New routes `GET /api/connections/{id}`, `GET /api/badges`, `GET /api/invites/me` and `POST /api/invites/{code}/claim` are registered (mock only until the points model lands). `lib/points.ts` now carries the V2 table (50/20, +5 topics, +15 note, +100/+50 invites) and migration `0001` moves the connections points check and adds `whatsapp` to the link vocabulary. [points-rules](points-rules.md) still describes the plan's table and needs the V2 rewrite with the data model follow-up.
+
+## [2026-10-29] ingest | V2 points model and real handlers
+
+- Migration `0002`: `users.avatar`, `users.city`, `users.golden_cap_at`, `connections.topics`, `interactions.title` and `pending_action`, tables `bonus_points`, `user_badges`, `invites`; both score views rebuilt (notes pay the author, bonus points count). Handlers now fill every V2 field: profile stats, scores and badges, person relationship and last note, connection detail, badge catalog with progress (`lib/badges/rules.ts`), invites with the golden cap, leaderboard scope and `me`, and the AI summary returns a title and a pending action. [points-rules](points-rules.md) rewritten for the V2 table.

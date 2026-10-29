@@ -39,6 +39,15 @@ export async function apiGet<T extends z.ZodType>(path: string, schema: T, optio
   return schema.parse(await response.json());
 }
 
+// Fire-and-forget POST from a page (e.g. claiming an invite after sign-in); failures are logged, never shown.
+export async function apiPostQuietly(path: string, body: unknown = {}): Promise<void> {
+  const { origin, cookie } = await originAndCookies();
+  const requestHeaders: Record<string, string> = { cookie, "Content-Type": "application/json" };
+  if (process.env.API_MODE === "mock") requestHeaders[MOCK_HEADERS.mock] = "1";
+  const response = await fetch(`${origin}${path}`, { method: "POST", headers: requestHeaders, body: JSON.stringify(body), cache: "no-store" }).catch(() => null);
+  if (!response?.ok) console.error("quiet post failed", path, response?.status);
+}
+
 // A missing resource becomes null so pages can `notFound()`; other failures still throw.
 export async function apiGetOrNull<T extends z.ZodType>(path: string, schema: T, options?: Options): Promise<z.output<T> | null> {
   try {
