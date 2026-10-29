@@ -25,7 +25,7 @@ function strings(value: unknown, path = ""): [string, string][] {
 }
 
 // Words that read the same in both languages (brand, networks, loanwords) are allowed to repeat.
-const SAME_IN_BOTH = new Set(["x (twitter)", "github", "staff", "founder", "coral", "extras", "color", "proptech", "fintech", "founders fest 2026"].concat(["admin", "whatsapp", "instagram", "linkedin", "compa", "x", "og", "live", "ok", "cosmos", "compas"]));
+const SAME_IN_BOTH = new Set(["x (twitter)", "github", "staff", "founder", "coral", "extras", "color", "proptech", "fintech", "founders fest 2026"].concat(["admin", "whatsapp", "instagram", "linkedin", "compa", "x", "og", "live", "ok", "cosmos"]));
 
 // Tour targets are element ids (data-tour), not copy.
 const isIdentifier = (path: string): boolean => path.endsWith(".target");
