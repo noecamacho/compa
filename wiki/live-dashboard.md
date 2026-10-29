@@ -28,6 +28,7 @@ The plan's podium-plus-topics layout was replaced by **Loom+**, chosen after pro
 
 | Piece | Behavior |
 | --- | --- |
+| Stage | Rotates four views every 30 s with a cross-fade, starting each load on a different one: loom, orbit, race, pulse wave; `?viz=` pins one, `?rotate=` sets the period; all keep moving with no activity, and hold still under reduced motion |
 | Loom | Pegs on a ring (people), threads (accepted connections; mint new, bubblegum reconnection); new threads draw in, then settle. Instanced and merged, so 2,500 people and 4,000 links stay drawable |
 | Pulse | Connections per minute, last 30 min, with a mood line (steady, rush, quiet, empty, upcoming, final) |
 | Feed | The 4 newest pairs, "Ana ⇄ Luis", names only (p. 6) |

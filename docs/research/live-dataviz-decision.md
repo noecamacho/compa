@@ -40,6 +40,29 @@ idle state, podium, finale, keep the loom).
 | --- | --- | --- | --- |
 | ![](live-dataviz/concepts/loom-rush-1920.jpg) | ![](live-dataviz/concepts/podium-rush-1920.jpg) | ![](live-dataviz/concepts/heartbeat-rush-1920.jpg) | ![](live-dataviz/concepts/constellation-rush-1920.jpg) |
 
+## Rotating views (owner request, 2026-10-29)
+
+The owner asked for several of the researched visualizations, switching on every load or every 30 s, and never
+still. The stage behind the counters (`components/live/LiveStage.tsx`) now rotates four views; the panels around it
+(ranking, feed, pulse, state cards) stay put so the board never loses its anchors.
+
+| View | Always moving | On a new connection |
+| --- | --- | --- |
+| Loom (`viz/LoomViz.tsx`) | The ring turns; dust drifts over the plate; sun-yellow beads travel along recent threads | The thread draws in thick, then settles |
+| Orbit (`viz/Orbit.tsx`) | Rings turn at their own speeds (top ten on the inner ring, named); dust drifts; the sun breathes | A comet flies from A to B with a sparkling tail and a burst |
+| Race (`viz/Race.tsx`) | Shimmer stripes slide along the top-8 bars; bubbles rise; ghost bars pulse when empty | Rows reorder with FLIP; the scoring bar flashes and sparks |
+| Pulse wave (`viz/Wave.tsx`) | An ECG line scrolls over a breathing baseline; the 30-minute bars sway | A heartbeat spike; bubbles arc into the current minute's bar |
+
+- Each load starts on a different view than the last one in that tab (session storage), then rotates every 30 s with
+  a 700 ms cross-fade and a named progress strip.
+- `?viz=loom|orbit|race|wave` pins a view for a projector; `?rotate=<seconds>` changes the period (5–600), `0`
+  stops it. Malformed values fall back to the defaults (`lib/live/rotation.ts`, zod).
+- Reduced motion: every view holds still and redraws only when the data changes, and the stage stops rotating unless
+  the URL sets a period.
+- A view that cannot run (no WebGL for the loom) leaves the rotation instead of showing an error.
+- Canvas views share one loop (`viz/useCanvasLoop.ts`, paused in hidden tabs, DPR capped at 1.5 on phones and 2 on
+  screens) and one fixed particle pool of 320 (`viz/particles.ts`).
+
 ## Built for scale
 
 - **Loom:** pegs are two instanced meshes (flat discs) and settled threads are merged into one mesh per kind
