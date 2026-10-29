@@ -10,6 +10,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- Admin console, responsive pass: tables from 768 px and stacked cards on a phone, sticky primary actions, a two-column event page with the QR and actions beside the details, a live preview on the new-event form, inline field validation with a kept draft, consequence dialogs (bottom sheet on a phone) for rotate, end, archive, remove attendee and delete test user, and loading and error states.
 - Monito builder: a "Soy" row with Hombre, Mujer and Otro (Mujer draws a skirt and suggests long hair), stored in the look; building a monito is now required before using the app, also when signing in with a LinkedIn photo.
 - Super-admin console at `/admin` (390, 834 and 1440, Spanish and English): list, create and edit events (description, venue, address, city, country, website, IANA time zone, schedule, status, test flag), the join QR and link, rotate code, end now, archive; attendees with counts, check-in on someone's behalf (consent recorded as admin-assigned), organizers per event; people search. New `/api/admin/*` routes (API spec A11). `GET /api/me` returns `role` and `isTest`.
 - Real-mode test harness: synthetic test users (`users.is_test`, no LinkedIn) with generated profiles, `POST /api/admin/test-users/{id}/session` to sign in as one, the `x-compa-automation` header for test runners (`TEST_AUTOMATION_SECRET`), the seeded test event Codex Conf 2026 (`SEED_TEST_EVENT=1`), and `docs/testing/real-mode.md`.

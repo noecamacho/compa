@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import QRCode from "qrcode";
 import { AdminShell, AdminTitle } from "@/components/admin/AdminShell";
@@ -29,6 +30,9 @@ export default async function AdminEventPage({ params }: Props) {
   const ended = event.status === "ended" || event.status === "archived";
   return (
     <AdminShell copy={copy} active="events">
+      <Link href="/admin" className="-mb-2 flex min-h-11 items-center self-start text-[14px] font-extrabold underline">
+        ← {copy.events.title}
+      </Link>
       <AdminTitle
         right={
           <span className="flex gap-2">
@@ -39,25 +43,29 @@ export default async function AdminEventPage({ params }: Props) {
       >
         {event.name}
       </AdminTitle>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-[260px_1fr]">
-        <Card className="flex flex-col items-center gap-3 px-4 py-4">
-          <div role="img" aria-label={copy.detail.qrLabel(event.name)} className="w-full max-w-[220px] [&>svg]:h-auto [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: qrSvg }} />
-          <SectionLabel>{copy.detail.joinUrl}</SectionLabel>
-          <code className="text-center text-[13px] font-extrabold break-all">{event.joinUrl}</code>
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-6">
+        <Card className="lg:col-start-1">
+          <StatGrid>
+            <Stat value={event.counts.attendees} label={copy.detail.attendees} />
+            <Stat value={event.counts.connections} label={copy.detail.connections} />
+            <Stat value={event.counts.pending} label={copy.detail.pending} />
+          </StatGrid>
         </Card>
-        <div className="flex flex-col gap-4">
-          <Card>
-            <StatGrid>
-              <Stat value={event.counts.attendees} label={copy.detail.attendees} />
-              <Stat value={event.counts.connections} label={copy.detail.connections} />
-              <Stat value={event.counts.pending} label={copy.detail.pending} />
-            </StatGrid>
+        <aside className="flex flex-col gap-4 lg:sticky lg:top-[96px] lg:col-start-2 lg:row-span-3 lg:row-start-1 lg:self-start">
+          <Card className="flex flex-col items-center gap-3 px-4 py-4 md:flex-row md:gap-5 lg:flex-col">
+            <div role="img" aria-label={copy.detail.qrLabel(event.name)} className="w-full max-w-[200px] shrink-0 [&>svg]:h-auto [&>svg]:w-full" dangerouslySetInnerHTML={{ __html: qrSvg }} />
+            <div className="flex min-w-0 flex-col items-center gap-1 text-center md:items-start md:text-left lg:items-center lg:text-center">
+              <SectionLabel>{copy.detail.joinUrl}</SectionLabel>
+              <code className="text-[13px] font-extrabold break-all">{event.joinUrl}</code>
+            </div>
           </Card>
           <EventActions locale={locale} slug={event.slug} joinUrl={event.joinUrl} liveUrl={`${event.joinUrl}/live`} ended={ended} archived={event.status === "archived"} />
+        </aside>
+        <div className="flex min-w-0 flex-col gap-5 lg:col-start-1">
+          <EventPeople locale={locale} slug={event.slug} attendees={people.attendees} organizers={organizers.organizers} testUsers={people.counts.testUsers} />
+          <EventForm key={`${event.startsAt}-${event.endsAt}-${event.status}`} locale={locale} event={event} />
         </div>
       </div>
-      <EventPeople locale={locale} slug={event.slug} attendees={people.attendees} organizers={organizers.organizers} testUsers={people.counts.testUsers} />
-      <EventForm key={`${event.startsAt}-${event.endsAt}-${event.status}`} locale={locale} event={event} />
     </AdminShell>
   );
 }
