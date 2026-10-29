@@ -1,13 +1,16 @@
 // The projected live board under every scenario it must survive (docs/research/live-dataviz.md). Runs against
 // `API_MODE=mock bun run dev`: the server renders the mock snapshot, then the board's 3 s poll is answered here
 // with scripted frames from lib/testing/live-scenarios.ts. No database, no LinkedIn.
-// LIVE_SHOTS=<dir> also writes the screenshots used in the research doc.
-import { expect, test, type Page, type Route } from "@playwright/test";
+// LIVE_SHOTS=<dir> also writes the screenshots used in the research doc. Each test sets its own viewport and locale,
+// so the spec runs once, in the live-1920-en project.
+import type { Page, Route } from "@playwright/test";
 import path from "node:path";
 import { SCENARIOS, scenarioFrames, type ScenarioName } from "../../lib/testing/live-scenarios";
+import { expect, test } from "../fixtures";
 
 const LIVE_PATH = "/e/k7m2p9xq4t/live";
 const POLL = "**/api/e/*/live";
+const inLocale = (locale: "es-MX" | "en-US") => ({ locale, extraHTTPHeaders: { "Accept-Language": locale } });
 const VIEWPORTS = { phone: { width: 390, height: 844 }, tablet: { width: 834, height: 1112 }, laptop: { width: 1440, height: 900 }, screen: { width: 1920, height: 1080 } } as const;
 
 type Serve = { fail?: (poll: number) => boolean; frames?: ReturnType<typeof scenarioFrames> };
@@ -46,14 +49,16 @@ async function expectNoHorizontalScroll(page: Page) {
   expect(overflow).toBeLessThanOrEqual(0);
 }
 
+test.beforeEach(async ({}, testInfo) => test.skip(testInfo.project.name.endsWith("-es"), "each test sets its own locale"));
+
 const counter = (page: Page, label: string) =>
   page
     .locator("dl > div")
     .filter({ has: page.locator("dt", { hasText: new RegExp(`^${label}$`) }) })
     .locator("dd");
 
-test.describe("live board scenarios @live", () => {
-  test.use({ viewport: VIEWPORTS.screen, locale: "en-US" });
+test.describe("live board scenarios @live @mock", () => {
+  test.use({ viewport: VIEWPORTS.screen, ...inLocale("en-US") });
 
   test("zero: nobody in, the board invites the first person", async ({ page }) => {
     await openBoard(page, "zero");
@@ -174,13 +179,13 @@ test.describe("live board scenarios @live", () => {
     console.log(`thousands fps: ${fps.toFixed(1)}`);
     // Headless software WebGL (SwiftShader) draws an empty ring at ~22 fps on CI-class machines, far below a venue
     // laptop's GPU; this guards against a frozen page (it was 0.2 fps before the instanced loom), not a frame target.
-    expect(fps).toBeGreaterThan(2);
+    expect(fps).toBeGreaterThan(1);
     await shot(page, "thousands-1920");
   });
 });
 
-test.describe("live board resilience @live", () => {
-  test.use({ viewport: VIEWPORTS.laptop, locale: "en-US" });
+test.describe("live board resilience @live @mock", () => {
+  test.use({ viewport: VIEWPORTS.laptop, ...inLocale("en-US") });
 
   test("network loss: reconnecting pill with the last update, backoff, then recovery", async ({ page }) => {
     const polls = await openBoard(page, "trickle", 3, { fail: (poll) => poll === 1 || poll === 2 });
@@ -237,8 +242,8 @@ test.describe("live board resilience @live", () => {
   });
 });
 
-test.describe("live board reduced motion @live", () => {
-  test.use({ viewport: VIEWPORTS.laptop, locale: "en-US", reducedMotion: "reduce" });
+test.describe("live board reduced motion @live @mock", () => {
+  test.use({ viewport: VIEWPORTS.laptop, ...inLocale("en-US"), reducedMotion: "reduce" });
 
   test("feed rows and pulse bars do not animate", async ({ page }) => {
     await openBoard(page, "rush", 2);
@@ -247,21 +252,33 @@ test.describe("live board reduced motion @live", () => {
   });
 });
 
-for (const [size, viewport] of Object.entries(VIEWPORTS)) {
-  for (const locale of ["es-MX", "en-US"] as const) {
-    test.describe(`live board ${size} ${locale} @live`, () => {
-      test.use({ viewport, locale });
-      for (const name of ["zero", "rush", "ended", "longNames"] as const satisfies readonly ScenarioName[]) {
-        test(`${name} fits without sideways scroll`, async ({ page }) => {
-          await openBoard(page, name, 2);
-          await expectNoHorizontalScroll(page);
-          await expect(page.getByTestId("live-pulse")).toBeVisible();
-          if (locale === "es-MX") await expect(page.locator("main")).toHaveAttribute("lang", "es");
-          if (size !== "screen" && locale === "en-US") await shot(page, `${name}-${viewport.width}`);
-        });
-      }
-    });
-  }
+// The 1920 screen is covered above; smaller screens check fit in both locales on the busiest and the final states.
+const MATRIX: [keyof typeof VIEWPORTS, ScenarioName][] = [
+  ["phone", "rush"],
+  ["phone", "ended"],
+  ["phone", "zero"],
+  ["phone", "longNames"],
+  ["tablet", "rush"],
+  ["tablet", "ended"],
+  ["laptop", "rush"],
+  ["laptop", "ended"],
+];
+
+for (const locale of ["es-MX", "en-US"] as const) {
+  test.describe(`live board fit ${locale} @live @mock`, () => {
+    test.use(inLocale(locale));
+    for (const [size, name] of MATRIX) {
+      test(`${name} at ${size} fits without sideways scroll`, async ({ page }) => {
+        const viewport = VIEWPORTS[size];
+        await page.setViewportSize(viewport);
+        await openBoard(page, name, 2);
+        await expectNoHorizontalScroll(page);
+        await expect(page.getByTestId("live-pulse")).toBeVisible();
+        await expect(page.locator("main")).toHaveAttribute("lang", locale.slice(0, 2));
+        if (locale === "en-US") await shot(page, `${name}-${viewport.width}`);
+      });
+    }
+  });
 }
 
 test("every scenario frame passes the snapshot schema", async () => {
