@@ -107,7 +107,7 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
         <JoinQr qrSvg={qrSvg} joinUrl={joinUrl} copy={copy} />
       </header>
 
-      <div className="grid min-h-0 gap-4 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_clamp(320px,26vw,520px)] lg:gap-[1.5vw]">
+      <div className="grid min-h-0 gap-4 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_clamp(340px,28vw,520px)] lg:gap-[1.5vw]">
         <section className="relative aspect-square w-full sm:aspect-[4/3] lg:aspect-auto lg:h-full" aria-label={copy.vizLabel}>
           {unavailable ? (
             <p className="absolute inset-0 m-0 flex items-center justify-center p-6 text-center text-[16px] font-extrabold text-muted">{copy.noWebgl}</p>
