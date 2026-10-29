@@ -33,7 +33,7 @@ export function QrPoster({ locale, name, slug, joinUrl, svg }: Props) {
   return (
     <main
       aria-label={t.stage(name)}
-      className="paper-dots relative flex min-h-dvh flex-col overflow-hidden text-ink [--qr:min(78vw,44dvh)] landscape:[--qr:min(60dvh,40vw)]"
+      className="paper-dots relative flex min-h-dvh flex-col overflow-hidden text-ink [--qr:min(80vw,42dvh)] landscape:[--qr:min(62dvh,42vw)]"
     >
       <Confetti />
       <div className="relative z-20 flex justify-end gap-2 px-4 pt-3 [:fullscreen_&]:hidden">
@@ -43,7 +43,7 @@ export function QrPoster({ locale, name, slug, joinUrl, svg }: Props) {
         </Link>
       </div>
       <div className="relative z-10 flex flex-1 flex-col items-center justify-center gap-[max(14px,3vmin)] px-4 py-[max(12px,2.5vmin)] landscape:flex-row landscape:gap-[6vmin] landscape:px-[5vmin]">
-        <section className="flex min-w-0 flex-col items-center gap-[max(10px,2vmin)] text-center landscape:flex-1 landscape:items-start landscape:text-left">
+        <section className="flex min-w-0 flex-col items-center gap-[max(10px,2vmin)] text-center landscape:max-w-[min(48vw,105vmin)] landscape:items-start landscape:text-left">
           <Image src="/brand/compa-logo.png" width={925} height={1024} alt={landing.brand} priority className="h-[clamp(60px,14vmin,480px)] w-auto" />
           <h1 className="m-0 font-display text-[clamp(18px,3.4vmin,120px)] leading-[1.1] font-bold [overflow-wrap:anywhere]">{name}</h1>
           <div className="grid w-full">
