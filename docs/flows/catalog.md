@@ -437,11 +437,11 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | Scanning any QR |
 | Pre | — |
 | Happy path | — |
-| Alternates | A non-`/u/` QR is ignored silently (`handleFromQr` returns null) |
+| Alternates | A non-`/u/` QR shows `connect.invalidQr` and the scanner keeps reading |
 | Errors | Unknown handle → 404 `user_not_found` → `connect.notFound`; on 05 → `notFound()` |
 | Edge cases | An event QR (`/e/<code>`) should route to the door. A malicious QR with a lookalike domain: `handleFromQr` matches `/u/` on **any** origin, so `evil.com/u/x` looks up handle `x` on COMPA (harmless, but confusing) |
 | Status | UI Partial · API Ready · DB — |
-| E2E coverage | `e2e/connect/scan.spec.ts`: fake video with a non-COMPA QR → "not a COMPA QR" hint; event QR → door; unknown handle → not found |
+| E2E coverage | `e2e/qa-port.spec.ts`: fake video with a non-COMPA QR → `connect.invalidQr` (mock). Missing: event QR → door; unknown handle → not found |
 | Tickets | [T-033](backlog.md#t-033) |
 
 <a id="f-21"></a>
