@@ -14,6 +14,8 @@ coverage/
 
 # Environment and deploy
 .env
+# Claude Code agent worktrees
+.claude/worktrees/
 .env.*
 !.env.example
 .vercel/

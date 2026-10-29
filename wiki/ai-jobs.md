@@ -26,7 +26,7 @@ The AI does three bounded jobs with structured output; it never decides points o
 }
 ```
 
-The source description of `summary` says the sentences are in Spanish (p. 12); see [open-questions](open-questions.md) on end-user language.
+Language: transcription runs with `language: "es"` and the summary and next steps are written in Spanish (p. 12; team decision 2026-10-29, [open-questions](open-questions.md) #6). Prompts, code and identifiers stay English.
 
 ## System prompt for the summary, translated (p. 12)
 
@@ -34,6 +34,7 @@ The source description of `summary` says the sentences are in Spanish (p. 12); s
 
 ## Models and fallbacks (p. 12)
 
+- Defaults: `OPENAI_STT_MODEL=gpt-4o-mini-transcribe`; `OPENAI_TEXT_MODEL=gpt-5.4-mini` (confirmed in the team account; the code has no default and requires it).
 - Use the transcription and text models current in the team's OpenAI account; confirm the names in the console before coding them and put them in environment variables `OPENAI_STT_MODEL` and `OPENAI_TEXT_MODEL`.
 - If transcription fails, show the text field; if the summary fails, store the user's text verbatim as the summary.
 - Transcription slow (> 5 s) or noisy: the text field is always visible as an alternative (p. 20).
