@@ -24,7 +24,6 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Invites: a claimed invite is never re-linked to a second person, and concurrent first loads of `GET /api/invites/me` no longer fail with 500.
 - The live screen survives an access-code rotation (the board stays up and asks for the new link from Admin instead of showing "not found") and shows outages: an 8 s fetch timeout, one poll in flight, the age of the data in the reconnecting pill, and an outage page that retries every 10 s.
 - Admin: a test admin can no longer delete their own account (409 `cannot_delete_self`); "TEST" labels in the attendee list and user picker meet contrast; confirm dialogs on one page no longer share ids.
-
 - Sign-in keeps the deep link: a signed-out visitor opening any app screen (for example `/connections`) or onboarding step now goes to `/auth/linkedin?next=<path>` and comes back to that screen, instead of landing on `/` and losing the path. A new `proxy.ts` passes the requested path to layouts as `x-pathname`; unsafe paths still fall back through `safeNext` (T-011).
 - A first-night attendee with no connections yet now sees incoming requests on Home right away instead of after the first poll.
 - Marking notifications seen never moves backwards (a stale tab) nor into the future.
