@@ -127,3 +127,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Which P0 crash and visibility gaps remain on main?
 
 - P0-4 and P0-7 were already fixed on main (`apiGetSafe`, `withDefaultVisibility` in `lib/visibility.ts`); P0-6 fixed: the register screen shows the event-screen notice before sending `screenConsent: true` ([backend gap analysis](../docs/backend-gap-analysis.md) section 4).
+
+## [2026-10-29] ingest | Official COMPA logo
+
+- The captain set the official logo: two interlocking speech bubbles (green and blue, ink outline, hard shadow) with the rounded wordmark "compa". Originals in `design/brand/`; transparent web versions in `public/brand/`; favicon, `app/icon.png`, `app/apple-icon.png` and `app/opengraph-image.png` generated from them. Replaces the yellow single-bubble mark.
