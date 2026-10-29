@@ -21,7 +21,7 @@ test.describe("my profile in mock mode", () => {
     await page.goto("/me");
     await expect(page.getByText(diego.name, { exact: true })).toBeVisible();
     await expect(page.getByText(`${diego.headline} · ${diego.company}`)).toBeVisible();
-    await expect(page.getByText(copy.pointsRank(formatPoints(1265), 6))).toBeVisible();
+    await expect(page.getByText(copy.pointsRank(formatPoints("es", 1265), 6))).toBeVisible();
     for (const label of [copy.newConnections, copy.reconnections, copy.events]) await expect(page.getByText(label, { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: new RegExp(copy.badgesCount(diego.badges?.length ?? 0, BADGE_IDS.length)) })).toHaveAttribute("href", "/me/badges");
     await expect(picker(page, "linkedin").getByRole("button", { name: visibility.levels.connections })).toHaveAttribute("aria-pressed", "true");
@@ -136,7 +136,7 @@ test.describe("my profile in real mode", () => {
       expect(me.scores?.event.points).toBe(50);
       const rank = me.scores?.event.rank ?? null;
       expect(rank).not.toBeNull();
-      await expect(ana.page.getByText(copy.pointsRank(formatPoints(50), rank), { exact: true })).toBeVisible({ timeout: 2_000 });
+      await expect(ana.page.getByText(copy.pointsRank(formatPoints("es", 50), rank), { exact: true })).toBeVisible({ timeout: 2_000 });
       await expect(ana.page.getByRole("link", { name: new RegExp(`^${copy.ranking}`) })).toContainText(`#${rank}`, { timeout: 2_000 });
     }).toPass({ timeout: 30_000 });
     expect((await call(ana.page.request, "GET", "/api/me", Me)).stats?.newConnections).toBe(1);

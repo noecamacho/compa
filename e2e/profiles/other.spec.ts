@@ -24,7 +24,7 @@ test.describe("another person in mock mode", () => {
     await expect(page.getByText(`${valeria.headline} · ${valeria.company}`)).toBeVisible();
     await expect(page.getByText(person.connected, { exact: true })).toBeVisible();
     const scores = valeriaProfile.scores?.event;
-    await expect(page.getByRole("link", { name: person.pointsRank(formatPoints(scores?.points ?? 0), scores?.rank ?? null) })).toHaveAttribute("href", "/ranking");
+    await expect(page.getByRole("link", { name: person.pointsRank(formatPoints("es", scores?.points ?? 0), scores?.rank ?? null) })).toHaveAttribute("href", "/ranking");
     for (const [key, url] of Object.entries(valeria.links ?? {})) {
       await expect(page.getByRole("link", { name: person.linkLabel(networks[key as keyof typeof networks], valeria.name) })).toHaveAttribute("href", url);
     }

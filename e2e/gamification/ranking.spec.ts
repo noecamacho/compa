@@ -12,7 +12,7 @@ const scopeButton = (page: Page, label: string) => page.getByRole("group", { nam
 // The podium is three links in the order 2, 1, 3 on screen; each holds the first name and the points.
 async function expectPodium(page: Page, board: LeaderboardT): Promise<void> {
   for (const row of board.rows.slice(0, 3)) {
-    await expect(page.getByRole("link", { name: new RegExp(`${firstName(row.name)}.*${row.rank}.*${formatPoints(row.points)}`) }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: new RegExp(`${firstName(row.name)}.*${row.rank}.*${formatPoints("es", row.points)}`) }).first()).toBeVisible();
   }
 }
 
@@ -20,7 +20,7 @@ async function expectMyCard(page: Page, board: LeaderboardT, sub: string): Promi
   const mine = board.me;
   if (!mine) throw new Error("the board has no `me`");
   await expect(page.getByText(copy.youRank(mine.rank), { exact: true })).toBeVisible();
-  await expect(page.getByText(copy.youSub(formatPoints(mine.points), sub), { exact: true })).toBeVisible();
+  await expect(page.getByText(copy.youSub(formatPoints("es", mine.points), sub), { exact: true })).toBeVisible();
   if (!mine.above) return;
   await expect(page.getByText(copy.toPass(firstName(mine.above.name)), { exact: true })).toBeVisible();
   await expect(page.getByText(copy.pointsShort(mine.gap), { exact: true })).toBeVisible();
@@ -54,7 +54,7 @@ test.describe("ranking in mock mode", () => {
 
   test("a podium place I am connected with opens their profile @mock", async ({ page }) => {
     await page.goto("/ranking");
-    const first = page.getByRole("link", { name: new RegExp(`${firstName(valeriaPublic.name)}.*1.*${formatPoints(1980)}`) });
+    const first = page.getByRole("link", { name: new RegExp(`${firstName(valeriaPublic.name)}.*1.*${formatPoints("es", 1980)}`) });
     await expect(first).toHaveAttribute("href", `/people/${valeriaPublic.handle}`);
     await page.getByRole("link", { name: copy.connectNow }).click();
     await expect(page).toHaveURL(/\/connect$/);

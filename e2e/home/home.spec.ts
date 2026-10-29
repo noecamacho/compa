@@ -17,10 +17,10 @@ test.describe("home in mock mode", () => {
     await expect(page.getByRole("link", { name: home.hello(firstName(me.name)) })).toHaveAttribute("href", "/me");
     await expect(page.getByRole("link", { name: bellLabel(testInfo.project.use.locale, 3) })).toHaveAttribute("href", "/notifications");
     await expect(page.getByRole("link", { name: tour.incoming.title(firstName(paola.name)) })).toHaveAttribute("href", `/requests/${ids.connection3}`);
-    await expect(page.getByText(home.until(eventDoor.name, formatHour(eventDoor.endsAt)))).toBeVisible();
+    await expect(page.getByText(home.until(eventDoor.name, formatHour("es", eventDoor.endsAt)))).toBeVisible();
     await expect(page.getByText(String(eventDoor.counters.connections), { exact: true })).toBeVisible();
     await expect(page.getByRole("img", { name: home.pairsNow })).toContainText(home.pair("Valeria", "Rodrigo"));
-    const [before, rank, after] = home.rank(6, formatPoints(1265));
+    const [before, rank, after] = home.rank(6, formatPoints("es", 1265));
     await expect(page.getByRole("link", { name: `${before}${rank}${after}` })).toHaveAttribute("href", "/ranking");
     await expect(page.getByRole("link", { name: new RegExp(home.connectHint) })).toHaveAttribute("href", "/connect");
     const invite = page.getByRole("link", { name: new RegExp(home.inviteTitle) });

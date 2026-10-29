@@ -29,7 +29,7 @@ test.describe("connect: voice note on the register screen", () => {
       await openRegister(page);
       await noteButton(page).click();
       await expect(recordingButton(page)).toBeVisible();
-      await expect(recordingButton(page)).toContainText(register.recording(formatClock(1)));
+      await expect(recordingButton(page)).toContainText(register.recording(formatClock("es", 1)));
       const upload = page.waitForRequest((request) => request.method() === "POST" && request.url().endsWith("/api/transcribe"));
       await recordingButton(page).click();
       expect((await upload).headers()["content-type"]).toContain("multipart/form-data");
@@ -61,7 +61,7 @@ test.describe("connect: voice note on the register screen", () => {
       const upload = page.waitForRequest((request) => request.url().endsWith("/api/transcribe"));
       await page.clock.runFor(120_000);
       await upload;
-      await expect(page.getByText(register.noteSaved(formatClock(120)))).toBeVisible();
+      await expect(page.getByText(register.noteSaved(formatClock("es", 120)))).toBeVisible();
     });
 
     for (const error of [E.invalidAudio, E.transcriptionFailed, E.rateLimited, E.unauthorized]) {
