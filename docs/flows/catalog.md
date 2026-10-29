@@ -19,7 +19,7 @@ Each flow has an id `F-xx` and these fields:
   - **Mock-only:** renders only in mock mode.
   - **Missing:** not built.
   - **IP:** built on an unmerged branch.
-- **E2E coverage:** the spec file the flow's Playwright tests live in, and the scenarios to assert. Captain requirement, 2026-10-29; harness in [T-000](backlog.md#t-000). The harness and a smoke spec exist; no flow spec exists yet, so every flow's e2e status is Missing.
+- **E2E coverage:** the spec file the flow's Playwright tests live in, and the scenarios to assert. Captain requirement, 2026-10-29; harness in [T-000](backlog.md#t-000). Specs now exist for every built flow; [E2E coverage status](#e2e-coverage-status) lists them and what is still uncovered.
 - **Tickets:** links into the [backlog](backlog.md).
 
 Screen numbers (01–12) are the V2 screens in [DESIGN.md](../../DESIGN.md#screens). "Real mode" means without `API_MODE=mock`.
@@ -114,9 +114,32 @@ Screen numbers (01–12) are the V2 screens in [DESIGN.md](../../DESIGN.md#scree
 | IP | 10 |
 | No UI layer | 1 (F-60) |
 
-In the overview, a flow that shows a transition such as "Missing → IP" is counted by its `main` status. **E2E coverage: 0 of 74**, which is the T-000 harness plus a spec per flow.
+In the overview, a flow that shows a transition such as "Missing → IP" is counted by its `main` status. **E2E coverage:** every flow with a built UI or API has specs (2026-10-29); see [E2E coverage status](#e2e-coverage-status).
 
 ---
+
+## E2E coverage status
+
+Updated 2026-10-29 (branch `fm/compa-e2e-coverage`). Specs run at 390, 834 and 1440 in `es` and `en` (plus reduced motion on 390, and `live-1920` for the big screen), in mock mode and in real mode against a local Supabase (never production; LinkedIn never called). WebKit projects run in CI only.
+
+| Section | Flows | Specs |
+| --- | --- | --- |
+| Onboarding | F-01–F-11, F-42 | `e2e/onboarding/` landing, signin, profile, monito, deep-links, invite-link |
+| Account | F-61, F-62 | `e2e/account/session.spec.ts` |
+| Events | F-10, F-12, F-14, F-15, F-70, F-71 | `e2e/events/` door, check-in, window |
+| Connect | F-13, F-16–F-22, F-24, F-27–F-29 | `e2e/connect/` my-qr, scan, search, register, voice-note |
+| Requests | F-23, F-25, F-26, F-30–F-33, F-35, F-36, F-50, F-69 | `e2e/requests/` incoming, pending, accept-decline, mutual |
+| Summaries, connections, profiles, home | F-37, F-39–F-43 | `e2e/summaries/note`, `e2e/connections/list`, `e2e/profiles/` me, other, `e2e/home/home` |
+| Gamification | F-44–F-48 | `e2e/gamification/` badges, ranking, invites |
+| Notifications | F-49 | `e2e/notifications/bell.spec.ts` |
+| Big screen | F-51, F-52, F-54 | `e2e/live/big-screen.spec.ts` |
+| Admin | F-55–F-57, F-60 | `e2e/admin/` access, api, events, people, test-users |
+| API contract | all 46 operations | `e2e/api/` contract-mock, contract-real, real-success, openapi |
+| System | F-66–F-68, F-72–F-74 | `e2e/system/` resilience, rate-limits, i18n, a11y, responsive |
+
+Not covered, because the feature is not built: withdraw (F-34), saved-summary edit and delete (F-38), seed toggle and moderation (F-58, F-59), delete, export and block (F-63–F-65), offline banner, security headers, axe scans (not installed), English copy on Spanish-only app screens (T-110, T-111), the 500-node load run (F-53). Not covered for other reasons: clicking a WebGL node on the big screen (no hooks; the board and API snapshot are asserted instead), a real transcription or draft (needs OpenAI), the 300-request and 5-draft caps in real mode (mock only).
+
+Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spec.ts`), and signed-in `notFound()` pages answer 200 because the loading UI has started streaming, so specs assert the content instead of the status.
 
 ## Onboarding
 
@@ -308,7 +331,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Pre | The event is running (`isRunning`) |
 | Happy path | Notice "your name and photo will appear on the event screen" (M13) → Accept → `POST …/check-in { screenConsent: true }` → 201 → `attendee.checked_in` broadcast → `/home` with the LIVE card |
 | Alternates | Decline the notice → no check-in, explanation, back to the landing |
-| Errors | 409 `consent_required` (body `false`); `event_not_running`; `event_not_found`; 400 `invalid_input` |
+| Errors | 400 `invalid_input` (the body only accepts `screenConsent: true`, so there is no `consent_required` on this route); 409 `event_not_running`; 404 `event_not_found`; 401 → `/join` sends the person to sign in |
 | Edge cases | No anonymous mode (M13). Withdrawing consent later is not possible (T-026). A check-in while already at another running event makes the newest check-in the current event (F-71) |
 | Status | UI **IP** · API Ready (slug on `main`, code on IP) · DB Ready |
 | E2E coverage | `e2e/events/check-in.spec.ts`: accept → appears in `/api/e/<code>/live` people; decline → not checked in; mock `consent_required`, `event_not_running` and `event_not_found` show their copy |

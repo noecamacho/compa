@@ -29,6 +29,9 @@ export function JoinConsent({ code, eventName, person, locale }: Props) {
       await apiCall("POST", `/api/e/${code}/check-in`, CheckIn, { screenConsent: true });
       router.replace("/home");
     } catch (caught) {
+      // The session ended between the page load and the tap: sign in again and come back here, as the page itself does.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- /auth/linkedin is a route handler, not a page
+      if (caught instanceof ApiClientError && caught.status === 401) return window.location.assign(`/auth/linkedin?next=${encodeURIComponent(`${eventPath(code)}/join`)}`);
       const notRunning = caught instanceof ApiClientError && caught.code === "event_not_running";
       setError(notRunning ? copy.notRunning : copy.failed);
       setSending(false);

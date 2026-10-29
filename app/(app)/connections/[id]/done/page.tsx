@@ -40,7 +40,8 @@ export default async function ConfirmationPage({ params }: Props) {
   const title = pending ? copy.titlePending(first(other.name)) : detail.kind === "new" ? copy.titleNew(first(other.name)) : copy.titleReconnection(first(other.name));
   return (
     <Screen width="focus">
-      {pending && <PendingWatcher connectionId={detail.connectionId} />}
+      {/* Only a pending request can still change; an expired one would refresh forever. */}
+      {detail.status === "pending" && <PendingWatcher connectionId={detail.connectionId} />}
       <Header close="/home" />
       <div className="flex flex-col items-center gap-3">
         <div className="flex items-center">

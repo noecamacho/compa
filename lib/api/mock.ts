@@ -55,6 +55,7 @@ export function mockResponse(spec: AnyRouteSpec, req: Request): Response {
   const choice = readChoice(req);
   if (!wantsError(spec, choice)) return mockSuccess(spec, req, choice.example);
   const error = findError(spec, choice);
+  if (!error && req.headers.get(MOCK_HEADERS.errorScope) === "documented") return mockSuccess(spec, req, choice.example);
   if (!error) return unknownMockError(spec, choice);
   return errorResponse(toApiError(error), MOCK_RESPONSE_HEADERS);
 }

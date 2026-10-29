@@ -30,6 +30,16 @@ export function parseAccessCode(input: string | null | undefined): string | null
   return ACCESS_CODE_PATTERN.test(code) ? code : null;
 }
 
+// Next.js hands the /e/[code] segment over still percent-encoded (`/e/%20code` arrives as "%20code"), so the pages
+// decode it once before re-encoding it for the API; a malformed escape stays as is and fails like any unknown code.
+export function codeFromSegment(segment: string): string {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
 export const eventPath = (code: string): string => `/e/${code}`;
 
 export const joinUrl = (origin: string, code: string): string => `${origin.replace(/\/$/, "")}${eventPath(code)}`;

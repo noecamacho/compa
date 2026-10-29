@@ -98,11 +98,23 @@ e2e/
   live/              big-screen
   admin/             events, moderation
   account/           session, delete-export, block-report
-  system/            resilience, rate-limits, i18n, a11y, responsive, headers, legal, analytics, openapi
+  api/               contract suite generated from lib/api/routes.ts (mock and real), openapi
+  system/            resilience, rate-limits, i18n, a11y, responsive
   smoke.spec.ts
 ```
 
 Each flow in [catalog.md](catalog.md) names its spec file and the scenarios to assert in its **E2E coverage** row.
+
+### Running locally against a local Supabase
+
+Real mode never targets production. A local stack works without the test project:
+
+1. `supabase init` in a scratch folder, set a unique `project_id` and free ports in `supabase/config.toml`, then `supabase start` (realtime, studio and storage can stay off; broadcasts fail silently).
+2. Put its URL, anon and service-role keys, `DATABASE_URL` and a random `TEST_AUTOMATION_SECRET` (32+ characters) in `.env.local`; run `bun run db:migrate` and `SEED_TEST_EVENT=1 bun run db:seed`.
+3. Build once and serve two ports: `next start -p 3471` (real) and `API_MODE=mock next start -p 3472` (mock). Build from a clean checkout: `next build` typechecks `e2e/` too.
+4. `API_MODE=mock E2E_BASE_URL=http://localhost:3472 bunx playwright test` and `E2E_BASE_URL=http://localhost:3471 bunx playwright test` (with `.env.local` loaded). Agents sharing a worktree pass `--output=test-results/<area>`.
+
+The email sign-in spec reads the magic link from the local Mailpit (`E2E_MAILPIT_URL`, default the API port + 3). WebKit needs system libraries (`sudo npx playwright install-deps`); without them run the Chromium projects and leave WebKit to CI.
 
 ### Two modes
 
@@ -113,7 +125,7 @@ Each flow in [catalog.md](catalog.md) names its spec file and the scenarios to a
 | Signed-in screens without a database | Start the app with `API_MODE=mock bun run dev`. `hasSession()` then returns true, and server-side `apiGet` sends `x-compa-mock: 1` (`lib/server/session.ts`, `lib/api/server-fetch.ts`) |
 | A documented error on a client call | `mock.mockError('not_at_event', '**/api/connections')` (a `page.route` that adds `x-compa-mock-error`); without the URL every API call gets it. `mock.mockStatus(n)` and `mock.mockExample(name)` work the same way |
 | A named success example | Header `x-compa-mock-example: fallback` on `POST /api/interactions/draft`, or `notSubstantive` |
-| An error on a server-rendered page | `mock.mockServerError('event_not_found')` sets the test-only cookie `compa-mock-error`; `lib/api/server-fetch.ts` forwards it as `x-compa-mock-error` only under `API_MODE=mock` (`lib/api/mock-cookie.ts`). Every server fetch of that request gets it, so pick a code each of them documents |
+| An error on a server-rendered page | `mock.mockServerError('event_not_found')` sets the test-only cookie `compa-mock-error`; `lib/api/server-fetch.ts` forwards it as `x-compa-mock-error` only under `API_MODE=mock` (`lib/api/mock-cookie.ts`). Only the server fetches whose route documents that code fail; the others answer their success example (`x-compa-mock-error-scope: documented`) |
 | Network failure or slowness | `context.setOffline(true)`; `page.route(url, r => setTimeout(() => r.continue(), 3000))` |
 
 Asking for an error a route does not document returns `400 mock_error_unknown`. Treat that as a broken test, not a pass.
@@ -133,11 +145,11 @@ Asking for an error a route does not document returns `400 mock_error_unknown`. 
 | Locale | Spanish (`locale: "es-MX"`, `Accept-Language: es-MX`) and English (`locale: "en-US"`); spot-check `fr-FR` → English | Project `use.locale` + `extraHTTPHeaders` |
 | Motion | `reducedMotion: "reduce"` variant on `mobile-390` | Project `use.reducedMotion` |
 | Media | Chromium projects launch with a fake camera and microphone (`--use-fake-device-for-media-stream`, `--use-fake-ui-for-media-stream`); a scan spec adds `--use-file-for-fake-video-capture=<qr.y4m>` with `test.use({ launchOptions })`. WebKit gets `permissions: []` for the denied path | `launchOptions.args` |
-| Target | Local `bun run dev` (default), or `E2E_BASE_URL=https://compa.lol` for read-only `@prod` smoke tests | `baseURL`, `--grep @prod` |
+| Target | Local `bun run dev` (default; CI builds and runs `next start`), any local server through `E2E_BASE_URL`, or `E2E_BASE_URL=https://compa.lol` for read-only `@prod` smoke tests | `baseURL`, `--grep @prod` |
 
 ### Artifacts and CI
 
-- `.github/workflows/e2e.yml` runs on every pull request. The `mock` job installs Chromium and WebKit and runs the specs against `bun run dev` with `API_MODE=mock`.
+- `.github/workflows/e2e.yml` runs on every pull request. The `mock` job installs Chromium and WebKit, builds the app and runs the specs against `next start` with `API_MODE=mock`, in eight shards.
 - The `real` job runs `@real` specs only when the captain sets the repository variable `E2E_TEST_BASE_URL` (a deployment on the separate test project) and the secret `E2E_TEST_AUTOMATION_SECRET`.
 - Every test keeps its trace, screenshot and video on failure (`retain-on-failure`, `only-on-failure`); the job uploads them with the HTML report.
 
@@ -146,7 +158,7 @@ Asking for an error a route does not document returns `400 mock_error_unknown`. 
 | Measure | Count |
 | --- | --- |
 | Flows | 74. UI layer: 2 Ready, 30 Partial, 12 Mock-only, 19 Missing, 10 IP, 1 no UI |
-| E2E specs existing today | Harness and smoke spec (T-000); 0 of 74 flows |
+| E2E specs existing today | Every built flow and all 46 API operations ([coverage status](catalog.md#e2e-coverage-status)) |
 | Tickets | 86: P0 12, P1 48, P2 26; 11 in progress on the two branches |
 | Missing CRUD operations | 34 |
 | Risks | 40 (8 high impact) |

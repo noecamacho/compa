@@ -46,6 +46,16 @@ describe("real-mode client", () => {
     expect(String((error as Error).message)).not.toContain(SECRET);
   });
 
+  test("signInAs retries a 502 session_failed from a parallel sign-in", async () => {
+    let calls = 0;
+    const { doFetch } = fakeFetch(() => {
+      calls += 1;
+      return calls === 1 ? Response.json({ error: { code: "session_failed" } }, { status: 502 }) : Response.json(testSession);
+    });
+    await realModeClient({ baseUrl: BASE, secret: SECRET, fetch: doFetch }).signInAs(testUser);
+    expect(calls).toBe(2);
+  });
+
   test("parses cookie attributes", () => {
     const cookie = parseSetCookie("a=b; Path=/x; Secure; HttpOnly; SameSite=None");
     expect(cookie).toMatchObject({ name: "a", value: "b", path: "/x", secure: true, httpOnly: true, sameSite: "None" });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Icon, type IconName } from "@/components/icons";
 import { useCopy } from "@/components/LocaleProvider";
 import { HIT_AREA } from "@/components/ui/hit-area";
@@ -17,11 +17,18 @@ const VIA: { key: "whatsapp" | "instagram" | "more"; color: string; icon: IconNa
 export function InviteActions({ url }: Props) {
   const copy = useCopy().invite;
   const [copied, setCopied] = useState(false);
+  const shown = useRef<HTMLSpanElement>(null);
 
   async function copyLink() {
-    await navigator.clipboard?.writeText(url).catch(() => undefined);
+    const done = await navigator.clipboard?.writeText(url).then(() => true, () => false);
+    if (!done) return selectLink();
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
+  }
+
+  // Clipboard denied or missing: select the link so it can be copied by hand (DESIGN.md, 12 Invitar).
+  function selectLink() {
+    if (shown.current) window.getSelection()?.selectAllChildren(shown.current);
   }
 
   async function share(key: (typeof VIA)[number]["key"]) {
@@ -34,7 +41,7 @@ export function InviteActions({ url }: Props) {
   return (
     <>
       <div className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-paper px-3 border-ink">
-        <span className="flex-1 truncate text-[14px] font-extrabold">{url.replace(/^https?:\/\//, "")}</span>
+        <span ref={shown} className="flex-1 truncate text-[14px] font-extrabold">{url.replace(/^https?:\/\//, "")}</span>
         <button
           type="button"
           onClick={copyLink}

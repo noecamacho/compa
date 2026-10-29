@@ -13,7 +13,11 @@ concurrency:
 jobs:
   mock:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
     permissions:
       contents: read
     env:
@@ -29,12 +33,12 @@ jobs:
       - name: Install browsers
         run: bun run e2e:install
       - name: Run mock-mode specs
-        run: bun run e2e
+        run: bun run e2e --shard=${{ matrix.shard }}/8
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-mock
+          name: playwright-mock-${{ matrix.shard }}
           path: |
             playwright-report/
             test-results/

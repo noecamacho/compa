@@ -137,7 +137,8 @@ export function Icon({ name, size = 22, strokeWidth = 2.6, ...rest }: Props) {
       strokeWidth={filled ? undefined : strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
-      aria-hidden="true"
+      // Decorative unless the caller names it (e.g. the connection kind on 07 Conexiones).
+      aria-hidden={rest["aria-label"] ? undefined : true}
       {...rest}
     >
       {ICONS[name]}

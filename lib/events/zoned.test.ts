@@ -17,4 +17,8 @@ describe("event wall clock", () => {
     }
   });
   test("malformed input is null", () => expect(zonedToUtc("29/10/2026 10:00", "UTC")).toBeNull());
+  test("an unknown or half-typed zone is null, not a throw", () => {
+    expect(zonedToUtc("2026-10-29T10:00", "Mars/Olympus")).toBeNull();
+    expect(zonedToUtc("2026-10-29T10:00", "America/Mex")).toBeNull();
+  });
 });

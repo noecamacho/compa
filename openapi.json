@@ -6035,6 +6035,7 @@
                   "name": "Founders Fest GDL",
                   "startsAt": "2026-10-29T16:00:00.000Z",
                   "endsAt": "2026-10-30T04:00:00.000Z",
+                  "timezone": "America/Mexico_City",
                   "isRunning": true,
                   "phase": "running",
                   "counters": {
@@ -12971,7 +12972,7 @@
             "items": {
               "type": "integer",
               "exclusiveMinimum": 0,
-              "maximum": 9007199254740991
+              "maximum": 32767
             }
           }
         }
@@ -15098,6 +15099,10 @@
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
           },
+          "timezone": {
+            "type": "string",
+            "description": "IANA time zone the event's times are shown in, e.g. `America/Mexico_City`."
+          },
           "isRunning": {
             "type": "boolean"
           },
@@ -15136,6 +15141,7 @@
           "name",
           "startsAt",
           "endsAt",
+          "timezone",
           "isRunning",
           "phase",
           "counters"
@@ -16164,6 +16170,15 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "title": {
+                "type": "string"
+              },
+              "pendingAction": {
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "points": {
                 "type": "integer",

@@ -39,7 +39,7 @@ function Counter({ value, label, tone, locale }: { value: number; label: string;
 function ClosedNotice({ event, copy, locale }: { event: EventDoorT; copy: DoorCopy; locale: Locale }) {
   return (
     <p role="status" className="m-0 rounded-button bg-sun-soft px-4 py-3 text-[15px] leading-[1.4] font-extrabold border-ink">
-      {event.phase === "upcoming" ? copy.notStarted(formatTime(locale, event.startsAt)) : copy.ended}
+      {event.phase === "upcoming" ? copy.notStarted(formatTime(locale, event.startsAt, event.timezone)) : copy.ended}
     </p>
   );
 }

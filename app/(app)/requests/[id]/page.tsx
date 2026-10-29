@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { RequestActions } from "@/components/connections/RequestActions";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
@@ -24,6 +24,8 @@ export default async function RequestPage({ params }: Props) {
   const { id } = await params;
   const [me, detail] = await Promise.all([apiGet("/api/me", Me), apiGetOrNull(`/api/connections/${id}`, ConnectionDetail, { mockExample: "incoming" })]);
   if (!detail) notFound();
+  // Only the scanned person answers a pending request; the requester, or anyone once accepted, gets the done screen.
+  if (detail.direction === "sent" || detail.status === "accepted") redirect(`/connections/${id}/done`);
   const other = detail.other;
   const profile = await apiGetOrNull(`/api/users/${other.handle}`, UserProfile);
   const mutual = profile?.relationship?.mutual ?? [];
@@ -110,11 +112,8 @@ export default async function RequestPage({ params }: Props) {
         {copy.bothWin}
       </Muted>
 
-      {detail.status === "expired" ? (
-        <Muted className="mt-auto text-center text-[13px] font-extrabold">{all.apiErrors.codes.event_ended}</Muted>
-      ) : (
-        <RequestActions connectionId={detail.connectionId} />
-      )}
+      {detail.status === "expired" && <Muted className="mt-auto text-center text-[13px] font-extrabold">{all.apiErrors.codes.event_ended}</Muted>}
+      {detail.status === "pending" && <RequestActions connectionId={detail.connectionId} />}
     </Screen>
   );
 }

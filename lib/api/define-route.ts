@@ -86,10 +86,11 @@ export function defineRoute<
     if (servesMock(spec, req)) return mockResponse(spec, req);
     if (!handler) return errorResponse(toApiError(E.notImplemented));
     try {
+      // Auth first: a stranger's malformed admin path meets the same 404 as any other, so the route stays undiscoverable.
+      const user = await resolveUser(spec.auth, req);
       // Next.js passes no params for static paths.
       const params = parse(spec.params, (await ctx?.params) ?? {}, "path");
       const query = parse(spec.query, Object.fromEntries(new URL(req.url).searchParams), "query");
-      const user = await resolveUser(spec.auth, req);
       // Multipart handlers validate the request themselves so they can read its File fields.
       const body = spec.bodyKind === "multipart" ? {} : parse(spec.body, await readBody(spec, req), "body");
       const input = { req, params, query, body, user } as Parameters<typeof handler>[0];

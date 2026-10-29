@@ -1,4 +1,6 @@
 // Wall-clock time in an event's time zone <-> UTC, for the admin form's `datetime-local` inputs (M20).
+import { isTimeZone } from "./schedule";
+
 const PARTS = { hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" } as const;
 
 function wallClock(instant: Date, timeZone: string): Record<string, number> {
@@ -15,10 +17,11 @@ function offsetMs(instant: number, timeZone: string): number {
 
 const LOCAL = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/;
 
-// "2026-10-29T10:00" in America/Mexico_City → 2026-10-29T16:00:00Z. Null for malformed input.
+// "2026-10-29T10:00" in America/Mexico_City → 2026-10-29T16:00:00Z. Null for malformed input or an unknown zone,
+// which the admin form holds while someone is still typing the zone name.
 export function zonedToUtc(local: string, timeZone: string): Date | null {
   const match = LOCAL.exec(local);
-  if (!match) return null;
+  if (!match || !isTimeZone(timeZone)) return null;
   const [, y, m, d, h, min] = match.map(Number);
   const guess = Date.UTC(y ?? 0, (m ?? 1) - 1, d ?? 1, h ?? 0, min ?? 0);
   // Two passes settle the offset across a DST change.

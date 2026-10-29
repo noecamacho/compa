@@ -64,7 +64,7 @@ export default async function HomePage({ searchParams }: Props) {
       <StickyBar className="flex items-center justify-between">
         <Link href="/me" className="flex items-center gap-3 tappable">
           <Avatar person={avatarOf(me)} size={46} shadow={3} />
-          <span className="font-display text-[24px] leading-none font-bold">{home.hello(firstName(me.name))}</span>
+          <h1 className="m-0 font-display text-[24px] leading-none font-bold">{home.hello(firstName(me.name))}</h1>
         </Link>
         <AlertsBell initial={notificationList?.unseenCount ?? 0} locale={locale} />
       </StickyBar>

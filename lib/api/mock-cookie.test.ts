@@ -15,6 +15,7 @@ describe("mockHeadersFor", () => {
     expect(mockHeadersFor("sb-auth=x; compa-mock-error=event_not_found; other=1", "mock")).toEqual({
       "x-compa-mock": "1",
       "x-compa-mock-error": "event_not_found",
+      "x-compa-mock-error-scope": "documented",
     });
   });
 

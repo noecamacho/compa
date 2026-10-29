@@ -143,7 +143,8 @@ export const PatchMeBody = z
       .partialRecord(LinkKey, z.string().trim().max(200))
       .optional()
       .meta({ description: "A handle (`@user`), for WhatsApp a phone number with country code, or a URL of that network; an empty string removes the link. A value that fails these rules returns 400." }),
-    interestIds: z.array(z.int().positive()).max(10).optional(),
+    // interests.id is a smallint: a larger id is a 400, never a database error.
+    interestIds: z.array(z.int().positive().max(32_767)).max(10).optional(),
   })
   .meta({ id: "PatchMeBody" });
 
@@ -184,6 +185,7 @@ export const EventDoor = z
     name: z.string(),
     startsAt: isoDate,
     endsAt: isoDate,
+    timezone: z.string().meta({ description: "IANA time zone the event's times are shown in, e.g. `America/Mexico_City`." }),
     isRunning: z.boolean(),
     phase: z.enum(["upcoming", "running", "ended"]).meta({ description: "Where now falls in the event window." }),
     counters: z.object({ checkedIn: z.int(), connections: z.int() }),
@@ -432,6 +434,8 @@ export const Approved = z
       summary: z.string(),
       topics: z.array(Topic),
       nextSteps: z.array(z.string()),
+      title: z.string().optional(),
+      pendingAction: z.string().nullable().optional(),
       points: z.int(),
       approvedAt: isoDate,
     }),
