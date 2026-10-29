@@ -1,4 +1,5 @@
 import { ConnectionList as List } from "@/components/connections/ConnectionList";
+import { IncomingRequests } from "@/components/home/IncomingRequests";
 import { Icon } from "@/components/icons";
 import { Chip } from "@/components/ui/Chip";
 import { IconButton } from "@/components/ui/IconButton";
@@ -31,6 +32,8 @@ export default async function ConnectionsPage({ searchParams }: Props) {
           <Icon name="chevronDown" size={14} strokeWidth={3} />
         </Chip>
       )}
+      {/* Requests waiting for my answer come first (A7); polled so new ones appear within seconds. */}
+      <IncomingRequests initial={demo === "empty" ? [] : list.incoming} />
       <List people={people} />
     </Screen>
   );
