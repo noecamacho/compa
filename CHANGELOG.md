@@ -29,6 +29,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Notification bell now opens a live-updating list for requests, accepted connections, invitees and earned badges; opening the list marks displayed items as seen.
 - Award an invite's first-connection points only once when concurrent accepts race.
 - Use a provider-neutral sign-in error for failed LinkedIn and email callbacks.
 - Connection confirm screen now shows the event-screen notice before sending `screenConsent: true` (M13).

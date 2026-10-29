@@ -153,6 +153,17 @@ export const connectionList: z.input<typeof S.ConnectionList> = {
   totals: { points: 1265, connections: 6, people: 5 },
 };
 
+export const notifications: z.input<typeof S.Notifications> = {
+  notifications: [
+    { id: `request:${ids.connection}`, kind: "request", connectionId: ids.connection, person: valeriaPublic, eventName: founders.name, createdAt: TONIGHT, unseen: true },
+    { id: `accepted:${ids.connection2}`, kind: "accepted", connectionId: ids.connection2, person: rodrigo, eventName: founders.name, createdAt: TONIGHT, unseen: true },
+    { id: `badge:${ids.diego}`, kind: "badge_earned", badgeId: "apreton", badgeName: "Primer apretón", createdAt: TONIGHT, unseen: true },
+  ],
+  unseenCount: 3,
+};
+
+export const notificationsSeen: z.input<typeof S.NotificationsSeenBody> = { seenThrough: TONIGHT };
+
 export const connectionDetail: z.input<typeof S.ConnectionDetail> = {
   connectionId: ids.connection,
   status: "accepted",

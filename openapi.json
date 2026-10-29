@@ -6628,6 +6628,297 @@
         }
       }
     },
+    "/api/notifications": {
+      "get": {
+        "operationId": "listNotifications",
+        "summary": "My notifications",
+        "description": "Derived from pending requests, accepted requests, connected invitees and earned badges. Declines are never shown.",
+        "tags": [
+          "notifications"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Recent notifications and the unseen count.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "notifications": [
+                    {
+                      "id": "request:0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
+                      "kind": "request",
+                      "connectionId": "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a",
+                      "person": {
+                        "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
+                        "handle": "valeria-ochoa",
+                        "name": "Valeria Ochoa",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#E0A97F",
+                          "hair": "long",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#6CC4FF",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "none",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CTO",
+                        "company": "Tlali",
+                        "city": "Monterrey",
+                        "interests": [
+                          "Startups",
+                          "Architecture",
+                          "Agents"
+                        ]
+                      },
+                      "eventName": "Founders Fest GDL",
+                      "createdAt": "2026-10-29T18:15:00.000Z",
+                      "unseen": true
+                    },
+                    {
+                      "id": "accepted:1e0d9c8b-7a6f-4e5d-9c2b-1a0f9e8d7c6b",
+                      "kind": "accepted",
+                      "connectionId": "1e0d9c8b-7a6f-4e5d-9c2b-1a0f9e8d7c6b",
+                      "person": {
+                        "id": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
+                        "handle": "rodrigo-pena",
+                        "name": "Rodrigo Peña",
+                        "photoUrl": null,
+                        "avatar": {
+                          "skin": "#BF8360",
+                          "hair": "shaved",
+                          "hairColor": "#2A2438",
+                          "outfit": "plain",
+                          "shirt": "#FFD93D",
+                          "pants": "#4A6FA5",
+                          "shoes": "#FFFFFF",
+                          "hat": "none",
+                          "hatColor": "#FF6B4A",
+                          "hatAccent": "#FFFFFF",
+                          "face": "mustache",
+                          "beard": false,
+                          "extra": "none"
+                        },
+                        "headline": "CEO",
+                        "company": "Pagalo",
+                        "city": "Guadalajara",
+                        "interests": [
+                          "Startups",
+                          "APIs"
+                        ]
+                      },
+                      "eventName": "Founders Fest GDL",
+                      "createdAt": "2026-10-29T18:15:00.000Z",
+                      "unseen": true
+                    },
+                    {
+                      "id": "badge:3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                      "kind": "badge_earned",
+                      "badgeId": "apreton",
+                      "badgeName": "Primer apretón",
+                      "createdAt": "2026-10-29T18:15:00.000Z",
+                      "unseen": true
+                    }
+                  ],
+                  "unseenCount": 3
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/Notifications"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notifications/seen": {
+      "post": {
+        "operationId": "markNotificationsSeen",
+        "summary": "Mark notifications as seen",
+        "tags": [
+          "notifications"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "seenThrough": "2026-10-29T18:15:00.000Z"
+              },
+              "schema": {
+                "$ref": "#/components/schemas/NotificationsSeenBody"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Notifications are marked as seen."
+          },
+          "401": {
+            "description": "unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "unauthorized"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "unauthorized": {
+                    "summary": "Sign in with LinkedIn to continue.",
+                    "value": {
+                      "error": {
+                        "code": "unauthorized",
+                        "message": "Sign in with LinkedIn to continue."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/connections/{id}/knew": {
       "patch": {
         "operationId": "setKnew",
@@ -10513,6 +10804,14 @@
               "cape"
             ]
           },
+          "body": {
+            "type": "string",
+            "enum": [
+              "man",
+              "woman",
+              "other"
+            ]
+          },
           "accent": {
             "type": "string",
             "pattern": "^#[0-9A-Fa-f]{6}$"
@@ -11128,6 +11427,19 @@
         },
         "required": [
           "toHandle"
+        ]
+      },
+      "NotificationsSeenBody": {
+        "type": "object",
+        "properties": {
+          "seenThrough": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "seenThrough"
         ]
       },
       "KnewBody": {
@@ -12736,6 +13048,180 @@
           "friend"
         ]
       },
+      "Notifications": {
+        "type": "object",
+        "properties": {
+          "notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Notification"
+            }
+          },
+          "unseenCount": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "notifications",
+          "unseenCount"
+        ],
+        "additionalProperties": false
+      },
+      "Notification": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "request"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "unseen": {
+                "type": "boolean"
+              },
+              "connectionId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "person": {
+                "$ref": "#/components/schemas/Card"
+              },
+              "eventName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "createdAt",
+              "unseen",
+              "connectionId",
+              "person",
+              "eventName"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "accepted"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "unseen": {
+                "type": "boolean"
+              },
+              "connectionId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              },
+              "person": {
+                "$ref": "#/components/schemas/Card"
+              },
+              "eventName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "createdAt",
+              "unseen",
+              "connectionId",
+              "person",
+              "eventName"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "invitee_connected"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "unseen": {
+                "type": "boolean"
+              },
+              "person": {
+                "$ref": "#/components/schemas/Card"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "createdAt",
+              "unseen",
+              "person"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "const": "badge_earned"
+              },
+              "createdAt": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+              },
+              "unseen": {
+                "type": "boolean"
+              },
+              "badgeId": {
+                "$ref": "#/components/schemas/BadgeId"
+              },
+              "badgeName": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "kind",
+              "createdAt",
+              "unseen",
+              "badgeId",
+              "badgeName"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "type": "object"
+      },
       "KnewResult": {
         "type": "object",
         "properties": {
@@ -13710,6 +14196,14 @@
               "badge",
               "medal",
               "cape"
+            ]
+          },
+          "body": {
+            "type": "string",
+            "enum": [
+              "man",
+              "woman",
+              "other"
             ]
           },
           "accent": {

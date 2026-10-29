@@ -913,10 +913,10 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | Home bell |
 | Pre | — |
 | Happy path (intended) | The count of unseen items → tap → list (requests, acceptances, invitee connected, badge earned) |
-| Alternates | Today: the count equals `incoming.length` on page load; the bell is an `IconButton` without a link |
+| Alternates | The bell count polls the unseen notification total; the list is at `/notifications` |
 | Errors | — |
-| Edge cases | Declines never appear (M8). The count is not refreshed without a reload |
-| Status | UI Partial · API Missing · DB — |
+| Edge cases | Declines never appear (M8). Opening the list marks displayed items seen; new items remain unseen |
+| Status | UI Ready · API Ready · DB Ready |
 | E2E coverage | `e2e/notifications/bell.spec.ts`: count updates by polling; tap → list; opening marks seen |
 | Tickets | [T-031](backlog.md#t-031), [T-080](backlog.md#t-080) |
 

@@ -187,3 +187,16 @@ export const admin: typeof es.admin = {
     failed: "That didn't work. Try again.",
   },
 };
+
+export const notifications: typeof es.notifications = {
+  title: "Notifications",
+  home: "Home",
+  emptyTitle: "You're all caught up",
+  emptyHint: "New requests, connections and badges will show up here.",
+  newLabel: "New",
+  bellLabel: (count) => (count ? `Notifications, ${count} new` : "Notifications"),
+  request: (name, event) => `${name} sent you a request at ${event}`,
+  accepted: (name, event) => `${name} accepted your request at ${event}`,
+  inviteeConnected: (name) => `${name} connected with someone through your invite`,
+  badgeEarned: (name) => `You earned the ${name} badge`,
+};

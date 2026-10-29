@@ -307,6 +307,18 @@ export const ConnectionList = z
   })
   .meta({ id: "ConnectionList" });
 
+export const Notification = z.discriminatedUnion("kind", [
+  z.object({ id: z.string(), kind: z.literal("request"), createdAt: isoDate, unseen: z.boolean(), connectionId: uuid, person: Card, eventName: z.string() }),
+  z.object({ id: z.string(), kind: z.literal("accepted"), createdAt: isoDate, unseen: z.boolean(), connectionId: uuid, person: Card, eventName: z.string() }),
+  z.object({ id: z.string(), kind: z.literal("invitee_connected"), createdAt: isoDate, unseen: z.boolean(), person: Card }),
+  z.object({ id: z.string(), kind: z.literal("badge_earned"), createdAt: isoDate, unseen: z.boolean(), badgeId: BadgeId, badgeName: z.string() }),
+]).meta({ id: "Notification" });
+
+export const Notifications = z
+  .object({ notifications: z.array(Notification), unseenCount: z.int() })
+  .meta({ id: "Notifications" });
+export const NotificationsSeenBody = z.object({ seenThrough: isoDate }).meta({ id: "NotificationsSeenBody" });
+
 const LivePerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable(), points: z.int() });
 const LiveConnection = z.object({ id: uuid, a: uuid, b: uuid, kind: ConnectionKind, at: isoDate });
 
@@ -422,6 +434,8 @@ export type CardT = z.infer<typeof Card>;
 export type MeT = z.infer<typeof Me>;
 export type UserProfileT = z.infer<typeof UserProfile>;
 export type ConnectionListT = z.infer<typeof ConnectionList>;
+export type NotificationT = z.infer<typeof Notification>;
+export type NotificationsT = z.infer<typeof Notifications>;
 export type PersonHistoryT = z.infer<typeof PersonHistory>;
 export type ConnectionDetailT = z.infer<typeof ConnectionDetail>;
 export type LeaderboardT = z.infer<typeof Leaderboard>;
