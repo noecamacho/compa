@@ -1,11 +1,12 @@
 // F-28 Voice note on the register screen: Chromium's fake microphone records, POST /api/transcribe (multipart)
 // answers the mock example, and the note waits in sessionStorage for the done page. Errors fall back to no note.
+import { E } from "../../lib/api/errors";
 import type { Page } from "@playwright/test";
 import { ids, valeriaPublic } from "../../lib/api/examples";
 import { register } from "../../lib/copy/es";
 import { formatClock } from "../../lib/format";
 import { transcribe } from "../../lib/api/routes";
-import { expect, test } from "../fixtures";
+import { errorCopy, expect, test } from "../fixtures";
 import { expectError, skipTours } from "./helpers";
 
 const TRANSCRIPT = transcribe.success.example?.text ?? "";
@@ -63,13 +64,14 @@ test.describe("connect: voice note on the register screen", () => {
       await expect(page.getByText(register.noteSaved(formatClock(120)))).toBeVisible();
     });
 
-    for (const code of ["invalid_audio", "transcription_failed", "rate_limited", "unauthorized"]) {
-      test(`${code} from /api/transcribe drops the note and the request still goes out @mock`, async ({ page, mock }) => {
-        await mock.mockError(code, "**/api/transcribe");
+    for (const error of [E.invalidAudio, E.transcriptionFailed, E.rateLimited, E.unauthorized]) {
+      test(`${error.code} from /api/transcribe keeps the recording for a retry and the request still goes out @mock`, async ({ page, mock }) => {
+        await mock.mockError(error.code, "**/api/transcribe");
         await openRegister(page);
         await noteButton(page).click();
         await recordingButton(page).click();
-        await expect(page.getByText(register.micUnavailable)).toBeVisible();
+        await expect(page.getByText(errorCopy(error))).toBeVisible();
+        await expect(page.getByRole("button", { name: register.retryUpload })).toBeVisible();
         await expect(noteButton(page)).toBeVisible();
         await confirmButton(page, 20).click();
         await expect(page).toHaveURL(/\/done$/);

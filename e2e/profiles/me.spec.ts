@@ -1,5 +1,6 @@
 // 09 MiPerfil and its edit flow (F-41, F-42): points and rank, every shortcut, per-link visibility that saves at once
 // and reverts on failure, editing name, role and city, and interests. Spanish-only copy, so both locales assert lib/copy/es.
+import { errorCopy } from "../fixtures";
 import type { Page } from "@playwright/test";
 import { E } from "../../lib/api/errors";
 import { me as diego } from "../../lib/api/examples";
@@ -79,7 +80,7 @@ test.describe("my profile in mock mode", () => {
     await mock.mockError("invalid_input", "**/api/me");
     await page.goto("/onboarding/profile?from=me");
     await page.getByRole("button", { name: profile.save }).click();
-    await expect(page.getByRole("alert").filter({ hasText: E.invalidInput.message })).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: errorCopy(E.invalidInput) })).toBeVisible();
     await expect(page).toHaveURL(/\/onboarding\/profile\?from=me$/);
   });
 

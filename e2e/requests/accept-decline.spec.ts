@@ -5,7 +5,7 @@ import { diego, ids } from "../../lib/api/examples";
 import { E } from "../../lib/api/errors";
 import { common, confirmation, networks, request } from "../../lib/copy/es";
 import { firstName } from "../../lib/format";
-import { expect, test } from "../fixtures";
+import { errorCopy, expect, test } from "../fixtures";
 import { AdminEvents, accept, detailOf, expectError, expectNotFound, listOf, notificationsOf, sendRequest, skipTours } from "../connect/helpers";
 
 const INCOMING = ids.connection3;
@@ -42,8 +42,17 @@ test.describe("requests: accept and decline (mock)", () => {
     await expect(page).toHaveURL(/\/home$/);
   });
 
-  test("a failed decline still goes home (the decline is silent) @mock", async ({ page, mock }) => {
+  test("a failed decline stays with the reason so it can be retried @mock", async ({ page, mock }) => {
     await mock.mockError("event_ended", "**/api/connections/*/decline");
+    await page.goto(`/requests/${INCOMING}`);
+    await declineButton(page).click();
+    await expect(alert(page)).toHaveText(errorCopy(E.eventEnded));
+    await expect(declineButton(page)).toBeEnabled();
+    await expect(page).toHaveURL(new RegExp(`/requests/${INCOMING}$`));
+  });
+
+  test("declining an already answered request goes home @mock", async ({ page, mock }) => {
+    await mock.mockError("not_pending", "**/api/connections/*/decline");
     await page.goto(`/requests/${INCOMING}`);
     await declineButton(page).click();
     await expect(page).toHaveURL(/\/home$/);
@@ -54,7 +63,7 @@ test.describe("requests: accept and decline (mock)", () => {
       await mock.mockError(error.code, "**/api/connections/*/accept");
       await page.goto(`/requests/${INCOMING}`);
       await acceptButton(page).click();
-      await expect(alert(page)).toHaveText(error.message);
+      await expect(alert(page)).toHaveText(errorCopy(error));
       await expect(acceptButton(page)).toBeEnabled();
       await expect(declineButton(page)).toBeEnabled();
       await expect(page).toHaveURL(new RegExp(`/requests/${INCOMING}$`));
@@ -252,7 +261,7 @@ test.describe("requests: accept and decline (real)", () => {
       await admin.end(event.slug);
 
       await acceptButton(bruno.page).click();
-      await expect(alert(bruno.page)).toHaveText(E.eventEnded.message);
+      await expect(alert(bruno.page)).toHaveText(errorCopy(E.eventEnded));
       await expectError(await bruno.page.request.post(`/api/connections/${sent.connectionId}/decline`), 409, "event_ended");
       await expectError(await ana.page.request.patch(`/api/connections/${sent.connectionId}/knew`, { data: { knew: true } }), 409, "not_pending");
       expect((await detailOf(ana.page.request, sent.connectionId)).status).toBe("expired");

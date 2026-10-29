@@ -6,7 +6,7 @@ import { ids, valeriaPublic } from "../../lib/api/examples";
 import { E } from "../../lib/api/errors";
 import { common, confirmation, register } from "../../lib/copy/es";
 import { firstName } from "../../lib/format";
-import { expect, test } from "../fixtures";
+import { errorCopy, expect, test } from "../fixtures";
 import { detailOf, expectError, expectNotFound, listOf, sendRequest, skipTours } from "./helpers";
 
 const kindButton = (page: Page, label: string) => page.getByRole("group", { name: register.typeLabel }).getByRole("button", { name: new RegExp(label) });
@@ -91,15 +91,15 @@ test.describe("connect: register screen (mock)", () => {
     await expect(page.getByRole("heading", { name: register.title })).toHaveCount(0);
   });
 
-  const SERVER_MESSAGE_ERRORS = [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed];
-  for (const error of SERVER_MESSAGE_ERRORS) {
+  const ERRORS_WITH_COPY = [E.invalidInput, E.unauthorized, E.userNotFound, E.selfConnection, E.notAtEvent, E.consentRequired, E.testUserNotAllowed];
+  for (const error of ERRORS_WITH_COPY) {
     test(`${error.code} keeps the form and shows the error @mock`, async ({ page, mock }) => {
       await page.goto(`/connect/${valeriaPublic.handle}`);
       await mock.mockError(error.code, "**/api/connections");
       const answered = page.waitForResponse((response) => response.request().method() === "POST" && response.url().endsWith("/api/connections"));
       await confirmButton(page, 20).click();
       expect((await answered).status()).toBe(error.status);
-      await expect(page.getByText(error.message)).toBeVisible();
+      await expect(page.getByText(errorCopy(error))).toBeVisible();
       await expect(confirmButton(page, 20)).toBeEnabled();
       await expect(page).toHaveURL(new RegExp(`/connect/${valeriaPublic.handle}$`));
     });
@@ -163,7 +163,7 @@ test.describe("connect: register screen (real)", () => {
     await page.goto(`/connect/${realUser.user.handle}`);
     await expect(page.getByText(realUser.user.name).first()).toBeVisible();
     await page.getByRole("button", { name: /^Confirmar/ }).click();
-    await expect(page.getByText(E.selfConnection.message)).toBeVisible();
+    await expect(page.getByText(errorCopy(E.selfConnection))).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/connect/${realUser.user.handle}$`));
     await expectError(await page.request.post("/api/connections", { data: { toHandle: realUser.user.handle, screenConsent: true } }), 409, "self_connection");
   });
@@ -176,7 +176,7 @@ test.describe("connect: register screen (real)", () => {
       expect(loner.id).not.toBe(realUser.user.id);
       await page.goto(`/connect/${loner.handle}`);
       await page.getByRole("button", { name: /^Confirmar/ }).click();
-      await expect(page.getByText(E.notAtEvent.message)).toBeVisible();
+      await expect(page.getByText(errorCopy(E.notAtEvent))).toBeVisible();
       await expectError(await page.request.post("/api/connections", { data: { toHandle: loner.handle, screenConsent: true } }), 409, "not_at_event");
     } finally {
       await realMode.deleteTestUser(loner.id);

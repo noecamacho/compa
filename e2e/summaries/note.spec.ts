@@ -1,5 +1,6 @@
 // 08b NotaVoz (F-37): read the saved draft, type or record a note, draft it (default, fallback, not substantive),
 // approve it (+15) and every documented error. The note copy is Spanish-only, so both locales assert lib/copy/es.
+import { errorCopy } from "../fixtures";
 import type { Page, Request } from "@playwright/test";
 import { E } from "../../lib/api/errors";
 import { connectionDetail, draft, ids, valeriaConnected } from "../../lib/api/examples";
@@ -98,15 +99,15 @@ test.describe("voice note in mock mode", () => {
     await openTyping(page);
     await draftTyped(page, "hola");
     await page.getByRole("button", { name: note.save }).click();
-    await expect(page.getByText(E.notSubstantive.message)).toBeVisible();
+    await expect(page.getByText(errorCopy(E.notSubstantive))).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`${NOTE}$`));
   });
 
   for (const [code, text] of [
-    ["summary_failed", E.summaryFailed.message],
-    ["connection_not_accepted", E.connectionNotAccepted.message],
-    ["not_found", E.notFound.message],
-    ["invalid_input", E.invalidInput.message],
+    ["summary_failed", errorCopy(E.summaryFailed)],
+    ["connection_not_accepted", errorCopy(E.connectionNotAccepted)],
+    ["not_found", errorCopy(E.notFound)],
+    ["invalid_input", errorCopy(E.invalidInput)],
     ["rate_limited", common.rateLimited],
     ["limit_reached", common.limitReached],
   ] as const) {
@@ -121,9 +122,9 @@ test.describe("voice note in mock mode", () => {
   }
 
   for (const [code, text] of [
-    ["already_approved", E.alreadyApproved.message],
-    ["not_author", E.notAuthor.message],
-    ["not_found", E.notFound.message],
+    ["already_approved", errorCopy(E.alreadyApproved)],
+    ["not_author", errorCopy(E.notAuthor)],
+    ["not_found", errorCopy(E.notFound)],
   ] as const) {
     test(`an approval that fails with ${code} stays on the note @mock`, async ({ page, mock }) => {
       expect(approveSummary.errors.map((error) => error.code)).toContain(code);
@@ -170,7 +171,7 @@ test.describe("voice note in real mode", () => {
     const id = await sendRequest(ana, bruno.user);
     await ana.page.goto(`/connections/${id}/note`);
     await draftTyped(ana.page);
-    await expect(ana.page.getByText(E.connectionNotAccepted.message, { exact: true })).toBeVisible();
+    await expect(ana.page.getByText(errorCopy(E.connectionNotAccepted), { exact: true })).toBeVisible();
     await expectApiError(await ana.page.request.post("/api/interactions/draft", { data: { connectionId: id, text: TYPED } }), 409, "connection_not_accepted");
     await expectApiError(await ana.page.request.post("/api/interactions/draft", { data: { connectionId: id, text: " " } }), 400, "invalid_input");
   });
@@ -202,7 +203,7 @@ test.describe("voice note in real mode", () => {
     const drafted = await response;
     // The draft calls OpenAI; a server without OPENAI_API_KEY answers summary_failed, which the screen must say.
     if (drafted.status() === 502) {
-      await expect(ana.page.getByText(E.summaryFailed.message, { exact: true })).toBeVisible();
+      await expect(ana.page.getByText(errorCopy(E.summaryFailed), { exact: true })).toBeVisible();
       test.skip(true, "the real-mode server has no OpenAI key: approval needs a draft");
     }
     const { interactionId } = (await drafted.json()) as { interactionId: string };

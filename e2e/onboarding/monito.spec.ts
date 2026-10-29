@@ -1,5 +1,7 @@
 // F-08: 02b Monito at /onboarding/monito: every option row, random, photo vs monito, save (PATCH /api/me) to `next`,
 // ?from=me, save errors and persistence. This screen is Spanish only (lib/copy/index.ts).
+import { E } from "../../lib/api/errors";
+import { errorCopy } from "../fixtures";
 import type { Locator, Page, Request } from "@playwright/test";
 import { Me } from "../../lib/api/schemas";
 import { common, monito as copy } from "../../lib/copy/es";
@@ -117,14 +119,13 @@ test.describe("monito (mock)", () => {
     await expect(page).toHaveURL(/\/me$/);
   });
 
-  for (const code of ["invalid_input", "unauthorized"]) {
+  for (const code of ["invalid_input", "unauthorized"] as const) {
     test(`a ${code} save error shows and keeps the selection @mock`, async ({ page, mock }) => {
       await openMonito(page);
       await pickLook(page);
       await mock.mockError(code, "**/api/me");
       await saveButton(page).click();
-      // The server message is shown as is (F-08 "raw msg").
-      await expect(page.getByText(code === "unauthorized" ? /Sign in/ : /invalid/i)).toBeVisible();
+      await expect(page.getByText(errorCopy(code === "unauthorized" ? E.unauthorized : E.invalidInput))).toBeVisible();
       await expect(page).toHaveURL(/\/onboarding\/monito$/);
       await expectChosen(page);
       await expect(saveButton(page)).toBeEnabled();
