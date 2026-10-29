@@ -1,6 +1,7 @@
 import { BADGES, CATEGORY_STYLE, SHAPES, type BadgeId } from "@/lib/badges/catalog";
 
-export type BadgeState = "earned" | "locked";
+// "pending": still to earn but its art is shown (faded, with the lock); "locked": grey mystery, for secret badges.
+export type BadgeState = "earned" | "pending" | "locked";
 
 type Props = {
   id: BadgeId;
@@ -27,12 +28,13 @@ export function Badge({ id, size = 120, state = "earned", withName = false, tilt
   const badge = BADGES[id];
   const style = CATEGORY_STYLE[badge.category];
   const locked = state === "locked";
+  const earned = state === "earned";
   const shape = SHAPES[style.shape];
   const viewHeight = withName ? 156 : 130;
   const stroke = locked ? LOCKED.stroke : "#1E1B2E";
   const icon = badge.icon;
   const textFill = locked ? "#6F6A7E" : "#1E1B2E";
-  const label = `${badge.name}${locked ? ", por ganar" : ""}`;
+  const label = `${badge.name}${earned ? "" : ", por ganar"}`;
   return (
     <svg
       viewBox={`0 0 120 ${viewHeight}`}
@@ -44,59 +46,61 @@ export function Badge({ id, size = 120, state = "earned", withName = false, tilt
       style={{ display: "block", overflow: "visible", fontFamily: "var(--font-display)" }}
     >
       <g transform={tilted ? "rotate(-5 60 65)" : undefined}>
-        {!locked && <path d={shape} transform="translate(4,4)" fill="#1E1B2E" />}
-        <path
-          d={shape}
-          fill={locked ? LOCKED.fill : style.fill}
-          stroke={stroke}
-          strokeWidth={4}
-          strokeDasharray={locked ? "9 7" : undefined}
-          strokeLinejoin="round"
-        />
-        <path
-          d={shape}
-          transform="translate(60,62) scale(0.84) translate(-60,-62)"
-          fill="none"
-          stroke={stroke}
-          strokeWidth={2}
-          strokeDasharray="5 4"
-          strokeLinejoin="round"
-          opacity={0.7}
-        />
-        <g
-          transform="translate(32,34)"
-          fill="none"
-          stroke={stroke}
-          strokeWidth={4.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          opacity={locked ? 0.75 : 1}
-        >
-          {icon.a && <path d={icon.a} fill={lockedFill(icon.fa, locked)} />}
-          {icon.b && <path d={icon.b} fill={lockedFill(icon.fb, locked)} />}
-          {icon.c && <path d={icon.c} fill={lockedFill(icon.fc, locked)} />}
-          {icon.d && <path d={icon.d} fill={lockedFill(icon.fd, locked, true)} stroke="none" />}
-          {icon.text && (
-            <text
-              x={icon.text.x}
-              y={icon.text.y}
-              textAnchor="middle"
-              fontWeight={700}
-              fontSize={icon.text.size}
-              fill={textFill}
-              stroke="none"
-            >
-              {icon.text.value}
-            </text>
-          )}
+        <g opacity={state === "pending" ? 0.6 : 1}>
+          {earned && <path d={shape} transform="translate(4,4)" fill="#1E1B2E" />}
+          <path
+            d={shape}
+            fill={locked ? LOCKED.fill : style.fill}
+            stroke={stroke}
+            strokeWidth={4}
+            strokeDasharray={earned ? undefined : "9 7"}
+            strokeLinejoin="round"
+          />
+          <path
+            d={shape}
+            transform="translate(60,62) scale(0.84) translate(-60,-62)"
+            fill="none"
+            stroke={stroke}
+            strokeWidth={2}
+            strokeDasharray="5 4"
+            strokeLinejoin="round"
+            opacity={0.7}
+          />
+          <g
+            transform="translate(32,34)"
+            fill="none"
+            stroke={stroke}
+            strokeWidth={4.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity={locked ? 0.75 : 1}
+          >
+            {icon.a && <path d={icon.a} fill={lockedFill(icon.fa, locked)} />}
+            {icon.b && <path d={icon.b} fill={lockedFill(icon.fb, locked)} />}
+            {icon.c && <path d={icon.c} fill={lockedFill(icon.fc, locked)} />}
+            {icon.d && <path d={icon.d} fill={lockedFill(icon.fd, locked, true)} stroke="none" />}
+            {icon.text && (
+              <text
+                x={icon.text.x}
+                y={icon.text.y}
+                textAnchor="middle"
+                fontWeight={700}
+                fontSize={icon.text.size}
+                fill={textFill}
+                stroke="none"
+              >
+                {icon.text.value}
+              </text>
+            )}
+          </g>
         </g>
-        {locked && (
+        {!earned && (
           <g transform="translate(82,84)">
             <rect x={-13} y={-2} width={26} height={22} rx={6} fill="#FFFFFF" stroke="#1E1B2E" strokeWidth={3} />
             <path d="M-7 -2 V-8 a7 7 0 0 1 14 0 V-2" fill="none" stroke="#1E1B2E" strokeWidth={3} />
           </g>
         )}
-        {!locked && size >= 64 && (
+        {earned && size >= 64 && (
           <path
             d="M94 18 l3 7 7 3 -7 3 -3 7 -3 -7 -7 -3 7 -3z"
             fill="#FFFFFF"
