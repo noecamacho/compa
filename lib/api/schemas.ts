@@ -319,7 +319,8 @@ export const Notifications = z
   .meta({ id: "Notifications" });
 export const NotificationsSeenBody = z.object({ seenThrough: isoDate }).meta({ id: "NotificationsSeenBody" });
 
-const LivePerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable(), points: z.int() });
+// `connections` is the person's accepted count at the event; the `connections` list below holds only the most recent links.
+const LivePerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable(), points: z.int(), connections: z.int() });
 const LiveConnection = z.object({ id: uuid, a: uuid, b: uuid, kind: ConnectionKind, at: isoDate });
 
 export const LiveSnapshot = z

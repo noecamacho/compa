@@ -1,7 +1,7 @@
 import "server-only";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull, or, sql } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
-import { connections, eventAttendees, eventScores, events, lifetimeScores, users, type EventRow } from "../../db/schema";
+import { bonusPoints, connections, eventAttendees, eventScores, events, interactions, lifetimeScores, users, type EventRow } from "../../db/schema";
 import { realPeopleOnly } from "./events";
 
 export type Standing = { rank: number | null; points: number };
@@ -12,9 +12,29 @@ const connectionCount = sql<number>`coalesce(${eventScores.connections}, 0)`.map
 
 export type Ranked = { userId: string; name: string; photoUrl: string | null; points: number; connections: number };
 
+// Rankings read every score of an event (or of everyone), so many phones asking at once share one result per
+// instance for a few seconds instead of each scanning all connections (conference-scale finding 2).
+const RANKING_TTL_MS = 3000;
+const rankings = new Map<string, { at: number; value: Promise<Ranked[]> }>();
+
+export function sharedRanking(key: string, load: () => Promise<Ranked[]>, now = Date.now()): Promise<Ranked[]> {
+  const hit = rankings.get(key);
+  if (hit && now - hit.at < RANKING_TTL_MS) return hit.value;
+  const value = load();
+  const entry = { at: now, value };
+  rankings.set(key, entry);
+  // A failed load is not shared: the next caller retries.
+  value.catch(() => rankings.get(key) === entry && rankings.delete(key));
+  return value;
+}
+
 // Checked-in attendees in leaderboard order: points, connections, earliest check-in (data model §4.4).
-export async function rankedAtEvent(event: EventRow, db: Executor = getDb()): Promise<Ranked[]> {
-  const rows = await db
+export function rankedAtEvent(event: EventRow): Promise<Ranked[]> {
+  return sharedRanking(`event:${event.id}`, () => loadRankedAtEvent(event));
+}
+
+async function loadRankedAtEvent(event: EventRow): Promise<Ranked[]> {
+  const rows = await getDb()
     .select({ userId: users.id, name: users.name, photoUrl: users.photoUrl, points, connections: connectionCount })
     .from(eventAttendees)
     .innerJoin(users, eq(users.id, eventAttendees.userId))
@@ -28,8 +48,13 @@ const lifetimePoints = sql<number>`coalesce(${lifetimeScores.points}, 0)`.mapWit
 const lifetimeConnections = sql<number>`coalesce(${lifetimeScores.connections}, 0)`.mapWith(Number);
 
 // Everyone with points, all events, best first. Test users count only on boards seen from a test event or by a test user (M20).
-export async function rankedLifetime({ includeTest }: { includeTest: boolean }, db: Executor = getDb()): Promise<Ranked[]> {
-  return db
+export function rankedLifetime({ includeTest }: { includeTest: boolean }): Promise<Ranked[]> {
+  return sharedRanking(`lifetime:${includeTest}`, () => loadRankedLifetime(includeTest));
+}
+
+// async: a drizzle query re-runs on every `then`, a shared result must be a settled Promise.
+async function loadRankedLifetime(includeTest: boolean): Promise<Ranked[]> {
+  return getDb()
     .select({ userId: users.id, name: users.name, photoUrl: users.photoUrl, points: lifetimePoints, connections: lifetimeConnections })
     .from(lifetimeScores)
     .innerJoin(users, eq(users.id, lifetimeScores.userId))
@@ -45,10 +70,32 @@ export function standingOf(ranked: Ranked[], userId: string): Standing {
   return { rank: index + 1, points: row.points };
 }
 
-export async function scoresFor(person: { id: string; isTest: boolean }, event: EventRow | undefined, db: Executor = getDb()): Promise<Scores> {
+export async function scoresFor(person: { id: string; isTest: boolean }, event: EventRow | undefined): Promise<Scores> {
   const userId = person.id;
-  const [atEvent, lifetime] = await Promise.all([event ? rankedAtEvent(event, db) : Promise.resolve([]), rankedLifetime({ includeTest: person.isTest }, db)]);
+  const [atEvent, lifetime] = await Promise.all([event ? rankedAtEvent(event) : Promise.resolve([]), rankedLifetime({ includeTest: person.isTest })]);
   return { event: standingOf(atEvent, userId), lifetime: standingOf(lifetime, userId) };
+}
+
+const sumOf = (column: typeof connections.points | typeof interactions.points | typeof bonusPoints.points) =>
+  sql`coalesce(sum(${column}), 0)`;
+
+// One person's lifetime points, the same sum as the lifetime_scores view but read through that person's rows only
+// (indexes on requester, addressee, author and bonus owner) instead of aggregating every connection.
+export async function lifetimePointsOf(userId: string, db: Executor = getDb()): Promise<number> {
+  const accepted = db
+    .select({ n: sumOf(connections.points) })
+    .from(connections)
+    .where(and(eq(connections.status, "accepted"), or(eq(connections.requesterId, userId), eq(connections.addresseeId, userId))));
+  const notes = db
+    .select({ n: sumOf(interactions.points) })
+    .from(interactions)
+    .where(and(eq(interactions.authorId, userId), isNotNull(interactions.approvedAt)));
+  const bonus = db.select({ n: sumOf(bonusPoints.points) }).from(bonusPoints).where(eq(bonusPoints.userId, userId));
+  const [row] = await db
+    .select({ points: sql<number>`((${accepted}) + (${notes}) + (${bonus}))::int`.mapWith(Number) })
+    .from(users)
+    .where(eq(users.id, userId));
+  return row?.points ?? 0;
 }
 
 export type Stats = { newConnections: number; reconnections: number; events: number };

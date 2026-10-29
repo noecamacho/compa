@@ -209,3 +209,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] change | UI follow-ups (hero fallback, seam, note gap)
 
 - Landing hero: `lib/landing/hero-budget.ts` decides when to skip or leave the Three.js scene (weak device hints; median frame time over 36 ms drops to 1x pixels, then to the SVG). `Crowd.tsx` now draws the six monitos and floor at the scene's first-frame positions. Scene topics `Agents` / `Open Source` come from `lib/topics.ts`. `Screen` holds a fixed dot layer and `StickyBar` is translucent paper over it (iOS ignores `background-attachment: fixed`). Note screen buttons no longer pin to the viewport bottom from 1024. WebKit could not run on the build host (missing system libraries), so devices were emulated with Chromium profiles.
+
+## [2026-10-29] change | Conference-scale fixes: auth, scores, live payload, indexes, door cache
+
+- Findings 1, 2, 9, 14 and 21 of [docs/research/conference-load.md](../docs/research/conference-load.md) fixed: local JWT verification with `getClaims()` and `503 auth_unavailable` on Auth outages; per-person lifetime points and 3 s shared rankings; live snapshot limited to public columns and the 1,000 most recent links; migration `0009` indexes; 1 s CDN cache on the event door. New page [conference-scale](conference-scale.md) with fix status; pointers from [risks](risks.md), [delivery-checklist](delivery-checklist.md), [architecture-stack](architecture-stack.md), [points-rules](points-rules.md) and [event-day-runbook](event-day-runbook.md).

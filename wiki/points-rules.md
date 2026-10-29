@@ -24,6 +24,6 @@ Business rules live on the server, never on the client: points, idempotency and 
 
 ## Scores
 
-`event_scores` and `lifetime_scores` are views (migration `0002`): accepted connections pay both people, approved notes pay their author, `bonus_points` pay whoever they name. The leaderboard (`GET /api/events/{slug}/leaderboard?scope=event|lifetime`) orders by points, connections, then earliest check-in, and adds `me` (rank, the row above and the gap) when the viewer is signed in.
+`event_scores` and `lifetime_scores` are views (migration `0002`): accepted connections pay both people, approved notes pay their author, `bonus_points` pay whoever they name. The leaderboard (`GET /api/events/{slug}/leaderboard?scope=event|lifetime`) orders by points, connections, then earliest check-in, and adds `me` (rank, the row above and the gap) when the viewer is signed in. Rankings are shared per server instance for 3 s, so a new point can take up to 3 s to move a rank; a person's own lifetime total on `GET /api/connections` is read live from their rows ([conference-scale](conference-scale.md)).
 
 Related: [data-model](data-model.md), [rounds-and-badges](rounds-and-badges.md), [screens](screens/README.md).

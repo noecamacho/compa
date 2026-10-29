@@ -80,6 +80,8 @@ export const users = pgTable(
     check("users_city_check", sql`char_length(${t.city}) <= 80`),
     check("users_avatar_mode_check", sql`${t.avatarMode} in ('photo', 'monito')`),
     check("users_role_check", sql`${t.role} in ('user', 'super_admin')`),
+    // Lifetime ranking tie-break and signup order (badges).
+    index("users_created_at_idx").on(t.createdAt),
   ],
 ).enableRLS();
 
@@ -156,7 +158,11 @@ export const eventAttendees = pgTable(
     // Set when a super admin checked the person in on their behalf; consent is then admin-assigned (M20).
     addedBy: uuid("added_by").references(() => users.id, { onDelete: "set null" }),
   },
-  (t) => [primaryKey({ columns: [t.eventId, t.userId] })],
+  (t) => [
+    primaryKey({ columns: [t.eventId, t.userId] }),
+    // "Which event am I at now": a person's latest check-in (people.ts findCurrentEvent).
+    index("event_attendees_user_checked_in_idx").on(t.userId, t.checkedInAt.desc()),
+  ],
 ).enableRLS();
 
 // People who run an event (M20). Assigned by super admins; organizers get no extra powers yet.
@@ -225,6 +231,9 @@ export const connections = pgTable(
     index("connections_requester_idx").on(t.requesterId),
     index("connections_addressee_idx").on(t.addresseeId),
     index("connections_event_status_idx").on(t.eventId, t.status),
+    // One person's accepted (or pending) connections: lifetime points, stats, incoming requests.
+    index("connections_requester_status_idx").on(t.requesterId, t.status),
+    index("connections_addressee_status_idx").on(t.addresseeId, t.status),
   ],
 ).enableRLS();
 
@@ -255,6 +264,9 @@ export const interactions = pgTable(
     check("interactions_pending_action_length_check", sql`char_length(${t.pendingAction}) <= 200`),
     check("interactions_approved_has_points_check", sql`(${t.approvedAt} is null) = (${t.points} is null)`),
     uniqueIndex("interactions_one_approved_uq").on(t.connectionId).where(sql`approved_at is not null`),
+    index("interactions_connection_idx").on(t.connectionId),
+    // A person's approved notes: lifetime points (scores.ts lifetimePointsOf).
+    index("interactions_author_approved_idx").on(t.authorId).where(sql`approved_at is not null`),
   ],
 ).enableRLS();
 
@@ -274,7 +286,11 @@ export const bonusPoints = pgTable(
     points: smallint("points").notNull(),
     createdAt: createdAt(),
   },
-  (t) => [uniqueIndex("bonus_points_once_uq").on(t.userId, t.reason, t.refId), index("bonus_points_user_idx").on(t.userId)],
+  (t) => [
+    uniqueIndex("bonus_points_once_uq").on(t.userId, t.reason, t.refId),
+    index("bonus_points_user_idx").on(t.userId),
+    index("bonus_points_event_idx").on(t.eventId),
+  ],
 ).enableRLS();
 
 // The catalog lives in lib/badges/catalog.ts; only earned badges are stored.

@@ -1,59 +1,58 @@
 import "server-only";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, count, eq, sql } from "drizzle-orm";
 import { getDb } from "../../db/client";
-import { connections, eventAttendees, eventScores, users, type EventRow } from "../../db/schema";
+import { connections, type EventRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { isRunning } from "../connection-status";
 import { rankingTips } from "../copy/es";
 import { currentUserOrNull } from "./auth";
-import { realPeopleOnly, requireEventByCode } from "./events";
-import { cardFor } from "./people";
+import { connectionsOfRealPeople, LIVE_CACHE, requireEventByCode } from "./events";
+import { cardFor, usersByIds } from "./people";
 import { rankedAtEvent, rankedLifetime, type Ranked } from "./scores";
 
-// A6: the big screen is public; a 1 s shared cache absorbs many screens polling the same event.
-const LIVE_CACHE = { "Cache-Control": "public, s-maxage=1, stale-while-revalidate=1" };
+// The snapshot carries the most recent links only, so its size stays flat as the room connects (about 1.15 MB at
+// 1,000 people and 6k links before the cap; Vercel refuses bodies over 4.5 MB). Counters still count every link.
+const LIVE_LINKS = 1000;
 
-const points = sql<number>`coalesce(${eventScores.points}, 0)`.mapWith(Number);
-const connectionCount = sql<number>`coalesce(${eventScores.connections}, 0)`.mapWith(Number);
+const acceptedAt = (event: EventRow) =>
+  and(eq(connections.eventId, event.id), eq(connections.status, "accepted"), connectionsOfRealPeople(event));
 
-// Checked-in attendees in leaderboard order: points, connections, earliest check-in (data model §4.4).
-async function rankedAttendees(event: EventRow) {
-  return getDb()
-    .select({ user: users, points, connections: connectionCount })
-    .from(eventAttendees)
-    .innerJoin(users, eq(users.id, eventAttendees.userId))
-    .leftJoin(eventScores, and(eq(eventScores.eventId, eventAttendees.eventId), eq(eventScores.userId, eventAttendees.userId)))
-    .where(and(eq(eventAttendees.eventId, event.id), realPeopleOnly(event)))
-    .orderBy(desc(points), desc(connectionCount), asc(eventAttendees.checkedInAt));
+async function recentLinks(event: EventRow) {
+  const rows = await getDb()
+    .select({ id: connections.id, a: connections.requesterId, b: connections.addresseeId, kind: connections.kind, respondedAt: connections.respondedAt, createdAt: connections.createdAt })
+    .from(connections)
+    .where(acceptedAt(event))
+    .orderBy(sql`${connections.respondedAt} desc nulls last`)
+    .limit(LIVE_LINKS);
+  return rows.reverse();
 }
 
-async function acceptedConnections(event: EventRow) {
-  return getDb()
-    .select()
+async function linkCounters(event: EventRow) {
+  const [row] = await getDb()
+    .select({ total: count(), reconnections: sql<number>`count(*) filter (where ${connections.kind} = 'reconnection')`.mapWith(Number) })
     .from(connections)
-    .where(and(eq(connections.eventId, event.id), eq(connections.status, "accepted")))
-    .orderBy(asc(connections.respondedAt));
+    .where(acceptedAt(event));
+  return { total: row?.total ?? 0, reconnections: row?.reconnections ?? 0 };
 }
 
 export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): ResultOf<typeof R.liveSnapshot> {
   const event = await requireEventByCode(params.code);
   const now = new Date();
-  const [attendees, accepted] = await Promise.all([rankedAttendees(event), acceptedConnections(event)]);
-  const people = attendees.map(({ user, points }) => ({ id: user.id, name: user.name, photoUrl: user.photoUrl, points }));
+  const [ranked, recent, totals] = await Promise.all([rankedAtEvent(event), recentLinks(event), linkCounters(event)]);
+  const people = ranked.map(({ userId, name, photoUrl, points, connections }) => ({ id: userId, name, photoUrl, points, connections }));
   const shown = new Set(people.map((person) => person.id));
-  // An edge to someone left off the screen (a test user at a real event, M20) is left off too.
-  const visible = accepted.filter((row) => shown.has(row.requesterId) && shown.has(row.addresseeId));
-  const links = visible.map((row) => ({
-    id: row.id,
-    a: row.requesterId,
-    b: row.addresseeId,
-    kind: row.kind ?? "new",
-    at: (row.respondedAt ?? row.createdAt).toISOString(),
-  }));
-  const reconnections = links.filter((link) => link.kind === "reconnection").length;
-  const counters = { checkedIn: people.length, connections: links.length, newCount: links.length - reconnections, reconnections };
+  // An edge to someone left off the screen (a test user at a real event, M20, or a removed attendee) is left off too.
+  const links = recent
+    .filter((row) => shown.has(row.a) && shown.has(row.b))
+    .map(({ id, a, b, kind, respondedAt, createdAt }) => ({ id, a, b, kind: kind ?? "new", at: (respondedAt ?? createdAt).toISOString() }));
+  const counters = {
+    checkedIn: people.length,
+    connections: totals.total,
+    newCount: totals.total - totals.reconnections,
+    reconnections: totals.reconnections,
+  };
   const body = {
     event: { code: event.accessCode, name: event.name, isRunning: isRunning(event, now) },
     people,
@@ -66,10 +65,11 @@ export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): 
 
 export async function livePerson({ params }: InputOf<typeof R.livePerson>): ResultOf<typeof R.livePerson> {
   const event = await requireEventByCode(params.code);
-  const ranked = await rankedAttendees(event);
-  const index = ranked.findIndex((entry) => entry.user.id === params.userId);
+  const ranked = await rankedAtEvent(event);
+  const index = ranked.findIndex((entry) => entry.userId === params.userId);
   const entry = ranked[index] ?? fail(E.attendeeNotFound);
-  const card = await cardFor(null, entry.user);
+  const [person] = await usersByIds([entry.userId]);
+  const card = await cardFor(null, person ?? fail(E.attendeeNotFound));
   return { body: { card, points: entry.points, connections: entry.connections, rank: index + 1 }, headers: LIVE_CACHE };
 }
 

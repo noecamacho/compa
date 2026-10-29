@@ -22,4 +22,9 @@ The project is ready when the full flow works in production from two different p
 - Submitted before Thursday 2026-10-29 at 10:00; improvements allowed until Friday 2026-10-30 at 13:00
 - Event day: `main` frozen from one hour before doors, rollback target and `/api/health` checked ([event-day-runbook](event-day-runbook.md))
 
+## Added for conference scale ([conference-scale](conference-scale.md))
+
+- The open conference-scale fixes are shipped or consciously accepted (polling backoff, pool settings, `/home` fan-out, rollback); Supabase compute upsized for the day; Auth rate limits raised; production JWT signing key is asymmetric (ES256), which local session checks depend on
+- `main` frozen during the event; the access code is not rotated while screens are up
+
 The "public repository with a license" item conflicts with the current private repository; see [open-questions](open-questions.md). Related: [timeline](timeline.md), [demo-script](demo-script.md).

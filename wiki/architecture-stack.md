@@ -29,4 +29,10 @@ Scanning with the native camera avoids the iPhone problem: Safari has no `Barcod
 
 Package manager and runtime: Bun (team decision 2026-10-28, replaces the plan's pnpm); backend and hosting: Supabase and Vercel (confirmed by the team); strict TypeScript (p. 17). Commands: `bun run dev`, `bun run lint`, `bun run typecheck`, `bun run build`, `bun run seed` (p. 17).
 
+## Load-bearing choices at conference scale ([conference-scale](conference-scale.md))
+
+- Sessions are checked with `supabase.auth.getClaims()`: the JWT is verified locally against the cached JWKS (ES256), so a request does not call Supabase Auth; an Auth failure is `503 auth_unavailable`, never "signed out" (`lib/server/supabase.ts`).
+- Scores stay views (no hot rows); per-person reads go through that person's rows (`lifetimePointsOf`), whole-board rankings are shared per instance for 3 s (`sharedRanking`, `lib/server/scores.ts`).
+- Public event reads (`/api/e/{code}`, `/live`) carry a 1 s CDN cache; the live snapshot is capped at the 1,000 most recent links.
+
 Decision records derived from this page: [ARCHITECTURE.md](../ARCHITECTURE.md). Related: [data-model](data-model.md), [api](api.md), [ai-jobs](ai-jobs.md), [agent-contract](agent-contract.md).
