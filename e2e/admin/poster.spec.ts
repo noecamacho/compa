@@ -84,22 +84,25 @@ test.describe("admin QR poster", () => {
     expect(state.width, "the QR is large").toBeGreaterThanOrEqual(Math.min(viewport.width, viewport.height) * 0.4);
     await expect.poll(() => sidewaysOverflow(page), { message: "horizontal overflow on the poster" }).toBeLessThanOrEqual(0);
 
-    const [esBox, enBox] = await Promise.all([lines.es.boundingBox(), lines.en.boundingBox()]);
-    if (!esBox || !enBox) throw new Error("call to action has no box");
+    // Layout boxes, not bounding boxes: the cross-fade nudges the fading line up with a transform.
+    const layout = (line: Locator) => line.evaluate((element) => ({ top: (element as HTMLElement).offsetTop, height: (element as HTMLElement).offsetHeight }));
+    const [es, en] = await Promise.all([layout(lines.es), layout(lines.en)]);
     if (reduced) {
       // Calm variant: nothing moves and both languages stack, both readable.
       expect(await runningAnimations(page)).toBe(0);
-      expect(enBox.y).toBeGreaterThanOrEqual(esBox.y + esBox.height);
+      expect(en.top).toBeGreaterThanOrEqual(es.top + es.height);
       return;
     }
     // With motion: the two languages share one spot and cross-fade, and the stage keeps moving.
-    expect(Math.abs(enBox.y - esBox.y)).toBeLessThanOrEqual(1);
+    expect(en.top).toBe(es.top);
     expect(await runningAnimations(page)).toBeGreaterThan(0);
   });
 
-  test("an unknown event gets the 404 @mock", async ({ page }) => {
+  // The admin layout streams first, so the not-found page can arrive with a 200; assert what the page shows instead.
+  test("an unknown event gets the not-found page @mock", async ({ page }) => {
     await page.setExtraHTTPHeaders({ [MOCK_HEADERS.status]: "404" });
-    const response = await page.goto(POSTER);
-    expect(response?.status()).toBe(404);
+    await page.goto(POSTER);
+    await expect(page.getByRole("heading", { level: 1, name: "404" })).toBeVisible();
+    await expect(page.getByRole("img", { name: "compa", exact: true })).toHaveCount(0);
   });
 });
