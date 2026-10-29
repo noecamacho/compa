@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { z } from "zod";
-import { ApiClientError, apiCall, networkError } from "./client";
+import { apiCall, networkError } from "./client";
 
 const realFetch = globalThis.fetch;
 afterEach(() => {

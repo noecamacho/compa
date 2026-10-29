@@ -25,8 +25,7 @@ test.describe("incoming requests @mock", () => {
     await expect(card).toContainText(tour.incoming.title(firstName(paola.name)));
   });
 
-  test("a new request shows up by polling within 4 s", async ({ page }, testInfo) => {
-    const { request } = copyOf(testInfo);
+  test("a new request shows up by polling within 4 s", async ({ page }) => {
     const fresh = { connectionId: NEW_REQUEST_ID, from: andrea, event: connectionList.incoming[0]?.event, createdAt: "2026-10-29T19:00:00.000Z" };
     // The page renders on the server; only the browser's polls see the new request.
     await page.route("**/api/connections", (route) => route.fulfill({ json: { ...connectionList, incoming: [fresh, ...connectionList.incoming] } }));
