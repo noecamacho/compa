@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 import { Button } from "@/components/ui/Button";
 
 export type ConfirmSpec = { title: string; body: string; confirmLabel: string; cancelLabel: string; danger?: boolean };
@@ -13,6 +13,8 @@ type Props = { spec: ConfirmSpec | null; open: boolean; onAnswer: (confirmed: bo
 // A bottom sheet on a phone (thumb reach), a centered modal from 768 px.
 export function ConfirmDialog({ spec, open, onAnswer }: Props) {
   const ref = useRef<HTMLDialogElement>(null);
+  // A page can hold several dialogs (event actions and people); fixed ids would label them all with the first title.
+  const id = useId();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -24,8 +26,8 @@ export function ConfirmDialog({ spec, open, onAnswer }: Props) {
   return (
     <dialog
       ref={ref}
-      aria-labelledby="confirm-title"
-      aria-describedby="confirm-body"
+      aria-labelledby={`${id}-title`}
+      aria-describedby={`${id}-body`}
       onCancel={(event) => {
         event.preventDefault();
         onAnswer(false);
@@ -34,10 +36,10 @@ export function ConfirmDialog({ spec, open, onAnswer }: Props) {
       className="m-0 mt-auto w-full max-w-none rounded-t-card bg-white p-0 text-ink border-ink backdrop:bg-ink/50 md:m-auto md:max-w-[440px] md:rounded-card md:shadow-hard-4"
     >
       <div className="flex flex-col gap-3 px-5 pt-5 pb-[max(20px,env(safe-area-inset-bottom))]">
-        <h2 id="confirm-title" className="m-0 font-display text-[22px] leading-[1.15] font-bold">
+        <h2 id={`${id}-title`} className="m-0 font-display text-[22px] leading-[1.15] font-bold">
           {spec?.title}
         </h2>
-        <p id="confirm-body" className="m-0 text-[15px] leading-[1.4] font-bold text-muted">
+        <p id={`${id}-body`} className="m-0 text-[15px] leading-[1.4] font-bold text-muted">
           {spec?.body}
         </p>
         <div className="mt-2 flex flex-col-reverse gap-3 md:flex-row md:justify-end">
