@@ -28,6 +28,10 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - The captain chose MIT; `LICENSE` added. Updated `open-questions` #14 (license resolved, repository visibility still open).
 
+## [2026-10-29] query | AI core for transcription and summaries
+
+- `lib/ai/*` implements `ai-jobs`: Spanish transcription, Structured Outputs summary, verbatim fallback (p. 12). `lib/topics.ts` ships a 41-topic placeholder list until `open-questions` #4 is settled.
+
 ## [2026-10-28] query | What is the minimum API for the MVP with LinkedIn sign-up?
 
 - Added `docs/plans/2026-10-28-mvp-api-plan.md`. It records the captain's LinkedIn sign-up decision (D1, reverses "no login or OAuth"; follow-up PR to update `AGENTS.md` §4 and ADR-007) and finds that self-serve LinkedIn OIDC returns only name, photo, email and locale. It proposes resolutions for open questions #7, #12, #13 and #17 and new questions #20–#23, which are not yet appended to `open-questions`.
