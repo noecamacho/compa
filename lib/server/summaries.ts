@@ -122,5 +122,5 @@ export async function approveSummary({ user, params, body }: InputOf<typeof R.ap
     points: SUMMARY_POINTS,
     approvedAt: (row.approvedAt ?? new Date()).toISOString(),
   };
-  return { body: { interaction } };
+  return { body: { interaction, pointsAwarded: SUMMARY_POINTS } };
 }

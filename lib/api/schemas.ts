@@ -237,6 +237,7 @@ export const Approved = z
       points: z.int(),
       approvedAt: isoDate,
     }),
+    pointsAwarded: z.int(),
   })
   .meta({ id: "Approved" });
 

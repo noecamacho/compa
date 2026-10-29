@@ -362,6 +362,7 @@ export const approveSummary = route({
         points: 25,
         approvedAt: "2026-10-29T18:20:00.000Z",
       },
+      pointsAwarded: 25,
     },
   },
   errors: [E.invalidInput, E.unauthorized, E.notAuthor, E.notFound, E.notSubstantive, E.alreadyApproved],

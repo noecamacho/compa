@@ -4622,7 +4622,8 @@
                     ],
                     "points": 25,
                     "approvedAt": "2026-10-29T18:20:00.000Z"
-                  }
+                  },
+                  "pointsAwarded": 25
                 },
                 "schema": {
                   "$ref": "#/components/schemas/Approved"
@@ -6254,10 +6255,16 @@
               "approvedAt"
             ],
             "additionalProperties": false
+          },
+          "pointsAwarded": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           }
         },
         "required": [
-          "interaction"
+          "interaction",
+          "pointsAwarded"
         ],
         "additionalProperties": false
       }
