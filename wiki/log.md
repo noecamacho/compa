@@ -143,3 +143,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Can people sign in from compa.lol?
 
 - Captain decision: yes. The landing offers "Entrar con LinkedIn" for sign-up and sign-in (then `/home`); events stay exclusive because joining needs the QR link. API spec A10a records the amendment; the sign-out warning no longer says the QR is needed to come back.
+
+## [2026-10-29] query | How do super admins and real-mode tests work?
+
+- Captain requirement implemented on `feat/COMPA-TBD-super-admin-test-harness`: `users.role` and `/admin` (404 for everyone else), editable event details, organizers, and the real-mode test harness (test users, sign-in-as, automation header, Codex Conf 2026 seed). Specs: data model M20, API spec A11; method in `docs/testing/real-mode.md`. OQ #52 and #56 updated, #57 added.
