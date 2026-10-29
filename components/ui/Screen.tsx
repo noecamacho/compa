@@ -12,6 +12,8 @@ type Props = {
   gap?: number;
   width?: ScreenWidth;
   className?: string;
+  // Set once a client screen has restored its draft from storage (components/ui/useHydrated.ts).
+  "data-restored"?: string;
 };
 
 // Phone: 390 max, 18 side padding (README). Tablet: 32 gutter. Desktop: 40 gutter, 1040 of content for wide screens.
@@ -28,13 +30,14 @@ const BOTTOM_CLASS = {
 // One screen: paper with dots across the whole viewport (a fixed layer, so the sticky bar's frosted paper never shows a seam, even where iOS ignores background-attachment: fixed), content centered in it, 48 top padding, 14 between blocks (README).
 // `--rail` is set by the (app) layout from 1024 so content centers beside the rail; onboarding has no rail, so it is 0.
 // `--gutter` is the side padding; StickyBar bleeds over it.
-export function Screen({ children, dock = false, gap = 14, width = "wide", className }: Props) {
+export function Screen({ children, dock = false, gap = 14, width = "wide", className, "data-restored": restored }: Props) {
   return (
     <div className="relative isolate min-h-dvh bg-paper lg:pl-(--rail)">
       <span aria-hidden="true" className="paper-dots pointer-events-none fixed inset-0 -z-10" />
       <main
         className={`relative mx-auto flex min-h-dvh w-full flex-col px-(--gutter) pt-12 [--gutter:18px] md:[--gutter:32px] lg:[--gutter:40px] ${WIDTH_CLASS[width]} ${BOTTOM_CLASS[dock ? "dock" : "plain"]} ${className ?? ""}`}
         style={{ gap }}
+        data-restored={restored}
       >
         {children}
       </main>

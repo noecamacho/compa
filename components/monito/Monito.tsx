@@ -15,6 +15,8 @@ export function Monito({ look, px = 10, label = "Monito", className }: Props) {
       shapeRendering="crispEdges"
       role="img"
       aria-label={label}
+      // The look as data, so screens (and tests) can tell two monitos apart without reading the pixels.
+      data-look={JSON.stringify(look)}
       className={className}
       style={{ display: "block" }}
     >
