@@ -1,6 +1,7 @@
 import "server-only";
 import * as adminEventRoute from "@/app/api/admin/events/[slug]/route";
 import * as adminEventsRoute from "@/app/api/admin/events/route";
+import * as adminStatsRoute from "@/app/api/admin/stats/route";
 import * as attendeesRoute from "@/app/api/admin/events/[slug]/attendees/route";
 import * as organizersRoute from "@/app/api/admin/events/[slug]/organizers/route";
 import * as testUsersRoute from "@/app/api/admin/test-users/route";
@@ -47,6 +48,7 @@ const ENTRIES: readonly Entry[] = [
   { spec: routes.getAdminEvent, handler: adminEventRoute.GET },
   { spec: routes.listAttendees, handler: attendeesRoute.GET },
   { spec: routes.listOrganizers, handler: organizersRoute.GET },
+  { spec: routes.adminStats, handler: adminStatsRoute.GET },
 ];
 
 export function findInProcessRoute(method: string, pathname: string): { handler: RouteHandler; params: PathParams } | null {

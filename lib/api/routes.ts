@@ -163,12 +163,33 @@ export const listAdminEvents = route({
   method: "get",
   path: "/api/admin/events",
   summary: "All events (super admins)",
-  description: `${ADMIN} Newest first; archived events only with \`archived=1\` or \`status=archived\`.`,
+  description: `${ADMIN} Newest first by default, one page at a time with the total. Archived events only with \`archived=1\`, \`status=archived\` or \`phase=archived\`; \`phase\` wins over both. A test admin sees test events only.`,
   tags: ["admin"],
   auth: "admin",
   query: A.AdminEventQuery,
-  success: { status: 200, description: "Events with their counts.", schema: A.AdminEventList, example: { events: [AX.adminEvent, AX.testEvent] } },
+  success: {
+    status: 200,
+    description: "One page of events with their counts, and the total.",
+    schema: A.AdminEventList,
+    example: { events: AX.adminEvents, total: AX.adminEvents.length, page: 1, pageSize: 25 },
+    examples: {
+      paged: { summary: "Page 2 of 3", value: { events: AX.adminEvents, total: 20, page: 2, pageSize: 8 } },
+      empty: { summary: "No events match", value: { events: [], total: 0, page: 1, pageSize: 25 } },
+    },
+  },
   errors: [E.invalidInput, E.notFound],
+});
+
+export const adminStats = route({
+  id: "adminStats",
+  method: "get",
+  path: "/api/admin/stats",
+  summary: "Console headline numbers (super admins)",
+  description: `${ADMIN} Events by phase, people, check-ins and connections. Pending counts only events that are not over. A test admin sees test events and test people only.`,
+  tags: ["admin"],
+  auth: "admin",
+  success: { status: 200, description: "The numbers, as of now.", schema: A.AdminStats, example: AX.stats },
+  errors: [E.notFound],
 });
 
 export const createEvent = route({
@@ -267,12 +288,13 @@ export const listAttendees = route({
   method: "get",
   path: "/api/admin/events/{slug}/attendees",
   summary: "An event's attendees with counts (super admins)",
-  description: `${ADMIN} Newest check-in first, test users included and counted apart.`,
+  description: `${ADMIN} Newest check-in first by default, test users included and counted apart. \`q\`, \`source\` and \`test\` filter; \`total\` counts the matches, \`counts\` the whole event. Points and connections sort missing scores as 0.`,
   tags: ["admin"],
   auth: "admin",
   params: S.SlugParams,
-  success: { status: 200, description: "Attendees.", schema: A.AdminAttendeeList, example: AX.attendees },
-  errors: [E.notFound, E.eventNotFound],
+  query: A.AttendeeQuery,
+  success: { status: 200, description: "One page of attendees.", schema: A.AdminAttendeeList, example: AX.attendees },
+  errors: [E.invalidInput, E.notFound, E.eventNotFound],
 });
 
 export const addAttendee = route({
@@ -355,11 +377,17 @@ export const searchUsers = route({
   method: "get",
   path: "/api/admin/users",
   summary: "Search people (super admins)",
-  description: `${ADMIN} By name, handle, email or company; \`test\` includes, excludes or isolates test users.`,
+  description: `${ADMIN} By name, handle, email or company; \`test\` includes, excludes or isolates test users; \`role\` narrows to super admins or everyone else. \`limit\` is the page size. A test admin sees test people only.`,
   tags: ["admin"],
   auth: "admin",
   query: A.UserSearchQuery,
-  success: { status: 200, description: "Matching people, by name.", schema: A.AdminUserList, example: { users: [AX.noe, AX.testAna] } },
+  success: {
+    status: 200,
+    description: "One page of matching people, by name by default, and the total.",
+    schema: A.AdminUserList,
+    example: { users: AX.adminUsers, total: AX.adminUsers.length, page: 1, pageSize: 25 },
+    examples: { empty: { summary: "Nobody matches", value: { users: [], total: 0, page: 1, pageSize: 25 } } },
+  },
   errors: [E.invalidInput, E.notFound],
 });
 
@@ -400,7 +428,7 @@ export const deleteTestUser = route({
   auth: "automation",
   params: A.TestUserParams,
   success: { status: 204, description: "Deleted.", schema: NoBody },
-  errors: [E.notFound, E.testUserNotFound, E.harnessUnavailable],
+  errors: [E.notFound, E.testUserNotFound, E.cannotDeleteSelf, E.harnessUnavailable],
 });
 
 export const createTestSession = route({
@@ -803,6 +831,7 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   searchPeople,
   getUser,
   listAdminEvents,
+  adminStats,
   createEvent,
   getAdminEvent,
   patchAdminEvent,

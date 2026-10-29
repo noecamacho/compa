@@ -196,7 +196,9 @@ export async function listTestUsers({ query }: InputOf<typeof R.listTestUsers>):
 }
 
 // Deleting the auth row cascades to `users`, then to check-ins, connections, summaries and points.
-export async function deleteTestUser({ params }: InputOf<typeof R.deleteTestUser>): ResultOf<typeof R.deleteTestUser> {
+// A test admin deleting their own account would end their session mid-run; automation (no user) is never "self".
+export async function deleteTestUser({ user, params }: InputOf<typeof R.deleteTestUser>): ResultOf<typeof R.deleteTestUser> {
+  if (user?.id === params.id) return fail(E.cannotDeleteSelf);
   const target = requireTestTarget(await findUser(params.id));
   const { error } = await serviceAuth().deleteUser(target.authUserId);
   if (error) throw new Error(`test auth user not deleted: ${error.message}`);

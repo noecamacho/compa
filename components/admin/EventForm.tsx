@@ -11,6 +11,7 @@ import { CreatedEvent } from "@/lib/api/schemas";
 import { copyFor } from "@/lib/copy";
 import { MAX_SCHEDULE_ENTRIES, type ScheduleEntry } from "@/lib/events/schedule";
 import type { Locale } from "@/lib/i18n";
+import { slugify } from "@/lib/admin/slug";
 import { EVENT_STATUSES } from "@/lib/roles";
 import { AdminField, AdminInput } from "./AdminField";
 import { MobileActionBar } from "./AdminParts";
@@ -19,6 +20,9 @@ import { Notice } from "./Notice";
 import { DETAILS, bodyFrom, initialState, validate, type FormState } from "./eventFormState";
 
 type Props = { locale: Locale; event?: AdminEventT };
+
+// The on-blur availability check of a new slug (spec §5.2); only shown while it is still about the typed slug.
+type SlugCheck = { slug: string; status: "checking" | "free" | "taken" };
 
 const COMMON_ZONES = ["America/Mexico_City", "America/Monterrey", "America/Bogota", "America/New_York", "America/Los_Angeles", "Europe/Madrid", "UTC"];
 const DRAFT_KEY = "compa:admin:new-event-draft";
@@ -72,6 +76,9 @@ export function EventForm({ locale, event }: Props) {
   const [draftRestored, setDraftRestored] = useState(false);
   const [touched, setTouched] = useState<ReadonlySet<string>>(new Set());
   const [submitted, setSubmitted] = useState(false);
+  // The slug follows the name until it is typed by hand (M8).
+  const [slugEdited, setSlugEdited] = useState(false);
+  const [slugCheck, setSlugCheck] = useState<SlugCheck | null>(null);
   const dirty = JSON.stringify(state) !== baseline;
   const errors = validate(state, isNew, full);
   const shown = (id: string) => (submitted || touched.has(id) ? (errors[id] ?? null) : null);
@@ -88,6 +95,7 @@ export function EventForm({ locale, event }: Props) {
     // sessionStorage only exists after hydration, so the draft cannot seed the initial state without a server/client mismatch.
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setState(draft);
+    setSlugEdited(draft.slug !== slugify(draft.name));
     setDraftRestored(true);
   }, [isNew]);
 
@@ -102,7 +110,24 @@ export function EventForm({ locale, event }: Props) {
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
+  // 404 means free, 200 taken; anything else stays silent (the server still refuses a duplicate on create).
+  async function checkSlug() {
+    touch("event-slug");
+    const slug = state.slug;
+    if (errors["event-slug"]) return;
+    setSlugCheck({ slug, status: "checking" });
+    const response = await fetch(`/api/admin/events/${encodeURIComponent(slug)}`).catch(() => null);
+    const status = response?.status === 404 ? "free" : response?.ok ? "taken" : null;
+    setSlugCheck(status ? { slug, status } : null);
+  }
+
+  const slugNote = slugCheck?.slug === state.slug ? slugCheck.status : null;
+  const slugError = shown("event-slug") ?? (slugNote === "taken" ? f.slugTaken : null);
+  const slugHint = slugNote === "checking" ? full.ui.detail.slugChecking : slugNote === "free" ? full.ui.detail.slugFree : u.slugHint;
+  const setName = (name: string) => set(isNew && !slugEdited ? { name, slug: slugify(name) } : { name });
+
   function discardDraft() {
+    setSlugEdited(false);
     setState(JSON.parse(baseline) as FormState);
     setDraftRestored(false);
     setSubmitted(false);
@@ -161,14 +186,26 @@ export function EventForm({ locale, event }: Props) {
             </button>
           </p>
         )}
-        <Card className="flex flex-col gap-6 px-4 py-5 md:px-6">
+        {/* A size container: on the event page the form sits beside the QR column at xl, so the date and schedule grids
+            follow the card's width (no clipped time inputs at 1440) rather than the viewport. */}
+        <Card className="@container flex flex-col gap-6 px-4 py-5 md:px-6">
           <SectionLabel>{isNew ? f.createTitle : f.editTitle}</SectionLabel>
           <fieldset className="m-0 flex min-w-0 flex-col gap-3 border-0 p-0">
             <legend className="mb-3 font-display text-[18px] font-bold">{u.basics}</legend>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <AdminInput {...field("event-name")} label={f.name} value={state.name} onChange={(e) => set({ name: e.target.value })} required maxLength={120} autoComplete="off" />
+              <AdminInput {...field("event-name")} label={f.name} value={state.name} onChange={(e) => setName(e.target.value)} required maxLength={120} autoComplete="off" />
               {isNew && (
-                <AdminInput {...field("event-slug")} label={f.slug} hint={u.slugHint} value={state.slug} onChange={(e) => set({ slug: e.target.value.toLowerCase() })} required autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={48} />
+                <AdminInput
+                  id="event-slug"
+                  error={slugError}
+                  onBlur={checkSlug}
+                  label={f.slug}
+                  hint={slugHint}
+                  value={state.slug}
+                  onChange={(e) => {
+                    setSlugEdited(true);
+                    set({ slug: e.target.value.toLowerCase() });
+                  }} required autoCapitalize="none" autoCorrect="off" spellCheck={false} maxLength={48} />
               )}
               <AdminField id="event-status" label={f.status}>
                 {(aria, className) => (
@@ -210,7 +247,7 @@ export function EventForm({ locale, event }: Props) {
 
           <fieldset className="m-0 min-w-0 border-0 p-0">
             <legend className="mb-3 font-display text-[18px] font-bold">{u.when}</legend>
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 @xl:grid-cols-2 @3xl:grid-cols-3">
               <AdminInput {...field("event-timezone")} label={f.timezone} list="event-zones" value={state.timezone} onChange={(e) => set({ timezone: e.target.value })} required autoCapitalize="none" spellCheck={false} />
               <datalist id="event-zones">
                 {COMMON_ZONES.map((zone) => (
@@ -227,14 +264,16 @@ export function EventForm({ locale, event }: Props) {
             <Muted className="text-[13px] font-bold">{f.scheduleHint}</Muted>
             {state.schedule.length === 0 && <Muted className="text-[13px] font-bold">{u.scheduleEmpty}</Muted>}
             {state.schedule.map((entry, index) => (
-              <div key={index} role="group" aria-label={`${f.schedule} ${index + 1}`} className="grid grid-cols-2 items-start gap-3 rounded-[16px] bg-paper px-3 py-3 border-ink md:grid-cols-[1fr_1fr_1fr_2fr_auto]">
-                <AdminInput {...field(`entry-${index}-date`)} label={f.entryDate} type="date" value={entry.date} onChange={(e) => setEntry(index, { date: e.target.value })} required />
+              <div key={index} role="group" aria-label={`${f.schedule} ${index + 1}`} className="grid grid-cols-2 items-start gap-3 rounded-[16px] bg-paper px-3 py-3 border-ink @xl:grid-cols-[minmax(150px,1fr)_minmax(110px,1fr)_minmax(110px,1fr)] @3xl:grid-cols-[minmax(150px,1fr)_minmax(110px,0.7fr)_minmax(110px,0.7fr)_minmax(0,2fr)_auto]">
+                <div className="col-span-2 @xl:col-span-1">
+                  <AdminInput {...field(`entry-${index}-date`)} label={f.entryDate} type="date" value={entry.date} onChange={(e) => setEntry(index, { date: e.target.value })} required />
+                </div>
                 <AdminInput {...field(`entry-${index}-start`)} label={f.entryStart} type="time" value={entry.start} onChange={(e) => setEntry(index, { start: e.target.value })} required />
                 <AdminInput {...field(`entry-${index}-end`)} label={f.entryEnd} type="time" value={entry.end} onChange={(e) => setEntry(index, { end: e.target.value })} required />
-                <div className="col-span-2 md:col-span-1">
+                <div className="col-span-2 @3xl:col-span-1">
                   <AdminInput id={`entry-${index}-title`} label={f.entryTitle} value={entry.title ?? ""} maxLength={80} onChange={(e) => setEntry(index, { title: e.target.value })} />
                 </div>
-                <Button height={44} className="col-span-2 w-auto! md:col-span-1 md:mt-[22px]" aria-label={`${f.removeEntry} ${index + 1}`} onClick={() => set({ schedule: state.schedule.filter((_, i) => i !== index) })}>
+                <Button height={44} className="col-span-2 w-auto! @xl:col-span-1 @xl:mt-[22px]" aria-label={`${f.removeEntry} ${index + 1}`} onClick={() => set({ schedule: state.schedule.filter((_, i) => i !== index) })}>
                   {f.removeEntry}
                 </Button>
               </div>
@@ -258,7 +297,7 @@ export function EventForm({ locale, event }: Props) {
         </Card>
       </div>
       {isNew && (
-        <aside className="hidden lg:sticky lg:top-[96px] lg:block">
+        <aside className="hidden lg:sticky lg:top-6 lg:block">
           <EventPreview locale={locale} copy={full} state={state} />
         </aside>
       )}

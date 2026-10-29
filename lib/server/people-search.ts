@@ -5,7 +5,7 @@ import { eventAttendees, users } from "../../db/schema";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { slugify } from "../slug";
-import { escapeLike } from "./admin-people";
+import { escapeLike } from "./admin-events";
 import { realPeopleOnly } from "./events";
 import { cardsFor, findCurrentEvent } from "./people";
 

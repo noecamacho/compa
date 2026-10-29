@@ -82,9 +82,9 @@ Screen numbers (01–12) are the V2 screens in [DESIGN.md](../../DESIGN.md#scree
 | [F-52](#f-52) | Big screen with an empty event | IP | Ready | Ready | T-090, T-028 |
 | [F-53](#f-53) | Big screen with many nodes, for hours | IP | Partial | Ready | T-091, T-093 |
 | [F-54](#f-54) | Big screen person card and leaderboard | IP | Ready | Ready | T-090 |
-| [F-55](#f-55) | Admin creates an event | Missing | Ready | Ready | T-023 |
-| [F-56](#f-56) | Admin rotates the access code | Missing | IP | IP | T-022, T-023 |
-| [F-57](#f-57) | Admin edits, ends early or archives an event | Missing | Missing | Partial | T-023 |
+| [F-55](#f-55) | Admin creates an event | Ready | Ready | Ready | T-023 |
+| [F-56](#f-56) | Admin rotates the access code | Ready | Ready | Ready | T-022, T-023 |
+| [F-57](#f-57) | Admin edits, ends early or archives an event | Ready | Ready | Ready | T-023 |
 | [F-58](#f-58) | Admin seed or demo toggle | Missing | Missing | Missing | T-028 |
 | [F-59](#f-59) | Admin moderation (hide, ban, reports) | Missing | Missing | Missing | T-104, T-042 |
 | [F-60](#f-60) | Admin bootstrap (first admin) | — | Partial | Ready | T-029 |
@@ -1038,9 +1038,9 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Happy path | `POST { name, slug, startsAt, endsAt }` → 201 (IP: + `access_code`) |
 | Alternates | `db/seed.ts` with `SEED_DEMO=1` (`founders-fest`) |
 | Errors | `invalid_input`, 401, 403 `forbidden`, 409 `slug_taken` |
-| Edge cases | No UI (DESIGN.md "Surfaces"). Time zone (T-024) |
-| Status | UI Missing · API Ready · DB Ready |
-| E2E coverage | `e2e/admin/events.spec.ts`: admin creates → appears in the list with a printable QR; non-admin → 403 copy; `slug_taken` |
+| Edge cases | Slug auto-fills from the name and is checked live; time zone (T-024) |
+| Status | UI Ready · API Ready · DB Ready |
+| E2E coverage | `e2e/admin/console.spec.ts` (@mock: new-event slug, list, QR tab) and `e2e/admin/api.spec.ts` (@real: create, `slug_taken`, non-admin 404) |
 | Tickets | [T-023](backlog.md#t-023) |
 
 <a id="f-56"></a>
@@ -1055,8 +1055,8 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Alternates | — |
 | Errors | 403 |
 | Edge cases | Existing check-ins keep working; old printed QR codes stop working |
-| Status | UI Missing · API **IP** · DB **IP** |
-| E2E coverage | `e2e/admin/events.spec.ts` (see F-15) |
+| Status | UI Ready · API Ready · DB Ready |
+| E2E coverage | `e2e/admin/console.spec.ts` (@mock: rotate confirm warns that printed QR codes stop working); `e2e/events/door.spec.ts` (see F-15) |
 | Tickets | [T-022](backlog.md#t-022), [T-023](backlog.md#t-023) |
 
 <a id="f-57"></a>
@@ -1071,8 +1071,8 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Alternates | — |
 | Errors | `invalid_input` (window), 403 |
 | Edge cases | Hard delete cascades and erases scores (FK). Pending requests expire on end (OQ #56) |
-| Status | UI Missing · API Missing · DB Partial (no `archived_at`) |
-| E2E coverage | `e2e/admin/events.spec.ts`: end now → a pending request shows expired; archived event → the door shows not found |
+| Status | UI Ready · API Ready · DB Ready (`events.status` includes `archived`) |
+| E2E coverage | `e2e/admin/console-real.spec.ts` (@real: End now, Archive, Restore through the row menus); `e2e/admin/api.spec.ts` (@real: lifecycle routes). Still open: pending request shows expired after End now |
 | Tickets | [T-023](backlog.md#t-023) |
 
 <a id="f-58"></a>

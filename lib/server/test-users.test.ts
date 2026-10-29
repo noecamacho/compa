@@ -3,7 +3,7 @@ import type { EventRow, UserRow } from "../../db/schema";
 import { ApiError } from "../api/errors";
 
 mock.module("server-only", () => ({}));
-const { requireTestTarget } = await import("./test-users");
+const { deleteTestUser, requireTestTarget } = await import("./test-users");
 const { ensureCheckedIn } = await import("./events");
 
 function caught(run: () => unknown): ApiError {
@@ -35,5 +35,16 @@ describe("check-in keeps test users out of real events (M20)", () => {
     const error = await promise.then(() => null, (reason: unknown) => reason);
     expect(error).toBeInstanceOf(ApiError);
     expect((error as ApiError).code).toBe("test_user_not_allowed");
+  });
+});
+
+describe("a test admin cannot delete their own account (admin spec §7.5)", () => {
+  test("refused with 409 before touching the database", async () => {
+    const self = { id: "6a0f6c1e-1b2d-4c3e-8f4a-5b6c7d8e9f01", isTest: true, role: "super_admin" } as UserRow;
+    const input = { req: new Request("http://localhost"), user: self, params: { id: self.id }, query: {}, body: {} };
+    const error = await deleteTestUser(input).then(() => null, (reason: unknown) => reason);
+    expect(error).toBeInstanceOf(ApiError);
+    expect((error as ApiError).status).toBe(409);
+    expect((error as ApiError).code).toBe("cannot_delete_self");
   });
 });

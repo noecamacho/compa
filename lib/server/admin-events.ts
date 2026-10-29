@@ -1,8 +1,10 @@
 import "server-only";
-import { and, count, desc, eq, inArray, ne, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, ilike, inArray, lte, ne, or, sql, type AnyColumn, type SQL } from "drizzle-orm";
 import { getDb } from "../../db/client";
 import { connections, eventAttendees, eventOrganizers, events, users, type EventRow, type UserRow } from "../../db/schema";
 import { generateAccessCode, joinUrl } from "../access-code";
+import { EVENT_PHASES, type EventPhaseT } from "../admin/event-phase";
+import { sortDirection, type SortDir } from "../admin/sort";
 import { canManageEvent } from "../api/admin-gate";
 import type { AdminEventT, AdminUserT, PatchEventBodyT } from "../api/admin-schemas";
 import { ApiError, E, fail } from "../api/errors";
@@ -155,19 +157,95 @@ export async function createEvent({ req, user, body }: InputOf<typeof R.createEv
   }
 }
 
-function listFilter(admin: UserRow, query: InputOf<typeof R.listAdminEvents>["query"]): SQL | undefined {
-  const conditions = [
-    query.status ? eq(events.status, query.status) : undefined,
-    query.status || query.archived === "1" ? undefined : ne(events.status, "archived"),
-    admin.isTest ? eq(events.isTest, true) : undefined,
-  ];
-  return and(...conditions);
+// ---- GET /api/admin/events ----
+
+type ListQuery = InputOf<typeof R.listAdminEvents>["query"];
+type TestScope = ListQuery["test"];
+
+// Search text matches literally: `%`, `_` and `\` are escaped for ilike.
+export const escapeLike = (text: string): string => text.replace(/[\\%_]/g, (char) => `\\${char}`);
+
+// Shared by the events, people and attendee lists.
+export const testFilter = (isTest: AnyColumn, test: TestScope): SQL | undefined => (test === "include" ? undefined : eq(isTest, test === "only"));
+
+// A test admin sees test events only (lib/api/admin-gate.ts canManageEvent).
+export const managedEvents = (admin: UserRow): SQL | undefined => (admin.isTest ? eq(events.isTest, true) : undefined);
+
+const live = () => eq(events.status, "live");
+
+// The phaseOf rule (lib/admin/event-phase.ts) in SQL.
+const PHASE_SQL: Record<EventPhaseT, (now: Date) => SQL | undefined> = {
+  running: (now) => and(live(), lte(events.startsAt, now), gt(events.endsAt, now)),
+  upcoming: (now) => and(live(), gt(events.startsAt, now)),
+  draft: () => eq(events.status, "draft"),
+  ended: (now) => or(eq(events.status, "ended"), and(live(), lte(events.endsAt, now))),
+  archived: () => eq(events.status, "archived"),
+};
+
+export const phaseFilter = (phase: EventPhaseT, now: Date): SQL => PHASE_SQL[phase](now) ?? sql`true`;
+
+// `phase` wins over `status`, which wins over the legacy `archived` flag.
+function lifecycleFilter(query: ListQuery, now: Date): SQL | undefined {
+  if (query.phase) return phaseFilter(query.phase, now);
+  if (query.status) return eq(events.status, query.status);
+  return query.archived === "1" ? undefined : ne(events.status, "archived");
 }
 
+function eventTextFilter(q: string | undefined): SQL | undefined {
+  if (!q) return undefined;
+  const pattern = `%${escapeLike(q)}%`;
+  return or(ilike(events.name, pattern), ilike(events.slug, pattern), ilike(events.venueName, pattern), ilike(events.city, pattern), eq(events.accessCode, q.toLowerCase()));
+}
+
+export const eventListFilter = (admin: UserRow, query: ListQuery, now: Date): SQL | undefined =>
+  and(lifecycleFilter(query, now), eventTextFilter(query.q), testFilter(events.isTest, query.test), managedEvents(admin));
+
+// Integers are inlined: a bound parameter in CASE would be typed text and sort "10" before "2".
+const phaseRank = (now: Date): SQL =>
+  sql`case ${sql.join(
+    EVENT_PHASES.map((phase, rank) => sql`when ${phaseFilter(phase, now)} then ${sql.raw(String(rank))}`),
+    sql` `,
+  )} end`;
+
+const EVENT_SORT_KEYS: Record<ListQuery["sort"], (now: Date) => AnyColumn | SQL> = {
+  startsAt: () => events.startsAt,
+  name: () => events.name,
+  createdAt: () => events.createdAt,
+  status: phaseRank,
+  attendees: () => sql`(select count(*) from ${eventAttendees} where ${eventAttendees.eventId} = ${events.id})`,
+  connections: () =>
+    sql`(select count(*) from ${connections} where ${connections.eventId} = ${events.id} and ${connections.status} = 'accepted')`,
+};
+
+export const orderBy = (dir: SortDir, key: AnyColumn | SQL, tiebreaker: AnyColumn): SQL[] => {
+  const by = dir === "asc" ? asc : desc;
+  return [by(key), by(tiebreaker)];
+};
+
+// `events.id` breaks ties, so a page never repeats or skips a row when sort keys are equal.
+export const eventOrder = (sort: ListQuery["sort"], dir: SortDir | undefined, now: Date): SQL[] =>
+  orderBy(sortDirection(sort, dir), EVENT_SORT_KEYS[sort](now), events.id);
+
+export const pageOffset = (page: number, pageSize: number): number => (page - 1) * pageSize;
+
+// shortcut: offset pagination can shift a row when events change between page loads; a cursor if that ever matters.
 export async function listAdminEvents({ req, user, query }: InputOf<typeof R.listAdminEvents>): ResultOf<typeof R.listAdminEvents> {
-  const rows = await getDb().select().from(events).where(listFilter(user, query)).orderBy(desc(events.startsAt)).limit(200);
+  const now = new Date();
+  const where = eventListFilter(user, query, now);
+  const { page, pageSize } = query;
+  const db = getDb();
+  const [rows, [totals]] = await Promise.all([
+    db
+      .select()
+      .from(events)
+      .where(where)
+      .orderBy(...eventOrder(query.sort, query.dir, now))
+      .limit(pageSize)
+      .offset(pageOffset(page, pageSize)),
+    db.select({ n: count() }).from(events).where(where),
+  ]);
   const counts = await eventCounts(rows.map((row) => row.id));
-  return { body: { events: rows.map((row) => toAdminEvent(req, row, counts.get(row.id))) } };
+  return { body: { events: rows.map((row) => toAdminEvent(req, row, counts.get(row.id), now)), total: totals?.n ?? 0, page, pageSize } };
 }
 
 export async function getAdminEvent({ req, user, params }: InputOf<typeof R.getAdminEvent>): ResultOf<typeof R.getAdminEvent> {

@@ -11,7 +11,7 @@ export default function AdminError({ reset }: { error: Error; reset: () => void 
   const [locale] = useState(() => pickLocale(typeof navigator === "undefined" ? [] : navigator.languages));
   const copy = copyFor(locale).admin;
   return (
-    <AdminShell copy={copy}>
+    <AdminShell copy={copy} locale={locale}>
       <div role="alert" className="flex max-w-[480px] flex-col items-start gap-3">
         <h1 className="m-0 font-display text-[26px] leading-[1.1] font-bold">{copy.ui.pageError.title}</h1>
         <p className="m-0 text-[15px] font-bold text-muted">{copy.ui.pageError.body}</p>

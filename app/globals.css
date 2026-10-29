@@ -251,6 +251,32 @@
   }
 }
 
+/* Horizontal scrollers (admin chips and tabs): fade the edge that has more content, so clipping reads as scrollable.
+   Scroll-driven, so nothing fades when the content fits; browsers without scroll timelines just scroll. */
+@property --fade-start {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@property --fade-end {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+@keyframes scroll-fade {
+  from { --fade-start: 0px; --fade-end: 28px; }
+  8% { --fade-start: 28px; }
+  92% { --fade-end: 28px; }
+  to { --fade-start: 28px; --fade-end: 0px; }
+}
+@utility scroll-fade-x {
+  mask-image: linear-gradient(to right, transparent, #000 var(--fade-start), #000 calc(100% - var(--fade-end)), transparent);
+  @supports (animation-timeline: scroll()) {
+    animation: scroll-fade linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -261,5 +287,16 @@
   /* The live pairs start invisible and are revealed by their loop; without it, show them in place. */
   .animate-pair {
     opacity: 1 !important;
+  }
+}
+
+/* Admin event QR print (admin spec §5.3, edge case 37): the event page portals [data-admin-print] into <body>; printing
+   shows that sheet alone. Pages without the sheet print as usual. */
+@media print {
+  body:has(> [data-admin-print]) > :not([data-admin-print]) {
+    display: none !important;
+  }
+  body > [data-admin-print] {
+    display: flex !important;
   }
 }

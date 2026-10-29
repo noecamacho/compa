@@ -2309,7 +2309,7 @@
       "get": {
         "operationId": "listAdminEvents",
         "summary": "All events (super admins)",
-        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Newest first; archived events only with `archived=1` or `status=archived`.",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Newest first by default, one page at a time with the total. Archived events only with `archived=1`, `status=archived` or `phase=archived`; `phase` wins over both. A test admin sees test events only.",
         "tags": [
           "admin"
         ],
@@ -2344,6 +2344,93 @@
             "description": "`1` includes archived events."
           },
           {
+            "in": "query",
+            "name": "phase",
+            "schema": {
+              "description": "Only events in this derived phase; wins over `status` and `archived`.",
+              "$ref": "#/components/schemas/EventPhase"
+            },
+            "description": "Only events in this derived phase; wins over `status` and `archived`."
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Name, slug, venue or city (case-insensitive), or an exact access code.",
+              "type": "string",
+              "maxLength": 80
+            },
+            "description": "Name, slug, venue or city (case-insensitive), or an exact access code."
+          },
+          {
+            "in": "query",
+            "name": "test",
+            "schema": {
+              "default": "include",
+              "description": "Include, exclude or isolate test events.",
+              "type": "string",
+              "enum": [
+                "include",
+                "exclude",
+                "only"
+              ]
+            },
+            "description": "Include, exclude or isolate test events."
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "startsAt",
+              "description": "`status` orders by phase: running, upcoming, draft, ended, archived.",
+              "type": "string",
+              "enum": [
+                "startsAt",
+                "name",
+                "status",
+                "attendees",
+                "connections",
+                "createdAt"
+              ]
+            },
+            "description": "`status` orders by phase: running, upcoming, draft, ended, archived."
+          },
+          {
+            "in": "query",
+            "name": "dir",
+            "schema": {
+              "description": "Default: `asc` for `name`, `desc` otherwise.",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Default: `asc` for `name`, `desc` otherwise."
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "description": "1-based page number."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 200,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200
+            }
+          },
+          {
             "$ref": "#/components/parameters/mockMockHeader"
           },
           {
@@ -2358,81 +2445,498 @@
         ],
         "responses": {
           "200": {
-            "description": "Events with their counts.",
+            "description": "One page of events with their counts, and the total.",
             "content": {
               "application/json": {
-                "example": {
-                  "events": [
-                    {
-                      "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
-                      "slug": "founders-fest",
-                      "name": "Founders Fest GDL",
-                      "accessCode": "k7m2p9xq4t",
-                      "joinUrl": "https://compa.lol/e/k7m2p9xq4t",
-                      "startsAt": "2026-10-29T16:00:00.000Z",
-                      "endsAt": "2026-10-30T04:00:00.000Z",
-                      "isRunning": true,
-                      "status": "live",
-                      "isTest": false,
-                      "description": "Founders, operators and investors from Guadalajara, one night.",
-                      "venueName": "Casa Jalisco",
-                      "address": "Av. Chapultepec 480",
-                      "city": "Guadalajara",
-                      "country": "México",
-                      "websiteUrl": "https://foundersfest.example.com",
-                      "timezone": "America/Mexico_City",
-                      "schedule": [
-                        {
-                          "date": "2026-10-29",
-                          "start": "10:00",
-                          "end": "22:00"
-                        },
-                        {
-                          "date": "2026-10-29",
-                          "start": "18:00",
-                          "end": "18:45",
-                          "title": "Keynote"
-                        }
-                      ],
-                      "createdAt": "2026-10-20T12:00:00.000Z",
-                      "counts": {
-                        "attendees": 340,
-                        "connections": 218,
-                        "pending": 12,
-                        "organizers": 2
-                      }
-                    },
-                    {
-                      "id": "a3e4f5a6-b7c8-4d9e-8f0a-1b2c3d4e5f04",
-                      "slug": "codex-conf-2026",
-                      "name": "Codex Conf 2026",
-                      "accessCode": "c0dexc0nf26",
-                      "joinUrl": "https://compa.lol/e/c0dexc0nf26",
-                      "startsAt": "2026-10-29T16:00:00.000Z",
-                      "endsAt": "2026-10-30T04:00:00.000Z",
-                      "isRunning": true,
-                      "status": "live",
-                      "isTest": true,
-                      "description": "The shared test event for real-mode tests. Test people only.",
-                      "venueName": "The test lab",
-                      "address": "Av. Chapultepec 480",
-                      "city": "Guadalajara",
-                      "country": "México",
-                      "websiteUrl": "https://foundersfest.example.com",
-                      "timezone": "America/Mexico_City",
-                      "schedule": [],
-                      "createdAt": "2026-10-20T12:00:00.000Z",
-                      "counts": {
-                        "attendees": 13,
-                        "connections": 4,
-                        "pending": 2,
-                        "organizers": 1
-                      }
-                    }
-                  ]
-                },
                 "schema": {
                   "$ref": "#/components/schemas/AdminEventList"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Default",
+                    "value": {
+                      "events": [
+                        {
+                          "id": "2b02b3c4-d5e6-4f7a-8b8c-9d0e1f2a3b12",
+                          "slug": "noche-de-agentes-cdmx",
+                          "name": "Noche de Agentes CDMX",
+                          "accessCode": "n8chagnt5x",
+                          "joinUrl": "https://compa.lol/e/n8chagnt5x",
+                          "startsAt": "2026-11-14T00:00:00.000Z",
+                          "endsAt": "2026-11-14T05:00:00.000Z",
+                          "isRunning": false,
+                          "status": "live",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Foro Reforma",
+                          "address": "Paseo de la Reforma 250, Juárez",
+                          "city": "Ciudad de México",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-10-25T18:30:00.000Z",
+                          "counts": {
+                            "attendees": 0,
+                            "connections": 0,
+                            "pending": 0,
+                            "organizers": 1
+                          }
+                        },
+                        {
+                          "id": "3c13c4d5-e6f7-4a8b-9c9d-0e1f2a3b4c13",
+                          "slug": "demo-day-merida",
+                          "name": "Demo Day Mérida",
+                          "accessCode": "d3m0mrd7kq",
+                          "joinUrl": "https://compa.lol/e/d3m0mrd7kq",
+                          "startsAt": "2026-12-05T22:00:00.000Z",
+                          "endsAt": "2026-12-06T03:00:00.000Z",
+                          "isRunning": false,
+                          "status": "draft",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Centro de Convenciones Siglo XXI",
+                          "address": "Calle 60 Norte 299",
+                          "city": "Mérida",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Merida",
+                          "schedule": [],
+                          "createdAt": "2026-10-28T09:15:00.000Z",
+                          "counts": {
+                            "attendees": 0,
+                            "connections": 0,
+                            "pending": 0,
+                            "organizers": 0
+                          }
+                        },
+                        {
+                          "id": "7a57a8b9-c0d1-4e2f-9a3b-4c5d6e7f8a17",
+                          "slug": "encuentro-fundadores-occidente",
+                          "name": "Encuentro de Fundadoras, Fundadores e Inversionistas de Tecnología del Occidente de México: edición Guadalajara, 3 días",
+                          "accessCode": "3ncu3ntr0g",
+                          "joinUrl": "https://compa.lol/e/3ncu3ntr0g",
+                          "startsAt": "2026-10-28T15:00:00.000Z",
+                          "endsAt": "2026-10-31T02:00:00.000Z",
+                          "isRunning": true,
+                          "status": "live",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Expo Guadalajara, Salón Jalisco y explanada norte",
+                          "address": "Av. Mariano Otero 1499, Verde Valle",
+                          "city": "Guadalajara",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-09-30T17:45:00.000Z",
+                          "counts": {
+                            "attendees": 1112,
+                            "connections": 854,
+                            "pending": 41,
+                            "organizers": 6
+                          }
+                        },
+                        {
+                          "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
+                          "slug": "founders-fest",
+                          "name": "Founders Fest GDL",
+                          "accessCode": "k7m2p9xq4t",
+                          "joinUrl": "https://compa.lol/e/k7m2p9xq4t",
+                          "startsAt": "2026-10-29T16:00:00.000Z",
+                          "endsAt": "2026-10-30T04:00:00.000Z",
+                          "isRunning": true,
+                          "status": "live",
+                          "isTest": false,
+                          "description": "Founders, operators and investors from Guadalajara, one night.",
+                          "venueName": "Casa Jalisco",
+                          "address": "Av. Chapultepec 480",
+                          "city": "Guadalajara",
+                          "country": "México",
+                          "websiteUrl": "https://foundersfest.example.com",
+                          "timezone": "America/Mexico_City",
+                          "schedule": [
+                            {
+                              "date": "2026-10-29",
+                              "start": "10:00",
+                              "end": "22:00"
+                            },
+                            {
+                              "date": "2026-10-29",
+                              "start": "18:00",
+                              "end": "18:45",
+                              "title": "Keynote"
+                            }
+                          ],
+                          "createdAt": "2026-10-20T12:00:00.000Z",
+                          "counts": {
+                            "attendees": 340,
+                            "connections": 218,
+                            "pending": 12,
+                            "organizers": 2
+                          }
+                        },
+                        {
+                          "id": "a3e4f5a6-b7c8-4d9e-8f0a-1b2c3d4e5f04",
+                          "slug": "codex-conf-2026",
+                          "name": "Codex Conf 2026",
+                          "accessCode": "c0dexc0nf26",
+                          "joinUrl": "https://compa.lol/e/c0dexc0nf26",
+                          "startsAt": "2026-10-29T16:00:00.000Z",
+                          "endsAt": "2026-10-30T04:00:00.000Z",
+                          "isRunning": true,
+                          "status": "live",
+                          "isTest": true,
+                          "description": "The shared test event for real-mode tests. Test people only.",
+                          "venueName": "The test lab",
+                          "address": "Av. Chapultepec 480",
+                          "city": "Guadalajara",
+                          "country": "México",
+                          "websiteUrl": "https://foundersfest.example.com",
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-10-20T12:00:00.000Z",
+                          "counts": {
+                            "attendees": 13,
+                            "connections": 4,
+                            "pending": 2,
+                            "organizers": 1
+                          }
+                        },
+                        {
+                          "id": "4d24d5e6-f7a8-4b9c-8d0e-1f2a3b4c5d14",
+                          "slug": "hackathon-tapatio",
+                          "name": "Hackathon Tapatío",
+                          "accessCode": "h4ckt4p8wz",
+                          "joinUrl": "https://compa.lol/e/h4ckt4p8wz",
+                          "startsAt": "2026-10-18T15:00:00.000Z",
+                          "endsAt": "2026-10-19T03:00:00.000Z",
+                          "isRunning": false,
+                          "status": "live",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Palacio de la Cultura y la Comunicación",
+                          "address": "Av. Chapultepec 480",
+                          "city": "Zapopan",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-10-01T16:00:00.000Z",
+                          "counts": {
+                            "attendees": 128,
+                            "connections": 96,
+                            "pending": 9,
+                            "organizers": 3
+                          }
+                        },
+                        {
+                          "id": "5e35e6f7-a8b9-4c0d-9e1f-2a3b4c5d6e15",
+                          "slug": "startup-mixer-roma",
+                          "name": "Startup Mixer Roma",
+                          "accessCode": "m6x3rr0m4p",
+                          "joinUrl": "https://compa.lol/e/m6x3rr0m4p",
+                          "startsAt": "2026-10-10T00:30:00.000Z",
+                          "endsAt": "2026-10-10T04:00:00.000Z",
+                          "isRunning": false,
+                          "status": "ended",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Casa Lamm",
+                          "address": "Álvaro Obregón 99, Roma Norte",
+                          "city": "Ciudad de México",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-09-20T12:00:00.000Z",
+                          "counts": {
+                            "attendees": 74,
+                            "connections": 51,
+                            "pending": 0,
+                            "organizers": 2
+                          }
+                        },
+                        {
+                          "id": "6f46f7a8-b9c0-4d1e-8f2a-3b4c5d6e7f16",
+                          "slug": "meetup-zapopan-2025",
+                          "name": "Meetup Zapopan 2025",
+                          "accessCode": "z4p8p4nm2t",
+                          "joinUrl": "https://compa.lol/e/z4p8p4nm2t",
+                          "startsAt": "2025-11-20T00:00:00.000Z",
+                          "endsAt": "2025-11-20T04:00:00.000Z",
+                          "isRunning": false,
+                          "status": "archived",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Andares Coworking",
+                          "address": "Av. Chapultepec 480",
+                          "city": "Zapopan",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2025-11-01T12:00:00.000Z",
+                          "counts": {
+                            "attendees": 41,
+                            "connections": 23,
+                            "pending": 0,
+                            "organizers": 1
+                          }
+                        }
+                      ],
+                      "total": 8,
+                      "page": 1,
+                      "pageSize": 25
+                    }
+                  },
+                  "paged": {
+                    "summary": "Page 2 of 3",
+                    "value": {
+                      "events": [
+                        {
+                          "id": "2b02b3c4-d5e6-4f7a-8b8c-9d0e1f2a3b12",
+                          "slug": "noche-de-agentes-cdmx",
+                          "name": "Noche de Agentes CDMX",
+                          "accessCode": "n8chagnt5x",
+                          "joinUrl": "https://compa.lol/e/n8chagnt5x",
+                          "startsAt": "2026-11-14T00:00:00.000Z",
+                          "endsAt": "2026-11-14T05:00:00.000Z",
+                          "isRunning": false,
+                          "status": "live",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Foro Reforma",
+                          "address": "Paseo de la Reforma 250, Juárez",
+                          "city": "Ciudad de México",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-10-25T18:30:00.000Z",
+                          "counts": {
+                            "attendees": 0,
+                            "connections": 0,
+                            "pending": 0,
+                            "organizers": 1
+                          }
+                        },
+                        {
+                          "id": "3c13c4d5-e6f7-4a8b-9c9d-0e1f2a3b4c13",
+                          "slug": "demo-day-merida",
+                          "name": "Demo Day Mérida",
+                          "accessCode": "d3m0mrd7kq",
+                          "joinUrl": "https://compa.lol/e/d3m0mrd7kq",
+                          "startsAt": "2026-12-05T22:00:00.000Z",
+                          "endsAt": "2026-12-06T03:00:00.000Z",
+                          "isRunning": false,
+                          "status": "draft",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Centro de Convenciones Siglo XXI",
+                          "address": "Calle 60 Norte 299",
+                          "city": "Mérida",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Merida",
+                          "schedule": [],
+                          "createdAt": "2026-10-28T09:15:00.000Z",
+                          "counts": {
+                            "attendees": 0,
+                            "connections": 0,
+                            "pending": 0,
+                            "organizers": 0
+                          }
+                        },
+                        {
+                          "id": "7a57a8b9-c0d1-4e2f-9a3b-4c5d6e7f8a17",
+                          "slug": "encuentro-fundadores-occidente",
+                          "name": "Encuentro de Fundadoras, Fundadores e Inversionistas de Tecnología del Occidente de México: edición Guadalajara, 3 días",
+                          "accessCode": "3ncu3ntr0g",
+                          "joinUrl": "https://compa.lol/e/3ncu3ntr0g",
+                          "startsAt": "2026-10-28T15:00:00.000Z",
+                          "endsAt": "2026-10-31T02:00:00.000Z",
+                          "isRunning": true,
+                          "status": "live",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Expo Guadalajara, Salón Jalisco y explanada norte",
+                          "address": "Av. Mariano Otero 1499, Verde Valle",
+                          "city": "Guadalajara",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-09-30T17:45:00.000Z",
+                          "counts": {
+                            "attendees": 1112,
+                            "connections": 854,
+                            "pending": 41,
+                            "organizers": 6
+                          }
+                        },
+                        {
+                          "id": "e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a55",
+                          "slug": "founders-fest",
+                          "name": "Founders Fest GDL",
+                          "accessCode": "k7m2p9xq4t",
+                          "joinUrl": "https://compa.lol/e/k7m2p9xq4t",
+                          "startsAt": "2026-10-29T16:00:00.000Z",
+                          "endsAt": "2026-10-30T04:00:00.000Z",
+                          "isRunning": true,
+                          "status": "live",
+                          "isTest": false,
+                          "description": "Founders, operators and investors from Guadalajara, one night.",
+                          "venueName": "Casa Jalisco",
+                          "address": "Av. Chapultepec 480",
+                          "city": "Guadalajara",
+                          "country": "México",
+                          "websiteUrl": "https://foundersfest.example.com",
+                          "timezone": "America/Mexico_City",
+                          "schedule": [
+                            {
+                              "date": "2026-10-29",
+                              "start": "10:00",
+                              "end": "22:00"
+                            },
+                            {
+                              "date": "2026-10-29",
+                              "start": "18:00",
+                              "end": "18:45",
+                              "title": "Keynote"
+                            }
+                          ],
+                          "createdAt": "2026-10-20T12:00:00.000Z",
+                          "counts": {
+                            "attendees": 340,
+                            "connections": 218,
+                            "pending": 12,
+                            "organizers": 2
+                          }
+                        },
+                        {
+                          "id": "a3e4f5a6-b7c8-4d9e-8f0a-1b2c3d4e5f04",
+                          "slug": "codex-conf-2026",
+                          "name": "Codex Conf 2026",
+                          "accessCode": "c0dexc0nf26",
+                          "joinUrl": "https://compa.lol/e/c0dexc0nf26",
+                          "startsAt": "2026-10-29T16:00:00.000Z",
+                          "endsAt": "2026-10-30T04:00:00.000Z",
+                          "isRunning": true,
+                          "status": "live",
+                          "isTest": true,
+                          "description": "The shared test event for real-mode tests. Test people only.",
+                          "venueName": "The test lab",
+                          "address": "Av. Chapultepec 480",
+                          "city": "Guadalajara",
+                          "country": "México",
+                          "websiteUrl": "https://foundersfest.example.com",
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-10-20T12:00:00.000Z",
+                          "counts": {
+                            "attendees": 13,
+                            "connections": 4,
+                            "pending": 2,
+                            "organizers": 1
+                          }
+                        },
+                        {
+                          "id": "4d24d5e6-f7a8-4b9c-8d0e-1f2a3b4c5d14",
+                          "slug": "hackathon-tapatio",
+                          "name": "Hackathon Tapatío",
+                          "accessCode": "h4ckt4p8wz",
+                          "joinUrl": "https://compa.lol/e/h4ckt4p8wz",
+                          "startsAt": "2026-10-18T15:00:00.000Z",
+                          "endsAt": "2026-10-19T03:00:00.000Z",
+                          "isRunning": false,
+                          "status": "live",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Palacio de la Cultura y la Comunicación",
+                          "address": "Av. Chapultepec 480",
+                          "city": "Zapopan",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-10-01T16:00:00.000Z",
+                          "counts": {
+                            "attendees": 128,
+                            "connections": 96,
+                            "pending": 9,
+                            "organizers": 3
+                          }
+                        },
+                        {
+                          "id": "5e35e6f7-a8b9-4c0d-9e1f-2a3b4c5d6e15",
+                          "slug": "startup-mixer-roma",
+                          "name": "Startup Mixer Roma",
+                          "accessCode": "m6x3rr0m4p",
+                          "joinUrl": "https://compa.lol/e/m6x3rr0m4p",
+                          "startsAt": "2026-10-10T00:30:00.000Z",
+                          "endsAt": "2026-10-10T04:00:00.000Z",
+                          "isRunning": false,
+                          "status": "ended",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Casa Lamm",
+                          "address": "Álvaro Obregón 99, Roma Norte",
+                          "city": "Ciudad de México",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2026-09-20T12:00:00.000Z",
+                          "counts": {
+                            "attendees": 74,
+                            "connections": 51,
+                            "pending": 0,
+                            "organizers": 2
+                          }
+                        },
+                        {
+                          "id": "6f46f7a8-b9c0-4d1e-8f2a-3b4c5d6e7f16",
+                          "slug": "meetup-zapopan-2025",
+                          "name": "Meetup Zapopan 2025",
+                          "accessCode": "z4p8p4nm2t",
+                          "joinUrl": "https://compa.lol/e/z4p8p4nm2t",
+                          "startsAt": "2025-11-20T00:00:00.000Z",
+                          "endsAt": "2025-11-20T04:00:00.000Z",
+                          "isRunning": false,
+                          "status": "archived",
+                          "isTest": false,
+                          "description": null,
+                          "venueName": "Andares Coworking",
+                          "address": "Av. Chapultepec 480",
+                          "city": "Zapopan",
+                          "country": "México",
+                          "websiteUrl": null,
+                          "timezone": "America/Mexico_City",
+                          "schedule": [],
+                          "createdAt": "2025-11-01T12:00:00.000Z",
+                          "counts": {
+                            "attendees": 41,
+                            "connections": 23,
+                            "pending": 0,
+                            "organizers": 1
+                          }
+                        }
+                      ],
+                      "total": 20,
+                      "page": 2,
+                      "pageSize": 8
+                    }
+                  },
+                  "empty": {
+                    "summary": "No events match",
+                    "value": {
+                      "events": [],
+                      "total": 0,
+                      "page": 1,
+                      "pageSize": 25
+                    }
+                  }
                 }
               }
             }
@@ -2801,6 +3305,131 @@
                       "error": {
                         "code": "slug_taken",
                         "message": "An event with that slug already exists."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/admin/stats": {
+      "get": {
+        "operationId": "adminStats",
+        "summary": "Console headline numbers (super admins)",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Events by phase, people, check-ins and connections. Pending counts only events that are not over. A test admin sees test events and test people only.",
+        "tags": [
+          "admin"
+        ],
+        "security": [
+          {
+            "supabaseSession": []
+          }
+        ],
+        "x-compa-auth": "admin",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The numbers, as of now.",
+            "content": {
+              "application/json": {
+                "example": {
+                  "events": {
+                    "running": 3,
+                    "upcoming": 1,
+                    "draft": 1,
+                    "ended": 2,
+                    "archived": 1,
+                    "test": 1
+                  },
+                  "people": {
+                    "total": 1284,
+                    "test": 13,
+                    "superAdmins": 3,
+                    "joinedLast24h": 212
+                  },
+                  "checkIns": {
+                    "total": 1695,
+                    "last24h": 356
+                  },
+                  "connections": {
+                    "accepted": 1246,
+                    "pending": 52
+                  },
+                  "asOf": "2026-10-29T20:00:00.000Z"
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStats"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "not_found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "not_found"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "not_found": {
+                    "summary": "Not found.",
+                    "value": {
+                      "error": {
+                        "code": "not_found",
+                        "message": "Not found."
                       }
                     }
                   }
@@ -3662,7 +4291,7 @@
       "get": {
         "operationId": "listAttendees",
         "summary": "An event's attendees with counts (super admins)",
-        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Newest check-in first, test users included and counted apart.",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). Newest check-in first by default, test users included and counted apart. `q`, `source` and `test` filter; `total` counts the matches, `counts` the whole event. Points and connections sort missing scores as 0.",
         "tags": [
           "admin"
         ],
@@ -3683,6 +4312,93 @@
             "required": true
           },
           {
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Matches name, handle, email or company (case-insensitive).",
+              "type": "string",
+              "maxLength": 80
+            },
+            "description": "Matches name, handle, email or company (case-insensitive)."
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "schema": {
+              "default": "all",
+              "description": "`admin`: checked in by a super admin; `self`: through the door.",
+              "type": "string",
+              "enum": [
+                "all",
+                "admin",
+                "self"
+              ]
+            },
+            "description": "`admin`: checked in by a super admin; `self`: through the door."
+          },
+          {
+            "in": "query",
+            "name": "test",
+            "schema": {
+              "default": "include",
+              "type": "string",
+              "enum": [
+                "include",
+                "exclude",
+                "only"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "checkedInAt",
+              "type": "string",
+              "enum": [
+                "checkedInAt",
+                "name",
+                "points",
+                "connections"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dir",
+            "schema": {
+              "description": "Default: `asc` for `name`, `desc` otherwise.",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Default: `asc` for `name`, `desc` otherwise."
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "description": "1-based page number."
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "default": 1000,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000
+            }
+          },
+          {
             "$ref": "#/components/parameters/mockMockHeader"
           },
           {
@@ -3697,7 +4413,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Attendees.",
+            "description": "One page of attendees.",
             "content": {
               "application/json": {
                 "example": {
@@ -3739,18 +4455,158 @@
                       "addedByAdmin": false,
                       "points": 50,
                       "connections": 1
+                    },
+                    {
+                      "user": {
+                        "id": "1af1a2b3-c4d5-4e6f-9a7b-8c9d0e1f2a11",
+                        "handle": "fernanda-de-la-cruz-z5t1",
+                        "name": "Fernanda de la Cruz Montenegro",
+                        "photoUrl": null,
+                        "headline": "Head of Growth",
+                        "company": "Mercado Bonito",
+                        "city": "Monterrey, Nuevo León",
+                        "email": "fernanda-de-la-cruz-z5t1@test.compa.lol",
+                        "role": "user",
+                        "isTest": true,
+                        "createdAt": "2026-10-29T15:00:00.000Z"
+                      },
+                      "checkedInAt": "2026-10-29T16:58:12.000Z",
+                      "addedByAdmin": false,
+                      "points": 210,
+                      "connections": 3
+                    },
+                    {
+                      "user": {
+                        "id": "09e0f1a2-b3c4-4d5e-8f6a-7b8c9d0e1f10",
+                        "handle": "elena-ruiz-q9w3",
+                        "name": "Elena Ruiz",
+                        "photoUrl": null,
+                        "headline": "ML Engineer",
+                        "company": "Agentes MX",
+                        "city": "Monterrey, Nuevo León",
+                        "email": "elena-ruiz-q9w3@test.compa.lol",
+                        "role": "user",
+                        "isTest": true,
+                        "createdAt": "2026-10-29T15:00:00.000Z"
+                      },
+                      "checkedInAt": "2026-10-29T16:44:05.000Z",
+                      "addedByAdmin": false,
+                      "points": 120,
+                      "connections": 2
+                    },
+                    {
+                      "user": {
+                        "id": "f8d9e0f1-a2b3-4c4d-9e5f-6a7b8c9d0e09",
+                        "handle": "daniel-soto-p2r7",
+                        "name": "Daniel Soto",
+                        "photoUrl": null,
+                        "headline": "Partner",
+                        "company": "Jaguar Ventures",
+                        "city": "Monterrey, Nuevo León",
+                        "email": "daniel-soto-p2r7@test.compa.lol",
+                        "role": "user",
+                        "isTest": true,
+                        "createdAt": "2026-10-29T15:00:00.000Z"
+                      },
+                      "checkedInAt": "2026-10-29T16:31:47.000Z",
+                      "addedByAdmin": true,
+                      "points": 0,
+                      "connections": 0
+                    },
+                    {
+                      "user": {
+                        "id": "e7c8d9e0-f1a2-4b3c-8d4e-5f6a7b8c9d08",
+                        "handle": "camila-ortiz-m4x8",
+                        "name": "Camila Ortiz",
+                        "photoUrl": null,
+                        "headline": "Product Designer",
+                        "company": "Diseño Tapatío",
+                        "city": "Monterrey, Nuevo León",
+                        "email": "camila-ortiz-m4x8@test.compa.lol",
+                        "role": "user",
+                        "isTest": true,
+                        "createdAt": "2026-10-29T15:00:00.000Z"
+                      },
+                      "checkedInAt": "2026-10-29T16:20:00.000Z",
+                      "addedByAdmin": false,
+                      "points": 70,
+                      "connections": 1
                     }
                   ],
+                  "total": 6,
                   "counts": {
-                    "attendees": 13,
+                    "attendees": 6,
                     "connections": 4,
                     "pending": 2,
                     "organizers": 1,
-                    "testUsers": 13
+                    "testUsers": 6
                   }
                 },
                 "schema": {
                   "$ref": "#/components/schemas/AdminAttendeeList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -4782,7 +5638,7 @@
       "get": {
         "operationId": "searchUsers",
         "summary": "Search people (super admins)",
-        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). By name, handle, email or company; `test` includes, excludes or isolates test users.",
+        "description": "Super admins only; anyone else gets 404 `not_found`, so the route cannot be discovered (A11). By name, handle, email or company; `test` includes, excludes or isolates test users; `role` narrows to super admins or everyone else. `limit` is the page size. A test admin sees test people only.",
         "tags": [
           "admin"
         ],
@@ -4818,13 +5674,65 @@
           },
           {
             "in": "query",
+            "name": "role",
+            "schema": {
+              "default": "any",
+              "type": "string",
+              "enum": [
+                "any",
+                "super_admin",
+                "user"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "sort",
+            "schema": {
+              "default": "name",
+              "type": "string",
+              "enum": [
+                "name",
+                "createdAt"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "dir",
+            "schema": {
+              "description": "Default: `asc` for `name`, `desc` otherwise.",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            },
+            "description": "Default: `asc` for `name`, `desc` otherwise."
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "default": 1,
+              "description": "1-based page number.",
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            },
+            "description": "1-based page number."
+          },
+          {
+            "in": "query",
             "name": "limit",
             "schema": {
               "default": 25,
+              "description": "Page size.",
               "type": "integer",
               "minimum": 1,
               "maximum": 100
-            }
+            },
+            "description": "Page size."
           },
           {
             "$ref": "#/components/parameters/mockMockHeader"
@@ -4841,41 +5749,110 @@
         ],
         "responses": {
           "200": {
-            "description": "Matching people, by name.",
+            "description": "One page of matching people, by name by default, and the total.",
             "content": {
               "application/json": {
-                "example": {
-                  "users": [
-                    {
-                      "id": "6a0f6c1e-1b2d-4c3e-8f4a-5b6c7d8e9f01",
-                      "handle": "noe-camacho",
-                      "name": "Noe Camacho",
-                      "photoUrl": null,
-                      "headline": "Captain",
-                      "company": "COMPA",
-                      "city": "Guadalajara",
-                      "email": "noe@example.com",
-                      "role": "super_admin",
-                      "isTest": false,
-                      "createdAt": "2026-10-28T20:00:00.000Z"
-                    },
-                    {
-                      "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
-                      "handle": "ana-garza-k3p9",
-                      "name": "Ana Garza",
-                      "photoUrl": null,
-                      "headline": "Cofounder & CEO",
-                      "company": "Rutea",
-                      "city": "Monterrey, Nuevo León",
-                      "email": "ana-garza-k3p9@test.compa.lol",
-                      "role": "user",
-                      "isTest": true,
-                      "createdAt": "2026-10-29T15:00:00.000Z"
-                    }
-                  ]
-                },
                 "schema": {
                   "$ref": "#/components/schemas/AdminUserList"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Default",
+                    "value": {
+                      "users": [
+                        {
+                          "id": "d6b7c8d9-e0f1-4a2b-9c3d-4e5f6a7b8c07",
+                          "handle": "diego-ramirez",
+                          "name": "Diego Ramírez",
+                          "photoUrl": null,
+                          "headline": "Founder",
+                          "company": "Nopal Pay",
+                          "city": "Ciudad de México",
+                          "email": "diego@nopalpay.mx",
+                          "role": "user",
+                          "isTest": false,
+                          "createdAt": "2026-10-27T03:12:00.000Z"
+                        },
+                        {
+                          "id": "c5a6b7c8-d9e0-4f1a-8b2c-3d4e5f6a7b06",
+                          "handle": "maria-jose-hernandez-villasenor",
+                          "name": "María José Hernández Villaseñor",
+                          "photoUrl": null,
+                          "headline": "Directora de Innovación Abierta",
+                          "company": "Grupo Industrial de Occidente",
+                          "city": "Zapopan, Jalisco",
+                          "email": "maria.jose.hernandez.villasenor@grupo-industrial-occidente.com.mx",
+                          "role": "user",
+                          "isTest": false,
+                          "createdAt": "2026-10-29T16:41:00.000Z"
+                        },
+                        {
+                          "id": "6a0f6c1e-1b2d-4c3e-8f4a-5b6c7d8e9f01",
+                          "handle": "noe-camacho",
+                          "name": "Noe Camacho",
+                          "photoUrl": null,
+                          "headline": "Captain",
+                          "company": "COMPA",
+                          "city": "Guadalajara",
+                          "email": "noe@example.com",
+                          "role": "super_admin",
+                          "isTest": false,
+                          "createdAt": "2026-10-28T20:00:00.000Z"
+                        },
+                        {
+                          "id": "8c1d2e3f-4a5b-4c6d-8e7f-9a0b1c2d3e02",
+                          "handle": "ana-garza-k3p9",
+                          "name": "Ana Garza",
+                          "photoUrl": null,
+                          "headline": "Cofounder & CEO",
+                          "company": "Rutea",
+                          "city": "Monterrey, Nuevo León",
+                          "email": "ana-garza-k3p9@test.compa.lol",
+                          "role": "user",
+                          "isTest": true,
+                          "createdAt": "2026-10-29T15:00:00.000Z"
+                        },
+                        {
+                          "id": "9d2e3f4a-5b6c-4d7e-9f8a-0b1c2d3e4f03",
+                          "handle": "bruno-vega-7tq2",
+                          "name": "Bruno Vega",
+                          "photoUrl": null,
+                          "headline": "Staff Engineer",
+                          "company": "Codex Labs",
+                          "city": "Monterrey, Nuevo León",
+                          "email": "bruno-vega-7tq2@test.compa.lol",
+                          "role": "user",
+                          "isTest": true,
+                          "createdAt": "2026-10-29T15:00:00.000Z"
+                        },
+                        {
+                          "id": "b4f5a6b7-c8d9-4e0f-9a1b-2c3d4e5f6a05",
+                          "handle": "codex-test-admin",
+                          "name": "Codex Test Admin",
+                          "photoUrl": null,
+                          "headline": "Test super admin",
+                          "company": "COMPA",
+                          "city": "Guadalajara",
+                          "email": "codex-test-admin@test.compa.lol",
+                          "role": "super_admin",
+                          "isTest": true,
+                          "createdAt": "2026-10-28T22:00:00.000Z"
+                        }
+                      ],
+                      "total": 6,
+                      "page": 1,
+                      "pageSize": 25
+                    }
+                  },
+                  "empty": {
+                    "summary": "Nobody matches",
+                    "value": {
+                      "users": [],
+                      "total": 0,
+                      "page": 1,
+                      "pageSize": 25
+                    }
+                  }
                 }
               }
             }
@@ -5673,6 +6650,64 @@
                       "error": {
                         "code": "test_user_not_found",
                         "message": "No test user with that id."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "cannot_delete_self",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "cannot_delete_self"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "cannot_delete_self": {
+                    "summary": "You cannot delete the account you are signed in with.",
+                    "value": {
+                      "error": {
+                        "code": "cannot_delete_self",
+                        "message": "You cannot delete the account you are signed in with."
                       }
                     }
                   }
@@ -13159,6 +14194,17 @@
         ],
         "description": "`draft` and `archived` close every public route; `ended` closes the window."
       },
+      "EventPhase": {
+        "type": "string",
+        "enum": [
+          "running",
+          "upcoming",
+          "draft",
+          "ended",
+          "archived"
+        ],
+        "description": "Derived from status and window: a `live` event is upcoming, running or ended by the clock."
+      },
       "AdminCreateEventBody": {
         "type": "object",
         "properties": {
@@ -14423,10 +15469,29 @@
             "items": {
               "$ref": "#/components/schemas/AdminEvent"
             }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Every match across all pages."
+          },
+          "page": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           }
         },
         "required": [
-          "events"
+          "events",
+          "total",
+          "page",
+          "pageSize"
         ],
         "additionalProperties": false
       },
@@ -14640,6 +15705,142 @@
         ],
         "additionalProperties": false
       },
+      "AdminStats": {
+        "type": "object",
+        "properties": {
+          "events": {
+            "type": "object",
+            "properties": {
+              "running": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "upcoming": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "draft": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "ended": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "archived": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "test": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "running",
+              "upcoming",
+              "draft",
+              "ended",
+              "archived",
+              "test"
+            ],
+            "additionalProperties": false
+          },
+          "people": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "test": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "superAdmins": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "joinedLast24h": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "total",
+              "test",
+              "superAdmins",
+              "joinedLast24h"
+            ],
+            "additionalProperties": false
+          },
+          "checkIns": {
+            "type": "object",
+            "properties": {
+              "total": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "last24h": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "total",
+              "last24h"
+            ],
+            "additionalProperties": false
+          },
+          "connections": {
+            "type": "object",
+            "properties": {
+              "accepted": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991
+              },
+              "pending": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Pending requests at events that are not over (ended or archived ones expire on read)."
+              }
+            },
+            "required": [
+              "accepted",
+              "pending"
+            ],
+            "additionalProperties": false
+          },
+          "asOf": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+          }
+        },
+        "required": [
+          "events",
+          "people",
+          "checkIns",
+          "connections",
+          "asOf"
+        ],
+        "additionalProperties": false,
+        "description": "Console headline numbers. A test admin sees test events and test people only."
+      },
       "AdminEventBody": {
         "type": "object",
         "properties": {
@@ -14686,6 +15887,12 @@
               "$ref": "#/components/schemas/AdminAttendee"
             }
           },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Attendees matching the query, across all pages."
+          },
           "counts": {
             "type": "object",
             "properties": {
@@ -14722,11 +15929,13 @@
               "organizers",
               "testUsers"
             ],
-            "additionalProperties": false
+            "additionalProperties": false,
+            "description": "The whole event, whatever the query."
           }
         },
         "required": [
           "attendees",
+          "total",
           "counts"
         ],
         "additionalProperties": false
@@ -14912,10 +16121,29 @@
             "items": {
               "$ref": "#/components/schemas/AdminUser"
             }
+          },
+          "total": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991,
+            "description": "Every match across all pages."
+          },
+          "page": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "pageSize": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
           }
         },
         "required": [
-          "users"
+          "users",
+          "total",
+          "page",
+          "pageSize"
         ],
         "additionalProperties": false
       },

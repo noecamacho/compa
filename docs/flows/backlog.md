@@ -409,7 +409,7 @@ Each IP ticket also carries a priority, and it is counted in that priority colum
 | Type | Priority | Lane | Depends on | Effort |
 | --- | --- | --- | --- | --- |
 | backend+ui | P1 | live+seeds | T-000, T-020, T-022, OQ #56 | L |
-- **State:** Ready on `feat/COMPA-TBD-super-admin-test-harness` (2026-10-29), pending review. `/admin`, `/admin/events/new`, `/admin/events/<slug>` and the `GET`/`PATCH /api/admin/events…`, `…/end`, `…/archive`, attendee and organizer routes. Captain change: non-super-admins get **404**, not 403 (API spec A11). Archive is `events.status = 'archived'`, not `archived_at`. E2E spec still to write once T-000 lands.
+- **State:** Ready on `feat/COMPA-TBD-super-admin-test-harness` (2026-10-29), pending review. `/admin`, `/admin/events/new`, `/admin/events/<slug>` and the `GET`/`PATCH /api/admin/events…`, `…/end`, `…/archive`, attendee and organizer routes. Captain change: non-super-admins get **404**, not 403 (API spec A11). Archive is `events.status = 'archived'`, not `archived_at`. Redesign on `fm/compa-admin-redesign` (2026-10-29): paged, searchable and sortable lists with stats, bulk actions and a tabbed event page (`DESIGN.md` "Responsive breakpoints"). E2E: `e2e/admin/api.spec.ts` and `console-real.spec.ts` (`@real`), `console.spec.ts` (mock).
 
 - **E2E:** `e2e/admin/events.spec.ts`. Scenarios: create, edit window, end now (pending request then shows expired), archive; validation errors; non-admin 403.
 - **Files:**

@@ -9,9 +9,9 @@ export const SectionLabel = ({ children, className, style }: Props) => (
   </span>
 );
 
-// Secondary grey text.
-export const Muted = ({ children, className, style }: Props) => (
-  <span className={`text-muted ${className ?? ""}`} style={style}>
+// Secondary grey text. `title` carries the full value when the text is truncated.
+export const Muted = ({ children, className, style, title }: Props & { title?: string }) => (
+  <span className={`text-muted ${className ?? ""}`} style={style} title={title}>
     {children}
   </span>
 );
