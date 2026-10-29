@@ -11,19 +11,19 @@ const LINKS: { key: AdminSection; href: string }[] = [
   { key: "testUsers", href: "/admin/test-users" },
 ];
 
-type Props = { copy: Dictionary["admin"]; active: AdminSection; children: ReactNode };
+type Props = { copy: Dictionary["admin"]; active?: AdminSection; children: ReactNode };
 
 // The console frame: fluid from 390 to 1440, content capped at 1200 and centered (DESIGN.md "Responsive breakpoints").
 export function AdminShell({ copy, active, children }: Props) {
   return (
-    <div className="paper-dots min-h-dvh w-full">
-      <header className="sticky top-0 z-10 border-b-[2.5px] border-ink bg-paper">
+    <div className="paper-dots flex min-h-dvh w-full flex-col">
+      <header className="z-10 border-b-[2.5px] border-ink bg-paper md:sticky md:top-0">
         <div className="mx-auto flex w-full max-w-[1200px] flex-wrap items-center gap-3 px-4 py-3 md:px-8">
           <Link href="/admin" className="flex items-center gap-2">
             <Logo />
             <span className="rounded-[9px] bg-ink px-2 py-[2px] font-display text-[12px] font-bold text-paper">{copy.title}</span>
           </Link>
-          <nav aria-label={copy.navLabel} className="order-3 flex w-full gap-2 overflow-x-auto md:order-none md:w-auto md:flex-1">
+          <nav aria-label={copy.navLabel} className="order-3 -mx-1 flex w-full gap-2 overflow-x-auto px-1 pb-1 md:order-none md:mx-0 md:w-auto md:flex-1 md:px-0 md:pb-0">
             {LINKS.map((link) => (
               <Link
                 key={link.key}
@@ -35,12 +35,12 @@ export function AdminShell({ copy, active, children }: Props) {
               </Link>
             ))}
           </nav>
-          <Link href="/me" className="ml-auto text-[13px] font-extrabold underline md:ml-0">
+          <Link href="/me" className="ml-auto flex min-h-11 items-center text-[13px] font-extrabold underline md:ml-0">
             {copy.nav.app}
           </Link>
         </div>
       </header>
-      <main className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 px-4 py-6 md:px-8 md:py-8">{children}</main>
+      <main className="mx-auto flex w-full max-w-[1200px] flex-1 flex-col gap-5 px-4 pt-6 pb-6 md:gap-6 md:px-8 md:py-8">{children}</main>
     </div>
   );
 }
@@ -48,7 +48,7 @@ export function AdminShell({ copy, active, children }: Props) {
 export function AdminTitle({ children, right }: { children: ReactNode; right?: ReactNode }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h1 className="m-0 font-display text-[28px] leading-[1.1] font-bold md:text-[34px]">{children}</h1>
+      <h1 className="m-0 min-w-0 font-display text-[28px] leading-[1.1] font-bold [overflow-wrap:anywhere] md:text-[34px]">{children}</h1>
       {right}
     </div>
   );

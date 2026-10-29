@@ -43,6 +43,13 @@
       "when": 1793267390743,
       "tag": "0005_super_admin_test_harness",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1793270062767,
+      "tag": "0006_notifications_seen_at",
+      "breakpoints": true
     }
   ]
 }

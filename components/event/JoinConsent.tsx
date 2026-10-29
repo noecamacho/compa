@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar } from "@/components/monito/Avatar";
 import { Button } from "@/components/ui/Button";
+import { EVENT_STACK } from "./layout";
 import { eventPath } from "@/lib/access-code";
 import { ApiClientError, apiCall } from "@/lib/api/client";
 import { CheckIn } from "@/lib/api/schemas";
@@ -35,10 +36,10 @@ export function JoinConsent({ code, eventName, person, locale }: Props) {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6">
-      <div className="flex flex-1 flex-col justify-center gap-5">
-        <span className="text-[15px] font-extrabold text-muted">{eventName}</span>
-        <h1 className="m-0 font-display text-[36px] leading-[1.05] font-bold">{copy.title}</h1>
+    <div className={EVENT_STACK}>
+      <div className="flex flex-1 flex-col justify-center gap-5 md:flex-none">
+        <span className="text-[15px] font-extrabold text-muted [overflow-wrap:anywhere]">{eventName}</span>
+        <h1 className="m-0 font-display text-[clamp(32px,9vw,36px)] leading-[1.05] font-bold text-balance sm:text-[44px]">{copy.title}</h1>
         <div className="flex items-center gap-4 rounded-card bg-white px-4 py-4 border-ink shadow-hard-4">
           <Avatar person={person} size={56} shadow={2} />
           <p className="m-0 text-[15px] leading-[1.45] font-extrabold">{copy.notice}</p>
@@ -50,10 +51,10 @@ export function JoinConsent({ code, eventName, person, locale }: Props) {
             {error}
           </p>
         )}
-        <Button variant="primary" height={56} onClick={accept} disabled={sending} aria-busy={sending}>
+        <Button variant="primary" height={60} className="text-[18px]" onClick={accept} disabled={sending} aria-busy={sending}>
           {sending ? copy.sending : copy.accept}
         </Button>
-        <Link href={eventPath(code)} className="flex min-h-11 items-center justify-center text-[14px] font-extrabold text-muted">
+        <Link href={eventPath(code)} className="tappable flex min-h-11 items-center justify-center text-[14px] font-extrabold text-muted">
           {copy.cancel}
         </Link>
       </div>

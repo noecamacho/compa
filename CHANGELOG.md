@@ -8,7 +8,13 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 - Badges: `GET /api/badges` no longer fails for signed-in users (a raw date in the sign-up count broke the query), so the badge screen and awarding work again; badges still to earn show their own art, faded with a lock, and only secret ones stay grey.
 
+### Documentation
+
+- Describe the attendee flows that are implemented and document the custom SMTP or Send Email hook requirement for hosted Supabase email sign-in.
+
 ### Added
+
+- Admin console, responsive pass: tables from 768 px and stacked cards on a phone, sticky primary actions, a two-column event page with the QR and actions beside the details, a live preview on the new-event form, inline field validation with a kept draft, consequence dialogs (bottom sheet on a phone) for rotate, end, archive, remove attendee and delete test user, and loading and error states.
 
 - Attendee app is responsive at 390, 834 and 1440: the 390 layout is unchanged; from 834 Home, Me, profiles, Ranking and the monito builder use two columns, Connections and Badges use wider grids, and one-task screens center at reading width; from 1024 the dock becomes a left rail (with the Admin link for super admins). New loading skeleton and error screen with retry, a real empty state on Connections, and 44 px tap areas on chips, toggles and swatches.
 - Monito builder: a "Soy" row with Hombre, Mujer and Otro (Mujer draws a skirt and suggests long hair), stored in the look; building a monito is now required before using the app, also when signing in with a LinkedIn photo.
@@ -26,6 +32,9 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Notification bell now opens a live-updating list for requests, accepted connections, invitees and earned badges; opening the list marks displayed items as seen.
+- Award an invite's first-connection points only once when concurrent accepts race.
+- Use a provider-neutral sign-in error for failed LinkedIn and email callbacks.
 - Connection confirm screen now shows the event-screen notice before sending `screenConsent: true` (M13).
 - The AI summary prompt is event-neutral: it no longer tells the model it is at a JavaScript conference.
 - Home, Ranking and Badges render a section empty instead of the error page when a secondary call fails; profiles stored before the `whatsapp` link existed parse again.
@@ -35,8 +44,11 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Changed
 
+- Landing: "Entrar con LinkedIn" / "Sign in with LinkedIn" is now the one primary action, with the LinkedIn mark and a short reassurance line, above the fold on a 390 phone and pinned to the bottom edge on shorter screens; the event-QR hint became a quiet secondary row. Public pages (landing, event door, join, not found, live) reflow at 390, 834 and 1440 (live also at 1280 and 1920) with safe-area padding, grouped content on tablets and desktops, and a 16 px email field so iOS does not zoom.
+
 - Safer deploys: pull requests run lint, typecheck, tests and build (`.github/workflows/checks.yml`); the production deploy runs the same gates first and only deletes older deployments when the new one is READY.
 - On phones the top row (avatar, greeting and bell on Home; back and title elsewhere) stays pinned while scrolling, the dock respects the iPhone safe area, and overscroll no longer drags them. Home, incoming requests and the live person card now show the LinkedIn photo or the monito the person chose.
+- Run database migrations only in Vercel Production builds; Preview builds no longer target the production database.
 - The landing page offers "Entrar con LinkedIn" (sign-up and sign-in) so people can reach their events without rescanning; joining an event still needs its QR.
 - Database migrations apply automatically on every production deploy: the workflow deploys with a remote Vercel build whose build command runs `db:migrate:deploy` before `next build`.
 - `GET /api/me` returns `currentEvent: { code, name }`; the home and ranking screens reach the live data through it and show an "out of an event" state when it is null. Onboarding copy no longer promises title, company or city from LinkedIn (only name, photo and email come from it).

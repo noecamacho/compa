@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { Logo } from "@/components/brand/Logo";
 import { JoinConsent } from "@/components/event/JoinConsent";
+import { EVENT_MAIN } from "@/components/event/layout";
 import { eventPath } from "@/lib/access-code";
 import { currentMe } from "@/lib/server/current-event";
 import { loadEventDoor } from "@/lib/server/event-door";
@@ -18,7 +19,7 @@ export default async function JoinEventPage({ params }: Props) {
   if (me.currentEvent?.code === event.code && process.env.API_MODE !== "mock") redirect("/home");
   if (!event.isRunning) redirect(eventPath(event.code));
   return (
-    <main lang={locale} className="paper-dots flex min-h-dvh w-full flex-col items-center px-[18px] pt-12 pb-8 sm:px-8">
+    <main lang={locale} className={EVENT_MAIN}>
       <div className="flex w-full max-w-[480px] flex-1 flex-col gap-6">
         <Logo />
         <JoinConsent code={event.code} eventName={event.name} person={{ name: me.name, look: me.avatar }} locale={locale} />

@@ -17,7 +17,7 @@ const redirect = (location: string) => new Response(null, { status: 302, headers
 
 const redirectTo = (req: Request, path: string) => redirect(new URL(path, siteOrigin(req)).toString());
 
-const failedSignIn = (req: Request) => redirectTo(req, "/?error=linkedin");
+const failedSignIn = (req: Request) => redirectTo(req, "/?error=signin");
 
 export async function authLinkedin({ req, query }: InputOf<typeof R.authLinkedin>): ResultOf<typeof R.authLinkedin> {
   const callback = new URL("/auth/callback", siteOrigin(req));
@@ -49,7 +49,7 @@ export async function authCallback({ req, query }: InputOf<typeof R.authCallback
   const { data, error } = await supabase.auth.exchangeCodeForSession(query.code);
   if (error || !data.user) return failedSignIn(req);
   const synced = await upsertLinkedInUser(data.user).catch((syncError: unknown) => {
-    console.error("LinkedIn user sync failed", syncError);
+    console.error("User sync failed", syncError);
     return null;
   });
   return synced ? redirectTo(req, safeNext(query.next)) : failedSignIn(req);

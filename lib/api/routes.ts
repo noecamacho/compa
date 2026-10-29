@@ -29,13 +29,13 @@ export const authCallback = route({
   id: "authCallback",
   method: "get",
   path: "/auth/callback",
-  summary: "Finish LinkedIn sign-in",
+  summary: "Finish sign-in",
   description:
-    "Exchanges the code for a session, creates the user (unique handle) or syncs name and photo unless edited (M14), then redirects to `next` or `/me`. Failure redirects to `/?error=linkedin`.",
+    "Exchanges the code for a session, creates the user (unique handle) or syncs name and photo unless edited (M14), then redirects to `next` or `/me`. Failure redirects to `/?error=signin`.",
   tags: ["auth"],
   auth: "public",
   query: S.CallbackQuery,
-  success: { status: 302, description: "Redirect to `next`, `/me`, or `/?error=linkedin`.", redirect: "/me" },
+  success: { status: 302, description: "Redirect to `next`, `/me`, or `/?error=signin`.", redirect: "/me" },
   errors: [],
 });
 
@@ -470,6 +470,31 @@ export const listConnections = route({
   errors: WITH_USER,
 });
 
+export const listNotifications = route({
+  id: "listNotifications",
+  method: "get",
+  path: "/api/notifications",
+  summary: "My notifications",
+  description: "Derived from pending requests, accepted requests, connected invitees and earned badges. Declines are never shown.",
+  tags: ["notifications"],
+  auth: "user",
+  success: { status: 200, description: "Recent notifications and the unseen count.", schema: S.Notifications, example: X.notifications },
+  errors: WITH_USER,
+});
+
+export const markNotificationsSeen = route({
+  id: "markNotificationsSeen",
+  method: "post",
+  path: "/api/notifications/seen",
+  summary: "Mark notifications as seen",
+  tags: ["notifications"],
+  auth: "user",
+  body: S.NotificationsSeenBody,
+  bodyExample: X.notificationsSeen,
+  success: { status: 204, description: "Notifications are marked as seen.", schema: NoBody },
+  errors: WITH_USER,
+});
+
 export const setKnew = route({
   id: "setKnew",
   method: "patch",
@@ -738,6 +763,8 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   checkIn,
   createConnection,
   listConnections,
+  listNotifications,
+  markNotificationsSeen,
   setKnew,
   acceptConnection,
   declineConnection,
