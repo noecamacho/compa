@@ -28,7 +28,7 @@ Contradictions, gaps and ambiguities found while ingesting the build plan. Nothi
 | 22 | **Event time window.** Events have `starts_at` and `ends_at`; is check-in allowed before `starts_at`, can a check-in happen after `ends_at`, and which time zone shows on screens? | Data-model spec §3, §4.1 |
 | 23 | **Reverse request after a decline.** After Luis declines Ana, the pair cannot connect again at that event (M8). Is that also true if Luis later scans Ana, or should a reverse scan open a fresh chance? | Data-model spec M8, §4.1 |
 | 24 | **Account deletion.** Deleting a user cascades to check-ins and connections, which changes other people's scores and history. Delete, anonymize, or keep connections with a placeholder? | Data-model spec §3 |
-| 25 | **AI summaries.** Summaries were the plan's P0 feature (p. 3, p. 6) and are now out of the model (M17). Do they come back, and if so, do they score? | Data-model spec M17 |
+| 25 | **AI summaries.** Summaries were the plan's P0 feature (p. 3, p. 6) and are now out of the model (M17). Do they come back, and if so, do they score? **Resolved 2026-10-29:** summaries are back and score +25 to both on approval (data-model M18); the value is a constant pending captain confirmation. | Data-model spec M17 |
 | 26 | **Personal handle.** The API adds `users.handle` for the personal QR (`/u/<handle>`), generated from the name. Can people choose or change it, and is it shown on their card? | API spec A8 |
 | 27 | **Private Realtime channels.** Request and acceptance messages use private `user:<id>` channels with Realtime Authorization; this is unverified for the project's Supabase setup. Fallback is polling every 3 s. | API spec §8 |
 

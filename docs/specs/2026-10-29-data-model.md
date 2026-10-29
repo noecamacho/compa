@@ -26,7 +26,8 @@ Every decision below was made by the captain in this session.
 | M14 | Re-login **refreshes name and photo from LinkedIn unless the person edited that field** in COMPA. | — |
 | M15 | Interests come from **one global table** we seed, shared by all events. | `lib/topics.ts` constant (p. 17) |
 | M16 | On the big screen, **color encodes connection kind** (new vs reconnection); people are neutral. | Tribe colors |
-| M17 | AI summaries, bridges, rounds and badges are **out of the data model** for now. | P0 summary flow (p. 3, p. 6) |
+| M17 | Bridges, rounds and badges are **out of the data model**. | Bridges (p. 7), P2 extras (p. 3) |
+| M18 | **AI summaries are back and score**: after a connection is accepted, either person drafts a summary (AI via `lib/ai`), edits and approves it; one approved summary per connection; **+25 to both** (constant `SUMMARY_POINTS`, value taken from `docs/contracts/ai-summaries-api.md`; captain to confirm). Summary text is never on the big screen. | M17 draft; p. 6, p. 18 |
 
 ## 2. Entities
 
@@ -142,13 +143,36 @@ create index connections_requester_idx on connections (requester_id);
 create index connections_addressee_idx on connections (addressee_id);
 create index connections_event_status_idx on connections (event_id, status);
 
+create table interactions (                        -- AI summaries (M18)
+  id            uuid primary key default gen_random_uuid(),
+  connection_id uuid not null references connections (id) on delete cascade,
+  author_id     uuid not null references users (id) on delete cascade,
+  summary       text not null check (char_length(summary) <= 1200),
+  topics        text[] not null default '{}',          -- from lib/topics.ts
+  next_steps    text[] not null default '{}',
+  substantive   boolean not null,
+  fallback      boolean not null default false,        -- AI failed; summary is the author's text
+  points        smallint,                              -- SUMMARY_POINTS, set on approval
+  approved_at   timestamptz,
+  created_at    timestamptz not null default now(),
+  check ((approved_at is null) = (points is null))
+);
+create unique index interactions_one_approved_uq on interactions (connection_id) where approved_at is not null;
+
 -- scores: derived, never stored separately (M3)
 create view event_scores as
-  select c.event_id, p.user_id, sum(c.points)::int as points, count(*)::int as connections
-  from connections c
-  cross join lateral (values (c.requester_id), (c.addressee_id)) as p (user_id)
-  where c.status = 'accepted'
-  group by c.event_id, p.user_id;
+  with awards as (
+    select c.event_id, p.user_id, c.points, 1 as is_connection
+    from connections c cross join lateral (values (c.requester_id), (c.addressee_id)) as p (user_id)
+    where c.status = 'accepted'
+    union all
+    select c.event_id, p.user_id, i.points, 0
+    from interactions i join connections c on c.id = i.connection_id
+    cross join lateral (values (c.requester_id), (c.addressee_id)) as p (user_id)
+    where i.approved_at is not null
+  )
+  select event_id, user_id, sum(points)::int as points, sum(is_connection)::int as connections
+  from awards group by event_id, user_id;
 
 create view lifetime_scores as
   select user_id, sum(points)::int as points, sum(connections)::int as connections
@@ -207,7 +231,7 @@ RLS is enabled on every table with no client policies; all reads and writes go t
 
 ## 5. Out of scope for this model
 
-AI summaries and transcription, bridges, rounds, badges, organizer self-service, event-specific interest lists, photo upload (photos come from LinkedIn; editing a photo needs an upload mechanism, see open question #16).
+Bridges, rounds, badges, organizer self-service, event-specific interest lists, photo upload (photos come from LinkedIn; editing a photo needs an upload mechanism, see open question #16).
 
 ## 6. Open questions
 
