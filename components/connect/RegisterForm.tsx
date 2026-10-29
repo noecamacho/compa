@@ -34,7 +34,8 @@ type Props = { profile: UserProfileT };
 export function RegisterForm({ profile }: Props) {
   const router = useRouter();
   const person = profile.card;
-  const knew = profile.connection?.status === "accepted" || profile.connection?.kind === "reconnection";
+  // Connected tonight, or at any earlier event (the API sends `relationship` only for people already connected).
+  const knew = profile.connection?.status === "accepted" || profile.connection?.kind === "reconnection" || profile.relationship !== undefined;
   const [kind, setKind] = useState<Kind>(knew ? "reconnection" : "new");
   const [topics, setTopics] = useState<string[]>([]);
   const [note, setNote] = useState<NoteState>({ status: "idle" });
