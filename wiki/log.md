@@ -28,7 +28,11 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - The captain chose MIT; `LICENSE` added. Updated `open-questions` #14 (license resolved, repository visibility still open).
 
+## [2026-10-29] query | AI core for transcription and summaries
+
+- `lib/ai/*` implements `ai-jobs`: Spanish transcription, Structured Outputs summary, verbatim fallback (p. 12). `lib/topics.ts` ships a 41-topic placeholder list until `open-questions` #4 is settled.
+
 ## [2026-10-29] query | Summary language and summary points owner
 
-- Team decision: transcription and summaries in Spanish; resolved `open-questions` #6, partly #3 (STT default). Updated `ai-jobs`, `DESIGN.md`.
+- Team decision: transcription and summaries in Spanish; resolved `open-questions` #6 and #3 (models `gpt-4o-mini-transcribe` and `gpt-5.4-mini`). Updated `ai-jobs`, `DESIGN.md`.
 - `awardSummaryPoints` in `lib/points.ts` is written by the AI lane; recorded in `points-rules`.
