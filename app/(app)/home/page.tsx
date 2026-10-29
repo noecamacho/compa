@@ -2,14 +2,14 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { AlertsBell, IncomingRequests } from "@/components/home/IncomingRequests";
 import { InviteCard } from "@/components/home/InviteCard";
-import { LiveCard, OutsideEventCard } from "@/components/home/LiveCard";
+import { LiveCard } from "@/components/home/LiveCard";
 import { Icon } from "@/components/icons";
 import { Avatar } from "@/components/monito/Avatar";
 import { Tour } from "@/components/tour/Tour";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, Event, Invites, LiveSnapshot, Me } from "@/lib/api/schemas";
+import { ConnectionList, EventDoor, Invites, LiveSnapshot, Me, type EventDoorT, type LiveSnapshotT } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
 import { home, tour } from "@/lib/copy/es";
 import { firstName } from "@/lib/format";
@@ -17,11 +17,22 @@ import type { MonitoLook } from "@/lib/monito/look";
 
 type Props = { searchParams: Promise<{ demo?: string }> };
 
-// Live data is optional: outside an event (or before the event exists) the page still renders (gap analysis U7).
-async function liveFor(slug: string | null) {
-  if (!slug) return { snapshot: null, event: null };
-  const [snapshot, event] = await Promise.all([apiGetOrNull(`/api/events/${slug}/live`, LiveSnapshot), apiGetOrNull(`/api/events/${slug}`, Event)]);
+type Live = { snapshot: LiveSnapshotT; event: EventDoorT };
+
+// The live card needs the current event; its code comes from /api/me (API spec A10).
+async function loadLive(code: string | undefined): Promise<Live | null> {
+  if (!code) return null;
+  const [snapshot, event] = await Promise.all([apiGet(`/api/e/${code}/live`, LiveSnapshot), apiGet(`/api/e/${code}`, EventDoor)]);
   return { snapshot, event };
+}
+
+function NoEventCard() {
+  return (
+    <Card tone="sky-soft" className="flex flex-col gap-1 px-4 py-[14px]">
+      <span className="font-display text-[20px] leading-[1.1] font-bold">{home.noEventTitle}</span>
+      <span className="text-[13px] font-extrabold">{home.noEventHint}</span>
+    </Card>
+  );
 }
 
 // 03 Inicio and 03b InicioVacio: one page, the empty branch when the person has no connections yet.
@@ -29,9 +40,8 @@ export default async function HomePage({ searchParams }: Props) {
   const { demo } = await searchParams;
   // `?demo=empty` previews the first-night state in mock mode.
   const me = await apiGet("/api/me", Me, demo === "empty" ? { mockExample: "empty" } : {});
-  const slug = me.currentEvent?.slug ?? (process.env.API_MODE === "mock" ? "founders-fest" : null);
-  const [{ snapshot, event }, list, invites] = await Promise.all([
-    liveFor(slug),
+  const [live, list, invites] = await Promise.all([
+    loadLive(me.currentEvent?.code),
     apiGet("/api/connections", ConnectionList),
     apiGetOrNull("/api/invites/me", Invites),
   ]);
@@ -51,7 +61,7 @@ export default async function HomePage({ searchParams }: Props) {
       <IncomingRequests initial={incoming} />
 
       <div data-tour="live">
-        {snapshot && event ? <LiveCard snapshot={snapshot} me={me} endsAt={event.endsAt} looks={looks} empty={empty} /> : <OutsideEventCard />}
+        {live ? <LiveCard snapshot={live.snapshot} me={me} endsAt={live.event.endsAt} looks={looks} empty={empty} /> : <NoEventCard />}
       </div>
 
       <div data-tour="connect">

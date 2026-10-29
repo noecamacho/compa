@@ -8,4 +8,5 @@ test("prompt names both people and keeps the note's language", () => {
   expect(prompt).toContain("same language as the note");
   expect(prompt).not.toContain("in Spanish");
   expect(prompt).toContain("substantive=false");
+  expect(prompt).not.toContain("JavaScript conference");
 });

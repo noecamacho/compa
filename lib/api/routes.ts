@@ -129,31 +129,57 @@ export const createEvent = route({
   auth: "admin",
   body: S.CreateEventBody,
   bodyExample: { name: X.event.name, slug: X.event.slug, startsAt: X.event.startsAt, endsAt: X.event.endsAt },
-  success: { status: 201, description: "Created.", schema: S.CreatedEvent, example: { event: { ...X.event, id: X.ids.event } } },
+  success: {
+    status: 201,
+    description: "Created, with the access code and the join URL to print in the event QR (M19).",
+    schema: S.CreatedEvent,
+    example: { event: { ...X.event, id: X.ids.event, accessCode: X.accessCode, joinUrl: X.joinUrl } },
+  },
   errors: [E.invalidInput, E.unauthorized, E.notAdmin, E.slugTaken],
 });
+
+export const rotateEventCode = route({
+  id: "rotateEventCode",
+  method: "post",
+  path: "/api/admin/events/{slug}/rotate-code",
+  summary: "Rotate an event's access code (admins)",
+  description: "Issues a new code; the old QR, door and live links stop working at once (A10). Check-ins are kept.",
+  tags: ["events"],
+  auth: "admin",
+  params: S.SlugParams,
+  success: {
+    status: 200,
+    description: "The new code and join URL.",
+    schema: S.RotatedCode,
+    example: { slug: X.founders.slug, accessCode: "w3nq8r5tzc", joinUrl: "https://compa.lol/e/w3nq8r5tzc" },
+  },
+  errors: [E.unauthorized, E.notAdmin, E.eventNotFound],
+});
+
+const CODE_GATED = "Public, but only with the access code from the event QR (A10). A malformed, unknown or rotated code returns the same 404.";
 
 export const getEvent = route({
   id: "getEvent",
   method: "get",
-  path: "/api/events/{slug}",
-  summary: "Event join page",
+  path: "/api/e/{code}",
+  summary: "Event door (event QR)",
+  description: `${CODE_GATED} Name, window and the two counters the door shows.`,
   tags: ["events"],
   auth: "public",
-  params: S.SlugParams,
-  success: { status: 200, description: "The event.", schema: S.Event, example: X.event },
+  params: S.EventCodeParams,
+  success: { status: 200, description: "The event.", schema: S.EventDoor, example: X.eventDoor },
   errors: [E.eventNotFound],
 });
 
 export const checkIn = route({
   id: "checkIn",
   method: "post",
-  path: "/api/events/{slug}/check-in",
+  path: "/api/e/{code}/check-in",
   summary: "Check in to an event (event QR)",
-  description: "Repeat-safe. `screenConsent: true` records that the person saw the big-screen notice (M13).",
+  description: "Repeat-safe. `screenConsent: true` records that the person saw the big-screen notice (M13). Unknown code: 404 (A10).",
   tags: ["events"],
   auth: "user",
-  params: S.SlugParams,
+  params: S.EventCodeParams,
   body: S.CheckInBody,
   bodyExample: { screenConsent: true },
   success: {
@@ -161,7 +187,7 @@ export const checkIn = route({
     description: "Checked in.",
     alsoStatus: { status: 200, description: "Already checked in." },
     schema: S.CheckIn,
-    example: { event: X.founders, checkedInAt: "2026-10-29T17:02:31.000Z", alreadyCheckedIn: false },
+    example: { event: X.foundersDoor, checkedInAt: "2026-10-29T17:02:31.000Z", alreadyCheckedIn: false },
   },
   errors: [E.invalidInput, E.unauthorized, E.eventNotFound, E.eventNotRunning],
 });
@@ -255,12 +281,12 @@ export const declineConnection = route({
 export const liveSnapshot = route({
   id: "liveSnapshot",
   method: "get",
-  path: "/api/events/{slug}/live",
+  path: "/api/e/{code}/live",
   summary: "Big screen snapshot",
-  description: "Public (A6). Accepted connections only; cached for at most 1 s.",
+  description: `${CODE_GATED} Accepted connections only; cached for at most 1 s (A6).`,
   tags: ["live"],
   auth: "public",
-  params: S.SlugParams,
+  params: S.EventCodeParams,
   success: { status: 200, description: "Snapshot.", schema: S.LiveSnapshot, example: X.liveSnapshot },
   errors: [E.eventNotFound],
 });
@@ -268,9 +294,9 @@ export const liveSnapshot = route({
 export const livePerson = route({
   id: "livePerson",
   method: "get",
-  path: "/api/events/{slug}/live/people/{userId}",
+  path: "/api/e/{code}/live/people/{userId}",
   summary: "Big screen person card",
-  description: "Public fields only; the viewer is anonymous (A5).",
+  description: `${CODE_GATED} Public fields only; the viewer is anonymous (A5).`,
   tags: ["live"],
   auth: "public",
   params: S.LivePersonParams,
@@ -286,12 +312,12 @@ export const livePerson = route({
 export const leaderboard = route({
   id: "leaderboard",
   method: "get",
-  path: "/api/events/{slug}/leaderboard",
+  path: "/api/e/{code}/leaderboard",
   summary: "Event leaderboard",
-  description: "Ordered by points, then connections, then earliest check-in.",
+  description: `${CODE_GATED} Ordered by points, then connections, then earliest check-in.`,
   tags: ["live"],
   auth: "public",
-  params: S.SlugParams,
+  params: S.EventCodeParams,
   query: S.LeaderboardQuery,
   success: {
     status: 200,
@@ -445,6 +471,7 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   listInterests,
   getUser,
   createEvent,
+  rotateEventCode,
   getEvent,
   checkIn,
   createConnection,
