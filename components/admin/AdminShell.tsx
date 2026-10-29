@@ -67,7 +67,7 @@ export function AdminShell({ copy, locale, active, admin, title, primary, counts
   );
 }
 
-const initials = (name: string) =>
+export const initials = (name: string) =>
   name
     .split(/\s+/)
     .filter(Boolean)
