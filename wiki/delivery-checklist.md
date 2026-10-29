@@ -27,4 +27,11 @@ The project is ready when the full flow works in production from two different p
 - The open conference-scale fixes are shipped or consciously accepted (polling backoff, pool settings, `/home` fan-out, rollback); Supabase compute upsized for the day; Auth rate limits raised; production JWT signing key is asymmetric (ES256), which local session checks depend on
 - `main` frozen during the event; the access code is not rotated while screens are up
 
+## Event-day checks ([conference-load](../docs/research/conference-load.md))
+
+- Scan a personal QR from inside the app on an iPhone (Safari) and in Firefox, not only Chrome on Android
+- If the access code was rotated anyway, reopen the live link from the admin event page
+- Unplug the projector's network for 30 s: the pill shows the age of the data and the board recovers on its own
+
+
 The "public repository with a license" item conflicts with the current private repository; see [open-questions](open-questions.md). Related: [timeline](timeline.md), [demo-script](demo-script.md).

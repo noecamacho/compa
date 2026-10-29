@@ -16,6 +16,12 @@
 - Topic scoring: before summaries exist, each connection adds the pair's shared interests ("topics that connect"); each approved summary adds its topics with weight ×3 ("topics people talk about") (p. 7).
 - Seed data (about 150 attendees, about 300 connections, about 80 summaries) plus an optional simulator adding a connection every 3–5 s; a toggle hides seeds (p. 18).
 
+## Resilience (as built, [conference-load](../docs/research/conference-load.md) findings 19 and 20)
+
+- `useLiveSnapshot` polls every 3 s with one request in flight and an 8 s timeout; a failed poll keeps the last snapshot and shows "Reconnecting… data from N s ago".
+- A 404 (the access code was rotated) keeps the board up with "The event code changed. Open the new screen link from Admin." instead of falling to the not-found door; polling continues.
+- A failed server render of `/e/<code>/live` shows a large outage message (`error.tsx`) that retries every 10 s.
+
 ## Privacy (p. 13)
 
 Shows leaderboard names and points plus aggregated topics. Never shows the text of a summary. Attendees can opt out and appear as "Anonymous".

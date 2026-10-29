@@ -14,6 +14,11 @@ What breaks when COMPA runs live at a conference (hundreds to thousands of phone
 | 6 | Deploy workflow deleted old deployments | No Instant Rollback | Keep the last 10 deployments; freeze `main` during the event ([event-day-runbook](event-day-runbook.md)) | Fixed |
 | 9 | Live snapshot unbounded, selected full user rows | 1.15 MB at 1k people / 6k links; 4.5 MB Vercel limit near 3k / 20k | Columns `id, name, photo_url` only; the 1,000 most recent links; counters from `count()`; each person carries `connections` (`lib/server/live.ts`) | Fixed |
 | 14 | Missing indexes | Amplifies 2 and 3 | Migration `0009_conference_scale_indexes` | Fixed |
+| 10 | In-app QR scanning dead on iPhone Safari and Firefox (no `BarcodeDetector`) | Headless Chromium without the API: QR never read; after: read in 3.7 s | `jsqr` loaded only on those browsers; the banner names the camera problem and points to the camera app (`components/connect/ScanPanel.tsx`) | Fixed |
+| 16 | Invite claim and creation races | 40 of 50 concurrent first loads of `/api/invites/me` returned 500 (23505); a second claim overwrote the first | Claim only an unclaimed invite; `onConflictDoNothing`, re-read, suffixed code (`lib/server/invites.ts`) | Fixed |
+| 17 | Client writes without timeout or offline handling; raw English errors; failed audio dropped | A hung accept spun past 20 s; an offline decline went home with the request still pending | 15 s timeout (drafts 35 s, audio 40 s), one GET retry on a network failure, Spanish `errorText`, kept audio with retry (`lib/api/client.ts`) | Fixed |
+| 19 | Access-code rotation sent the projector to "not found" | After a rotation the screen showed not-found within 8 s | A 404 keeps the last snapshot with a "code changed" pill (`lib/live-state.ts`) | Fixed |
+| 20 | Outages invisible on the projector; hung fetches never resolved | A hung snapshot showed nothing; 7 requests piled up in 20 s | 8 s timeout, one poll in flight, "data from N s ago" pill, `app/e/[code]/live/error.tsx` retries every 10 s | Fixed |
 | 21 | Event door `GET /api/e/{code}` uncached, 2 counts per hit | Every door scan hits Postgres | Same 1 s CDN cache as `/live` (`LIVE_CACHE`, `lib/server/events.ts`) | Fixed |
 
 Verified correct under concurrency: double-tap accept (one 200, one 409), mutual scans (one row), double check-in, 300 people scanning one speaker (no lock contention; scores are views, so there are no hot rows).
@@ -31,7 +36,7 @@ Verified correct under concurrency: double-tap accept (one 200, one 409), mutual
 - Supabase Auth per-IP limits: `/token` 150 per 5 min; `/otp`, `/magiclink`, `/verify` 30 per 5 min; built-in SMTP 2 emails per hour ([Supabase rate limits](https://supabase.com/docs/guides/auth/rate-limits)). Server-side calls share Vercel egress IPs; browser calls share the venue NAT IP.
 - Supavisor clients: Nano/Micro 200, Small 400, Medium 600 ([compute and disk](https://supabase.com/docs/guides/platform/compute-and-disk)).
 - Vercel function response body limit 4.5 MB.
-- iOS Safari has no `BarcodeDetector`: in-app scanning does nothing on iPhone; the native camera on `/u/<handle>` works.
+- iOS Safari has no `BarcodeDetector`: in-app scanning uses the jsQR fallback there (finding 10); the native camera on `/u/<handle>` also works.
 
 ## Pre-event checklist (short form)
 
