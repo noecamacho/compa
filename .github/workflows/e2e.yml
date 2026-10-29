@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [1, 2, 3, 4]
+        shard: [1, 2, 3, 4, 5, 6]
     permissions:
       contents: read
     env:
@@ -33,7 +33,7 @@ jobs:
       - name: Install browsers
         run: bun run e2e:install
       - name: Run mock-mode specs
-        run: bun run e2e --shard=${{ matrix.shard }}/4
+        run: bun run e2e --shard=${{ matrix.shard }}/6
       - name: Upload report
         if: failure()
         uses: actions/upload-artifact@v4
