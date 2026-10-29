@@ -9,6 +9,7 @@ import { NoBody } from "@/lib/api/route-spec";
 import { copyFor } from "@/lib/copy";
 import type { Locale } from "@/lib/i18n";
 import { Notice } from "./Notice";
+import { TestPill } from "./StatusPill";
 import { UserPicker } from "./UserPicker";
 import { useAdminAction } from "./useAdminAction";
 
@@ -44,9 +45,9 @@ export function EventPeople({ locale, slug, attendees, organizers, testUsers }: 
           {attendees.map(({ user, points, connections, addedByAdmin }) => (
             <li key={user.id} className="dashed-ink flex items-center gap-2 py-2 first:border-t-0">
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[14px] font-extrabold">
-                  {user.name}
-                  {user.isTest && <span className="ml-2 text-[11px] text-gum">{copy.events.test}</span>}
+                <span className="flex min-w-0 items-center gap-2 text-[14px] font-extrabold">
+                  <span className="truncate">{user.name}</span>
+                  {user.isTest && <TestPill label={copy.events.test} />}
                 </span>
                 <Muted className="text-[12px] font-bold">
                   @{user.handle} · {copy.attendees.points(points, connections)}
