@@ -43,7 +43,8 @@ curl -X POST 'localhost:3000/api/interactions/draft?mock=1&mockExample=fallback'
 
 ## Auth
 
-- Sign-in is LinkedIn only: link the user to `/auth/linkedin?next=/u/<handle>` (or any same-site path). `/auth/callback` sets the Supabase session cookie and redirects to `next` or `/me`; failure goes to `/?error=linkedin`.
+- Sign-in supports LinkedIn (`/auth/linkedin?next=/u/<handle>`) and email magic links (`POST /api/auth/email`). Both finish at `/auth/callback`, set the Supabase session cookie and return to a same-site `next` path.
+- Hosted Supabase projects need custom SMTP or a Send Email hook to deliver magic links to attendee email addresses. The built-in service only sends to organization team addresses and is limited to two messages per hour; see the [Supabase SMTP setup guide](https://supabase.com/docs/guides/auth/auth-smtp).
 - Same-origin `fetch` sends the cookie; no header needed. No session → `401 unauthorized`.
 - Public routes (no session): `/api/interests`, and the code-gated event routes `/api/e/:code`, `/api/e/:code/live`, `/api/e/:code/live/people/:userId`, `/api/e/:code/leaderboard` (any wrong code is `404 event_not_found`, API spec A10).
 - Admin routes (`users.is_admin`): `POST /api/admin/events`. Promote someone with `SEED_ADMIN_HANDLE=<handle> bun run db:seed`.

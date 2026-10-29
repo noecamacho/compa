@@ -164,7 +164,7 @@ Every screen handles **loading** (skeleton in the final layout, never a blank pa
 
 | Screen | Empty | Error / conflict | Offline | Permission denied |
 | --- | --- | --- | --- | --- |
-| 01 Landing | — | `/?error=linkedin` after a failed sign-in: asks to scan the event QR again | — | LinkedIn consent refused → back to 01 with the message |
+| 01 Landing | — | `/?error=signin` after a failed sign-in: show the generic sign-in error | — | LinkedIn consent refused → back to 01 with the message |
 | 02 Perfil | LinkedIn gave no job title, company or city: empty fields with placeholders | 400 `invalid_input` per field | Save disabled | — |
 | 02b Monito | Default look (`DEFAULT_LOOK`) | Save failed → keep the local choice and retry | Save disabled | — |
 | 03 Inicio | 03b (0 connections). **Outside an event** (`currentEvent: null`): not designed, pending | Live or leaderboard failed → hide that card and keep Conectar | Last known counters, marked stale | — |

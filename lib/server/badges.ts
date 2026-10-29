@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { connections, eventAttendees, events, interactions, userBadges, users, type EventRow, type UserRow } from "../../db/schema";
 import type { InputOf, ResultOf } from "../api/route-spec";
@@ -72,7 +72,7 @@ async function attendance(userId: string, db: Executor) {
 }
 
 async function signupIndex(user: UserRow, db: Executor): Promise<number> {
-  const [row] = await db.select({ before: sql<number>`count(*)`.mapWith(Number) }).from(users).where(sql`${users.createdAt} < ${user.createdAt}`);
+  const [row] = await db.select({ before: sql<number>`count(*)`.mapWith(Number) }).from(users).where(lt(users.createdAt, user.createdAt));
   return (row?.before ?? 0) + 1;
 }
 

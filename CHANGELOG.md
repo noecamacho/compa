@@ -4,8 +4,17 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Fixed
+
+- Badges: `GET /api/badges` no longer fails for signed-in users (a raw date in the sign-up count broke the query), so the badge screen and awarding work again; badges still to earn show their own art, faded with a lock, and only secret ones stay grey.
+
+### Documentation
+
+- Describe the attendee flows that are implemented and document the custom SMTP or Send Email hook requirement for hosted Supabase email sign-in.
+
 ### Added
 
+- Admin console, responsive pass: tables from 768 px and stacked cards on a phone, sticky primary actions, a two-column event page with the QR and actions beside the details, a live preview on the new-event form, inline field validation with a kept draft, consequence dialogs (bottom sheet on a phone) for rotate, end, archive, remove attendee and delete test user, and loading and error states.
 - Monito builder: a "Soy" row with Hombre, Mujer and Otro (Mujer draws a skirt and suggests long hair), stored in the look; building a monito is now required before using the app, also when signing in with a LinkedIn photo.
 - Super-admin console at `/admin` (390, 834 and 1440, Spanish and English): list, create and edit events (description, venue, address, city, country, website, IANA time zone, schedule, status, test flag), the join QR and link, rotate code, end now, archive; attendees with counts, check-in on someone's behalf (consent recorded as admin-assigned), organizers per event; people search. New `/api/admin/*` routes (API spec A11). `GET /api/me` returns `role` and `isTest`.
 - Real-mode test harness: synthetic test users (`users.is_test`, no LinkedIn) with generated profiles, `POST /api/admin/test-users/{id}/session` to sign in as one, the `x-compa-automation` header for test runners (`TEST_AUTOMATION_SECRET`), the seeded test event Codex Conf 2026 (`SEED_TEST_EVENT=1`), and `docs/testing/real-mode.md`.
@@ -21,6 +30,9 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Notification bell now opens a live-updating list for requests, accepted connections, invitees and earned badges; opening the list marks displayed items as seen.
+- Award an invite's first-connection points only once when concurrent accepts race.
+- Use a provider-neutral sign-in error for failed LinkedIn and email callbacks.
 - Connection confirm screen now shows the event-screen notice before sending `screenConsent: true` (M13).
 - The AI summary prompt is event-neutral: it no longer tells the model it is at a JavaScript conference.
 - Home, Ranking and Badges render a section empty instead of the error page when a secondary call fails; profiles stored before the `whatsapp` link existed parse again.
@@ -34,6 +46,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 - Safer deploys: pull requests run lint, typecheck, tests and build (`.github/workflows/checks.yml`); the production deploy runs the same gates first and only deletes older deployments when the new one is READY.
 - On phones the top row (avatar, greeting and bell on Home; back and title elsewhere) stays pinned while scrolling, the dock respects the iPhone safe area, and overscroll no longer drags them. Home, incoming requests and the live person card now show the LinkedIn photo or the monito the person chose.
+- Run database migrations only in Vercel Production builds; Preview builds no longer target the production database.
 - The landing page offers "Entrar con LinkedIn" (sign-up and sign-in) so people can reach their events without rescanning; joining an event still needs its QR.
 - Database migrations apply automatically on every production deploy: the workflow deploys with a remote Vercel build whose build command runs `db:migrate:deploy` before `next build`.
 - `GET /api/me` returns `currentEvent: { code, name }`; the home and ranking screens reach the live data through it and show an "out of an event" state when it is null. Onboarding copy no longer promises title, company or city from LinkedIn (only name, photo and email come from it).

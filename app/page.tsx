@@ -73,7 +73,7 @@ export default async function LandingPage({ searchParams }: Props) {
             </h1>
             <p className="m-0 max-w-[44ch] text-[15px] leading-[1.45] font-bold text-muted sm:text-[18px]">{copy.lead}</p>
 
-            {error === "linkedin" && (
+            {(error === "signin" || error === "linkedin") && (
               <p role="alert" className="m-0 text-[14px] font-extrabold text-coral">
                 {copy.signInError}
               </p>
