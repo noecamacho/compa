@@ -9,6 +9,7 @@ import { apiCall } from "@/lib/api/client";
 import { UserProfile, type CardT } from "@/lib/api/schemas";
 import { connect as copy } from "@/lib/copy/es";
 import { slugify } from "@/lib/slug";
+import { HIT_AREA } from "@/components/ui/hit-area";
 
 // Minimal typing for the Barcode Detection API (Chrome, Android); Safari has none (ARCHITECTURE.md ADR-004).
 type Detector = { detect(source: HTMLVideoElement): Promise<{ rawValue: string }[]> };
@@ -88,16 +89,18 @@ export function ScanPanel() {
         <span className="absolute top-[14px] right-0 left-0 text-center text-[12px] font-extrabold tracking-[1.2px] text-paper uppercase">
           {available ? copy.aim : copy.cameraUnavailable}
         </span>
-        <span className={`${CORNER} top-12 left-[72px] rounded-tl-[12px] border-t-4 border-l-4`} />
-        <span className={`${CORNER} top-12 right-[72px] rounded-tr-[12px] border-t-4 border-r-4`} />
-        <span className={`${CORNER} top-[234px] left-[72px] rounded-bl-[12px] border-b-4 border-l-4`} />
-        <span className={`${CORNER} top-[234px] right-[72px] rounded-br-[12px] border-r-4 border-b-4`} />
-        {/* The scan line sweeps between the corners while the camera is up; it holds still when the camera is not. */}
-        <span
-          aria-hidden="true"
-          className={`absolute top-[156px] right-[86px] left-[86px] h-1 rounded-[2px] bg-mint ${available ? "animate-scan" : ""}`}
-          style={{ boxShadow: "0 0 12px rgba(107,228,163,0.8)" }}
-        />
+        {/* A fixed 205×220 frame, centered, so the corners stay square however wide the viewfinder gets. */}
+        <span aria-hidden="true" className="absolute top-12 left-1/2 h-[220px] w-[205px] -translate-x-1/2">
+          <span className={`${CORNER} top-0 left-0 rounded-tl-[12px] border-t-4 border-l-4`} />
+          <span className={`${CORNER} top-0 right-0 rounded-tr-[12px] border-t-4 border-r-4`} />
+          <span className={`${CORNER} bottom-0 left-0 rounded-bl-[12px] border-b-4 border-l-4`} />
+          <span className={`${CORNER} right-0 bottom-0 rounded-br-[12px] border-r-4 border-b-4`} />
+          {/* The scan line sweeps between the corners while the camera is up; it holds still when the camera is not. */}
+          <span
+            className={`absolute top-[108px] right-[14px] left-[14px] h-1 rounded-[2px] bg-mint ${available ? "animate-scan" : ""}`}
+            style={{ boxShadow: "0 0 12px rgba(107,228,163,0.8)" }}
+          />
+        </span>
         {found && (
           <div className="animate-rise absolute right-3 bottom-3 left-3 flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3">
             <Avatar person={avatarOf(found)} size={42} />
@@ -107,7 +110,7 @@ export function ScanPanel() {
             </span>
             <Link
               href={`/connect/${found.handle}`}
-              className="inline-flex h-[34px] shrink-0 items-center justify-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold whitespace-nowrap border-ink shadow-hard-2 pressable"
+              className={`${HIT_AREA} inline-flex h-[34px] shrink-0 items-center justify-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold whitespace-nowrap border-ink shadow-hard-2 pressable`}
             >
               {copy.connectButton}
             </Link>

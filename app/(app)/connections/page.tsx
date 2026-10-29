@@ -8,9 +8,14 @@ import { apiGet } from "@/lib/api/server-fetch";
 import { connections as copy } from "@/lib/copy/es";
 import { StickyBar } from "@/components/ui/StickyBar";
 
+type Props = { searchParams: Promise<{ demo?: string }> };
+
 // 07 Conexiones: everyone I connected with, filtered by type, scoped to the current event chip.
-export default async function ConnectionsPage() {
+// `?demo=empty` previews the first-night state in mock mode, like Home.
+export default async function ConnectionsPage({ searchParams }: Props) {
+  const { demo } = await searchParams;
   const [me, list] = await Promise.all([apiGet("/api/me", Me), apiGet("/api/connections", ConnectionList)]);
+  const people = demo === "empty" ? [] : list.people;
   return (
     <Screen dock>
       <StickyBar className="flex items-center justify-between">
@@ -26,7 +31,7 @@ export default async function ConnectionsPage() {
           <Icon name="chevronDown" size={14} strokeWidth={3} />
         </Chip>
       )}
-      <List people={list.people} />
+      <List people={people} />
     </Screen>
   );
 }

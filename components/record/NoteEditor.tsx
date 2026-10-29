@@ -14,6 +14,7 @@ import { note as copy } from "@/lib/copy/es";
 import { formatClock } from "@/lib/format";
 import { forgetNote, recallNote } from "@/lib/note-draft";
 import { SUMMARY_POINTS } from "@/lib/points";
+import { HIT_AREA } from "@/components/ui/hit-area";
 
 type Summary = { interactionId: string; title: string; bullets: string[]; topics: string[]; pendingAction: string | null; seconds: number | null; approved: boolean };
 
@@ -211,7 +212,7 @@ export function NoteEditor({ detail }: Props) {
             <SectionLabel>{copy.pendingLabel}</SectionLabel>
             <span className="text-[14px] font-extrabold">{summary.pendingAction}</span>
           </span>
-          <button type="button" className="h-8 cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable">
+          <button type="button" className={`${HIT_AREA} h-8 cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable`}>
             {copy.remind}
           </button>
         </div>

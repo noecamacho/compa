@@ -21,7 +21,7 @@ export default async function InvitePage() {
   const done = invites.invitees.filter((invitee) => invitee.firstConnectionAt);
   const slots = Array.from({ length: invites.target }, (_, index) => done[index] ?? null);
   return (
-    <Screen>
+    <Screen width="focus">
       <Header close="/home" title={copy.title} />
       <Card tone="sun-soft" className="flex items-center gap-[14px] px-4 py-[14px]">
         <span className="flex h-[108px] w-[92px] shrink-0 items-end justify-center rounded-button bg-white pb-[6px] border-ink">
@@ -88,7 +88,7 @@ export default async function InvitePage() {
         {copy.footer[1]}
       </Muted>
 
-      <div className="mt-auto">
+      <div className="mt-auto md:mt-4">
         <ButtonLink href="/connect" variant="primary">
           <Icon name="qr" size={20} />
           {copy.showQr}

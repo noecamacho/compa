@@ -48,7 +48,7 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
   }
 
   return (
-    <Screen>
+    <Screen width="focus">
       <Header
         back={back}
         right={
@@ -79,7 +79,7 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
           <LinkToggles value={flags} onChange={setFlags} label={profile.linksLabel} />
           <Muted className="text-[12px] font-bold">{profile.linksHint}</Muted>
         </div>
-        <div className="mt-auto flex flex-col gap-[10px]">
+        <div className="mt-auto flex flex-col gap-[10px] md:mt-4">
           {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
           <Button type="submit" variant="primary" disabled={saving}>
             {saving ? profile.saving : onboarding ? profile.next : profile.save}

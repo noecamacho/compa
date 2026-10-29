@@ -54,6 +54,8 @@ Surfaces that the specs require but the handoff does not draw:
 
 Every view works at **390** (phone, primary), **834** (tablet) and **1440+** (desktop): fluid layout, readable content centered on wide screens, no horizontal scroll, touch targets of at least 44 px. `/e/<code>/live` is designed for **1920×1080** and also works on a 1280 laptop and in phone portrait (counters plus a compact network). The V2 visual system in `design/compa-v2/README.md` is the visual source of truth; the event entry flow (landing, `/e/<code>`, `/e/<code>/join`, `/e/<code>/live`) is specified in API spec A10.
 
+Attendee app (`app/(app)`, onboarding): `Screen` takes `width="wide"` (dashboards: content 354 → 770 → 1040) or `width="focus"` (one task: 354 → 576 → 600). From 834, Home puts the live card beside a tall Conectar tile, Me and PerfilOtro split into two columns, Ranking puts the podium beside "Tú", the monito builder keeps the preview beside the options, Connections uses 2 then 3 columns and Badges 4 then 5. From 1024 the bottom dock becomes the left rail of the Figma `Dock layout=rail` and stays on every attendee screen; super admins find "Admin" at its foot (the /me row stays on phones).
+
 ## Visual system
 
 All tokens are defined once in `app/globals.css` (`@theme`) and come from README "Sistema visual". Fonts load in `app/layout.tsx` (`next/font/google`). The live reference page is `/design` (`app/design/page.tsx`).
