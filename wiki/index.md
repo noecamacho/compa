@@ -11,6 +11,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 ## Sources
 
 - [sources/build-plan](sources/build-plan.md) — summary of the 21-page build plan PDF with a page map and the three diagrams.
+- [sources/build-day-slides](sources/build-day-slides.md) — summary of the 14-slide Codex Build Day Guadalajara deck with a slide map.
 
 ## Product
 
@@ -40,6 +41,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 
 ## Delivery
 
+- [hackathon-requirements](hackathon-requirements.md) — submission contents, eligibility, deadlines (Thu 29 10:00), evidence of Codex use, voting.
 - [team-and-prs](team-and-prs.md) — four people, four branches, PR merge order, work rules and the plan's PR template.
 - [timeline](timeline.md) — five phases and three gates in relative time, plus the closing-time warning.
 - [agent-contract](agent-contract.md) — the plan's draft agent contract and the four prompts, translated.

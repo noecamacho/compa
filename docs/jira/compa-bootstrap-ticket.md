@@ -101,7 +101,8 @@ Phases follow the plan's timeline (p. 16); each task is a child issue (Task) of 
 
 **COMPA-<TBD> Task: Demo readiness** (p. 19–21)
 - [ ] 60–90 s backup video; README with problem, demo GIF, stack, how to run and the agent workflow section; 3-minute pitch rehearsed twice; submission form sent; seeds and simulator on, `/live` full screen, backup video open before going on stage.
-- Acceptance: every item in `wiki/delivery-checklist.md` ticked.
+- [ ] Submission form filled with project name, team members, problem and solution, repository link, demo video, live demo page and evidence of Codex use; submitted before Thursday 2026-10-29 at 10:00 (`wiki/hackathon-requirements.md`).
+- Acceptance: every item in `wiki/delivery-checklist.md` ticked, including the items added by the event deck.
 
 ### Later (P2, cut first)
 

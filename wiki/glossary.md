@@ -29,4 +29,7 @@ English term first; the original Spanish term from the source is quoted where it
 | P0 / P1 / P2 | Priority tiers: P0 is never cut; P1 is cut after P2; P2 is cut first. | "P0 / P1 / P2" |
 | Follow on… | Buttons on a card that open the other person's social links in a new tab. | "Seguir en…" |
 | Structured Outputs | OpenAI feature that returns JSON validated against a schema. | — |
+| Build Day | The Codex Build Day Guadalajara event on 2026-10-28, 16:00–19:00, whose rules COMPA must meet; see [hackathon-requirements](hackathon-requirements.md). | "Build Day" |
+| Evidence of Codex use | A screenshot or short video of a concrete task done with Codex, required for eligibility. | "evidencia del uso de Codex" |
+| Submission | The entry registered in the event form: name, team, problem and solution, repository, video, live demo, evidence. | "entrega" |
 | Contract file | A file only the lead edits: migration, `lib/types.ts`, `lib/topics.ts`, `lib/points.ts`. | "contratos" |

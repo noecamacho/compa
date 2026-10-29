@@ -17,9 +17,9 @@ Caption in the source: "Three gates order the night: scaffold, full flow and fre
 | — | **Gate 3:** feature freeze, 45 min before closing | |
 | freeze – close | Demo ready | Backup video, README with the agent workflow, submission and pitch rehearsed twice |
 
-## Decided deadline (captain, 2026-10-28)
+## Event deadlines (deck s. 1, s. 11, s. 14; captain, 2026-10-28)
 
-Submission of the MVP, `README.md` and a demonstration video is due before 10:00 on 2026-10-29. Feature freeze at 09:00; the last hour is README, video and submission. The relative phases above still order the work; see the fast path in [AGENTS.md](../AGENTS.md).
+The Build Day ran 16:00–19:00 on 2026-10-28 (s. 1). New projects close on Thursday 2026-10-29 at 10:00, when voting opens; edits and voting close on Friday 2026-10-30 at 13:00 (s. 11). The captain set the internal target accordingly: MVP, `README.md` and demonstration video submitted before 10:00 on 2026-10-29, feature freeze at 09:00, last hour for README, video and submission. The relative phases above still order the work; see the fast path in [AGENTS.md](../AGENTS.md) and the full rules in [hackathon-requirements](hackathon-requirements.md).
 
 ## Closing-time warning (p. 16)
 

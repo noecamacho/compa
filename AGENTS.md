@@ -17,6 +17,7 @@ The MVP, a `README.md` and a demonstration video must be submitted before 10:00 
 - Do not wait for Jira. Use `COMPA-<TBD>` and the task names from `docs/jira/compa-bootstrap-ticket.md` as the ticket reference.
 - PRs stay small and land fast: one-line answers in the PR template are fine, "N/A" is fine with a word of why; the checklists still get ticked honestly. A 10-second GIF or a sentence of manual verification counts as testing.
 - Review within 10 minutes by one other agent or person; `main` stays deployable; revert first, fix later.
+- The entry must meet `wiki/hackathon-requirements.md`: live demo page, demo video, README with run instructions and "what was built here", evidence of Codex use, license, no secrets.
 - Scope order is the plan's: P0 never cut, then P2 goes first, recording, then @tag (`wiki/mvp-scope.md`). Feature freeze at 09:00; the last hour is README, video and submission (`wiki/delivery-checklist.md`).
 - Wiki updates during the fast path: one line in `wiki/log.md` per PR that changes knowledge; `wiki/index.md` only when a page is added.
 

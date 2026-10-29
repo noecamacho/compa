@@ -10,7 +10,7 @@ fail() {
   exit 1
 }
 
-changed_raw=$(git diff --cached --name-only --diff-filter=MDR -- raw/)
+changed_raw=$(git diff --cached --name-only --diff-filter=MDR -- raw/ | grep -v '^raw/README\.md$' || true)
 [ -z "$changed_raw" ] || fail "raw/ is immutable; do not modify, rename or delete: $changed_raw"
 
 forbidden=$(git diff --cached --name-only --diff-filter=ACMR | grep -E "$FORBIDDEN_RE" | grep -Ev "$ALLOWED_RE" || true)

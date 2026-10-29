@@ -11,4 +11,14 @@ The project is ready when the full flow works in production from two different p
 - 3-minute pitch rehearsed twice with a stopwatch
 - Hackathon submission form sent
 
+## Added by the event deck ([hackathon-requirements](hackathon-requirements.md), s. 9, s. 14)
+
+- Project name and team member names in the submission
+- Problem and proposed solution statement
+- Live demo page link (the Vercel deploy)
+- Evidence of Codex use: screenshot without sensitive data or short video segment, with where, how and how it was reviewed
+- README states what was built during the Build Day and what is missing
+- Licenses, privacy and absence of secrets checked; reuse declared
+- Submitted before Thursday 2026-10-29 at 10:00; improvements allowed until Friday 2026-10-30 at 13:00
+
 The "public repository with a license" item conflicts with the current private repository; see [open-questions](open-questions.md). Related: [timeline](timeline.md), [demo-script](demo-script.md).
