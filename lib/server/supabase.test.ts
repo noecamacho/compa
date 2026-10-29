@@ -1,15 +1,14 @@
 import { describe, expect, mock, test } from "bun:test";
 import { AuthApiError, AuthInvalidJwtError, AuthRetryableFetchError, AuthSessionMissingError } from "@supabase/supabase-js";
 import { ApiError } from "../api/errors";
+import type { ClaimsReader } from "./supabase";
 
-// authUserId reads the session through a Supabase client; each test decides what getClaims answers.
-let answer: () => Promise<unknown> = async () => ({ data: null, error: null });
+// Each test decides what getClaims answers; the reader is passed in, so no module mock can leak between test files.
+type Answer = Awaited<ReturnType<ClaimsReader["getClaims"]>>;
+let answer: () => Promise<Answer> = async () => ({ data: null, error: null });
 mock.module("server-only", () => ({}));
-mock.module("next/headers", () => ({ cookies: async () => ({ getAll: () => [], set: () => undefined }), headers: async () => new Headers() }));
-mock.module("@supabase/ssr", () => ({ createServerClient: () => ({ auth: { getClaims: () => answer() } }) }));
-process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://127.0.0.1:54321";
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= "anon";
-const { authUserId, isSignedOutError } = await import("./supabase");
+const { authUserIdFrom, isSignedOutError } = await import("./supabase");
+const authUserId = () => authUserIdFrom({ getClaims: () => answer() });
 
 const statusOf = async (run: Promise<unknown>) => run.then(() => 200, (error: unknown) => (error instanceof ApiError ? error.status : 500));
 

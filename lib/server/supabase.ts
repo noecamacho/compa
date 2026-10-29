@@ -37,15 +37,21 @@ export function isSignedOutError(error: unknown): boolean {
   return isAuthApiError(error) && status >= 400 && status < 500 && status !== 429;
 }
 
+// The part of the Supabase Auth client this module reads; the real client satisfies it.
+export type ClaimsReader = { getClaims(): Promise<{ data: { claims: { sub?: string } } | null; error: unknown }> };
+
 // The signed-in Supabase user id, or null when signed out. getClaims() verifies the JWT locally against the cached
 // JWKS (production signs with ES256), so a request does not call Supabase Auth unless the token needs a refresh.
 // When Auth cannot answer it fails with 503, so a load spike never looks like a mass sign-out (conference-scale finding 1).
-export async function authUserId(): Promise<string | null> {
-  const supabase = await createSupabaseServerClient();
-  const { data, error } = await supabase.auth.getClaims().catch((thrown: unknown) => ({ data: null, error: thrown }));
+export async function authUserIdFrom(auth: ClaimsReader): Promise<string | null> {
+  const { data, error } = await auth.getClaims().catch((thrown: unknown) => ({ data: null, error: thrown }));
   if (error && !isSignedOutError(error)) {
     console.error("auth unavailable", error);
     return fail(E.authUnavailable);
   }
   return data?.claims.sub ?? null;
+}
+
+export async function authUserId(): Promise<string | null> {
+  return authUserIdFrom((await createSupabaseServerClient()).auth);
 }
