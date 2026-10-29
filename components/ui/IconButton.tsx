@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useHydrated } from "./useHydrated";
 
 const CLASSES =
   "box-border flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-[14px] bg-white p-0 text-ink border-ink shadow-hard-3 pressable";
@@ -18,8 +21,9 @@ export function IconLink({ href, label, children, className }: LinkProps) {
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { label: string; children: ReactNode };
 
 export function IconButton({ label, children, className, ...rest }: ButtonProps) {
+  const hydrated = useHydrated();
   return (
-    <button type="button" aria-label={label} className={`${CLASSES} ${className ?? ""}`} {...rest}>
+    <button type="button" aria-label={label} className={`${CLASSES} ${className ?? ""}`} aria-disabled={hydrated ? undefined : true} {...rest}>
       {children}
     </button>
   );

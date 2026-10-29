@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { useHydrated } from "./useHydrated";
 
 type Variant = "primary" | "secondary" | "linkedin" | "ink";
 
@@ -35,9 +38,11 @@ export function ButtonLink({ href, children, className, ...look }: LinkProps) {
 
 type ButtonProps = Look & ButtonHTMLAttributes<HTMLButtonElement> & { children: ReactNode };
 
+// A tap before React has hydrated does nothing, so the button reads as disabled (no visual change) until then.
 export function Button({ variant, height, className, children, ...rest }: ButtonProps) {
+  const hydrated = useHydrated();
   return (
-    <button type="button" className={classesFor(className)} style={styleFor({ variant, height })} {...rest}>
+    <button type="button" className={classesFor(className)} style={styleFor({ variant, height })} aria-disabled={hydrated ? undefined : true} {...rest}>
       {children}
     </button>
   );
