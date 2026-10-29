@@ -88,7 +88,7 @@ hr-heavy bun run build && hr-heavy bunx next start -p 3107
 E2E_BASE_URL=http://localhost:3107 bun run e2e e2e/notifications --project=desktop-1440-en
 ```
 
-`e2e/notifications/live.spec.ts` opens two browser contexts (390 px English, 1440 px Spanish): A confirms a scan of B, B's toast, bell and push arrive in under 2 s, B accepts, A's pending screen flips with +20 in under 2 s. It also proves another person's private channel and an anonymous join are refused, that polling delivers when the Realtime websocket is blocked, and that a decline sends nothing. Real browser push services are not reached: the spec registers a subscription whose endpoint is its own mock service and checks the encrypted, VAPID-signed POST.
+`e2e/notifications/live.spec.ts` opens two browser contexts (390 px English, 1440 px Spanish): A confirms a scan of B, B's toast, bell and push arrive in under 2 s, B accepts, A's pending screen flips with the points in under 2 s. It also proves another person's private channel and an anonymous join are refused, that polling delivers when the Realtime websocket is blocked, and that a decline sends nothing. Real browser push services are not reached: the spec registers a subscription whose endpoint is its own mock service and checks the encrypted, VAPID-signed POST.
 
 ## Known limits
 

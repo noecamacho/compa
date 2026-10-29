@@ -89,10 +89,12 @@ export const nextSeenAt = (current: Date | null, seenThrough: Date, now: Date): 
 
 export async function markNotificationsSeen({ user, body }: InputOf<typeof R.markNotificationsSeen>): ResultOf<typeof R.markNotificationsSeen> {
   const seenAt = nextSeenAt(user.notificationsSeenAt, new Date(body.seenThrough), new Date());
-  // greatest() in the same statement, so two tabs posting at once cannot store the older mark.
+  // greatest() in the same statement, so two tabs posting at once cannot store the older mark. A raw Date cannot be
+  // bound inside sql``, hence the ISO string.
+  const iso = seenAt.toISOString();
   await getDb()
     .update(users)
-    .set({ notificationsSeenAt: sql`greatest(coalesce(${users.notificationsSeenAt}, ${seenAt}), ${seenAt})` })
+    .set({ notificationsSeenAt: sql`greatest(coalesce(${users.notificationsSeenAt}, ${iso}::timestamptz), ${iso}::timestamptz)` })
     .where(eq(users.id, user.id));
   // Other open tabs and devices clear their bell at once.
   await broadcast({ topic: userTopic(user.id), event: "notifications.seen", payload: { seenThrough: seenAt.toISOString() } });

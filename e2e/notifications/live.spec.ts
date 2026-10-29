@@ -8,6 +8,7 @@ import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { BrowserContext, Page } from "@playwright/test";
 import type { TestUserT } from "../../lib/api/admin-schemas";
+import { pointsFor } from "../../lib/points";
 import type { TestSessionCookies } from "../../lib/testing/real-mode";
 import { expect, test } from "../fixtures";
 import { startMockPushService, type MockPushService } from "../support/mock-push-service";
@@ -18,6 +19,7 @@ const POLL_FALLBACK_MS = 4500;
 const PUSH_PORT = Number(process.env.E2E_PUSH_PORT ?? 3199);
 const TOURS = ["home", "connect", "me", "ranking", "register"];
 
+const NEW_POINTS = `+${pointsFor("new")} pts`;
 const firstName = (user: TestUserT) => user.name.split(" ")[0] ?? user.name;
 
 const TLS_CERT = process.env.E2E_PUSH_TLS_CERT;
@@ -127,12 +129,12 @@ test.describe("live notifications @real", () => {
     const acceptedAt = Date.now();
     await brunoPage.getByRole("button", { name: "Aceptar" }).click();
     await expect(brunoPage).toHaveURL(/\/connections\/[0-9a-f-]+\/done$/);
-    await expect(brunoPage.getByText("+20 pts").first()).toBeVisible();
+    await expect(brunoPage.getByText(NEW_POINTS).first()).toBeVisible();
 
     // A: the waiting screen flips to "connected" and the toast says so, within 2 s.
     await expect(anaPage.getByRole("heading", { name: `Conectaste con ${firstName(bruno)}` })).toBeVisible({ timeout: LIVE_MS });
     await expect(anaPage.getByTestId("notification-toast")).toContainText(`${bruno.name} aceptó tu solicitud`, { timeout: LIVE_MS });
-    await expect(anaPage.getByText("+20 pts").first()).toBeVisible();
+    await expect(anaPage.getByText(NEW_POINTS).first()).toBeVisible();
     expect(await waitForPush(anaPush, acceptedAt, LIVE_MS)).toBeLessThan(LIVE_MS);
 
     // Opening the list marks everything seen, and B's bell clears.
@@ -233,14 +235,29 @@ test.describe("live notifications @real", () => {
     await brunoContext.close();
   });
 
-  test("the alerts card offers push on a phone that allows it", async ({ browser, testUsers, signIn }) => {
+  test("the alerts card offers push where the browser allows it", async ({ browser, testUsers, signIn }) => {
     const [ana] = await testUsers(1);
     if (!ana) throw new Error("test user not created");
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "en-US", permissions: ["notifications"] });
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "en-US" });
+    // Headless Chromium always answers "denied"; pretend the person has not been asked yet.
+    await context.addInitScript(() => Object.defineProperty(Notification, "permission", { get: () => "default" }));
     await signIn(context, ana);
     const page = await openAs(context, "/notifications");
     await expect(page.getByTestId("push-state")).toHaveAttribute("data-state", "off");
     await expect(page.getByRole("button", { name: "Turn on alerts" })).toBeVisible();
+    await context.close();
+  });
+
+  test("blocked alerts are explained, and in-app alerts keep working", async ({ browser, testUsers, signIn }) => {
+    const [ana] = await testUsers(1);
+    if (!ana) throw new Error("test user not created");
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "es-MX" });
+    await context.addInitScript(() => Object.defineProperty(Notification, "permission", { get: () => "denied" }));
+    await signIn(context, ana);
+    const page = await openAs(context, "/notifications");
+    await expect(page.getByTestId("push-state")).toHaveAttribute("data-state", "denied");
+    await expect(page.getByTestId("push-state")).toContainText("Bloqueaste los avisos");
+    await expect(page.getByRole("button", { name: "Activar avisos" })).toHaveCount(0);
     await context.close();
   });
 });

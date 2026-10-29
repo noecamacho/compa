@@ -933,7 +933,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Errors | — |
 | Edge cases | The pending screen re-renders on `request.accepted` from the private channel, else on its 3 s poll; the toast and push say "<name> accepted your request" |
 | Status | UI Ready · API Ready · DB Ready |
-| E2E coverage | `e2e/notifications/live.spec.ts`: requester screen flips to "Conectaste con …" with +20 within 2 s |
+| E2E coverage | `e2e/notifications/live.spec.ts`: requester screen flips to "Conectaste con …" with the points (+50 new) within 2 s |
 | Tickets | [T-032](backlog.md#t-032), [T-081](backlog.md#t-081) |
 
 ## Big screen
