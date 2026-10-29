@@ -616,6 +616,9 @@ export const tour = {
 
 // Counts inside admin copy go through Intl so 1340 reads "1,340" (spec §6.7).
 const num = (value: number) => new Intl.NumberFormat("es-MX").format(value);
+// "Ana, Bruno and 3 more": a bulk confirm names who it touches without growing past a few lines.
+const listNames = (names: string[], and: string, more: string, max = 8) =>
+  names.length <= max ? names.join(", ") : `${names.slice(0, max).join(", ")} ${and} ${num(names.length - max)} ${more}`;
 
 // Super-admin console (/admin, API spec A11). Bilingual: lib/copy/en.ts has the English twin.
 export const admin = {
@@ -707,9 +710,24 @@ export const admin = {
     title: "Personas",
     search: "Buscar",
     searchLabel: "Nombre, handle, correo o empresa",
-    filter: { include: "Todos", exclude: "Sin pruebas", only: "Solo pruebas" },
+    filter: { include: "Todos", exclude: "Reales", only: "Prueba" },
     empty: "Nadie coincide.",
     superAdmin: "SUPER ADMIN",
+    roleLabel: "Rol",
+    roles: { any: "Cualquier rol", super_admin: "Super admins" },
+    sortLabel: "Orden",
+    sorts: { name: "Nombre A–Z", createdAt: "Más recientes" },
+    colEmail: "Correo",
+    colHeadline: "Titular · Empresa",
+    colCity: "Ciudad",
+    colJoined: "Se unió",
+    copyEmail: "Copiar correo",
+    copyHandle: "Copiar handle",
+    openCard: "Abrir tarjeta",
+    copied: "Copiado.",
+    copyFailed: "No se pudo copiar. Selecciona el texto.",
+    noPeople: "Aún no hay personas",
+    noPeopleBody: "Aparecen aquí cuando inician sesión por primera vez.",
   },
   ui: {
     cancel: "Cancelar",
@@ -910,5 +928,26 @@ export const admin = {
     deleteConfirm: "Se borran su cuenta, conexiones y resúmenes. ¿Borrar?",
     at: (name: string) => `en ${name}`,
     failed: "No se pudo. Intenta otra vez.",
+    generatorTitle: "Crear usuarios de prueba",
+    createN: (count: number) => (count === 1 ? "Crear 1 usuario de prueba" : `Crear ${num(count)} usuarios de prueba`),
+    signInNote: "“Entrar como” reemplaza la sesión de admin de este navegador. Usa una ventana privada para conservar ambas.",
+    signInWarning: (handle: string) => `Tu sesión de admin (@${handle}) se reemplaza por la de esta persona. Para volver, inicia sesión otra vez como @${handle}.`,
+    thisIsYou: "Eres tú",
+    cannotDeleteSelf: "No puedes borrar la cuenta con la que iniciaste sesión.",
+    handlePrefix: "Prefijo del handle",
+    handlePrefixHint: "Minúsculas, números o guiones; por ejemplo, un id de corrida.",
+    colCurrentEvent: "Evento actual",
+    colCreated: "Creado",
+    noEvent: "Sin evento actual",
+    created: (when: string) => `creado ${when}`,
+    shown: (count: number) => (count === 1 ? "1 usuario de prueba" : `${num(count)} usuarios de prueba`),
+    noMatchPrefix: (prefix: string) => `Ningún usuario de prueba empieza con “${prefix}”.`,
+    select: (name: string) => `Seleccionar a ${name}`,
+    selectAll: "Seleccionar todos",
+    deleteN: (count: number) => `Borrar ${num(count)}`,
+    bulkDeleteTitle: (count: number) => (count === 1 ? "¿Borrar 1 usuario de prueba?" : `¿Borrar ${num(count)} usuarios de prueba?`),
+    bulkDeleteBody: (names: string[]) => `${listNames(names, "y", "más")}. Se borran sus cuentas, conexiones y resúmenes.`,
+    bulkDone: (count: number) => (count === 1 ? "Se borró 1 usuario de prueba." : `Se borraron ${num(count)} usuarios de prueba.`),
+    bulkFailed: (names: string[]) => `No se pudo borrar: ${listNames(names, "y", "más")}.`,
   },
 };

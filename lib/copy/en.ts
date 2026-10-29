@@ -91,6 +91,9 @@ export const notFound: typeof es.notFound = {
 };
 
 const num = (value: number) => new Intl.NumberFormat("en-US").format(value);
+// "Ana, Bruno and 3 more": a bulk confirm names who it touches without growing past a few lines.
+const listNames = (names: string[], and: string, more: string, max = 8) =>
+  names.length <= max ? names.join(", ") : `${names.slice(0, max).join(", ")} ${and} ${num(names.length - max)} ${more}`;
 
 export const admin: typeof es.admin = {
   title: "Admin",
@@ -181,9 +184,24 @@ export const admin: typeof es.admin = {
     title: "People",
     search: "Search",
     searchLabel: "Name, handle, email or company",
-    filter: { include: "Everyone", exclude: "No test users", only: "Test users only" },
+    filter: { include: "All", exclude: "Real", only: "Test" },
     empty: "Nobody matches.",
     superAdmin: "SUPER ADMIN",
+    roleLabel: "Role",
+    roles: { any: "Any role", super_admin: "Super admins" },
+    sortLabel: "Sort",
+    sorts: { name: "Name A–Z", createdAt: "Newest" },
+    colEmail: "Email",
+    colHeadline: "Headline · Company",
+    colCity: "City",
+    colJoined: "Joined",
+    copyEmail: "Copy email",
+    copyHandle: "Copy handle",
+    openCard: "Open card",
+    copied: "Copied.",
+    copyFailed: "Couldn't copy. Select the text instead.",
+    noPeople: "No people yet",
+    noPeopleBody: "People show up here the first time they sign in.",
   },
   ui: {
     cancel: "Cancel",
@@ -384,6 +402,27 @@ export const admin: typeof es.admin = {
     deleteConfirm: "Their account, connections and summaries are deleted. Delete?",
     at: (name: string) => `at ${name}`,
     failed: "That didn't work. Try again.",
+    generatorTitle: "Create test users",
+    createN: (count: number) => (count === 1 ? "Create 1 test user" : `Create ${num(count)} test users`),
+    signInNote: "“Sign in as” replaces this browser's admin session. Use a private window to keep both.",
+    signInWarning: (handle: string) => `Your admin session (@${handle}) is replaced by this person's. To come back, sign in again as @${handle}.`,
+    thisIsYou: "This is you",
+    cannotDeleteSelf: "You can't delete the account you're signed in with.",
+    handlePrefix: "Handle prefix",
+    handlePrefixHint: "Lowercase letters, numbers or hyphens, for example a run id.",
+    colCurrentEvent: "Current event",
+    colCreated: "Created",
+    noEvent: "No current event",
+    created: (when: string) => `created ${when}`,
+    shown: (count: number) => (count === 1 ? "1 test user" : `${num(count)} test users`),
+    noMatchPrefix: (prefix: string) => `No test users start with “${prefix}”.`,
+    select: (name: string) => `Select ${name}`,
+    selectAll: "Select all",
+    deleteN: (count: number) => `Delete ${num(count)}`,
+    bulkDeleteTitle: (count: number) => (count === 1 ? "Delete 1 test user?" : `Delete ${num(count)} test users?`),
+    bulkDeleteBody: (names: string[]) => `${listNames(names, "and", "more")}. Their accounts, connections and summaries are deleted.`,
+    bulkDone: (count: number) => (count === 1 ? "Deleted 1 test user." : `Deleted ${num(count)} test users.`),
+    bulkFailed: (names: string[]) => `Couldn't delete: ${listNames(names, "and", "more")}.`,
   },
 };
 
