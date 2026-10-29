@@ -47,6 +47,12 @@ export function EmailSignIn({ next, mock, locale }: Props) {
         type="email"
         required
         autoComplete="email"
+        inputMode="email"
+        autoCapitalize="none"
+        autoCorrect="off"
+        enterKeyHint="send"
+        // 16 px keeps iOS Safari from zooming into the field on focus (Field defaults to 14 px).
+        style={{ fontSize: 16 }}
         placeholder={copy.emailPlaceholder}
         value={email}
         onChange={(change) => setEmail(change.target.value)}

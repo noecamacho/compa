@@ -156,6 +156,22 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - PR #40 merged with a typecheck error (a teammate change made the monito body required). The Vercel build failed, and the keep-one-deployment cleanup still deleted the working deployment, so the site served 404 until the fix (PR #41) deployed. Now: PR checks gate merges, the deploy runs lint/typecheck/tests first, and cleanup only runs when the new deployment is READY.
 
+## [2026-10-29] query | What does the home notification bell show?
+
+- F-49/T-080 now has a notification list for pending requests, accepted requests, connected invitees and earned badges. The bell polls the unseen count, opening `/notifications` marks displayed items seen, and declines stay hidden (`docs/flows/catalog.md` F-49; `docs/flows/backlog.md` T-080).
+
+## [2026-10-29] query | What is needed to send attendee email sign-in links?
+
+- Hosted Supabase projects need custom SMTP or a Send Email hook to send magic links to arbitrary attendee addresses; its built-in email service only sends to team members and is limited to two emails per hour ([Supabase SMTP guide](https://supabase.com/docs/guides/auth/auth-smtp)). The README and API quickstart now state this deployment requirement.
+
+## [2026-10-29] query | Admin console responsive pass
+
+- `/admin` now follows the V2 breakpoints (390/834/1440): tables from md, cards below, consequence dialogs proportional to stakes (`components/admin/ConfirmDialog.tsx`), inline validation in `EventForm`. UI only; no API or data-model change.
+
+## [2026-10-29] query | Responsive public pages and landing CTA
+
+- Landing, event door, join, not found and live reviewed at 390/834/1440 (live 1280/1920) in both locales; LinkedIn sign-in is the landing's single primary action (`app/page.tsx`, `components/brand/LinkedInMark.tsx`), event entry screens share one frame (`components/event/layout.ts`). DESIGN.md breakpoints unchanged.
+
 ## [2026-10-29] change | Landing hero in Three.js
 
 - The landing hero (`components/landing/Crowd.tsx`) now plays a looping Three.js connection story (`components/landing/hero-scene.ts`, timeline in `lib/landing/hero-timeline.ts`); the SVG crowd remains the SSR, reduced-motion and no-WebGL fallback.

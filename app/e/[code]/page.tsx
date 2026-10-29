@@ -1,5 +1,7 @@
 import { notFound, redirect } from "next/navigation";
+import { LinkedInMark } from "@/components/brand/LinkedInMark";
 import { Logo } from "@/components/brand/Logo";
+import { EVENT_MAIN, EVENT_STACK } from "@/components/event/layout";
 import { EmailSignIn } from "@/components/event/EmailSignIn";
 import { Icon } from "@/components/icons";
 import { Card, type Tone } from "@/components/ui/Card";
@@ -52,44 +54,49 @@ export default async function EventDoorPage({ params }: Props) {
   const copy = copyFor(locale).door;
   const signedIn = me !== null;
   return (
-    <main lang={locale} className="paper-dots flex min-h-dvh w-full flex-col items-center overflow-x-hidden px-[18px] pt-12 pb-8 sm:px-8">
+    <main lang={locale} className={EVENT_MAIN}>
       <div className="flex w-full max-w-[480px] flex-1 flex-col gap-6">
         <Logo />
-        <div className="flex flex-1 flex-col justify-center gap-5">
-          <div className="flex flex-col gap-2">
-            {event.isRunning && (
-              <Pill tone="coral" rotate={-2} className="self-start">
-                <span className="animate-beat h-2 w-2 rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
-                {copy.live}
-              </Pill>
-            )}
-            <span className="text-[15px] font-extrabold text-muted">{copy.invitedTo}</span>
-            <h1 className="m-0 font-display text-[40px] leading-[1.02] font-bold tracking-[-0.5px] text-balance sm:text-[52px]">{event.name}</h1>
+        <div className={EVENT_STACK}>
+          <div className="flex flex-1 flex-col justify-center gap-5 md:flex-none">
+            <div className="flex flex-col gap-2">
+              {event.isRunning && (
+                <Pill tone="coral" rotate={-2} className="self-start">
+                  <span className="animate-beat h-2 w-2 rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
+                  {copy.live}
+                </Pill>
+              )}
+              <span className="text-[15px] font-extrabold text-muted">{copy.invitedTo}</span>
+              <h1 className="m-0 font-display text-[clamp(34px,10vw,40px)] leading-[1.02] font-bold tracking-[-0.5px] [overflow-wrap:anywhere] text-balance sm:text-[52px]">
+                {event.name}
+              </h1>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Counter value={event.counters.checkedIn} label={copy.checkedIn} tone="sky-soft" locale={locale} />
+              <Counter value={event.counters.connections} label={copy.connections} tone="mint-soft" locale={locale} />
+            </div>
+            {!event.isRunning && <ClosedNotice event={event} copy={copy} locale={locale} />}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Counter value={event.counters.checkedIn} label={copy.checkedIn} tone="sky-soft" locale={locale} />
-            <Counter value={event.counters.connections} label={copy.connections} tone="mint-soft" locale={locale} />
-          </div>
-          {!event.isRunning && <ClosedNotice event={event} copy={copy} locale={locale} />}
-        </div>
 
-        <div className="flex flex-col gap-3">
-          {event.isRunning && (
-            <>
-              <ButtonLink href={entryHref(event.code, signedIn)} variant={signedIn ? "primary" : "linkedin"} height={56} className="text-[17px]">
-                <Icon name={signedIn ? "chevronRight" : "linkedin"} size={20} />
-                {signedIn ? copy.ctaSignedIn : copy.cta}
-              </ButtonLink>
-              {!signedIn && <span className="text-center text-[12px] leading-[1.4] font-extrabold text-muted">{copy.note}</span>}
-              {!signedIn && <EmailSignIn next={joinPath(event.code)} mock={process.env.API_MODE === "mock"} locale={locale} />}
-            </>
-          )}
-          <a
-            href={`${eventPath(event.code)}/live`}
-            className="flex min-h-11 items-center justify-center gap-2 text-[14px] font-extrabold underline decoration-2 underline-offset-4"
-          >
-            {copy.watchLive}
-          </a>
+          <div className="flex flex-col gap-3">
+            {event.isRunning && (
+              <>
+                <ButtonLink href={entryHref(event.code, signedIn)} variant={signedIn ? "primary" : "linkedin"} height={60} className="gap-3 text-[18px]">
+                  {!signedIn && <LinkedInMark size={22} />}
+                  {signedIn ? copy.ctaSignedIn : copy.cta}
+                  {signedIn && <Icon name="chevronRight" size={20} strokeWidth={3} />}
+                </ButtonLink>
+                {!signedIn && <span className="text-center text-[13px] leading-[1.4] font-extrabold text-muted">{copy.note}</span>}
+                {!signedIn && <EmailSignIn next={joinPath(event.code)} mock={process.env.API_MODE === "mock"} locale={locale} />}
+              </>
+            )}
+            <a
+              href={`${eventPath(event.code)}/live`}
+              className="tappable flex min-h-11 items-center justify-center gap-2 text-[14px] font-extrabold underline decoration-2 underline-offset-4"
+            >
+              {copy.watchLive}
+            </a>
+          </div>
         </div>
       </div>
     </main>

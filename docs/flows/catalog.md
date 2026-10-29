@@ -129,7 +129,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | `https://compa.lol/` |
 | Pre | No session |
 | Happy path | `/` → landing (IP: `components/landing/Crowd.tsx`), with no sign-up button. Events are reachable only through an event QR (captain decision). On `main`, `/` shows 01 Bienvenida, with a LinkedIn button and Crear cuenta / Ya tengo cuenta |
-| Alternates | Arrives with `?error=linkedin` → sign-in error copy (F-04) |
+| Alternates | Arrives with `?error=signin` → generic sign-in error copy (F-04) |
 | Errors | None |
 | Edge cases | A visitor who wants to "join" without an event QR has no path. The landing must explain "scan the QR at your event". Search-engine visitors; link previews (OG tags in `app/layout.tsx`, Spanish only) |
 | Status | UI **IP** (landing) · API — · DB — |
@@ -162,7 +162,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Pre | LinkedIn app configured in Supabase (`linkedin_oidc`); OQ #20 |
 | Happy path | `GET /auth/linkedin` → 302 to LinkedIn → consent → `GET /auth/callback?code=` → `exchangeCodeForSession` → `upsertLinkedInUser` inserts `users` (handle from name, `pickHandle`) → 302 to `safeNext(next)`, default `/me` → 02 `/onboarding/profile` |
 | Alternates | `next` is a deep link (F-10, F-11, F-09) |
-| Errors | Any failure → `/?error=linkedin` → `welcome.signInError` |
+| Errors | Any failure → `/?error=signin` → generic sign-in error copy |
 | Edge cases | LinkedIn gives only name, email, photo and locale (captain decision), so job title, company and city are empty (F-07). No name → "COMPA" fallback (`lib/server/linkedin.ts`). A handle collision races and retries up to 3 times with a random suffix. The email is nullable. The LinkedIn photo URL may expire (OQ #21; IP copies it to Storage). The LinkedIn in-app browser has a different cookie jar, so the session may not carry over to Safari |
 | Status | UI Partial (no onboarding gate, T-014) · API Ready · DB Ready |
 | E2E coverage | `e2e/onboarding/signin.spec.ts`: LinkedIn is never called in CI. Stub the callback with `realUser` and assert the redirect to `next`. A unit test covers `profileFrom` with missing name, photo and email, and the `safeNext` cases (`//evil.com`, `/\\evil`) |
@@ -176,7 +176,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Actor | Anonymous visitor |
 | Entry | LinkedIn consent screen → Cancel |
 | Pre | — |
-| Happy path | `/auth/callback?error=user_cancelled_login` (or `access_denied`) → today `/?error=linkedin` (probed) → generic `welcome.signInError` |
+| Happy path | `/auth/callback?error=user_cancelled_login` (or `access_denied`) → `/?error=signin` → generic sign-in error copy |
 | Alternates | The person retries. `next` is lost today, because `failedSignIn` drops it |
 | Errors | Callback `error` → `?error=cancelled` or `denied` (T-012) |
 | Edge cases | The person closes the tab mid-OAuth and the PKCE verifier cookie lingers. The landing on the landing branch removes `Welcome`, which held the error copy |
@@ -193,7 +193,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | `/auth/callback` |
 | Pre | — |
 | Happy path | — |
-| Alternates | `error=invalid_scope` (PR #19 removed the duplicate scopes), the code exchange fails, or `upsertLinkedInUser` throws (logged as "LinkedIn user sync failed") → `/?error=linkedin` |
+| Alternates | `error=invalid_scope` (PR #19 removed the duplicate scopes), the code exchange fails, or user sync fails → `/?error=signin` |
 | Errors | → `?error=scope` or `sync` (T-012) |
 | Edge cases | A sync failure leaves a Supabase `auth.users` row without a `users` row, so every API call returns 401. The person loops between sign-in and failure until the next successful sync |
 | Status | UI Partial · API Partial · DB — |
@@ -913,10 +913,10 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | Home bell |
 | Pre | — |
 | Happy path (intended) | The count of unseen items → tap → list (requests, acceptances, invitee connected, badge earned) |
-| Alternates | Today: the count equals `incoming.length` on page load; the bell is an `IconButton` without a link |
+| Alternates | The bell count polls the unseen notification total; the list is at `/notifications` |
 | Errors | — |
-| Edge cases | Declines never appear (M8). The count is not refreshed without a reload |
-| Status | UI Partial · API Missing · DB — |
+| Edge cases | Declines never appear (M8). Opening the list marks displayed items seen; new items remain unseen |
+| Status | UI Ready · API Ready · DB Ready |
 | E2E coverage | `e2e/notifications/bell.spec.ts`: count updates by polling; tap → list; opening marks seen |
 | Tickets | [T-031](backlog.md#t-031), [T-080](backlog.md#t-080) |
 
