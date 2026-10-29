@@ -374,6 +374,17 @@ export const admin: typeof es.admin = {
       restore: "Restore",
       moreFor: (name: string) => `More actions for ${name}`,
     },
+    poster: {
+      open: "Show QR poster",
+      stage: (name: string) => `Poster for ${name}`,
+      fullscreen: "Full screen",
+      back: "Back to event",
+      title: ["Make as many", "compas", "as you can"],
+      prize: "and win a prize",
+      free: "Free!",
+      scan: "Scan to join",
+      ticker: ["Make compas!", "Win a prize", "It's free!"],
+    },
     bulk: {
       selected: (count: number) => `${num(count)} selected`,
       clear: "Clear selection",

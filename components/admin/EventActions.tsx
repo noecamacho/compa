@@ -72,6 +72,10 @@ export function EventHeaderActions({ locale, slug, name, joinUrl, liveUrl, phase
           <Icon name="external" size={18} />
           {ui.menu.openLive}
         </a>
+        <a href={`/admin/events/${slug}/poster`} target="_blank" rel="noopener noreferrer" className={LIVE_LINK}>
+          <Icon name="qr" size={18} />
+          {ui.poster.open}
+        </a>
         <RowMenu id={menuId} label={ui.menu.moreFor(name)}>
           <RowMenuItem menuId={menuId} onClick={copyLink}>
             {ui.menu.copyLink}
