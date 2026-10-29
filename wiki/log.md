@@ -103,3 +103,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | What testing is required for new work?
 
 - Captain decision: further development preferably ships with Playwright e2e specs that confirm the affected user flows (happy path, edge cases, errors) across 390/834/1440 and es/en, plus unit tests. Recorded in `AGENTS.md` §4, `docs/engineering-standards.md` (Testing) and the PR template; `AGENTS.md` also now states LinkedIn-only sign-in, responsive breakpoints and the bilingual UI.
+
+## [2026-10-29] query | How do database migrations reach production?
+
+- Automatically: pushes to `main` deploy through a remote Vercel build whose command is `bun run db:migrate:deploy && bun run build` (`DATABASE_URL_DIRECT`, a sensitive Vercel env value, is readable only during Vercel builds). A failed migration fails the deploy. Rule added to `AGENTS.md`: migrations are additive and backward-compatible.
