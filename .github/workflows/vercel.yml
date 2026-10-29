@@ -1,11 +1,11 @@
-# Deploys through the Vercel CLI with the team owner's token, because Vercel Pro blocks
-# native git deploys whose commit author is not a member of the Vercel team.
+# Deploys production through the Vercel CLI with the team owner's token, because Vercel Pro
+# blocks native git deploys whose commit author is not a member of the Vercel team.
+# No preview deployments: the captain decided only production exists (2026-10-29).
 name: Vercel
 
 on:
   push:
     branches: [main]
-  pull_request:
 
 concurrency:
   group: vercel-${{ github.ref }}
@@ -20,10 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
-    env:
-      TARGET: ${{ github.event_name == 'push' && 'production' || 'preview' }}
-      PROD_FLAG: ${{ github.event_name == 'push' && '--prod' || '' }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -32,18 +28,25 @@ jobs:
       - name: Install Vercel CLI
         run: bun add --global vercel@60.1.3
       - name: Pull project settings and env
-        run: vercel pull --yes --environment="$TARGET" --token="${{ secrets.VERCEL_TOKEN }}"
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
       - name: Build
-        run: vercel build $PROD_FLAG --token="${{ secrets.VERCEL_TOKEN }}"
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
       - name: Deploy
         id: deploy
-        run: echo "url=$(vercel deploy --prebuilt $PROD_FLAG --token="${{ secrets.VERCEL_TOKEN }}")" >> "$GITHUB_OUTPUT"
+        run: echo "url=$(vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}")" >> "$GITHUB_OUTPUT"
       - name: Summary
         run: |
-          echo "Deployed ($TARGET): ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
-      - name: Comment preview URL
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+          echo "Deployed (production): ${{ steps.deploy.outputs.url }}" >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep only the new deployment
         env:
-          GH_TOKEN: ${{ github.token }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          NEW_URL: ${{ steps.deploy.outputs.url }}
         run: |
-          gh pr comment "${{ github.event.pull_request.number }}" --edit-last --create-if-none --body "Preview: ${{ steps.deploy.outputs.url }} (docs at /api/docs)"
+          api="https://api.vercel.com"
+          auth="Authorization: Bearer $VERCEL_TOKEN"
+          keep=$(curl -sf "$api/v13/deployments/${NEW_URL#https://}?teamId=$VERCEL_ORG_ID" -H "$auth" | jq -r '.id // empty')
+          [ -n "$keep" ] || { echo "Could not resolve the new deployment; skipping cleanup"; exit 0; }
+          curl -sf "$api/v6/deployments?projectId=$VERCEL_PROJECT_ID&teamId=$VERCEL_ORG_ID&limit=100" -H "$auth" \
+            | jq -r --arg keep "$keep" '.deployments[].uid | select(. != $keep)' \
+            | xargs -r -I{} curl -sf -X DELETE "$api/v13/deployments/{}?teamId=$VERCEL_ORG_ID" -H "$auth" -o /dev/null
+          echo "Kept only $keep" >> "$GITHUB_STEP_SUMMARY"
