@@ -4,6 +4,24 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Added
+
+- Social handles: each network toggle on the profile and on "my profile" reveals an input; LinkedIn, Instagram, WhatsApp and X values are validated (one leading "@", country code, username or profile URL), stored in `users.links` (no migration) and shown to the other person only for networks that are on and only once the connection is accepted (confirmation and the other person's profile).
+- Search people by name on the connect screen (`GET /api/users?q=`, accents ignored) with a result list; a QR that is not a personal Compa link shows a message.
+- A Spanish not-found screen with a way back for any unknown person, connection or page; an offline strip on every screen while there is no network.
+- Playwright e2e suite (`bun run test:e2e`) running the real handlers on a local Postgres with a test sign-in (`COMPA_TEST_AUTH=1`), on three viewports, with axe checks.
+
+### Fixed
+
+- Badges were never awarded (a raw `created_at < $1` query failed and the error was swallowed); Primer apretón and the rest are stored again on accept.
+- AI summaries fall back to the verbatim text when OpenAI is not configured instead of failing the request; saving a note keeps the draft's topics; "Recordar" opens a calendar event with the pending action.
+- Connections list only people with an accepted connection (declined or pending requests no longer appear); its search button and event chip work.
+- Ranking podium and "the person above" open the person's profile; people with 0 points no longer appear on the podium.
+- Home keeps real incoming requests and invited friends while the person has no connections yet; the bell opens the connections when nothing is pending.
+- The other person's profile shows the real day of the last note, their networks and their badges (`/me/badges?of=`).
+- Register marks someone met at an earlier event as already known; a double tap on a network toggle ends where it began.
+- Profile and monito drafts survive a reload or going back; the monito builder no longer logs a hydration error on first visit; API failures show Spanish messages as alerts; small controls have 44 px touch targets.
+
 ### Security
 
 - Events are reachable only through an unguessable access code in the event QR (`compa.lol/e/<code>`). Public event routes moved from `/api/events/{slug}/…` to `/api/e/{code}/…` and answer any wrong code with the same `404 event_not_found`; the old slug routes are removed. Admins rotate a code with `POST /api/admin/events/{slug}/rotate-code`. Migration `0003_event_access_code` adds and backfills `events.access_code` (must be applied to production).
