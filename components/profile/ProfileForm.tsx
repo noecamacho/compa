@@ -29,10 +29,10 @@ const linkValuesOf = (links: Links | undefined): LinkValues =>
 
 const isInvalid = (key: LinkKey, value: string) => value.trim() !== "" && parseLink(key, value) === null;
 
-// The links the preview can show right now: only values that already pass validation.
-const parsedLinks = (values: LinkValues): Links =>
+// The links the preview can show right now: stored ones as saved, edited ones once they pass validation.
+const previewLinks = (values: LinkValues, initial: LinkValues, stored: Links | undefined): Links =>
   Object.fromEntries(LINK_KEYS.flatMap((key) => {
-    const url = parseLink(key, values[key]);
+    const url = values[key] === initial[key] ? stored?.[key] : parseLink(key, values[key]);
     return url ? [[key, url]] : [];
   }));
 
@@ -74,7 +74,9 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
     });
   }
 
-  const invalid = LINK_KEYS.filter((key) => isInvalid(key, links[key]));
+  // A stored value is never re-judged: only what the person edits must pass today's rules.
+  const isEditedInvalid = (key: LinkKey) => links[key] !== initialLinks[key] && isInvalid(key, links[key]);
+  const invalid = LINK_KEYS.filter(isEditedInvalid);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -142,7 +144,7 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
               network={key}
               value={links[key]}
               level={levels.links[key]}
-              error={(submitted || Boolean(touched[key])) && isInvalid(key, links[key])}
+              error={(submitted || Boolean(touched[key])) && isEditedInvalid(key)}
               removed={removed[key]}
               onValue={(value) => setLink(key, value)}
               onBlur={() => setTouched((current) => ({ ...current, [key]: true }))}
@@ -153,7 +155,7 @@ export function ProfileForm({ me, next, back, onboarding }: Props) {
           ))}
         </section>
 
-        <ProfilePreview me={me} draft={{ ...fields, links: parsedLinks(links), visibility: levels }} />
+        <ProfilePreview me={me} draft={{ ...fields, links: previewLinks(links, initialLinks, me.links), visibility: levels }} />
 
         <div className="mt-auto flex flex-col gap-[10px] md:mt-4">
           {error && (

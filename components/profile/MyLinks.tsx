@@ -19,9 +19,9 @@ export function MyLinks({ visibility, links }: Props) {
   const filled = NETWORK_ORDER.filter((key) => links[key]);
 
   function change(key: LinkKey, level: Visibility) {
-    const previous = levels;
-    setLevels({ ...levels, [key]: level });
-    void apiCall("PATCH", "/api/me/visibility", VisibilitySettings, { links: { [key]: level } }).catch(() => setLevels(previous));
+    const previous = levels[key];
+    setLevels((current) => ({ ...current, [key]: level }));
+    void apiCall("PATCH", "/api/me/visibility", VisibilitySettings, { links: { [key]: level } }).catch(() => setLevels((current) => ({ ...current, [key]: previous })));
   }
 
   if (filled.length === 0) {

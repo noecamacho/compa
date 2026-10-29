@@ -57,6 +57,7 @@ test("linkInputValue shows what the person typed and round-trips", () => {
     expect(parseLink(key, shown)).toBe(url);
   }
   expect(linkInputValue("x", undefined)).toBe("");
+  expect(linkInputValue("linkedin", "https://www.linkedin.com/in/100%")).toBe("https://www.linkedin.com/in/100%");
 });
 
 test("mergeLinks sets, keeps and removes", () => {

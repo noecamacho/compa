@@ -86,7 +86,15 @@ export function linkInputValue(key: LinkKey, url: string | undefined): string {
   if (!url.startsWith(base)) return url;
   const rest = url.slice(base.length);
   if (!/^[^/?#]+$/.test(rest)) return url;
-  const handle = decodeURIComponent(rest);
+  // Links saved before handles were encoded may hold a stray "%".
+  const handle = (() => {
+    try {
+      return decodeURIComponent(rest);
+    } catch {
+      return null;
+    }
+  })();
+  if (handle === null) return url;
   return key === "linkedin" ? handle : `@${handle}`;
 }
 
