@@ -49,7 +49,8 @@ export const SCREEN_ROUTES = PAGE_ROUTES.filter((route) => !NOT_AT_PHONE_SIZES.h
 export function collectConsoleErrors(page: Page): string[] {
   const errors: string[] = [];
   page.on("console", (message) => {
-    if (message.type() === "error") errors.push(message.text());
+    // The host's network interfaces changing (e.g. Docker) is not an app error.
+    if (message.type() === "error" && !message.text().includes("net::ERR_NETWORK_CHANGED")) errors.push(message.text());
   });
   page.on("pageerror", (error) => errors.push(error.message));
   return errors;
