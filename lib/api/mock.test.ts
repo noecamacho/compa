@@ -52,6 +52,12 @@ describe("mockResponse", () => {
     expect(((await response.json()) as { error: { message: string } }).error.message).toContain("401 unauthorized");
   });
 
+  test("a server-rendered page's error reaches only the routes that document it", async () => {
+    const headers = { "x-compa-mock-error": "event_not_found", "x-compa-mock-error-scope": "documented" };
+    expect(mockResponse(routes.getMe, post(headers)).status).toBe(200);
+    expect(mockResponse(routes.getEvent, post(headers)).status).toBe(404);
+  });
+
   test("204 and redirects have no body", async () => {
     expect(mockResponse(routes.declineConnection, post()).status).toBe(204);
     const redirect = mockResponse(routes.authCallback, new Request("http://localhost/auth/callback"));

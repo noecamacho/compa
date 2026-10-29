@@ -125,7 +125,7 @@ The email sign-in spec reads the magic link from the local Mailpit (`E2E_MAILPIT
 | Signed-in screens without a database | Start the app with `API_MODE=mock bun run dev`. `hasSession()` then returns true, and server-side `apiGet` sends `x-compa-mock: 1` (`lib/server/session.ts`, `lib/api/server-fetch.ts`) |
 | A documented error on a client call | `mock.mockError('not_at_event', '**/api/connections')` (a `page.route` that adds `x-compa-mock-error`); without the URL every API call gets it. `mock.mockStatus(n)` and `mock.mockExample(name)` work the same way |
 | A named success example | Header `x-compa-mock-example: fallback` on `POST /api/interactions/draft`, or `notSubstantive` |
-| An error on a server-rendered page | `mock.mockServerError('event_not_found')` sets the test-only cookie `compa-mock-error`; `lib/api/server-fetch.ts` forwards it as `x-compa-mock-error` only under `API_MODE=mock` (`lib/api/mock-cookie.ts`). Every server fetch of that request gets it, so pick a code each of them documents |
+| An error on a server-rendered page | `mock.mockServerError('event_not_found')` sets the test-only cookie `compa-mock-error`; `lib/api/server-fetch.ts` forwards it as `x-compa-mock-error` only under `API_MODE=mock` (`lib/api/mock-cookie.ts`). Only the server fetches whose route documents that code fail; the others answer their success example (`x-compa-mock-error-scope: documented`) |
 | Network failure or slowness | `context.setOffline(true)`; `page.route(url, r => setTimeout(() => r.continue(), 3000))` |
 
 Asking for an error a route does not document returns `400 mock_error_unknown`. Treat that as a broken test, not a pass.

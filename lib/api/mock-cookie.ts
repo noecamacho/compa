@@ -14,10 +14,11 @@ function cookieValue(cookieHeader: string, name: string): string | undefined {
   return pair?.slice(name.length + 1);
 }
 
-// The mock headers server-side fetches add for this request: none outside mock mode.
+// The mock headers server-side fetches add for this request: none outside mock mode. A page makes several server
+// fetches, so the cookie's error only reaches the routes that document it; the others answer their success example.
 export function mockHeadersFor(cookieHeader: string, apiMode = process.env.API_MODE): Record<string, string> {
   if (apiMode !== "mock") return {};
   const error = cookieValue(cookieHeader, MOCK_ERROR_COOKIE);
   if (!error || !ERROR_CODE.test(error)) return { [MOCK_HEADERS.mock]: "1" };
-  return { [MOCK_HEADERS.mock]: "1", [MOCK_HEADERS.error]: error };
+  return { [MOCK_HEADERS.mock]: "1", [MOCK_HEADERS.error]: error, [MOCK_HEADERS.errorScope]: "documented" };
 }
