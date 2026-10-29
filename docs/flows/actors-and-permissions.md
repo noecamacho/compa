@@ -13,8 +13,8 @@ Sources:
 Access model:
 
 - RLS is enabled on every table, with no client policies. Every read and write goes through route handlers that connect with the server's database credentials (data model §4.7).
-- Authorization therefore lives **only** in the handlers: membership checks such as `requireMember` and `requireAnswerable` in `lib/server/connections.ts`, and `requireUser` and `requireAdmin` for identity.
-- There is no organizer role separate from COMPA admin (M10).
+- Authorization therefore lives **only** in the handlers: membership checks such as `requireMember` and `requireAnswerable` in `lib/server/connections.ts`, and `requireUser` and `requireSuperAdmin` (`lib/api/admin-gate.ts`) for identity.
+- Super admins are `users.role = 'super_admin'` (M20, API spec A11); every admin route and page answers anyone else with 404. `event_organizers` records organizers per event, with no extra powers yet (OQ #52).
 
 ## 1. Actors
 
@@ -29,7 +29,7 @@ Access model:
 | Requester | The scanner of a connection | `connections.requester_id = me` | 05, the pending branch of 06 |
 | Addressee | The person who was scanned | `connections.addressee_id = me` | 06b `/requests/[id]` |
 | Connected peer | A pair with an `accepted` connection at **any** event | `connectedPeers()` (`lib/server/people.ts`); relation `connected` | 08 `/people/[handle]`; links unlock (M12) |
-| Admin or organizer | `users.is_admin = true` | `requireAdmin()` | `POST /api/admin/events`; rotate code (IP landing) |
+| Super admin | `users.role = 'super_admin'` (M20) | `requireSuperAdmin()`, 404 otherwise | `POST /api/admin/events`; rotate code (IP landing) |
 | Projector or big-screen viewer | Anonymous browser on the venue screen | No session; public routes | `/e/<code>/live` (IP landing); on `main` the public `/api/events/{slug}/live*` |
 | System jobs or cron | None exist | — | Expiry is computed on read (`statusForViewer`, `lib/connection-status.ts`); no Vercel Cron in `vercel.json` |
 | AI service | OpenAI, called from the server only | `lib/ai/openai.ts`; `OPENAI_STT_MODEL`, `OPENAI_TEXT_MODEL` | `POST /api/transcribe`, `POST /api/interactions/draft` |
@@ -70,7 +70,7 @@ Column abbreviations:
 | List interests | ✓ | ✓ | ✓ | — | — | — | ✓ | ✓ | `GET /api/interests` (public) |
 | Read someone's card | ✗ 401 | ✓ public fields | ✓ public fields | ✓ | ✓ | ✓ + connections fields | ✓ public fields (no admin override) | public fields via the live person card | `GET /api/users/{handle}`; `lib/visibility.ts` |
 | Search people by name | — | M | M (exact handle only) | — | — | — | M | — | T-034 |
-| Create an event | ✗ 401 | ✗ 403 `forbidden` | ✗ 403 | — | — | — | ✓\* (API only) | — | `POST /api/admin/events`; T-023 |
+| Create an event | ✗ 404 | ✗ 404 | ✗ 404 | — | — | — | ✓ (`/admin`) | — | `POST /api/admin/events`; T-023 |
 | Edit, end early or archive an event | — | — | — | — | — | — | M | — | T-023 |
 | Rotate an event access code | — | — | — | — | — | — | IP | — | landing branch; T-022 |
 | Open the event door | ✓ (→ sign-in) | IP | IP | — | — | — | IP | — | `/e/<code>`; T-020 |
@@ -138,14 +138,14 @@ These are the operations that do not exist at all, or exist in the API with no U
 | 7 | Photo | Remove photo or revert to LinkedIn | ✗ | ✗ | Self | T-066 |
 | 8 | Interests | Edit my interests | ✓ | ✗ | Self | T-065 |
 | 9 | Interests | Manage the interest catalog | ✗ (seed) | ✗ | Admin | T-051 |
-| 10 | Events | List events | ✗ | ✗ | Admin | T-023 |
-| 11 | Events | Create from a UI | ✓ | ✗ | Admin | T-023 |
-| 12 | Events | Edit name or window | ✗ | ✗ | Admin | T-023 |
-| 13 | Events | End early | ✗ | ✗ | Admin | T-023 |
-| 14 | Events | Archive or delete | ✗ | ✗ | Admin (soft only) | T-023 |
+| 10 | Events | List events | ✓ | ✓ | Admin | T-023 (A11) |
+| 11 | Events | Create from a UI | ✓ | ✓ | Admin | T-023 (A11) |
+| 12 | Events | Edit name or window | ✓ | ✓ | Admin | T-023 (A11) |
+| 13 | Events | End early | ✓ | ✓ | Admin | T-023 (A11) |
+| 14 | Events | Archive or delete | ✓ (archive) | ✓ | Admin (soft only) | T-023 (A11) |
 | 15 | Check-ins | Leave or undo check-in | ✗ | ✗ | Self | T-026 |
 | 16 | Check-ins | Withdraw screen consent | ✗ | ✗ | Self | T-026 |
-| 17 | Check-ins | Admin attendee list | ✗ | ✗ | Admin | T-023 |
+| 17 | Check-ins | Admin attendee list | ✓ | ✓ | Admin | T-023 (A11) |
 | 18 | Connections | Withdraw a pending request | ✗ | ✗ | Requester | T-035 |
 | 19 | Connections | Remove an accepted connection | ✗ | ✗ | Either member (OQ #44) | T-044 |
 | 20 | Connections | Set "we knew each other" | ✓ | ✗ | Requester while pending | T-043 |

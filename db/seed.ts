@@ -1,10 +1,12 @@
 // Seeds `interests` from lib/topics.ts (API spec §2). With SEED_DEMO=1 it also creates the demo event
 // `founders-fest`, owned by an existing user, because `users` rows need a Supabase `auth.users` row
-// that only a LinkedIn sign-in creates. SEED_ADMIN_HANDLE=<handle> promotes that user to admin first.
+// that only a LinkedIn sign-in creates. SEED_ADMIN_HANDLE=<handle> promotes that user to super admin first.
+// SEED_TEST_EVENT=1 creates the shared real-mode test event and its test people (db/seed-test-event.ts).
 import { eq, sql } from "drizzle-orm";
 import { TOPICS } from "../lib/topics";
 import { slugify } from "../lib/slug";
 import { createDatabase, type Database } from "./connect";
+import { seedTestEvent } from "./seed-test-event";
 import { events, interests, users } from "./schema";
 
 const DEMO_EVENT = { slug: "founders-fest", name: "Founders Fest Madrid 2026" };
@@ -21,12 +23,12 @@ async function seedInterests(db: Database): Promise<void> {
 
 async function promoteAdmin(db: Database, handle: string | undefined): Promise<void> {
   if (!handle) return;
-  const updated = await db.update(users).set({ isAdmin: true }).where(eq(users.handle, handle)).returning();
+  const updated = await db.update(users).set({ isAdmin: true, role: "super_admin" }).where(eq(users.handle, handle)).returning();
   console.log(updated.length ? `admin: ${handle} promoted` : `admin: no user with handle ${handle}`);
 }
 
 async function findDemoOwner(db: Database) {
-  const [admin] = await db.select().from(users).where(eq(users.isAdmin, true)).limit(1);
+  const [admin] = await db.select().from(users).where(eq(users.role, "super_admin")).limit(1);
   if (admin) return admin;
   const [anyone] = await db.select().from(users).orderBy(users.createdAt).limit(1);
   return anyone;
@@ -57,6 +59,7 @@ async function main(): Promise<void> {
     await seedInterests(db);
     await promoteAdmin(db, process.env.SEED_ADMIN_HANDLE);
     if (process.env.SEED_DEMO === "1") await seedDemoEvent(db);
+    if (process.env.SEED_TEST_EVENT === "1") await seedTestEvent(db);
   } finally {
     await db.close();
   }

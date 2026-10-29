@@ -8,6 +8,7 @@ import type * as R from "../api/routes";
 import type { MeT } from "../api/schemas";
 import { hasEnded, statusForViewer } from "../connection-status";
 import { mergeLinks } from "../links";
+import { isSuperAdmin } from "../roles";
 import { toCard, withDefaultVisibility } from "../visibility";
 import { earnedBadgeIds } from "./badges";
 import { latestInteraction } from "./connection-detail";
@@ -20,7 +21,7 @@ async function buildMe(user: UserRow): Promise<MeT> {
   const current = await findCurrentEvent(user.id, now, db);
   const [names, scores, stats, badges] = await Promise.all([
     interestNamesFor([user.id], db),
-    scoresFor(user.id, current, db),
+    scoresFor(user, current, db),
     statsFor(user.id, db),
     earnedBadgeIds(user.id, db),
   ]);
@@ -31,7 +32,9 @@ async function buildMe(user: UserRow): Promise<MeT> {
     visibility: withDefaultVisibility(user.visibility),
     nameEdited: user.nameEdited,
     photoEdited: user.photoEdited,
-    isAdmin: user.isAdmin,
+    isAdmin: isSuperAdmin(user),
+    role: user.role,
+    isTest: user.isTest,
     currentEvent: current ? { code: current.accessCode, name: current.name } : null,
     stats,
     scores,
@@ -160,7 +163,7 @@ export async function getUser({ user, params }: InputOf<typeof R.getUser>): Resu
   const [card, connection, scores, stats, badges, connected] = await Promise.all([
     cardFor(user.id, owner, db),
     relationAtCurrentEvent(user, owner, event, db),
-    scoresFor(owner.id, event, db),
+    scoresFor(owner, event, db),
     statsFor(owner.id, db),
     earnedBadgeIds(owner.id, db),
     connectedPeers(user.id, [owner.id], db),

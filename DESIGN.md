@@ -47,7 +47,7 @@ Surfaces that the specs require but the handoff does not draw:
 | Personal QR landing | `/u/[handle]` (built: redirects to `/connect/[handle]`) | A1, A8 | The phone's native camera opens this URL. Signed in: straight to 05. Signed out it should go LinkedIn → check-in notice → 05, but today the session guard sends it to `/` and the handle is lost |
 | Event door and check-in | `/e/[code]` and `/e/[code]/join` (built, API spec A10) | M9, M13, M19, `GET /api/e/{code}`, `POST /api/e/{code}/check-in` | Must show the notice "your name and photo will appear on the event screen" before `screenConsent: true` |
 | Big screen | `/e/[code]/live` (built, API spec A10) | A5, A6 | See [Big screen](#big-screen-live) |
-| Admin: create an event | `/admin/events` (not built) | M10, `POST /api/admin/events` | Admins only; plain form, any style |
+| Admin console | `/admin`, `/admin/events/new`, `/admin/events/[slug]`, `/admin/people`, `/admin/test-users` (built, API spec A11) | M20, `/api/admin/*` | Super admins only, 404 for everyone else; V2 cards and buttons in a wide, fluid frame (390 → 1440); entry points only for super admins |
 | Invite link | `/i/[code]` (built) | V2 `V2Invitar` | Sends to LinkedIn with `next=/onboarding/profile?invite=<code>`; the claim route is mock only |
 
 ## Responsive breakpoints (captain decision, 2026-10-29)

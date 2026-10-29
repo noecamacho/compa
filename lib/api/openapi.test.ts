@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { z } from "zod";
 import { buildOpenApiDocument } from "./openapi";
-import { NoBody } from "./route-spec";
+import { isAdminAuth, NoBody } from "./route-spec";
 import { ROUTES } from "./routes";
 
 const NOT_IN_CONTRACT = new Set(["/api/openapi.json", "/api/docs"]);
@@ -46,11 +46,15 @@ describe("OpenAPI document", () => {
     for (const route of ROUTES) expect(paths).toContain(route.path);
   });
 
-  test("public routes need no session; others document 401", () => {
+  test("public routes need no session; user routes document 401; admin routes document only 404 (A11)", () => {
     for (const route of ROUTES) {
       const operation = document.paths?.[route.path]?.[route.method];
       if (route.auth === "public") expect(operation?.security).toEqual([]);
-      else expect(operation?.responses?.["401"]).toBeDefined();
+      else if (isAdminAuth(route.auth)) {
+        expect(operation?.responses?.["401"]).toBeUndefined();
+        expect(operation?.responses?.["403"]).toBeUndefined();
+        expect(JSON.stringify(operation?.responses?.["404"])).toContain("not_found");
+      } else expect(operation?.responses?.["401"]).toBeDefined();
     }
   });
 

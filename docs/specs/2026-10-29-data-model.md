@@ -29,6 +29,7 @@ Every decision below was made by the captain in this session.
 | M17 | Bridges, rounds and badges are **out of the data model**. | Bridges (p. 7), P2 extras (p. 3) |
 | M19 | **Events are reached only through an unguessable access code** in the event QR: `events.access_code`, 10 characters from a crypto RNG over `23456789abcdefghjkmnpqrstuvwxyz` (≈ 49 bits, `lib/access-code.ts`), generated on create, unique, rotatable by admins. The QR encodes `https://compa.lol/e/<access_code>`; the slug is for admins only. Migration `0003_event_access_code` backfills existing rows with 12 hex characters from `gen_random_uuid()` (captain decision, 2026-10-29). | Join link `/e/<slug>` |
 | M18 | **AI summaries are back and score**: after a connection is accepted, either person drafts a summary (AI via `lib/ai`), edits and approves it; one approved summary per connection; **+25 to both** (constant `SUMMARY_POINTS`, value taken from `docs/contracts/ai-summaries-api.md`; captain to confirm). Summary text is never on the big screen. | M17 draft; p. 6, p. 18 |
+| M20 | **Super admins, test people and event details** (captain decision, 2026-10-29). `users.role` (`user` \| `super_admin`, default `user`) replaces `is_admin`, which stays and mirrors it; migration `0005_super_admin_test_harness` backfills the three captains (`noe-camacho`, `iker-pindter-velasco`, `sebastian-gandoulf-perez`) and anyone already `is_admin`. `users.is_test` and `events.is_test` mark synthetic people and test events: a test user only joins a test event, and real events never count or show test users. Events gain `description`, `venue_name`, `address`, `city`, `country`, `website_url`, `timezone` (IANA, default `America/Mexico_City`), `schedule` (jsonb list of `{ date, start, end, title? }` in that zone) and `status` (`draft` \| `live` \| `ended` \| `archived`; only `live` runs, draft and archived open no public route). New `event_organizers (event_id, user_id, role owner\|organizer\|staff)`; `event_attendees.added_by` records an admin-assigned check-in. | M10 (`is_admin` only) |
 
 ## 2. Entities
 
@@ -182,6 +183,35 @@ create view lifetime_scores as
   group by user_id;
 ```
 
+### 3.1 Amendment M20 (migration `0005_super_admin_test_harness`)
+
+```sql
+alter table users add column role text not null default 'user' check (role in ('user', 'super_admin'));
+alter table users add column is_test boolean not null default false;        -- synthetic real-mode test person
+alter table events add column description text check (char_length(description) <= 2000);
+alter table events add column venue_name text check (char_length(venue_name) <= 120);
+alter table events add column address text check (char_length(address) <= 200);
+alter table events add column city text check (char_length(city) <= 80);
+alter table events add column country text check (char_length(country) <= 80);
+alter table events add column website_url text check (char_length(website_url) <= 500);
+alter table events add column timezone text not null default 'America/Mexico_City'; -- IANA, validated in lib/events/schedule.ts
+alter table events add column schedule jsonb not null default '[]';          -- [{ date: 'YYYY-MM-DD', start: 'HH:MM', end: 'HH:MM', title? }]
+alter table events add column status text not null default 'live' check (status in ('draft', 'live', 'ended', 'archived'));
+alter table events add column is_test boolean not null default false;
+alter table event_attendees add column added_by uuid references users (id) on delete set null; -- admin-assigned consent
+create table event_organizers (
+  event_id   uuid not null references events (id) on delete cascade,
+  user_id    uuid not null references users (id) on delete cascade,
+  role       text not null default 'organizer' check (role in ('owner', 'organizer', 'staff')),
+  created_at timestamptz not null default now(),
+  primary key (event_id, user_id)
+);
+-- backfill
+update users set role = 'super_admin' where handle in ('noe-camacho', 'iker-pindter-velasco', 'sebastian-gandoulf-perez') or is_admin;
+update users set is_admin = true where role = 'super_admin';
+update events set status = 'ended' where ends_at <= now();
+```
+
 ## 4. Rules the data model enforces
 
 ### 4.1 Creating a request
@@ -219,13 +249,19 @@ One server-side function builds every view of another person:
 
 - always: `name`, `photo_url`;
 - `headline`, `company`, `interests`, and each link: included when its level is `public`, or `connections` and the two users have an accepted connection at any event; never when `hidden`;
-- never: `email`, `auth_user_id`, `linkedin_sub`, `linkedin_raw`, `is_admin`.
+- never: `email`, `auth_user_id`, `linkedin_sub`, `linkedin_raw`, `is_admin`, `role`, `is_test`.
 
 Hidden data is never sent to the client.
 
 ### 4.6 LinkedIn sync (M14)
 
 On every sign-in: update `linkedin_raw` and `linkedin_synced_at`; update `name` unless `name_edited`; update `photo_url` unless `photo_edited`. Editing either field in COMPA sets its `_edited` flag.
+
+### 4.6a Test people and lifecycle (M20)
+
+- A test user (`is_test`) checks in only to a test event, whether by QR, scan or admin; anything else is `409 test_user_not_allowed`.
+- At a real event, the door counters, live snapshot, person card and leaderboard leave test users and their connections out.
+- `isRunning` is true only for `status = 'live'` inside the window; `ended` and `archived` count as over, so pending requests expire. "End now" sets `ends_at = now()` (keeping `ends_at > starts_at`).
 
 ### 4.7 Access
 

@@ -2,6 +2,7 @@ import "server-only";
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { connections, eventAttendees, eventScores, events, lifetimeScores, users, type EventRow } from "../../db/schema";
+import { realPeopleOnly } from "./events";
 
 export type Standing = { rank: number | null; points: number };
 export type Scores = { event: Standing; lifetime: Standing };
@@ -18,7 +19,7 @@ export async function rankedAtEvent(event: EventRow, db: Executor = getDb()): Pr
     .from(eventAttendees)
     .innerJoin(users, eq(users.id, eventAttendees.userId))
     .leftJoin(eventScores, and(eq(eventScores.eventId, eventAttendees.eventId), eq(eventScores.userId, eventAttendees.userId)))
-    .where(eq(eventAttendees.eventId, event.id))
+    .where(and(eq(eventAttendees.eventId, event.id), realPeopleOnly(event)))
     .orderBy(desc(points), desc(connectionCount), asc(eventAttendees.checkedInAt));
   return rows;
 }
@@ -26,12 +27,13 @@ export async function rankedAtEvent(event: EventRow, db: Executor = getDb()): Pr
 const lifetimePoints = sql<number>`coalesce(${lifetimeScores.points}, 0)`.mapWith(Number);
 const lifetimeConnections = sql<number>`coalesce(${lifetimeScores.connections}, 0)`.mapWith(Number);
 
-// Everyone with points, all events, best first.
-export async function rankedLifetime(db: Executor = getDb()): Promise<Ranked[]> {
+// Everyone with points, all events, best first. Test users count only on boards seen from a test event or by a test user (M20).
+export async function rankedLifetime({ includeTest }: { includeTest: boolean }, db: Executor = getDb()): Promise<Ranked[]> {
   return db
     .select({ userId: users.id, name: users.name, photoUrl: users.photoUrl, points: lifetimePoints, connections: lifetimeConnections })
     .from(lifetimeScores)
     .innerJoin(users, eq(users.id, lifetimeScores.userId))
+    .where(includeTest ? undefined : eq(users.isTest, false))
     .orderBy(desc(lifetimePoints), desc(lifetimeConnections), asc(users.createdAt));
 }
 
@@ -43,8 +45,9 @@ export function standingOf(ranked: Ranked[], userId: string): Standing {
   return { rank: index + 1, points: row.points };
 }
 
-export async function scoresFor(userId: string, event: EventRow | undefined, db: Executor = getDb()): Promise<Scores> {
-  const [atEvent, lifetime] = await Promise.all([event ? rankedAtEvent(event, db) : Promise.resolve([]), rankedLifetime(db)]);
+export async function scoresFor(person: { id: string; isTest: boolean }, event: EventRow | undefined, db: Executor = getDb()): Promise<Scores> {
+  const userId = person.id;
+  const [atEvent, lifetime] = await Promise.all([event ? rankedAtEvent(event, db) : Promise.resolve([]), rankedLifetime({ includeTest: person.isTest }, db)]);
   return { event: standingOf(atEvent, userId), lifetime: standingOf(lifetime, userId) };
 }
 
