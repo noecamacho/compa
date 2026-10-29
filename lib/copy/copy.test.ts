@@ -37,7 +37,7 @@ describe("copy dictionaries", () => {
 
   test("both locales share one shape: same keys, same value kinds, same function arity", () => {
     for (const section of Object.keys(es)) {
-      expect(shape((en as Tree)[section], section)).toEqual(shape((es as Tree)[section], section));
+      expect(shape((en as Tree)[section], section).sort()).toEqual(shape((es as Tree)[section], section).sort());
     }
   });
 

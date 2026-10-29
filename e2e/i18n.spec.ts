@@ -42,6 +42,6 @@ test.describe("i18n", () => {
       await page.getByRole("button", { name: copy.request.accept }).click();
       await expect(alert).toBeVisible({ timeout: 5_000 });
     }).toPass({ timeout: 45_000 });
-    await expect(alert).toContainText(copy.errors.codes.not_pending ?? "");
+    await expect(alert).toContainText(copy.apiErrors.codes.not_pending);
   });
 });
