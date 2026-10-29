@@ -4,8 +4,9 @@ import "zod-openapi";
 import { z } from "zod";
 import { AVATAR_MODES } from "../avatar-mode";
 import { BADGE_IDS } from "../badges/catalog";
+import { checkLink, SHARED_LINK_KEYS } from "../links";
 import { MonitoLook } from "../monito/look";
-import { LINK_KEYS, VISIBILITY_LEVELS } from "../profile-fields";
+import { LINK_KEYS, VISIBILITY_LEVELS, type LinkKey as LinkKeyT } from "../profile-fields";
 import { TOPICS } from "../topics";
 
 const uuid = z.uuid();
@@ -117,6 +118,16 @@ export const UserProfile = z
 
 const optionalText = (max: number) => z.string().trim().max(max).nullable().optional();
 
+// The four shared networks are checked the same way the inputs check them (lib/links.ts); other keys stay free-form.
+const checkedLinks = (links: Partial<Record<LinkKeyT, string>>, ctx: z.RefinementCtx) => {
+  for (const key of SHARED_LINK_KEYS) {
+    const raw = links[key];
+    if (raw === undefined) continue;
+    const check = checkLink(key, raw);
+    if (!check.ok) ctx.addIssue({ code: "custom", path: [key], message: check.problem });
+  }
+};
+
 export const PatchMeBody = z
   .object({
     name: z.string().trim().min(1).max(80).optional(),
@@ -128,6 +139,7 @@ export const PatchMeBody = z
     avatarMode: AvatarMode.optional(),
     links: z
       .partialRecord(LinkKey, z.string().trim().max(200))
+      .superRefine(checkedLinks)
       .optional()
       .meta({ description: "`@user` or a URL; an empty string removes the link." }),
     interestIds: z.array(z.int().positive()).max(10).optional(),

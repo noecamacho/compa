@@ -18,3 +18,11 @@ export function formatHour(iso: string, timeZone = "America/Mexico_City"): strin
 }
 
 export const firstName = (name: string): string => name.split(" ")[0] ?? name;
+
+const dayFormat = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", timeZone: "America/Mexico_City" });
+
+// "Hoy" for something from today, otherwise its date ("28 oct"); days are compared in the event's time zone.
+export function relativeDay(iso: string, now: Date = new Date()): string {
+  const then = new Date(iso);
+  return dayFormat.format(then) === dayFormat.format(now) && Math.abs(now.getTime() - then.getTime()) < 36 * 3_600_000 ? time.today : dayFormat.format(then);
+}

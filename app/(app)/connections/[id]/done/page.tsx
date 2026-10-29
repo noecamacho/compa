@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Icon, type IconName } from "@/components/icons";
+import { Icon } from "@/components/icons";
 import { PendingWatcher } from "@/components/connections/PendingWatcher";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
+import { NetworkLinks, sharedLinks } from "@/components/profile/NetworkLinks";
 import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Chip";
@@ -11,18 +11,10 @@ import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { ConnectionDetail, Me } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
-import { common, confirmation as copy, networks } from "@/lib/copy/es";
+import { common, confirmation as copy } from "@/lib/copy/es";
 import { formatClock } from "@/lib/format";
-import type { LinkKey } from "@/lib/profile-fields";
 
 type Props = { params: Promise<{ id: string }> };
-
-const NETWORK_STYLE: Partial<Record<LinkKey, { color: string; icon: IconName; label: string }>> = {
-  linkedin: { color: "#DDF1FF", icon: "linkedin", label: networks.linkedin },
-  instagram: { color: "#FFE3EA", icon: "instagram", label: networks.instagram },
-  whatsapp: { color: "#DDF8EA", icon: "whatsapp", label: networks.whatsapp },
-  x: { color: "#FFF3BF", icon: "x", label: networks.x },
-};
 
 const first = (name: string) => name.split(" ")[0] ?? name;
 
@@ -44,7 +36,8 @@ export default async function ConfirmationPage({ params }: Props) {
   const other = detail.other;
   const pending = detail.status !== "accepted";
   const title = pending ? copy.titlePending(first(other.name)) : detail.kind === "new" ? copy.titleNew(first(other.name)) : copy.titleReconnection(first(other.name));
-  const links = Object.entries(other.links ?? {}).filter(([key]) => NETWORK_STYLE[key as LinkKey]);
+  // Only networks the other person turned on, and only once they accepted (visibility filter, API spec §6).
+  const links = pending ? [] : sharedLinks(other.links);
   return (
     <Screen>
       {pending && <PendingWatcher connectionId={detail.connectionId} />}
@@ -96,27 +89,7 @@ export default async function ConfirmationPage({ params }: Props) {
             <Muted className="text-[12px] font-bold">{pending ? copy.pendingNote : copy.keepTalking}</Muted>
           </span>
         </span>
-        {links.length > 0 && (
-          <div className="grid gap-[10px]" style={{ gridTemplateColumns: `repeat(${links.length}, minmax(0, 1fr))` }}>
-            {links.map(([key, url]) => {
-              const style = NETWORK_STYLE[key as LinkKey];
-              if (!style) return null;
-              return (
-                <Link
-                  key={key}
-                  href={url}
-                  target="_blank"
-                  rel="noreferrer"
-                  aria-label={copy.linkLabel(style.label, first(other.name))}
-                  className="flex h-12 min-w-0 items-center justify-center rounded-[14px] border-ink shadow-hard-2 pressable"
-                  style={{ background: style.color }}
-                >
-                  <Icon name={style.icon} size={24} />
-                </Link>
-              );
-            })}
-          </div>
-        )}
+        <NetworkLinks links={links} ownerFirstName={first(other.name)} />
       </Card>
 
       <div className="animate-rise" style={{ animationDelay: ".7s" }}>

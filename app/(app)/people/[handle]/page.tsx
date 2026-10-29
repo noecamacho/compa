@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BadgeShelf } from "@/components/badges/BadgeShelf";
 import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
+import { NetworkLinks, sharedLinks } from "@/components/profile/NetworkLinks";
 import { Card } from "@/components/ui/Card";
 import { Header } from "@/components/ui/Header";
 import { Pill } from "@/components/ui/Pill";
@@ -10,8 +11,8 @@ import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { UserProfile } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
-import { person as copy } from "@/lib/copy/es";
-import { formatPoints } from "@/lib/format";
+import { confirmation, person as copy } from "@/lib/copy/es";
+import { firstName, formatPoints, relativeDay } from "@/lib/format";
 import { BADGE_IDS } from "@/lib/badges/catalog";
 
 type Props = { params: Promise<{ handle: string }> };
@@ -24,6 +25,8 @@ export default async function PersonPage({ params }: Props) {
   const { card, connection, scores, badges = [], relationship, lastInteraction } = profile;
   const connected = connection?.status === "accepted";
   const status = connected ? copy.connected : connection?.status === "pending" ? copy.pending : copy.notConnected;
+  // The API sends links only for networks the person turned on and only once we are connected (API spec §6).
+  const links = connected ? sharedLinks(card.links) : [];
   return (
     <Screen>
       <Header
@@ -75,11 +78,21 @@ export default async function PersonPage({ params }: Props) {
         </Card>
       )}
 
+      {links.length > 0 && (
+        <Card className="flex flex-col gap-[10px] px-4 py-[14px]">
+          <span className="flex min-w-0 flex-col gap-[1px]">
+            <SectionLabel>{confirmation.connectWith(firstName(card.name))}</SectionLabel>
+            <Muted className="text-[12px] font-bold">{confirmation.keepTalking}</Muted>
+          </span>
+          <NetworkLinks links={links} ownerFirstName={firstName(card.name)} />
+        </Card>
+      )}
+
       <Card className="flex flex-col overflow-hidden">
         {lastInteraction && (
           <Link href={`/connections/${lastInteraction.connectionId}/note`} className="flex h-14 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper">
             <span className="flex-1">{copy.lastTime}</span>
-            <Muted className="text-[13px]">{`${copy.today} · ${lastInteraction.title}`}</Muted>
+            <Muted className="truncate text-[13px]">{`${relativeDay(lastInteraction.at)} · ${lastInteraction.title}`}</Muted>
             <Icon name="chevronRight" size={18} strokeWidth={3} />
           </Link>
         )}

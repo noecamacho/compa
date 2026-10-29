@@ -201,3 +201,9 @@ export async function inviteRow(code: string): Promise<{ inviteeId: string | nul
   const [row] = await sql()<{ invitee_id: string | null; first_connection_at: Date | null }[]>`select invitee_id, first_connection_at from invites where code = ${code}`;
   return row ? { inviteeId: row.invitee_id, firstConnectionAt: row.first_connection_at } : null;
 }
+
+// Answers a pending request the way the API does, without the API: status, kind and points.
+export async function acceptRequest(connectionId: string, kind: "new" | "reconnection" = "new"): Promise<void> {
+  const points = kind === "new" ? 50 : 20;
+  await sql()`update connections set status = 'accepted', kind = ${kind}, points = ${points}, responded_at = now() where id = ${connectionId}`;
+}

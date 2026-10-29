@@ -93,6 +93,7 @@ export const connect = {
   searchPlaceholder: "¿No sale el QR? Busca por nombre",
   cameraUnavailable: "Sin cámara aquí. Pide que te escaneen o busca por nombre.",
   notFound: "No encontramos a nadie con ese nombre.",
+  invalidQr: "Ese QR no es de Compa. Apunta al QR personal de la otra persona.",
 };
 
 export const register = {
@@ -261,6 +262,56 @@ export const networks = {
   instagram: "Instagram",
   whatsapp: "WhatsApp",
   x: "X",
+};
+
+// Typing the handle of each shared network (02 Perfil, 09 MiPerfil).
+export const linkFields = {
+  placeholder: {
+    linkedin: "usuario o enlace de LinkedIn",
+    instagram: "@usuario",
+    whatsapp: "+52 81 1234 5678",
+    x: "@usuario",
+  },
+  problem: {
+    duplicate_at: "Solo una @ al inicio.",
+    bad_handle: "Usa letras, números, punto o guion bajo, sin espacios.",
+    country_code: "Incluye el código de país, por ejemplo +52.",
+    bad_phone: "Escribe un número de teléfono con código de país.",
+    bad_linkedin: "Escribe tu usuario de LinkedIn o el enlace de tu perfil.",
+  },
+  saved: "Guardado",
+};
+
+// What the person sees when a call to the API fails, by error code (lib/api/errors.ts).
+export const apiErrors = {
+  fallback: "Algo salió mal. Inténtalo otra vez.",
+  network_error: "Sin conexión. Revisa tu internet e inténtalo otra vez.",
+  invalid_input: "Revisa los datos: hay algo que no es válido.",
+  unauthorized: "Tu sesión terminó. Vuelve a entrar con LinkedIn.",
+  forbidden: "No puedes hacer esto.",
+  not_author: "Solo quien grabó la nota puede guardarla.",
+  not_found: "No encontramos eso.",
+  user_not_found: "No hay nadie con ese nombre.",
+  event_not_found: "Ese evento no existe.",
+  connection_not_found: "No encontramos esa conexión.",
+  event_not_running: "El evento no está abierto ahora.",
+  self_connection: "No puedes conectar contigo mismo.",
+  not_at_event: "Esa persona no está en un evento ahora.",
+  consent_required: "Acepta aparecer en la pantalla del evento para conectar.",
+  not_pending: "Esta solicitud ya fue respondida.",
+  event_ended: "El evento terminó; la solicitud expiró.",
+  connection_not_accepted: "Primero tiene que aceptar la conexión.",
+  not_substantive: "La nota no describe una plática.",
+  already_approved: "Esta conexión ya tiene una nota guardada.",
+  invalid_audio: "No pudimos leer el audio. Escribe la nota.",
+  transcription_failed: "No pudimos transcribir la nota. Escríbela.",
+  summary_failed: "No pudimos resumir la nota. Inténtalo otra vez.",
+  internal_error: "Algo salió mal. Inténtalo otra vez.",
+} as Record<string, string>;
+
+// Shown at the top of every screen while the device has no network.
+export const offline = {
+  banner: "Sin conexión. Lo que hagas se guardará cuando vuelva el internet.",
 };
 
 export const time = {

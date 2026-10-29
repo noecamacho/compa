@@ -1,4 +1,5 @@
 import type { z } from "zod";
+import { apiErrors } from "../copy/es";
 
 // Typed same-origin fetch for Client Components. The session cookie travels on its own.
 export class ApiClientError extends Error {
@@ -18,6 +19,13 @@ type ErrorBody = { error?: { code?: string; message?: string; fields?: Record<st
 async function toError(response: Response): Promise<ApiClientError> {
   const body = (await response.json().catch(() => null)) as ErrorBody | null;
   return new ApiClientError(response.status, body?.error?.code ?? "unknown", body?.error?.message ?? response.statusText, body?.error?.fields);
+}
+
+// What to show the person for a failed call: Spanish by error code, never the API's English message.
+export function errorMessage(error: unknown): string {
+  if (error instanceof ApiClientError) return apiErrors[error.code] ?? apiErrors.fallback ?? "";
+  if (error instanceof TypeError) return apiErrors.network_error ?? "";
+  return apiErrors.fallback ?? "";
 }
 
 type Method = "GET" | "POST" | "PATCH" | "DELETE";
