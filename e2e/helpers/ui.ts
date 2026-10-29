@@ -36,3 +36,6 @@ export async function box(locator: Locator): Promise<{ x: number; y: number; wid
   if (!rect) throw new Error("element has no bounding box");
   return rect;
 }
+
+// The app's own alert, leaving out Next's route announcer (also role=alert, outside <main>).
+export const alertIn = (page: Page): Locator => page.locator("main").getByRole("alert");
