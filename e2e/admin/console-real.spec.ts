@@ -6,7 +6,7 @@ import { CreatedEvent } from "../../lib/api/schemas";
 import { copyFor } from "../../lib/copy";
 import type { TestSessionCookies } from "../../lib/testing/real-mode";
 import { expect, test } from "../fixtures";
-import { adminApi, harnessFor, localSql, runPrefix, signInAsTestAdmin, type AdminApi, type Sql } from "./helpers";
+import { adminApi, harnessFor, localSql, runPrefix, signInAsTestAdmin, type AdminApi, type Sql } from "./real-helpers";
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
