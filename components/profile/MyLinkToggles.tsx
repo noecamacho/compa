@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { apiCall } from "@/lib/api/client";
 import { Me, VisibilitySettings, type MeT, type VisibilitySettingsT } from "@/lib/api/schemas";
 import { me as copy } from "@/lib/copy/es";
@@ -18,16 +18,22 @@ const valuesFrom = (links: Links): SharedValues => Object.fromEntries(SHARED_NET
 // The four toggles on my profile save on each tap, and each handle saves when its input is left (V2MiPerfil).
 export function MyLinkToggles({ visibility, links }: Props) {
   const [flags, setFlags] = useState<SharedFlags>(flagsFrom(visibility));
+  // Latest flags, updated inside the handler, so a second tap before the re-render still flips from the right state.
+  const latest = useRef(flags);
   const [values, setValues] = useState<SharedValues>(() => valuesFrom(links));
   const [stored, setStored] = useState<SharedValues>(() => valuesFrom(links));
   const [problems, setProblems] = useState<SharedProblems>({});
   const [saved, setSaved] = useState<Partial<Record<SharedNetwork, boolean>>>({});
 
-  function change(next: SharedFlags) {
-    const changed = SHARED_NETWORKS.find((key) => next[key] !== flags[key]);
+  function toggle(key: SharedNetwork) {
+    const previous = latest.current;
+    const next = { ...previous, [key]: !previous[key] };
+    latest.current = next;
     setFlags(next);
-    if (!changed) return;
-    void apiCall("PATCH", "/api/me/visibility", VisibilitySettings, { links: { [changed]: next[changed] ? "connections" : "hidden" } }).catch(() => setFlags(flags));
+    void apiCall("PATCH", "/api/me/visibility", VisibilitySettings, { links: { [key]: next[key] ? "connections" : "hidden" } }).catch(() => {
+      latest.current = { ...latest.current, [key]: previous[key] };
+      setFlags(latest.current);
+    });
   }
 
   function setValue(key: SharedNetwork, value: string) {
@@ -52,5 +58,5 @@ export function MyLinkToggles({ visibility, links }: Props) {
   }
 
   const titles = Object.fromEntries(SHARED_NETWORKS.map((key) => [key, flags[key] ? (links[key] ?? "") : copy.hidden]));
-  return <LinkToggles value={flags} onChange={change} label={copy.linksLabel} titles={titles} values={values} onValueChange={setValue} onValueCommit={commit} problems={problems} saved={saved} />;
+  return <LinkToggles value={flags} onToggle={toggle} label={copy.linksLabel} titles={titles} values={values} onValueChange={setValue} onValueCommit={commit} problems={problems} saved={saved} />;
 }

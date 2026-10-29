@@ -20,7 +20,8 @@ const STYLE: Record<SharedNetwork, { color: string; icon: IconName }> = {
 
 type Props = {
   value: SharedFlags;
-  onChange: (next: SharedFlags) => void;
+  // Called with the tapped network; the owner flips it from its latest state (safe against double taps).
+  onToggle: (key: SharedNetwork) => void;
   label: string;
   titles?: Partial<Record<SharedNetwork, string>>;
   // The handle of each network; an input appears under the row for every network that is on.
@@ -37,7 +38,7 @@ const inputId = (key: SharedNetwork) => `link-${key}`;
 
 // Four 44 px icon toggles: on = tinted with a 2×2 shadow, off = white at 55 % (V2Perfil, V2MiPerfil).
 // Turning one on reveals its handle input; the value is validated by lib/links.ts.
-export function LinkToggles({ value, onChange, label, titles, values, onValueChange, onValueCommit, problems, saved }: Props) {
+export function LinkToggles({ value, onToggle, label, titles, values, onValueChange, onValueCommit, problems, saved }: Props) {
   const onKeyDown = (key: SharedNetwork) => (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key !== "Enter") return;
     event.preventDefault();
@@ -58,7 +59,7 @@ export function LinkToggles({ value, onChange, label, titles, values, onValueCha
               aria-label={networks[key]}
               aria-controls={withInputs ? inputId(key) : undefined}
               title={titles?.[key]}
-              onClick={() => onChange({ ...value, [key]: !on })}
+              onClick={() => onToggle(key)}
               className="box-border flex h-11 min-w-0 cursor-pointer items-center justify-center rounded-[12px] p-0 border-ink active:scale-95"
               style={{
                 background: on ? STYLE[key].color : "#FFFFFF",

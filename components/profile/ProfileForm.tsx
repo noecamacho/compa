@@ -88,6 +88,8 @@ function Form({ me, next, back, onboarding, initial, restored }: Props & { initi
   const update = (key: keyof typeof fields) => (event: FormEvent<HTMLInputElement>) =>
     setFields({ ...fields, [key]: event.currentTarget.value });
 
+  const toggleFlag = (key: SharedNetwork) => setFlags((prev) => ({ ...prev, [key]: !prev[key] }));
+
   const setValue = (key: SharedNetwork, value: string) => {
     setValues({ ...values, [key]: value });
     if (problems[key]) setProblems({ ...problems, [key]: undefined });
@@ -140,7 +142,7 @@ function Form({ me, next, back, onboarding, initial, restored }: Props & { initi
             <SectionLabel>{profile.linksLabel}</SectionLabel>
             <Muted className="text-[11px] font-extrabold whitespace-nowrap">{profile.linksOnlyConnections}</Muted>
           </span>
-          <LinkToggles value={flags} onChange={setFlags} label={profile.linksLabel} values={values} onValueChange={setValue} problems={problems} />
+          <LinkToggles value={flags} onToggle={toggleFlag} label={profile.linksLabel} values={values} onValueChange={setValue} problems={problems} />
           <Muted className="text-[12px] font-bold">{profile.linksHint}</Muted>
         </div>
         <div className="mt-auto flex flex-col gap-[10px]">
