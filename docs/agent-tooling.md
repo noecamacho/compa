@@ -41,11 +41,11 @@ Prerequisites that are reported but never installed automatically: git, jq (the 
 | Event | Script | Claude Code | Codex | Effect |
 | --- | --- | --- | --- | --- |
 | SessionStart (startup, resume) | `scripts/setup.sh --session` | `.claude/settings.json` | `.codex/hooks.json` | Configures hooks, auto-installs missing tools, prints the reminders (read `wiki/index.md`, load caveman and ponytail, use Serena and repomix, use the PR template) as session context |
-| PreToolUse on shell commands | `scripts/hooks/agent-pretooluse.sh` | `.claude/settings.json` | `.codex/hooks.json` | Parses `git commit -m`/`-F` messages from the command, runs `scripts/check-commit-message.sh`, exits 2 with the reason to block the command. Both agents honor exit 2 + stderr. |
+| PreToolUse on shell commands | `scripts/hooks/agent-pretooluse.sh` | `.claude/settings.json` | `.codex/hooks.json` | Blocks `git push` commands that target `main`; parses `git commit -m`/`-F` messages from the command, runs `scripts/check-commit-message.sh`, exits 2 with the reason to block the command. Both agents honor exit 2 + stderr. |
 
 Both hook files share the same schema: `hooks.<Event>[].matcher` plus `hooks[].{type:"command", command, timeout}`. Claude Code exposes the repository root as `$CLAUDE_PROJECT_DIR`; the Codex entries resolve it with `git rev-parse --show-toplevel`.
 
-Limits of the PreToolUse parser: it reads a single quoted `-m`/`--message` value (combined flags such as `-am` included), a `-F` file, or a heredoc that uses the `EOF` tag, and it recognizes `git` only at the start of a command (after `;`, `&&`, `||`, `|` or `(`), including `-C` and `-c` global options. Several `-m` flags, an editor commit or anything else it cannot parse are allowed through and caught by `.githooks/commit-msg`, which is the authoritative gate. Tests: `tests/hooks/run.sh`.
+Limits of the PreToolUse parser: it reads a single quoted `-m`/`--message` value (combined flags such as `-am` included), a `-F` file, or a heredoc that uses the `EOF` tag, and it recognizes `git` only at the start of a command (after `;`, `&&`, `||`, `|` or `(`), including `-C` and `-c` global options. Several `-m` flags, an editor commit or anything else it cannot parse are allowed through and caught by `.githooks/commit-msg`, which is the authoritative gate. The hook reads the whole command text, so a command that merely contains `(git commit -m "..."` or `git push origin main` inside a heredoc or quoted script is blocked too; put such text in a file and run the file. Tests: `tests/hooks/run.sh`.
 
 ## Sub agents
 

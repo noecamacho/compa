@@ -1,20 +1,39 @@
 #!/bin/sh
-# PreToolUse hook for Claude Code and Codex: blocks a `git commit` whose
-# message would fail scripts/check-commit-message.sh before the command runs.
-# Reads the hook JSON on stdin ({"tool_input":{"command":"..."}}); exits 2 with
-# the reason on stderr to block, 0 to allow. Both agents honor that contract.
-# Anything this parser cannot read is allowed through; .githooks/commit-msg is the backstop.
+# PreToolUse hook for Claude Code and Codex. Before a shell command runs it
+# blocks (exit 2, reason on stderr) a `git push` that targets main and a
+# `git commit` whose message would fail scripts/check-commit-message.sh.
+# Reads the hook JSON on stdin ({"tool_input":{"command":"..."}}); exit 0 allows.
+# Anything this parser cannot read is allowed through; the git hooks are the backstop.
 set -u
 
 HERE=$(cd "$(dirname "$0")" && pwd)
 CHECKER="$HERE/../check-commit-message.sh"
 # `git`, optionally with global options such as `-C dir` or `-c k=v`, at the start of a command.
-GIT_COMMIT_RE='(^|[;&|(]|&&|\|\|)[[:space:]]*git([[:space:]]+-[^[:space:]]+([[:space:]]+[^-[:space:]][^[:space:]]*)?)*[[:space:]]+commit([[:space:]]|$)'
+GIT_PREFIX_RE='(^|[;&|(]|&&|\|\|)[[:space:]]*git([[:space:]]+-[^[:space:]]+([[:space:]]+[^-[:space:]][^[:space:]]*)?)*[[:space:]]+'
+GIT_COMMIT_RE="${GIT_PREFIX_RE}commit([[:space:]]|\$)"
+GIT_PUSH_RE="${GIT_PREFIX_RE}push([[:space:]]|\$)"
+MAIN_REF_RE='(^|[[:space:]:/])main([[:space:]]|$)'
 MESSAGE_FLAG_RE='(^|[[:space:]])(-[a-zA-Z]*m|--message)[= ]'
 
+block() {
+  printf 'blocked: %s\n' "$1" >&2
+  exit 2
+}
+
 read_command() {
-  command -v jq >/dev/null 2>&1 || { printf 'agent-pretooluse: jq not found, commit message not checked\n' >&2; return 1; }
+  command -v jq >/dev/null 2>&1 || { printf 'agent-pretooluse: jq not found, command not checked\n' >&2; return 1; }
   jq -r '.tool_input.command // empty'
+}
+
+# The arguments of the last `git push` in the command, up to the next command separator.
+push_arguments() {
+  printf '%s' "$1" | tr '\n' ' ' | sed -E 's/.*[[:space:](]git([[:space:]]+-[^[:space:]]+([[:space:]]+[^-[:space:]][^[:space:]]*)?)*[[:space:]]+push//; s/[;&|].*//'
+}
+
+is_push_to_main() {
+  printf '%s' "$1" | grep -Eq "$GIT_PUSH_RE" || return 1
+  printf '%s' "$1" | grep -q 'ALLOW_MAIN_PUSH=1' && return 1
+  push_arguments " $1" | grep -Eq "$MAIN_REF_RE"
 }
 
 is_git_commit() {
@@ -45,17 +64,20 @@ extract_message() {
   message_from_inline_flag "$1"
 }
 
+check_commit_message() {
+  tmp=$(mktemp)
+  printf '%s\n' "$1" > "$tmp"
+  reason=$("$CHECKER" "$tmp" 2>&1 >/dev/null)
+  status=$?
+  rm -f "$tmp"
+  [ "$status" -eq 0 ] || block "$reason"
+}
+
 cmd=$(read_command) || exit 0
 [ -n "$cmd" ] || exit 0
+is_push_to_main "$cmd" && block "direct pushes to main are not allowed; push a branch and open a pull request (docs/git-workflow.md)"
 is_git_commit "$cmd" || exit 0
 message=$(extract_message "$cmd") || exit 0
 [ -n "$message" ] || exit 0
-
-tmp=$(mktemp)
-printf '%s\n' "$message" > "$tmp"
-reason=$("$CHECKER" "$tmp" 2>&1 >/dev/null)
-status=$?
-rm -f "$tmp"
-[ "$status" -eq 0 ] && exit 0
-printf 'blocked: %s\n' "$reason" >&2
-exit 2
+check_commit_message "$message"
+exit 0

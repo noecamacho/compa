@@ -33,7 +33,7 @@ Page conventions: kebab-case file names; a `# Title` first line; short factual s
 2. **Branch** from `main`: `<type>/<ticket>-<short-kebab-summary>`.
 3. **Commits**: Conventional Commits, English, small and focused, no AI attribution (`docs/git-workflow.md`). The hooks block violations.
 4. **PR** against `main` using `.github/PULL_REQUEST_TEMPLATE.md`. Every section filled. Update `CHANGELOG.md` for user-visible changes.
-5. Never push to `main`. Never merge your own PR.
+5. Never push to `main`; it accepts changes only through a reviewed PR (hooks enforce it, see "Protected `main`" in `docs/git-workflow.md`). Never merge your own PR.
 
 ## 4. Coding standards
 

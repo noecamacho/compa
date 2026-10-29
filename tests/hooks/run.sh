@@ -71,6 +71,14 @@ expect_hook 2 "$(json_command 'git -C app commit -m "bad subject"')" 'blocks com
 expect_hook 2 "$(json_command 'git -c user.name=x commit -m "bad subject"')" 'blocks commit with a -c global option'
 expect_hook 0 "$(json_command 'git commit -m "feat: add x" && echo done.')" 'ignores shell text after the quoted message'
 expect_hook 2 "$(json_command '(git commit -m "bad subject")')" 'blocks commit inside a subshell'
+expect_hook 2 "$(json_command 'git push origin main')" 'blocks push to main'
+expect_hook 2 "$(json_command 'git push -u origin HEAD:main')" 'blocks push of HEAD to main'
+expect_hook 2 "$(json_command 'git push --force origin main')" 'blocks force push to main'
+expect_hook 0 "$(json_command 'git push -u origin feat/COMPA-12-profile-form')" 'allows push of a feature branch'
+expect_hook 0 "$(json_command 'git push origin maintenance')" 'allows a branch whose name starts with main'
+expect_hook 0 "$(json_command 'ALLOW_MAIN_PUSH=1 git push origin main')" 'allows an explicit bootstrap push'
+expect_hook 0 "$(json_command 'git commit -m "docs: say main is protected" && git push -u origin docs/x')" 'ignores main mentioned in a commit message before a branch push'
+expect_hook 2 "$(json_command 'git add . && git push origin main && echo pushed')" 'blocks push to main inside a chain'
 
 printf '\n%s passed, %s failed\n' "$PASS" "$FAIL"
 [ "$FAIL" -eq 0 ]

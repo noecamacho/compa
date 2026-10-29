@@ -10,6 +10,13 @@ These rules apply to every contributor and every agent. Hooks in `.githooks/` en
 4. **Open a PR** against `main` using `.github/PULL_REQUEST_TEMPLATE.md`. Every section is filled in; "N/A" needs a reason.
 5. Never push to `main` directly. Never merge your own PR without review.
 
+## Protected `main`
+
+`main` accepts changes only through a reviewed pull request; every collaborator, human or agent, submits a PR.
+
+- Repository-side enforcement, active now: `.githooks/pre-push` refuses any push to `main`, and the agent PreToolUse hook blocks `git push` commands that target `main` before they run. `ALLOW_MAIN_PUSH=1` exists only for a deliberate bootstrap push by the owner.
+- GitHub-side enforcement (branch protection or a ruleset that requires a pull request, blocks force pushes and deletions): pending. On 2026-10-28 the GitHub API refused both the ruleset and the branch-protection endpoints for this private repository with "Upgrade to GitHub Pro or make this repository public to enable this feature". The owner must either upgrade the plan or make the repository public (see `wiki/open-questions.md` #14), then add a ruleset on `main` with "Require a pull request before merging" and "Block force pushes".
+
 ## Conventional Commits
 
 Format: `type(scope): imperative subject`, followed by a blank line and a body that explains why.
