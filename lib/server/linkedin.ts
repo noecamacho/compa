@@ -1,11 +1,12 @@
 import "server-only";
 import type { User } from "@supabase/supabase-js";
-import { eq, like } from "drizzle-orm";
+import { and, eq, like } from "drizzle-orm";
 import { z } from "zod";
 import { getDb } from "../../db/client";
 import { users, type UserRow } from "../../db/schema";
 import { handleBase, pickHandle } from "../handle";
 import { findUserByAuthId } from "./auth";
+import { mirrorPhoto, photoToStore } from "./avatar-storage";
 import { isUniqueViolation } from "./people";
 
 // Claims Supabase stores for `linkedin_oidc` in user_metadata (untrusted input, so parsed).
@@ -75,15 +76,29 @@ async function syncUser(existing: UserRow, profile: Profile): Promise<UserRow> {
       linkedinSyncedAt: new Date(),
       email: profile.email ?? existing.email,
       ...(existing.nameEdited ? {} : { name: profile.name }),
-      ...(existing.photoEdited ? {} : { photoUrl: profile.photoUrl }),
+      // The photo is refreshed by keepPhoto, which prefers our Storage copy over the expiring LinkedIn URL.
     })
     .where(eq(users.id, existing.id))
     .returning();
   return row ?? existing;
 }
 
+// The LinkedIn URL expires; replace it with our Storage copy unless the person set their own photo (M14).
+async function keepPhoto(user: UserRow, linkedinUrl: string | null): Promise<UserRow> {
+  if (!linkedinUrl || user.photoEdited) return user;
+  const photoUrl = photoToStore(await mirrorPhoto(user.id, linkedinUrl), user.photoUrl, linkedinUrl);
+  if (photoUrl === user.photoUrl) return user;
+  const [row] = await getDb()
+    .update(users)
+    .set({ photoUrl })
+    .where(and(eq(users.id, user.id), eq(users.photoEdited, false)))
+    .returning();
+  return row ?? user;
+}
+
 export async function upsertLinkedInUser(authUser: User): Promise<UserRow> {
   const profile = profileFrom(authUser);
   const existing = await findUserByAuthId(authUser.id);
-  return existing ? syncUser(existing, profile) : insertUser(authUser.id, profile);
+  const user = existing ? await syncUser(existing, profile) : await insertUser(authUser.id, profile);
+  return keepPhoto(user, profile.photoUrl);
 }
