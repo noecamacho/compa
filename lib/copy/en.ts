@@ -376,14 +376,14 @@ export const admin: typeof es.admin = {
     },
     poster: {
       open: "Show QR poster",
+      panelLink: "Full-screen poster",
       stage: (name: string) => `Poster for ${name}`,
       fullscreen: "Full screen",
       back: "Back to event",
-      title: ["Make as many", "compas", "as you can"],
-      prize: "and win a prize",
-      free: "Free!",
+      // Read in order it is the owner's caption, word for word; the second part is highlighted, the last is a sticker.
+      cta: ["BE THE ONE WHO", "CONNECTS THE MOST", "AND WIN A PRIZE", "FOR FREE"],
       scan: "Scan to join",
-      ticker: ["Make compas!", "Win a prize", "It's free!"],
+      ticker: ["CONNECT THE MOST!", "WIN A PRIZE", "IT'S FREE!"],
     },
     bulk: {
       selected: (count: number) => `${num(count)} selected`,
