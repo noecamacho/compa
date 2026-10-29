@@ -7,14 +7,10 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Added
 
 - Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
-- Live board (`/e/<code>/live`): a 30-minute pulse with a mood line (steady, rush, quiet), a "Just now" feed of the newest pairs (names only), cards for before the doors open, an empty room and the close, a final podium, an "Ends in N min" pill in the last ten minutes, photos and shared places for ties in the ranking, and larger type for reading at 10 m.
-- Live snapshot: `event.phase`, `event.startsAt`, `event.endsAt` and each person's `connections`.
 
 ### Changed
 
 - The deploy workflow keeps the 10 newest production deployments (it used to delete all others), so Vercel Instant Rollback works.
-- The live board's loom draws thousands of people and connections smoothly (instanced pegs, merged threads).
-- Live board polling backs off when the network fails, polls at once when the tab or network comes back, never steps back to an older snapshot and flags a stuck one as reconnecting.
 - Mobile polish on shared UI: 16 px inputs on touch (no iOS focus zoom), no tap-highlight flash, non-selectable button and pill labels, `Button`/`ButtonLink` `fit` prop for content width, tighter EN VIVO pill spacing, light and dark `theme-color`.
 - Profile editing: every network (LinkedIn, WhatsApp, Instagram, X, GitHub, website) has its own brand icon and name, a field that takes a handle, a WhatsApp number or a link with inline validation, and a labelled "Quitar" with "Deshacer" instead of an unlabelled cross. Each item (role, company, each link) has "Todos", "Conexiones" (only after the connection is accepted) or "Solo yo", with a live preview of the profile before and after connecting, in onboarding and in "Editar perfil". `/me` lists your links with their level; the other person's screen shows the links you may see.
 - Sign-in no longer re-downloads the LinkedIn photo every time: it updates the photo only while you still show your LinkedIn photo and it changed on LinkedIn; a chosen monito is never overwritten. Saving the profile unchanged no longer stops LinkedIn from refreshing your name. Migration 0008 adds `users.linkedin_photo_key`.
@@ -27,7 +23,6 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Client requests no longer hang on venue Wi-Fi: a 15 s timeout (35 s for drafts, 40 s for audio upload), one retry for a GET after a network failure, and Spanish messages for offline, timeout, signed-out, rate-limited and server errors instead of raw English text. A failed decline stays on the request screen with the reason. A voice note whose upload fails is kept and can be re-sent; leaving the screen while recording releases the microphone.
 - Invites: a claimed invite is never re-linked to a second person, and concurrent first loads of `GET /api/invites/me` no longer fail with 500.
 - The live screen survives an access-code rotation (the board stays up and asks for the new link from Admin instead of showing "not found") and shows outages: an 8 s fetch timeout, one poll in flight, the age of the data in the reconnecting pill, and an outage page that retries every 10 s.
-- Avatars fall back to the monito when a photo (for example an expired LinkedIn URL) fails to load.
 - Sign-in keeps the deep link: a signed-out visitor opening any app screen (for example `/connections`) or onboarding step now goes to `/auth/linkedin?next=<path>` and comes back to that screen, instead of landing on `/` and losing the path. A new `proxy.ts` passes the requested path to layouts as `x-pathname`; unsafe paths still fall back through `safeNext` (T-011).
 - A first-night attendee with no connections yet now sees incoming requests on Home right away instead of after the first poll.
 - Marking notifications seen never moves backwards (a stale tab) nor into the future.
