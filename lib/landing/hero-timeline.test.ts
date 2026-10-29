@@ -20,7 +20,9 @@ const at = (index: number, t: number) => index * CYCLE_SECONDS + t;
 describe("momentAt", () => {
   test("splits time into loop, beat and seconds inside the beat", () => {
     expect(momentAt(at(2, 3.5))).toMatchObject({ loop: 0, index: 2, t: 3.5 });
-    expect(momentAt(LOOP_SECONDS + at(1, 0.25))).toMatchObject({ loop: 1, index: 1, t: 0.25 });
+    const next = momentAt(LOOP_SECONDS + at(1, 0.25));
+    expect(next).toMatchObject({ loop: 1, index: 1 });
+    expect(next.t).toBeCloseTo(0.25);
   });
 
   test("clamps negative time to the start", () => {
@@ -79,7 +81,7 @@ describe("the pair", () => {
     expect(talking.x).toBeCloseTo(meet.x, 5);
     const back = actorAt(beat.a, at(0, CYCLE_SECONDS - 0.5));
     expect(Math.abs(back.x - (HOMES[beat.a]?.x ?? 0))).toBeLessThan(0.2);
-    expect(actorAt(beat.a, at(0, 1.8)).walking).toBe(true);
+    expect(actorAt(beat.a, at(0, 0.6)).walking).toBe(true);
   });
 
   test("bystanders never walk or hop", () => {

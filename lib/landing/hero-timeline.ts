@@ -7,7 +7,7 @@ export type Beat = { a: number; b: number; kind: LinkKind; topic: number };
 export type Spot = { x: number; z: number };
 export type Span = readonly [start: number, end: number];
 
-export const CYCLE_SECONDS = 12;
+export const CYCLE_SECONDS = 6.6;
 
 // Cast seats on the floor (x across, z toward the camera): two loose rows so the crowd reads as a room, not a line.
 export const HOMES: readonly Spot[] = [
@@ -33,19 +33,19 @@ export const LOOP_SECONDS = CYCLE_SECONDS * BEATS.length;
 
 // Seconds inside one beat.
 export const PHASES = {
-  walkIn: [1.0, 2.6],
-  scan: [2.6, 3.8],
-  scanned: [3.3, 3.8],
-  talkA: [3.8, 6.4],
-  talkB: [4.7, 6.6],
-  thread: [6.3, 7.1],
-  cheer: [6.6, 7.1],
-  points: [6.6, 8.8],
-  walkOut: [7.4, 9.2],
+  walkIn: [0, 1.2],
+  scan: [1.2, 2.2],
+  scanned: [1.7, 2.2],
+  talkA: [2.2, 3.8],
+  talkB: [2.9, 4.0],
+  thread: [3.7, 4.4],
+  cheer: [3.9, 4.4],
+  points: [3.9, 6.1],
+  walkOut: [4.8, 6.6],
 } as const satisfies Record<string, Span>;
 
 // The network fades during the tail of the last beat, so every loop starts on a clean floor.
-export const NETWORK_FADE: Span = [10.0, 11.8];
+export const NETWORK_FADE: Span = [4.8, 6.4];
 export const POINTS: Record<LinkKind, number> = { new: 50, reconnection: 20 };
 
 const MEET_GAP = 0.95;
