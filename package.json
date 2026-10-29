@@ -13,7 +13,10 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "bun db/seed.ts",
-    "db:migrate:deploy": "DATABASE_URL=\"${DATABASE_URL_DIRECT:-$DATABASE_URL}\" drizzle-kit migrate"
+    "db:migrate:deploy": "DATABASE_URL=\"${DATABASE_URL_DIRECT:-$DATABASE_URL}\" drizzle-kit migrate",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:report": "playwright show-report e2e/report"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.7",
@@ -32,6 +35,8 @@
     "zod-openapi": "6.0.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "4.3.3",
     "@types/bun": "^1.4.4",
     "@types/node": "^26.6.6",
