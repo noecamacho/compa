@@ -167,3 +167,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Admin console responsive pass
 
 - `/admin` now follows the V2 breakpoints (390/834/1440): tables from md, cards below, consequence dialogs proportional to stakes (`components/admin/ConfirmDialog.tsx`), inline validation in `EventForm`. UI only; no API or data-model change.
+
+## [2026-10-29] query | Responsive public pages and landing CTA
+
+- Landing, event door, join, not found and live reviewed at 390/834/1440 (live 1280/1920) in both locales; LinkedIn sign-in is the landing's single primary action (`app/page.tsx`, `components/brand/LinkedInMark.tsx`), event entry screens share one frame (`components/event/layout.ts`). DESIGN.md breakpoints unchanged.
