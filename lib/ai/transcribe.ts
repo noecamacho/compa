@@ -36,15 +36,16 @@ export async function validateAudio(file: File): Promise<void> {
   if (!ALLOWED_AUDIO_TYPES.has(baseType(file.type))) throw new AudioValidationError("type");
   if (file.size === 0) throw new AudioValidationError("empty");
   if (file.size > MAX_AUDIO_BYTES) throw new AudioValidationError("size");
-  let duration: number | undefined;
+  let format: { duration?: number; hasAudio?: boolean };
   try {
-    duration = (await parseBlob(file, { duration: true })).format.duration;
+    format = (await parseBlob(file, { duration: true })).format;
   } catch {
     throw new AudioValidationError("duration");
   }
-  if (duration === undefined || !Number.isFinite(duration) || duration > MAX_AUDIO_DURATION_SECONDS) {
-    throw new AudioValidationError("duration");
-  }
+  // Chrome's MediaRecorder writes webm with no Duration element; real audio with unknown length passes, bounded by size and the client's 2-minute stop.
+  if (format.duration === undefined && format.hasAudio) return;
+  if (format.duration === undefined || !Number.isFinite(format.duration)) throw new AudioValidationError("duration");
+  if (format.duration > MAX_AUDIO_DURATION_SECONDS) throw new AudioValidationError("duration");
 }
 
 // The File stays in memory and goes straight to OpenAI; it is never written to disk (plan p. 12).
