@@ -198,3 +198,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | How do social links, visibility and the LinkedIn photo sync work?
 
 - Links: `lib/links.ts` validates per network (WhatsApp E.164 number, handles, same-network URLs) in the browser and in `PATCH /api/me` (400). Per-item visibility Todos / Conexiones / Solo yo with a before/after preview in `ProfileForm` (onboarding and edit), using the server's `toCard`. Sign-in refreshes the photo only while the person shows their LinkedIn photo and its `linkedin_photo_key` changed (`lib/linkedin-photo.ts`, migration 0008; data model §4.6).
+
+## [2026-10-29] ingest | Event-day deploy safety and observability
+
+- New page [event-day-runbook](event-day-runbook.md): deploy freeze, Instant Rollback, signals to watch. The deploy workflow now keeps the 10 newest READY production deployments instead of deleting all others; added `app/error.tsx`, `app/global-error.tsx`, `instrumentation.ts` (`onRequestError`), JSON error logs with request ids in `defineRoute`, and `GET /api/health`.

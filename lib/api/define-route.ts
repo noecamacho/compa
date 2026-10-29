@@ -4,6 +4,7 @@ import type { UserRow } from "../../db/schema";
 import { ApiError, E, errorResponse, toApiError } from "./errors";
 import { isMockRequest, mockResponse } from "./mock";
 import { automationFrom } from "./automation";
+import { logError, pathOnly, requestIdFrom } from "../server/log";
 import { isAdminAuth, type Auth, type Handler, type HandlerResult, type ObjectSchema, type RouteRateLimit, type RouteSpec } from "./route-spec";
 
 type NextContext = { params: Promise<Record<string, string | string[] | undefined>> } | undefined;
@@ -64,10 +65,14 @@ function toResponse<R extends z.ZodType>(result: HandlerResult<R>, defaultStatus
   return Response.json(result.body, { status, headers: result.headers });
 }
 
-function errorToResponse(error: unknown): Response {
-  if (error instanceof ApiError) return errorResponse(error);
-  console.error("unhandled route error", error);
-  return errorResponse(toApiError(E.internal));
+// Every failure answers with x-request-id; server faults (5xx) are also logged with it, so a report maps to one log line.
+function errorToResponse(error: unknown, req: Request): Response {
+  const apiError = error instanceof ApiError ? error : toApiError(E.internal);
+  const requestId = requestIdFrom(req.headers);
+  if (apiError.status >= 500) {
+    logError({ event: "route_error", error, requestId, method: req.method, path: pathOnly(req.url), status: apiError.status });
+  }
+  return errorResponse(apiError, { "x-request-id": requestId });
 }
 
 export function defineRoute<
@@ -91,7 +96,7 @@ export function defineRoute<
       await enforceLimits(spec.rateLimit, user, input.body);
       return toResponse(await handler(input), spec.success.status);
     } catch (error) {
-      return errorToResponse(error);
+      return errorToResponse(error, req);
     }
   };
 }

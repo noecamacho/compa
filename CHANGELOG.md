@@ -4,8 +4,13 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Added
+
+- Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
+
 ### Changed
 
+- The deploy workflow keeps the 10 newest production deployments (it used to delete all others), so Vercel Instant Rollback works.
 - Mobile polish on shared UI: 16 px inputs on touch (no iOS focus zoom), no tap-highlight flash, non-selectable button and pill labels, `Button`/`ButtonLink` `fit` prop for content width, tighter EN VIVO pill spacing, light and dark `theme-color`.
 - Profile editing: every network (LinkedIn, WhatsApp, Instagram, X, GitHub, website) has its own brand icon and name, a field that takes a handle, a WhatsApp number or a link with inline validation, and a labelled "Quitar" with "Deshacer" instead of an unlabelled cross. Each item (role, company, each link) has "Todos", "Conexiones" (only after the connection is accepted) or "Solo yo", with a live preview of the profile before and after connecting, in onboarding and in "Editar perfil". `/me` lists your links with their level; the other person's screen shows the links you may see.
 - Sign-in no longer re-downloads the LinkedIn photo every time: it updates the photo only while you still show your LinkedIn photo and it changed on LinkedIn; a chosen monito is never overwritten. Saving the profile unchanged no longer stops LinkedIn from refreshing your name. Migration 0008 adds `users.linkedin_photo_key`.
