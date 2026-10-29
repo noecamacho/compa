@@ -180,7 +180,7 @@ export const notifications = {
   inviteeConnected: (name: string) => `${name} conectó con alguien por tu invitación`,
   badgeEarned: (name: string) => `Ganaste la insignia ${name}`,
   dismiss: "Cerrar aviso",
-  pushTitle: "Avisos en este teléfono",
+  pushTitle: "Avisos en este dispositivo",
   pushHint: "Entérate al instante cuando alguien te escanea o acepta, aunque COMPA esté cerrado.",
   pushEnable: "Activar avisos",
   pushOn: "Avisos activados en este dispositivo.",

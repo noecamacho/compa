@@ -30,6 +30,9 @@ const ONLY_PROJECT = "desktop-1440-en";
 
 let push: MockPushService;
 
+// The harness project sends its own Accept-Language; each context here picks its language explicitly.
+const inLocale = (locale: "es-MX" | "en-US") => ({ locale, extraHTTPHeaders: { "Accept-Language": locale } });
+
 async function openAs(context: BrowserContext, path: string): Promise<Page> {
   await context.addInitScript((ids: string[]) => ids.forEach((id) => localStorage.setItem(`compa:tour:${id}`, "done")), TOURS);
   const page = await context.newPage();
@@ -93,8 +96,8 @@ test.describe("live notifications @real", () => {
   test("a request and its acceptance arrive in under 2 s, by Realtime and by push, with points on both sides", async ({ browser, testUsers, signIn }) => {
     const [ana, bruno] = await testUsers(2);
     if (!ana || !bruno) throw new Error("test users not created");
-    const anaContext = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "es-MX" });
-    const brunoContext = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "en-US", isMobile: true, hasTouch: true });
+    const anaContext = await browser.newContext({ viewport: { width: 1440, height: 900 }, ...inLocale("es-MX") });
+    const brunoContext = await browser.newContext({ viewport: { width: 390, height: 844 }, ...inLocale("en-US"), isMobile: true, hasTouch: true });
     await signIn(anaContext, ana);
     await signIn(brunoContext, bruno);
 
@@ -187,7 +190,7 @@ test.describe("live notifications @real", () => {
   test("with Realtime blocked, polling still delivers the request", async ({ browser, testUsers, signIn }) => {
     const [ana, bruno] = await testUsers(2);
     if (!ana || !bruno) throw new Error("test users not created");
-    const brunoContext = await browser.newContext({ viewport: { width: 834, height: 1112 }, locale: "es-MX" });
+    const brunoContext = await browser.newContext({ viewport: { width: 834, height: 1112 }, ...inLocale("es-MX") });
     await brunoContext.routeWebSocket(/\/realtime\/v1\//, (socket) => socket.close());
     await signIn(brunoContext, bruno);
     const anaContext = await browser.newContext();
@@ -209,7 +212,7 @@ test.describe("live notifications @real", () => {
   test("a decline never notifies the person who scanned", async ({ browser, testUsers, signIn }) => {
     const [ana, bruno] = await testUsers(2);
     if (!ana || !bruno) throw new Error("test users not created");
-    const anaContext = await browser.newContext({ locale: "en-US" });
+    const anaContext = await browser.newContext(inLocale("en-US"));
     const brunoContext = await browser.newContext();
     await signIn(anaContext, ana);
     await signIn(brunoContext, bruno);
@@ -238,7 +241,7 @@ test.describe("live notifications @real", () => {
   test("the alerts card offers push where the browser allows it", async ({ browser, testUsers, signIn }) => {
     const [ana] = await testUsers(1);
     if (!ana) throw new Error("test user not created");
-    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, locale: "en-US" });
+    const context = await browser.newContext({ viewport: { width: 390, height: 844 }, ...inLocale("en-US") });
     // Headless Chromium always answers "denied"; pretend the person has not been asked yet.
     await context.addInitScript(() => Object.defineProperty(Notification, "permission", { get: () => "default" }));
     await signIn(context, ana);
@@ -251,7 +254,7 @@ test.describe("live notifications @real", () => {
   test("blocked alerts are explained, and in-app alerts keep working", async ({ browser, testUsers, signIn }) => {
     const [ana] = await testUsers(1);
     if (!ana) throw new Error("test user not created");
-    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, locale: "es-MX" });
+    const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, ...inLocale("es-MX") });
     await context.addInitScript(() => Object.defineProperty(Notification, "permission", { get: () => "denied" }));
     await signIn(context, ana);
     const page = await openAs(context, "/notifications");

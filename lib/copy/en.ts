@@ -257,7 +257,7 @@ export const notifications: typeof es.notifications = {
   inviteeConnected: (name) => `${name} connected with someone through your invite`,
   badgeEarned: (name) => `You earned the ${name} badge`,
   dismiss: "Dismiss",
-  pushTitle: "Alerts on this phone",
+  pushTitle: "Alerts on this device",
   pushHint: "Know the moment someone scans you or accepts, even with COMPA closed.",
   pushEnable: "Turn on alerts",
   pushOn: "Alerts are on for this device.",
