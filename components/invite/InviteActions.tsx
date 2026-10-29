@@ -33,7 +33,12 @@ export function InviteActions({ url }: Props) {
     <>
       <div className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-paper px-3 border-ink">
         <span className="flex-1 truncate text-[14px] font-extrabold">{url.replace(/^https?:\/\//, "")}</span>
-        <button type="button" onClick={copyLink} className="h-[30px] cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[12px] font-bold text-ink border-ink">
+        <button
+          type="button"
+          onClick={copyLink}
+          className="h-[30px] cursor-pointer rounded-[10px] px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable"
+          style={{ background: copied ? "#6BE4A3" : "#FFFFFF" }}
+        >
           {copied ? copy.copied : copy.copy}
         </button>
       </div>
@@ -43,7 +48,7 @@ export function InviteActions({ url }: Props) {
             key={via.key}
             type="button"
             onClick={() => share(via.key)}
-            className="flex min-w-0 cursor-pointer flex-col items-center gap-[6px] rounded-[14px] px-[6px] py-[10px] font-body text-[12px] font-extrabold text-ink border-ink shadow-hard-2"
+            className="flex min-w-0 cursor-pointer flex-col items-center gap-[6px] rounded-[14px] px-[6px] py-[10px] font-body text-[12px] font-extrabold text-ink border-ink shadow-hard-2 pressable"
             style={{ background: via.color }}
           >
             <Icon name={via.icon} size={18} />

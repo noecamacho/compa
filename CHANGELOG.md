@@ -13,7 +13,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Connection confirm screen now shows the event-screen notice before sending `screenConsent: true` (M13).
 - The AI summary prompt is event-neutral: it no longer tells the model it is at a JavaScript conference.
 - Home, Ranking and Badges render a section empty instead of the error page when a secondary call fails; profiles stored before the `whatsapp` link existed parse again.
-
+- Motion pass: the dock now lives in the `(app)` layout, so its pill actually travels between tabs (it used to remount and jump) and moves on tap before the route renders; every screen slides in through `app/(app)/template.tsx`; the segmented control's ink pill slides; the tour's spotlight and card glide between steps; buttons, cards, chips and icon buttons sink into their hard shadow on press (`pressable` / `tappable` utilities); list filters, podium, note phases, progress bars, the bell badge, the monito builder and the scan line animate; `prefers-reduced-motion` no longer hides the live pairs.
 - Accept Chrome and Android voice notes: MediaRecorder webm files carry no duration, so the server now rejects only audio whose known length exceeds two minutes or that contains no audio track.
 - Require explicit screen consent before writing an event check-in; accept multipart transcription uploads with server-side size and two-minute duration limits.
 

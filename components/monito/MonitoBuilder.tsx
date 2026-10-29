@@ -37,8 +37,8 @@ function Swatch({ hex, name, checked, onPick }: SwatchProps) {
       aria-checked={checked}
       aria-label={name}
       onClick={onPick}
-      className="h-8 w-8 shrink-0 cursor-pointer rounded-full p-0 border-ink"
-      style={{ background: hex, boxShadow: checked ? "0 0 0 3px #FFFFFF, 0 0 0 5px #1E1B2E" : undefined }}
+      className="h-8 w-8 shrink-0 cursor-pointer rounded-full p-0 border-ink transition-[box-shadow,transform] duration-200 active:scale-90"
+      style={{ background: hex, boxShadow: checked ? "0 0 0 3px #FFFFFF, 0 0 0 5px #1E1B2E" : "0 0 0 0 #FFFFFF, 0 0 0 0 #1E1B2E" }}
     />
   );
 }
@@ -52,7 +52,7 @@ function OptionChip({ label, on, onClick, role }: OptionChipProps) {
       type="button"
       {...state}
       onClick={onClick}
-      className="h-8 cursor-pointer rounded-[10px] px-[11px] font-body text-[12px] font-extrabold whitespace-nowrap border-ink"
+      className="h-8 cursor-pointer rounded-[10px] px-[11px] font-body text-[12px] font-extrabold whitespace-nowrap border-ink transition-[background-color,color,transform] duration-200 active:scale-95"
       style={{ background: on ? "#1E1B2E" : "#FFFFFF", color: on ? "#FFF6E5" : "#1E1B2E" }}
     >
       {label}
@@ -138,11 +138,14 @@ export function MonitoBuilder({ me, next, back, onboarding }: Props) {
       <div className="flex items-center gap-4 rounded-card bg-sun-soft px-4 py-3 border-ink shadow-hard-4">
         <span className="flex h-[150px] w-[124px] shrink-0 items-end justify-center rounded-[18px] bg-white pb-[6px] border-ink">
           {usePhoto ? (
-            <span className="flex h-full w-full items-center justify-center">
+            <span className="animate-fade-in flex h-full w-full items-center justify-center">
               <Avatar person={{ name: me.name, photoUrl: me.photoUrl, avatarMode: "photo" }} size={104} shadow={3} />
             </span>
           ) : (
-            <Monito look={look} px={7} label={copy.labelOwn} />
+            // Keyed by the look so the monito bounces every time an option changes.
+            <span key={JSON.stringify(look)} className="animate-bump block origin-bottom">
+              <Monito look={look} px={7} label={copy.labelOwn} />
+            </span>
           )}
         </span>
         <span className="flex min-w-0 flex-1 flex-col gap-[6px]">

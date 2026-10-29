@@ -94,8 +94,12 @@ export function RegisterForm({ profile }: Props) {
                 type="button"
                 aria-pressed={on}
                 onClick={() => setKind(option)}
-                className="flex h-[86px] cursor-pointer flex-col items-start justify-between rounded-button p-[10px] text-left font-body text-ink border-ink"
-                style={{ background: on ? KIND[option].color : "#FFFFFF", boxShadow: on ? "3px 3px 0 #1E1B2E" : "2px 2px 0 #1E1B2E" }}
+                className="flex h-[86px] cursor-pointer flex-col items-start justify-between rounded-button p-[10px] text-left font-body text-ink border-ink active:translate-x-[2px] active:translate-y-[2px]"
+                style={{
+                  background: on ? KIND[option].color : "#FFFFFF",
+                  boxShadow: on ? "3px 3px 0 #1E1B2E" : "2px 2px 0 #1E1B2E",
+                  transition: "background-color .2s ease, box-shadow .16s cubic-bezier(.2,.8,.3,1), transform .16s cubic-bezier(.2,.8,.3,1)",
+                }}
               >
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white" style={{ border: "2px solid #1E1B2E" }}>
                   <Icon name={KIND[option].icon} size={14} strokeWidth={2.8} />

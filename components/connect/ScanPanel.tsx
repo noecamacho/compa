@@ -92,9 +92,14 @@ export function ScanPanel() {
         <span className={`${CORNER} top-12 right-[72px] rounded-tr-[12px] border-t-4 border-r-4`} />
         <span className={`${CORNER} top-[234px] left-[72px] rounded-bl-[12px] border-b-4 border-l-4`} />
         <span className={`${CORNER} top-[234px] right-[72px] rounded-br-[12px] border-r-4 border-b-4`} />
-        <span aria-hidden="true" className="absolute top-[156px] right-[86px] left-[86px] h-1 rounded-[2px] bg-mint" />
+        {/* The scan line sweeps between the corners while the camera is up; it holds still when the camera is not. */}
+        <span
+          aria-hidden="true"
+          className={`absolute top-[156px] right-[86px] left-[86px] h-1 rounded-[2px] bg-mint ${available ? "animate-scan" : ""}`}
+          style={{ boxShadow: "0 0 12px rgba(107,228,163,0.8)" }}
+        />
         {found && (
-          <div className="absolute right-3 bottom-3 left-3 flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3">
+          <div className="animate-rise absolute right-3 bottom-3 left-3 flex items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] border-ink shadow-hard-3">
             <Avatar person={avatarOf(found)} size={42} />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="text-[15px] font-extrabold">{found.name}</span>
@@ -102,7 +107,7 @@ export function ScanPanel() {
             </span>
             <Link
               href={`/connect/${found.handle}`}
-              className="inline-flex h-[34px] shrink-0 items-center justify-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold whitespace-nowrap border-ink shadow-hard-2"
+              className="inline-flex h-[34px] shrink-0 items-center justify-center rounded-chip bg-mint px-3 font-display text-[13px] font-bold whitespace-nowrap border-ink shadow-hard-2 pressable"
             >
               {copy.connectButton}
             </Link>
@@ -120,7 +125,7 @@ export function ScanPanel() {
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={copy.searchPlaceholder}
-          className="box-border block h-12 w-full rounded-[14px] bg-white pr-[14px] pl-11 font-body text-[15px] font-bold text-ink outline-none placeholder:text-muted border-ink focus:shadow-[0_0_0_4px_#6BE4A3]"
+          className="box-border block h-12 w-full rounded-[14px] bg-white pr-[14px] pl-11 font-body text-[15px] font-bold text-ink outline-none placeholder:text-muted border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
         />
       </form>
       {notFound && <Muted className="text-center text-[12px] font-extrabold">{copy.notFound}</Muted>}

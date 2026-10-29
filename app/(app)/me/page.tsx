@@ -32,7 +32,7 @@ export default async function MePage() {
         </IconLink>
       </div>
 
-      <Link href="/onboarding/monito?from=me" aria-label={copy.changeMonito} className="mt-[-4px] flex items-center gap-4" data-tour="avatar">
+      <Link href="/onboarding/monito?from=me" aria-label={copy.changeMonito} className="mt-[-4px] flex items-center gap-4 tappable" data-tour="avatar">
         <span className="flex h-[140px] w-[132px] shrink-0 items-end justify-center rounded-card bg-sky-soft pb-[6px] border-ink shadow-hard-4">
           <Avatar person={avatarOf(me)} px={6} />
         </span>
@@ -72,17 +72,17 @@ export default async function MePage() {
       </Card>
 
       <Card className="flex flex-col overflow-hidden">
-        <Link href="/ranking" className="flex h-12 items-center gap-3 px-4 text-[15px] font-extrabold">
+        <Link href="/ranking" className="flex h-12 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper">
           <span className="flex-1">{copy.ranking}</span>
           <Muted className="text-[13px]">{me.scores?.event.rank ? `#${me.scores.event.rank}` : "—"}</Muted>
           <Icon name="chevronRight" size={18} strokeWidth={3} />
         </Link>
-        <Link href="/onboarding/monito?from=me" className="dashed-ink flex h-12 items-center gap-3 px-4 text-[15px] font-extrabold">
+        <Link href="/onboarding/monito?from=me" className="dashed-ink flex h-12 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper">
           <span className="flex-1">{copy.myMonito}</span>
           <Muted className="text-[13px]">{copy.change}</Muted>
           <Icon name="chevronRight" size={18} strokeWidth={3} />
         </Link>
-        <Link href="/home?tour=1" className="dashed-ink flex h-12 items-center gap-3 px-4 text-[15px] font-extrabold">
+        <Link href="/home?tour=1" className="dashed-ink flex h-12 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper">
           <span className="flex-1">{tour.replay}</span>
           <Icon name="chevronRight" size={18} strokeWidth={3} />
         </Link>

@@ -25,6 +25,9 @@ const RADIUS = 18;
 const POPUP_WIDTH = 318;
 const POPUP_HEIGHT = 210;
 const GAP = 14;
+// The spotlight and the card glide from one target to the next (same spring as the dock).
+const MOVE = ".45s cubic-bezier(.34,1.2,.5,1)";
+const RECT_MOVE = `x ${MOVE}, y ${MOVE}, width ${MOVE}, height ${MOVE}`;
 
 const storageKey = (id: string) => `compa:tour:${id}`;
 
@@ -133,49 +136,67 @@ export function Tour({ id, steps }: Props) {
     ? { top: -10, borderLeft: "2.5px solid #1E1B2E", borderTop: "2.5px solid #1E1B2E" }
     : { bottom: -10, borderRight: "2.5px solid #1E1B2E", borderBottom: "2.5px solid #1E1B2E" };
   return createPortal(
-    <div role="dialog" aria-modal="true" aria-label={step.title} className="fixed inset-0 z-50">
+    <div role="dialog" aria-modal="true" aria-label={step.title} className="animate-overlay-in fixed inset-0 z-50">
       <svg className="absolute inset-0 h-full w-full" aria-hidden="true">
         <defs>
           <mask id={maskId}>
             <rect x="0" y="0" width="100%" height="100%" fill="#fff" />
-            <rect x={box.left} y={box.top} width={box.width} height={box.height} rx={RADIUS} fill="#000" />
+            <rect x={box.left} y={box.top} width={box.width} height={box.height} rx={RADIUS} fill="#000" style={{ transition: RECT_MOVE }} />
           </mask>
         </defs>
         <rect x="0" y="0" width="100%" height="100%" fill="rgba(30,27,46,0.78)" mask={`url(#${maskId})`} />
-        <rect x={box.left} y={box.top} width={box.width} height={box.height} rx={RADIUS} fill="none" stroke="#FFD93D" strokeWidth={3} strokeDasharray="8 6" />
+        <rect
+          x={box.left}
+          y={box.top}
+          width={box.width}
+          height={box.height}
+          rx={RADIUS}
+          fill="none"
+          stroke="#FFD93D"
+          strokeWidth={3}
+          strokeDasharray="8 6"
+          style={{ transition: RECT_MOVE }}
+        />
       </svg>
       <div
-        className="animate-rise absolute flex flex-col gap-[10px] rounded-card bg-white px-4 py-[14px] border-ink shadow-hard-4"
-        style={{ top: position.top, left: position.left, width: POPUP_WIDTH }}
+        className="animate-rise absolute rounded-card bg-white px-4 py-[14px] border-ink shadow-hard-4"
+        style={{ top: position.top, left: position.left, width: POPUP_WIDTH, transition: `top ${MOVE}, left ${MOVE}` }}
       >
-        <span aria-hidden="true" className="absolute h-4 w-4 bg-white" style={{ left: arrowLeft, transform: "rotate(45deg)", ...arrowBorder }} />
-        <span className="flex items-center justify-between">
-          <span className="inline-flex h-6 items-center rounded-[8px] bg-sun-soft px-2 font-display text-[11px] font-bold" style={{ border: "2px solid #1E1B2E" }}>
-            {copy.step(index + 1, steps.length)}
+        <span
+          aria-hidden="true"
+          className="absolute h-4 w-4 bg-white"
+          style={{ left: arrowLeft, transform: "rotate(45deg)", transition: `left ${MOVE}`, ...arrowBorder }}
+        />
+        {/* Keyed by step so the text fades in while the card itself glides. */}
+        <div key={index} className="animate-fade-in relative flex flex-col gap-[10px]">
+          <span className="flex items-center justify-between">
+            <span className="inline-flex h-6 items-center rounded-[8px] bg-sun-soft px-2 font-display text-[11px] font-bold" style={{ border: "2px solid #1E1B2E" }}>
+              {copy.step(index + 1, steps.length)}
+            </span>
+            <button type="button" onClick={finish} className="cursor-pointer border-0 bg-transparent p-0 text-[12px] font-extrabold text-muted tappable">
+              {copy.skip}
+            </button>
           </span>
-          <button type="button" onClick={finish} className="cursor-pointer border-0 bg-transparent p-0 text-[12px] font-extrabold text-muted">
-            {copy.skip}
-          </button>
-        </span>
-        <span className="font-display text-[19px] leading-[1.15] font-bold">{step.title}</span>
-        <span className="text-[14px] leading-[1.4] font-bold">{step.body}</span>
-        <div className="flex gap-2 pt-1">
-          {previous !== null && (
+          <span className="font-display text-[19px] leading-[1.15] font-bold">{step.title}</span>
+          <span className="text-[14px] leading-[1.4] font-bold">{step.body}</span>
+          <div className="flex gap-2 pt-1">
+            {previous !== null && (
+              <button
+                type="button"
+                onClick={() => setIndex(previous)}
+                className="h-11 cursor-pointer rounded-[14px] bg-white px-4 font-display text-[15px] font-bold text-ink border-ink shadow-hard-2 pressable"
+              >
+                {copy.back}
+              </button>
+            )}
             <button
               type="button"
-              onClick={() => setIndex(previous)}
-              className="h-11 cursor-pointer rounded-[14px] bg-white px-4 font-display text-[15px] font-bold text-ink border-ink shadow-hard-2"
+              onClick={() => (last ? finish() : setIndex(next))}
+              className="h-11 flex-1 cursor-pointer rounded-[14px] bg-mint px-4 font-display text-[15px] font-bold text-ink border-ink shadow-hard-3 pressable"
             >
-              {copy.back}
+              {last ? copy.done : copy.next}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={() => (last ? finish() : setIndex(next))}
-            className="h-11 flex-1 cursor-pointer rounded-[14px] bg-mint px-4 font-display text-[15px] font-bold text-ink border-ink shadow-hard-3"
-          >
-            {last ? copy.done : copy.next}
-          </button>
+          </div>
         </div>
       </div>
     </div>,

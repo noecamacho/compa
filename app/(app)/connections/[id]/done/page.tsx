@@ -108,7 +108,7 @@ export default async function ConfirmationPage({ params }: Props) {
                   target="_blank"
                   rel="noreferrer"
                   aria-label={copy.linkLabel(style.label, first(other.name))}
-                  className="flex h-12 min-w-0 items-center justify-center rounded-[14px] border-ink shadow-hard-2"
+                  className="flex h-12 min-w-0 items-center justify-center rounded-[14px] border-ink shadow-hard-2 pressable"
                   style={{ background: style.color }}
                 >
                   <Icon name={style.icon} size={24} />
@@ -119,9 +119,11 @@ export default async function ConfirmationPage({ params }: Props) {
         )}
       </Card>
 
-      <ButtonLink href="/home" variant="primary">
-        {common.done}
-      </ButtonLink>
+      <div className="animate-rise" style={{ animationDelay: ".7s" }}>
+        <ButtonLink href="/home" variant="primary">
+          {common.done}
+        </ButtonLink>
+      </div>
     </Screen>
   );
 }
