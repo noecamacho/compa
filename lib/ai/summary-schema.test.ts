@@ -33,6 +33,6 @@ describe("SUMMARY_JSON_SCHEMA", () => {
     expect(SUMMARY_JSON_SCHEMA.additionalProperties).toBe(false);
     expect(Object.keys(SUMMARY_JSON_SCHEMA.properties).sort()).toEqual([...SUMMARY_JSON_SCHEMA.required].sort());
     expect(SUMMARY_JSON_SCHEMA.properties.topics.items.enum).toEqual([...TOPICS]);
-    expect(SUMMARY_JSON_SCHEMA.properties.summary.description).toContain("Spanish");
+    expect(SUMMARY_JSON_SCHEMA.properties.summary.description).toContain("same language as the note");
   });
 });

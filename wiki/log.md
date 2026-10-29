@@ -76,3 +76,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] ingest | Compa V2 design handoff
 
 - Added `design/compa-v2/` (README, 16 screen mocks, 4 components) as the visual source of truth for the attendee screens, and ported its four components to React/SVG (`lib/monito`, `lib/badges`, `components/`). The handoff's points table (50 new / 20 reconnection / +5 topics / +15 voice note / +100 and +50 per invited friend) differs from data model M3 and M18; the migration is tracked in a follow-up PR and the "+20 for accepting" line is logged in [open-questions](open-questions.md) #28.
+
+## [2026-10-29] query | Which language does the AI write in?
+
+- Captain decision: transcription keeps the spoken language (auto-detected) and the summary and next steps use the note's language; topics are always classified with the fixed vocabulary that seeds `interests`. Replaces the Spanish-only team decision in `ai-jobs`.
