@@ -17,6 +17,7 @@ import { BADGE_IDS } from "@/lib/badges/catalog";
 import { me as copy, tour } from "@/lib/copy/es";
 import { formatPoints } from "@/lib/format";
 import { isSuperAdmin } from "@/lib/roles";
+import { StickyBar } from "@/components/ui/StickyBar";
 
 // 09 MiPerfil.
 export default async function MePage() {
@@ -26,14 +27,14 @@ export default async function MePage() {
   const admin = isSuperAdmin(me);
   return (
     <Screen dock admin={admin}>
-      <div className="flex items-center justify-between">
+      <StickyBar className="flex items-center justify-between">
         <IconLink href="/connect" label={copy.myQr}>
           <Icon name="qr" size={20} />
         </IconLink>
         <IconLink href="/onboarding/profile?from=me" label={copy.edit}>
           <Icon name="pencil" size={19} />
         </IconLink>
-      </div>
+      </StickyBar>
 
       <Link href="/onboarding/monito?from=me" aria-label={copy.changeMonito} className="mt-[-4px] flex items-center gap-4 tappable" data-tour="avatar">
         <span className="flex h-[140px] w-[132px] shrink-0 items-end justify-center rounded-card bg-sky-soft pb-[6px] border-ink shadow-hard-4">
