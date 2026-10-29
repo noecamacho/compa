@@ -59,3 +59,4 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 - [docs/git-workflow.md](../docs/git-workflow.md) — commits, branches, versioning, hooks.
 - [docs/agent-tooling.md](../docs/agent-tooling.md) — caveman, ponytail, Serena, repomix.
 - [docs/jira/compa-bootstrap-ticket.md](../docs/jira/compa-bootstrap-ticket.md) — the Epic draft, ready to paste.
+- [docs/plans/2026-10-28-mvp-api-plan.md](../docs/plans/2026-10-28-mvp-api-plan.md) — MVP API plan: LinkedIn OIDC sign-up with handle+code fallback, field visibility, entities, 18 routes, connection tracking, `/live` contract, tonight's build plan.

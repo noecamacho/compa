@@ -27,3 +27,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-28] query | Which license does COMPA use?
 
 - The captain chose MIT; `LICENSE` added. Updated `open-questions` #14 (license resolved, repository visibility still open).
+
+## [2026-10-28] query | What is the minimum API for the MVP with LinkedIn sign-up?
+
+- Added `docs/plans/2026-10-28-mvp-api-plan.md`. It records the captain's LinkedIn sign-up decision (D1, reverses "no login or OAuth"; follow-up PR to update `AGENTS.md` §4 and ADR-007) and finds that self-serve LinkedIn OIDC returns only name, photo, email and locale. It proposes resolutions for open questions #7, #12, #13 and #17 and new questions #20–#23, which are not yet appended to `open-questions`.
