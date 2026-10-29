@@ -277,14 +277,14 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Field | Detail |
 | --- | --- |
 | Actor | Invite-link visitor |
-| Entry | A shared link `https://compa.lol/i/<code>` (WhatsApp, Instagram) |
+| Entry | A shared link `https://compa.lol/i/<code>` (WhatsApp, Instagram), always made inside an event |
 | Pre | — |
-| Happy path | `/i/<code>` → 307 `/auth/linkedin?next=/onboarding/profile?invite=<code>` (probed) → LinkedIn → 02 → **claim** `POST /api/invites/{code}/claim` → "Invited by <name>" → onboarding |
-| Alternates | Already signed in → still forced through LinkedIn (harmless). Mock mode → straight to 02 |
-| Errors | Claim 404 `not_found` (unknown code, or my own code: IP) → silent |
-| Edge cases | **The 02 page ignores `invite`, so the claim is never called** (T-075). A self-invite is blocked in IP. A second claim returns the first inviter (IP, repeat-safe). Invite farming with fresh fake accounts (OQ #48). The code is in the URL, so link previews do not leak anything sensitive |
+| Happy path | `/i/<code>` → 307 `/e/<event code>?invite=<code>` (the event door) → LinkedIn → `/e/<event code>/join?invite=<code>` → **claim** `POST /api/invites/{code}/claim` (server-side, quiet) → consent and check-in |
+| Alternates | Already signed in → the door goes straight to join. Mock mode → the example event door. An unknown, event-less or ended-event code → the "event not found" page |
+| Errors | Claim 404 `not_found` (unknown code, or my own code) → silent; 409 `invite_needs_event` (a row from before invites were event-scoped) and 409 `event_not_running` (the event is over) → silent on the join step |
+| Edge cases | A person already checked in to that event is sent to `/home` before the join step, so no claim. A self-invite is blocked in IP. A second claim returns the first inviter (IP, repeat-safe). Invite farming with fresh fake accounts (OQ #48). The code is in the URL, so link previews do not leak anything sensitive |
 | Status | UI Partial · API Mock-only (IP) · DB Missing (IP) |
-| E2E coverage | `e2e/onboarding/invite-link.spec.ts`: signed out → redirect keeps `invite`; after `realUser` sign-in the claim fires once and shows the inviter; unknown code silent; own code silent; reload does not double-claim |
+| E2E coverage | `e2e/onboarding/invite-link.spec.ts`: `/i/<code>` lands at the event door with the invite; join keeps it through sign-in; the join step claims once and the inviter sees the friend; unknown and own codes silent; mock refusal `invite_needs_event` |
 | Tickets | [T-074](backlog.md#t-074), [T-075](backlog.md#t-075), [T-076](backlog.md#t-076) |
 
 <a id="f-10"></a>
@@ -899,14 +899,14 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Field | Detail |
 | --- | --- |
 | Actor | Signed-in attendee |
-| Entry | Home invite card, or the chip on 04 → `/invite` |
+| Entry | Home invite card, or the chip on 04 → `/invite`; both only while checked in to an event |
 | Pre | — |
-| Happy path | `GET /api/invites/me` → code, link, 4 slots, golden-cap reward → Copiar (clipboard) or share (WhatsApp, Instagram, Más via `navigator.share`) |
-| Alternates | "Mostrar mi QR de invitación" → 04 |
+| Happy path | `GET /api/invites/me` → `link` (code, url, event) for the current event, 4 slots, golden-cap reward → Copiar (clipboard) or share (WhatsApp, Instagram, Más via `navigator.share`) |
+| Alternates | "Mostrar mi QR de invitación" → 04. Outside an event `link` is null: `/invite` explains that invites live in an event, the home card and the 04 chip are hidden and no invite row is created |
 | Errors | **501 on `main` → page throws** (probed) |
 | Edge cases | Clipboard denied → select the text (DESIGN.md). `navigator.share` is unavailable on desktop. Instagram has no web share target |
 | Status | UI Mock-only · API Mock-only (IP) · DB Missing (IP) |
-| E2E coverage | `e2e/gamification/invites.spec.ts`: link shown; Copiar puts it on the clipboard (`permissions: ['clipboard-read','clipboard-write']`); denied clipboard → selectable text; desktop without `navigator.share` → fallback |
+| E2E coverage | `e2e/gamification/invites.spec.ts`: link and event name shown; no link, card or chip outside an event; Copiar puts it on the clipboard (`permissions: ['clipboard-read','clipboard-write']`); denied clipboard → selectable text; desktop without `navigator.share` → fallback |
 | Tickets | [T-074](backlog.md#t-074) |
 
 <a id="f-48"></a>
@@ -917,10 +917,10 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Actor | Invitee and inviter |
 | Entry | F-09, then the invitee's first accepted connection |
 | Pre | Claim recorded |
-| Happy path (intended) | Claim → the invitee's first accept → +100 inviter, +50 invitee → 3 invitees → golden cap |
+| Happy path (intended) | Claim (event-scoped) → the invitee's first accept **at that event** → +100 inviter, +50 invitee → 3 invitees → golden cap |
 | Alternates | — |
-| Errors | `not_found` |
-| Edge cases | The claim is never called (T-075). Rewards are not in the score views (T-076). Fake-account farming. An existing user claims (OQ #48). The invitee's first connection is the inviter |
+| Errors | `not_found`, `invite_needs_event`, `event_not_running` |
+| Edge cases | A first connection at a different event pays nothing. Rewards are not in the score views (T-076). Fake-account farming. An existing user claims (OQ #48). The invitee's first connection is the inviter |
 | Status | UI Missing · API Mock-only (IP routes, no reward) · DB Missing |
 | E2E coverage | `e2e/gamification/invites.spec.ts`: invitee claims → first accept → inviter +100 and invitee +50 once; a second accept adds nothing; three invitees → golden cap visible on the monito |
 | Tickets | [T-075](backlog.md#t-075), [T-076](backlog.md#t-076) |

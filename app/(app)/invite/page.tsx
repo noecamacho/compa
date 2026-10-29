@@ -19,6 +19,7 @@ const GOLDEN_LOOK = withDefaults({ ...GOLDEN_CAP, outfit: "compa", shirt: "#FFFF
 export default async function InvitePage() {
   const { home, invite: copy } = (await requestCopy()).copy;
   const invites = await apiGet("/api/invites/me", Invites);
+  const { link } = invites;
   const done = invites.invitees.filter((invitee) => invitee.firstConnectionAt);
   const slots = Array.from({ length: invites.target }, (_, index) => done[index] ?? null);
   return (
@@ -78,16 +79,26 @@ export default async function InvitePage() {
         </div>
       </Card>
 
-      <Card className="flex flex-col gap-[10px] px-4 py-[14px]">
-        <SectionLabel>{copy.link}</SectionLabel>
-        <InviteActions url={invites.url} />
-      </Card>
+      {link ? (
+        <>
+          <Card className="flex flex-col gap-[10px] px-4 py-[14px]">
+            <SectionLabel>{copy.link}</SectionLabel>
+            <Muted className="text-[13px] font-extrabold">{copy.forEvent(link.event.name)}</Muted>
+            <InviteActions url={link.url} eventName={link.event.name} />
+          </Card>
 
-      <Muted className="text-center text-[12px] leading-[1.4] font-bold">
-        {copy.footer[0]}
-        <br />
-        {copy.footer[1]}
-      </Muted>
+          <Muted className="text-center text-[12px] leading-[1.4] font-bold">
+            {copy.footer[0]}
+            <br />
+            {copy.footer[1]}
+          </Muted>
+        </>
+      ) : (
+        <Card tone="sky-soft" className="flex flex-col gap-1 px-4 py-[14px]">
+          <span className="font-display text-[20px] leading-[1.1] font-bold">{copy.noEventTitle}</span>
+          <span className="text-[13px] font-extrabold">{copy.noEvent}</span>
+        </Card>
+      )}
 
       <div className="mt-auto md:mt-4">
         <ButtonLink href="/connect" variant="primary">

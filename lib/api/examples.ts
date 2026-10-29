@@ -299,8 +299,7 @@ export const badgeList: z.input<typeof S.BadgeList> = {
 };
 
 export const invites: z.input<typeof S.Invites> = {
-  code: "diego-r",
-  url: "https://compa.lol/i/diego-r",
+  link: { code: "diego-r", url: "https://compa.lol/i/diego-r", event: foundersDoor },
   invitees: [{ person: andrea, firstConnectionAt: "2026-10-29T17:30:00.000Z", points: 100 }],
   target: 3,
   goldenCap: false,

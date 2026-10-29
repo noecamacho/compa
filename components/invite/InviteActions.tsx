@@ -5,7 +5,7 @@ import { Icon, type IconName } from "@/components/icons";
 import { useCopy } from "@/components/LocaleProvider";
 import { HIT_AREA } from "@/components/ui/hit-area";
 
-type Props = { url: string };
+type Props = { url: string; eventName: string };
 
 const VIA: { key: "whatsapp" | "instagram" | "more"; color: string; icon: IconName }[] = [
   { key: "whatsapp", color: "#DDF8EA", icon: "whatsapp" },
@@ -14,7 +14,7 @@ const VIA: { key: "whatsapp" | "instagram" | "more"; color: string; icon: IconNa
 ];
 
 // Copy the link or share it; Instagram has no share URL, so it copies and opens the app's share sheet.
-export function InviteActions({ url }: Props) {
+export function InviteActions({ url, eventName }: Props) {
   const copy = useCopy().invite;
   const [copied, setCopied] = useState(false);
   const shown = useRef<HTMLSpanElement>(null);
@@ -32,7 +32,7 @@ export function InviteActions({ url }: Props) {
   }
 
   async function share(key: (typeof VIA)[number]["key"]) {
-    const text = copy.shareText(url);
+    const text = copy.shareText(url, eventName);
     if (key === "whatsapp") return window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener");
     if (navigator.share) return navigator.share({ text, url }).catch(() => undefined);
     return copyLink();

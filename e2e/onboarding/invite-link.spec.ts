@@ -1,10 +1,12 @@
-// F-09: the invite link /i/<code>. Signed out it signs in and keeps the invite; 02 Perfil (?invite=<code>) claims it
-// once (POST /api/invites/{code}/claim) and the inviter sees the friend; unknown and own codes stay silent.
-import type { APIRequestContext, Page } from "@playwright/test";
+// F-09: the invite link /i/<code>. An invite always belongs to an event: the link lands the friend at that event's door
+// (/e/<event code>?invite=<code>), the join step claims it once (POST /api/invites/{code}/claim) and the inviter sees the
+// friend; unknown and own codes stay silent. Signing in first keeps the invite on the way.
+import type { APIRequestContext } from "@playwright/test";
 import { ClaimedInvite, Invites, type CardT } from "../../lib/api/schemas";
-import { invites as mockInvites } from "../../lib/api/examples";
-import { profile } from "../../lib/copy/es";
-import { expect, redirectOf, signInPath, test } from "./helpers";
+import { accessCode, invites as mockInvites } from "../../lib/api/examples";
+import { redirectOf, signInPath } from "./helpers";
+import { expect, expectApiError, test } from "../profiles/helpers";
+import type { SignedInUser } from "../fixtures/two-users";
 
 async function invitesOf(request: APIRequestContext) {
   const response = await request.get("/api/invites/me");
@@ -12,19 +14,39 @@ async function invitesOf(request: APIRequestContext) {
   return Invites.parse(await response.json());
 }
 
+// The code of the open invite for the event the person is checked in to.
+async function codeOf(request: APIRequestContext): Promise<string> {
+  const { link } = await invitesOf(request);
+  if (!link) throw new Error("no invite link: the person is not checked in to an event");
+  return link.code;
+}
+
 const inviteeHandles = async (request: APIRequestContext): Promise<string[]> =>
   (await invitesOf(request)).invitees.map(({ person }: { person: CardT }) => person.handle);
 
-const openProfileWithInvite = async (page: Page, code: string) => {
-  await page.goto(`/onboarding/profile?invite=${code}`);
-  await expect(page.getByRole("heading", { level: 1, name: profile.title })).toBeVisible();
-};
+const joinWithInvite = (friend: SignedInUser, eventCode: string, code: string) => friend.page.goto(`/e/${eventCode}/join?invite=${code}`);
 
 test.describe("invite link", () => {
-  test("signed out, it signs in and keeps the invite @real", async ({ request, baseURL }) => {
-    const redirect = await redirectOf(request, "/i/ana-lopez", baseURL);
+  test("it lands at the door of the inviter's event and keeps the invite @real", async ({ people, request, baseURL, testEvent }) => {
+    const [inviter] = await people([{}]);
+    if (!inviter) throw new Error("test user not created");
+    const code = await codeOf(inviter.page.request);
+    const redirect = await redirectOf(request, `/i/${code}`, baseURL);
     expect(redirect.status).toBe(307);
-    expect(redirect.path).toBe(signInPath("/onboarding/profile?invite=ana-lopez"));
+    expect(redirect.path).toBe(`/e/${testEvent.accessCode}?invite=${code}`);
+  });
+
+  test("the join step keeps the invite through sign-in @real", async ({ request, baseURL, testEvent, people }) => {
+    const [inviter] = await people([{}]);
+    if (!inviter) throw new Error("test user not created");
+    const code = await codeOf(inviter.page.request);
+    const join = `/e/${testEvent.accessCode}/join?invite=${code}`;
+    expect((await redirectOf(request, join, baseURL)).path).toBe(signInPath(join));
+  });
+
+  test("an unknown invite code is a not-found page @real", async ({ request }) => {
+    const response = await request.get("/i/zz-no-such-invite", { maxRedirects: 0 });
+    expect(response.status()).toBe(404);
   });
 
   test("the claim needs a session @real", async ({ request }) => {
@@ -33,82 +55,65 @@ test.describe("invite link", () => {
     expect((await response.json()).error.code).toBe("unauthorized");
   });
 
-  test("a malformed code is rejected @real", async ({ page, realUser }) => {
-    expect(realUser.user.handle).toBeTruthy();
-    const response = await page.request.post("/api/invites/NOT_A_CODE!/claim", { data: {} });
-    expect(response.status()).toBe(400);
-    expect((await response.json()).error.code).toBe("invalid_input");
+  test("a malformed code is rejected @real", async ({ people }) => {
+    const [ana] = await people([{}]);
+    if (!ana) throw new Error("test user not created");
+    await expectApiError(await ana.page.request.post("/api/invites/NOT_A_CODE!/claim", { data: {} }), 400, "invalid_input");
   });
 
-  test("02 claims the invite once and the inviter sees the friend @real", async ({ twoUsers }) => {
-    const [inviter, friend] = twoUsers;
-    const { code } = await invitesOf(inviter.page.request);
+  test("the join step claims the invite once and the inviter sees the friend @real", async ({ people, testEvent }) => {
+    const [inviter] = await people([{}]);
+    const [friend] = await people([{}], { checkIn: false });
+    if (!inviter || !friend) throw new Error("test users not created");
+    const code = await codeOf(inviter.page.request);
     expect(await inviteeHandles(inviter.page.request)).not.toContain(friend.user.handle);
 
-    await openProfileWithInvite(friend.page, code);
+    await joinWithInvite(friend, testEvent.accessCode, code);
     await expect.poll(() => inviteeHandles(inviter.page.request), { timeout: 5_000 }).toContain(friend.user.handle);
 
     await friend.page.reload();
-    await expect(friend.page.getByRole("heading", { level: 1, name: profile.title })).toBeVisible();
     const handles = await inviteeHandles(inviter.page.request);
     expect(handles.filter((handle) => handle === friend.user.handle)).toHaveLength(1);
 
     const again = await friend.page.request.post(`/api/invites/${code}/claim`, { data: {} });
     expect(again.status()).toBe(200);
-    expect(ClaimedInvite.parse(await again.json()).inviter.handle).toBe(inviter.user.handle);
+    const claimed = ClaimedInvite.parse(await again.json());
+    expect(claimed.inviter.handle).toBe(inviter.user.handle);
+    expect(claimed.event).toEqual({ code: testEvent.accessCode, name: testEvent.name });
   });
 
-  test("two friends who open the same link both count for the inviter @real", async ({ twoUsers, testUsers, signIn, browser }) => {
-    test.fixme(true, "OPEN QUESTION 59 (wiki/open-questions.md): a used link links nobody else; crediting later friends is undecided (farming risk)");
-    const [inviter, first] = twoUsers;
-    const { code } = await invitesOf(inviter.page.request);
-    await openProfileWithInvite(first.page, code);
-    await expect.poll(() => inviteeHandles(inviter.page.request), { timeout: 5_000 }).toContain(first.user.handle);
-
-    const [second] = await testUsers(1);
-    if (!second) throw new Error("test user not created");
-    const context = await browser.newContext();
-    try {
-      await signIn(context, second);
-      const page = await context.newPage();
-      await openProfileWithInvite(page, code);
-      await expect.poll(() => inviteeHandles(inviter.page.request), { timeout: 5_000 }).toContain(second.handle);
-      expect(await inviteeHandles(inviter.page.request)).toContain(first.user.handle);
-    } finally {
-      await context.close();
-    }
-  });
-
-  test("my own code and an unknown code are silent @real", async ({ page, realUser }) => {
-    const { code } = await invitesOf(page.request);
-    const alerts = page.getByRole("alert").filter({ hasText: /\S/ });
-    await openProfileWithInvite(page, code);
+  test("my own code and an unknown code are silent @real", async ({ people, testEvent }) => {
+    const [ana] = await people([{}]);
+    if (!ana) throw new Error("test user not created");
+    const code = await codeOf(ana.page.request);
+    const alerts = ana.page.getByRole("alert").filter({ hasText: /\S/ });
+    await joinWithInvite(ana, testEvent.accessCode, code);
     await expect(alerts).toHaveCount(0);
-    const own = await page.request.post(`/api/invites/${code}/claim`, { data: {} });
-    expect(own.status()).toBe(404);
-    expect(await inviteeHandles(page.request)).not.toContain(realUser.user.handle);
+    await expectApiError(await ana.page.request.post(`/api/invites/${code}/claim`, { data: {} }), 404, "not_found");
+    expect(await inviteeHandles(ana.page.request)).not.toContain(ana.user.handle);
 
-    await openProfileWithInvite(page, "zz-no-such-invite");
+    await joinWithInvite(ana, testEvent.accessCode, "zz-no-such-invite");
     await expect(alerts).toHaveCount(0);
-    const unknown = await page.request.post("/api/invites/zz-no-such-invite/claim", { data: {} });
-    expect(unknown.status()).toBe(404);
-    expect((await unknown.json()).error.code).toBe("not_found");
+    await expectApiError(await ana.page.request.post("/api/invites/zz-no-such-invite/claim", { data: {} }), 404, "not_found");
   });
 });
 
 test.describe("invite link (mock)", () => {
-  test("goes straight to 02 without LinkedIn @mock", async ({ page }) => {
-    await page.goto(`/i/${mockInvites.code}`);
-    await expect(page).toHaveURL(/\/onboarding\/profile$/);
-    await expect(page.getByRole("heading", { level: 1, name: profile.title })).toBeVisible();
+  test("goes to the event door without LinkedIn, keeping the invite @mock", async ({ page }) => {
+    await page.goto(`/i/${mockInvites.link?.code}`);
+    await expect(page).toHaveURL(`/e/${accessCode}?invite=${mockInvites.link?.code}`);
   });
 
-  test("the claim answers the inviter, or 404 @mock", async ({ page }) => {
-    await page.goto("/onboarding/profile?invite=diego-r");
-    const claimed = await page.request.post(`/api/invites/${mockInvites.code}/claim`, { data: {} });
+  test("the claim answers the inviter and the event, or 404 @mock", async ({ page }) => {
+    const claimed = await page.request.post(`/api/invites/${mockInvites.link?.code}/claim`, { data: {} });
     expect(claimed.status()).toBe(200);
-    expect(ClaimedInvite.parse(await claimed.json()).code).toBe(mockInvites.code);
+    expect(ClaimedInvite.parse(await claimed.json()).event.code).toBe(accessCode);
     const missing = await page.request.post("/api/invites/zz-none/claim", { data: {}, headers: { "x-compa-mock-error": "not_found" } });
     expect(missing.status()).toBe(404);
+  });
+
+  test("an invite without an event cannot be claimed @mock", async ({ page }) => {
+    const refused = await page.request.post(`/api/invites/${mockInvites.link?.code}/claim`, { data: {}, headers: { "x-compa-mock-error": "invite_needs_event" } });
+    await expectApiError(refused, 409, "invite_needs_event");
   });
 });

@@ -3,7 +3,7 @@
 import type { Page } from "@playwright/test";
 import { invites as invitesExample } from "../../lib/api/examples";
 import { ClaimedInvite, Invites, Me } from "../../lib/api/schemas";
-import { common, home, invite as copy } from "../../lib/copy/es";
+import { common, connect, home, invite as copy } from "../../lib/copy/es";
 import { firstName } from "../../lib/format";
 import { GOLDEN_CAP } from "../../lib/monito/look";
 import { GOLDEN_CAP_INVITES, INVITE_POINTS } from "../../lib/points";
@@ -11,6 +11,9 @@ import type { SignedInUser } from "../fixtures/two-users";
 import { acceptedConnection, call, expect, expectApiError, expectErrorScreen, skipTours, test } from "../profiles/helpers";
 
 const shownLink = (url: string) => url.replace(/^https?:\/\//, "");
+
+if (!invitesExample.link) throw new Error("the invites example has no link");
+const mockLink = invitesExample.link;
 
 const selectedText = (page: Page) => page.evaluate(() => window.getSelection()?.toString() ?? "");
 
@@ -45,7 +48,8 @@ test.describe("invite in mock mode", () => {
     await expect(page.getByText(`+${andrea?.points ?? 0} pts`, { exact: true }).nth(1)).toBeVisible();
     for (const slot of [2, 3]) await expect(page.getByText(copy.friendSlot(slot), { exact: true })).toBeVisible();
     await expect(page.getByText(copy.cap, { exact: true })).toBeVisible();
-    await expect(page.getByText(shownLink(invitesExample.url), { exact: true })).toBeVisible();
+    await expect(page.getByText(shownLink(mockLink.url), { exact: true })).toBeVisible();
+    await expect(page.getByText(copy.forEvent(mockLink.event.name))).toBeVisible();
     await expect(page.getByRole("link", { name: copy.showQr })).toHaveAttribute("href", "/connect");
     await expect(page.getByRole("link", { name: common.close })).toHaveAttribute("href", "/home");
   });
@@ -56,7 +60,7 @@ test.describe("invite in mock mode", () => {
     await page.goto("/invite");
     await page.getByRole("button", { name: copy.copy, exact: true }).click();
     await expect(page.getByRole("button", { name: copy.copied, exact: true })).toBeVisible();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(invitesExample.url);
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(mockLink.url);
     await expect(page.getByRole("button", { name: copy.copy, exact: true })).toBeVisible();
   });
 
@@ -66,7 +70,7 @@ test.describe("invite in mock mode", () => {
     });
     await page.goto("/invite");
     await page.getByRole("button", { name: copy.copy, exact: true }).click();
-    await expect.poll(() => selectedText(page)).toBe(shownLink(invitesExample.url));
+    await expect.poll(() => selectedText(page)).toBe(shownLink(mockLink.url));
     await expect(page.getByRole("button", { name: copy.copied, exact: true })).toHaveCount(0);
   });
 
@@ -79,7 +83,7 @@ test.describe("invite in mock mode", () => {
     const opened = await popup;
     await opened.waitForLoadState();
     const text = new URL(opened.url()).searchParams.get("text");
-    expect(text).toBe(copy.shareText(invitesExample.url));
+    expect(text).toBe(copy.shareText(mockLink.url, mockLink.event.name));
     await opened.close();
   });
 
@@ -88,7 +92,7 @@ test.describe("invite in mock mode", () => {
       await stubShare(page);
       await page.goto("/invite");
       await page.getByRole("button", { name: via, exact: true }).click();
-      await expect.poll(() => page.locator("html").getAttribute("data-shared")).toBe(JSON.stringify({ text: copy.shareText(invitesExample.url), url: invitesExample.url }));
+      await expect.poll(() => page.locator("html").getAttribute("data-shared")).toBe(JSON.stringify({ text: copy.shareText(mockLink.url, mockLink.event.name), url: mockLink.url }));
     });
   }
 
@@ -99,7 +103,7 @@ test.describe("invite in mock mode", () => {
     await page.goto("/invite");
     await page.getByRole("button", { name: copy.more, exact: true }).click();
     await expect(page.getByRole("button", { name: copy.copied, exact: true })).toBeVisible();
-    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(invitesExample.url);
+    expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(mockLink.url);
   });
 
   test("the QR button and the close button navigate @mock", async ({ page }) => {
@@ -109,6 +113,11 @@ test.describe("invite in mock mode", () => {
     await page.goto("/invite");
     await page.getByRole("link", { name: common.close }).click();
     await expect(page).toHaveURL(/\/home$/);
+  });
+
+  test("outside an event the API gives no link @mock", async ({ page }) => {
+    const response = await page.request.get("/api/invites/me", { headers: { "x-compa-mock-example": "noEvent" } });
+    expect(Invites.parse(await response.json())).toMatchObject({ link: null, target: invitesExample.target });
   });
 
   test("a failed invite load shows the error screen @mock", async ({ page, mock }) => {
@@ -124,20 +133,48 @@ const POINTS_POLL = { timeout: 8_000 };
 const pointsOf = async (who: SignedInUser) => (await call(who.page.request, "GET", "/api/me", Me)).scores?.event.points ?? 0;
 const claim = (who: SignedInUser, code: string) => call(who.page.request, "POST", `/api/invites/${code}/claim`, ClaimedInvite, {});
 
-// The open invite row is created when its owner first loads it (/invite or the home card), as before sharing a link.
-const openInvite = async (inviter: SignedInUser) => (await invitesOf(inviter)).code;
+// The open invite row is created when its owner first loads it while checked in (/invite or the home card).
+const openInvite = async (inviter: SignedInUser) => {
+  const { link } = await invitesOf(inviter);
+  if (!link) throw new Error("no invite link: the inviter is not checked in to an event");
+  return link.code;
+};
 
 test.describe("invite in real mode", () => {
-  test("my link uses my handle and every slot starts empty @real", async ({ people, baseURL }) => {
+  test("my link uses my handle, names my event and every slot starts empty @real", async ({ people, baseURL, testEvent }) => {
     const [ana] = await people([{}]);
     if (!ana) throw new Error("test user not created");
     const invites = await invitesOf(ana);
-    expect(invites).toMatchObject({ code: ana.user.handle, invitees: [], target: GOLDEN_CAP_INVITES, goldenCap: false });
-    expect(invites.url).toBe(new URL(`/i/${ana.user.handle}`, baseURL).toString());
+    const url = new URL(`/i/${ana.user.handle}`, baseURL).toString();
+    expect(invites).toMatchObject({ link: { code: ana.user.handle, url, event: { code: testEvent.accessCode, name: testEvent.name } }, invitees: [], target: GOLDEN_CAP_INVITES, goldenCap: false });
     await ana.page.goto("/invite");
-    await expect(ana.page.getByText(shownLink(invites.url), { exact: true })).toBeVisible();
+    await expect(ana.page.getByText(shownLink(url), { exact: true })).toBeVisible();
+    await expect(ana.page.getByText(copy.forEvent(testEvent.name))).toBeVisible();
     await expect(ana.page.getByText(copy.progress(0, GOLDEN_CAP_INVITES), { exact: true })).toBeVisible();
     for (const slot of [1, 2, 3]) await expect(ana.page.getByText(copy.friendSlot(slot), { exact: true })).toBeVisible();
+  });
+
+  test("outside an event there is no link, no invite button and nothing is created @real", async ({ people }) => {
+    const [ana] = await people([{}], { checkIn: false });
+    if (!ana) throw new Error("test user not created");
+    expect(await invitesOf(ana)).toMatchObject({ link: null, invitees: [], target: GOLDEN_CAP_INVITES });
+    await ana.page.goto("/invite");
+    await expect(ana.page.getByText(copy.noEventTitle)).toBeVisible();
+    await expect(ana.page.getByText(copy.noEvent)).toBeVisible();
+    await expect(ana.page.getByRole("button", { name: copy.copy, exact: true })).toHaveCount(0);
+    await ana.page.goto("/home");
+    await expect(ana.page.getByRole("link", { name: new RegExp(home.inviteTitle) })).toHaveCount(0);
+    await ana.page.goto("/connect");
+    await expect(ana.page.getByRole("link", { name: connect.invite })).toHaveCount(0);
+  });
+
+  test("inside an event home and Conectar offer the invite @real", async ({ people }) => {
+    const [ana] = await people([{}]);
+    if (!ana) throw new Error("test user not created");
+    await ana.page.goto("/home");
+    await expect(ana.page.getByRole("link", { name: new RegExp(home.inviteTitle) })).toBeVisible();
+    await ana.page.goto("/connect");
+    await expect(ana.page.getByRole("link", { name: connect.invite })).toHaveAttribute("href", "/invite");
   });
 
   test("an unknown or own code cannot be claimed @real", async ({ people }) => {
@@ -147,11 +184,12 @@ test.describe("invite in real mode", () => {
     await expectApiError(await ana.page.request.post(`/api/invites/${await openInvite(ana)}/claim`, { data: {} }), 404, "not_found");
   });
 
-  test("the invitee's first accept pays +100 and +50 once @real", async ({ people }) => {
+  test("the invitee's first accept pays +100 and +50 once @real", async ({ people, testEvent }) => {
     const [inviter, invitee, bruno, carla] = await people([{}, {}, {}, {}]);
     if (!inviter || !invitee || !bruno || !carla) throw new Error("test users not created");
     const claimed = await claim(invitee, await openInvite(inviter));
     expect(claimed.inviter.handle).toBe(inviter.user.handle);
+    expect(claimed.event.code).toBe(testEvent.accessCode);
     await acceptedConnection(invitee, bruno);
     await expect.poll(() => pointsOf(inviter), POINTS_POLL).toBe(INVITE_POINTS.inviter);
     await expect.poll(() => pointsOf(invitee), POINTS_POLL).toBe(50 + INVITE_POINTS.invitee);
