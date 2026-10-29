@@ -6,8 +6,11 @@ import { E, fail } from "../api/errors";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { isRunning } from "../connection-status";
+import { rankingTips } from "../copy/es";
+import { currentUserOrNull } from "./auth";
 import { requireEvent } from "./events";
 import { cardFor } from "./people";
+import { rankedAtEvent, rankedLifetime, type Ranked } from "./scores";
 
 // A6: the big screen is public; a 1 s shared cache absorbs many screens polling the same event.
 const LIVE_CACHE = { "Cache-Control": "public, s-maxage=1, stale-while-revalidate=1" };
@@ -67,16 +70,25 @@ export async function livePerson({ params }: InputOf<typeof R.livePerson>): Resu
   return { body: { card, points: entry.points, connections: entry.connections, rank: index + 1 }, headers: LIVE_CACHE };
 }
 
+const toRow = (entry: Ranked, index: number) => ({ rank: index + 1, ...entry });
+
+// My row, the person just above me and the gap to pass them (V2Ranking). Not cached: it depends on the viewer.
+async function myStanding(ranked: Ranked[]) {
+  const viewer = await currentUserOrNull();
+  if (!viewer) return undefined;
+  const index = ranked.findIndex((entry) => entry.userId === viewer.id);
+  const mine = ranked[index];
+  if (!mine || mine.points === 0) return { rank: null, points: mine?.points ?? 0, above: null, gap: 0, tip: rankingTips.first };
+  const aboveEntry = index > 0 ? ranked[index - 1] : undefined;
+  const above = aboveEntry ? toRow(aboveEntry, index - 1) : null;
+  const gap = above ? above.points - mine.points + 1 : 0;
+  return { rank: index + 1, points: mine.points, above, gap, tip: above ? rankingTips.gap(gap) : null };
+}
+
 export async function leaderboard({ params, query }: InputOf<typeof R.leaderboard>): ResultOf<typeof R.leaderboard> {
   const event = await requireEvent(params.slug);
-  const ranked = await rankedAttendees(event);
-  const rows = ranked.slice(0, query.limit).map(({ user, points, connections }, index) => ({
-    rank: index + 1,
-    userId: user.id,
-    name: user.name,
-    photoUrl: user.photoUrl,
-    points,
-    connections,
-  }));
-  return { body: { rows }, headers: LIVE_CACHE };
+  const ranked = query.scope === "lifetime" ? await rankedLifetime() : await rankedAtEvent(event);
+  const rows = ranked.slice(0, query.limit).map(toRow);
+  const me = await myStanding(ranked);
+  return { body: me ? { rows, me } : { rows }, headers: me ? undefined : LIVE_CACHE };
 }

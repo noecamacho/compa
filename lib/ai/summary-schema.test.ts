@@ -4,8 +4,10 @@ import { SUMMARY_JSON_SCHEMA, SummaryOutput } from "./summary-schema";
 
 const valid = {
   summary: "Ana y Luis hablaron de React Server Components.",
+  title: "React Server Components en el panel de Ana",
   topics: ["React", "Next.js"],
   next_steps: ["Compartir el repositorio"],
+  pending_action: "Luis comparte el repositorio con Ana",
   substantive: true,
 };
 

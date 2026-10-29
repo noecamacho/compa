@@ -21,8 +21,10 @@ function requireTextModel(): string {
 // Plan p. 12: if the summary fails, store the user's text verbatim.
 const fallbackFor = (text: string): DraftSummary => ({
   summary: text.trim().slice(0, 1200),
+  title: text.trim().slice(0, 100),
   topics: [],
   next_steps: [],
+  pending_action: null,
   substantive: true,
   fallback: true,
 });

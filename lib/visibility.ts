@@ -1,5 +1,6 @@
 // The single visibility filter for every view of another person (API spec §6, data model §4.5).
 import type { CardT } from "./api/schemas";
+import type { MonitoLook } from "./monito/look";
 import { LINK_KEYS, type Links, type Visibility, type VisibilitySettings } from "./profile-fields";
 
 // public: anonymous or not connected; connected: an accepted connection at any event; self: the owner.
@@ -10,8 +11,10 @@ export type CardSource = {
   handle: string;
   name: string;
   photoUrl: string | null;
+  avatar: MonitoLook | null;
   headline: string | null;
   company: string | null;
+  city: string | null;
   links: Links;
   visibility: VisibilitySettings;
   interests: string[];
@@ -41,8 +44,11 @@ export function toCard(owner: CardSource, relation: Relation): CardT {
     handle: owner.handle,
     name: owner.name,
     photoUrl: owner.photoUrl,
+    // The monito and the city are public like the name and photo (design handoff).
+    ...optionalField("avatar", owner.avatar, true),
     ...optionalField("headline", owner.headline, canSee(owner.visibility.headline, relation)),
     ...optionalField("company", owner.company, canSee(owner.visibility.company, relation)),
+    ...optionalField("city", owner.city, true),
     ...optionalField("interests", owner.interests, canSee(owner.visibility.interests, relation)),
     ...optionalField("links", links, Object.keys(links).length > 0),
   };

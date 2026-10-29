@@ -96,3 +96,6 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Is production migrated to the V2 points?
 
 - Applied `drizzle/0001_v2_points_whatsapp.sql` to the production Supabase project (no rows existed). The points check now enforces 50 for new and 20 for reconnection, matching the deployed code; the points table itself awaits captain ratification (gap analysis, open question #29).
+## [2026-10-29] ingest | V2 points model and real handlers
+
+- Migration `0002`: `users.avatar`, `users.city`, `users.golden_cap_at`, `connections.topics`, `interactions.title` and `pending_action`, tables `bonus_points`, `user_badges`, `invites`; both score views rebuilt (notes pay the author, bonus points count). Handlers now fill every V2 field: profile stats, scores and badges, person relationship and last note, connection detail, badge catalog with progress (`lib/badges/rules.ts`), invites with the golden cap, leaderboard scope and `me`, and the AI summary returns a title and a pending action. [points-rules](points-rules.md) rewritten for the V2 table.
