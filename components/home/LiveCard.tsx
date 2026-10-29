@@ -1,29 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Icon, type IconName } from "@/components/icons";
-import { Avatar } from "@/components/monito/Avatar";
+import { useCallback, useEffect, useState } from "react";
+import { Icon } from "@/components/icons";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
-import type { EventDoorT, LiveRecentT, MeT } from "@/lib/api/schemas";
+import type { EventDoorT, LiveSnapshotT, MeT } from "@/lib/api/schemas";
 import { useCopy, useLocale } from "@/components/LocaleProvider";
 import { formatHour, formatPoints } from "@/lib/format";
-import type { MonitoLook } from "@/lib/monito/look";
+import { fetchHomeSnapshot } from "@/lib/live/home-snapshot";
+import { usePoll } from "@/lib/use-poll";
 
-type Pair = { a: { name: string; look?: MonitoLook }; b: { name: string; look?: MonitoLook } };
+// The same rotating stage as the big screen (canvas, WebGL): browser only.
+const LiveStage = dynamic(() => import("@/components/live/LiveStage"), { ssr: false });
 
-const SPARKS: { color: string; icon: IconName }[] = [
-  { color: "#FFD93D", icon: "bolt" },
-  { color: "#6BE4A3", icon: "plus" },
-  { color: "#FF8FAB", icon: "heart" },
-];
-
-// The last three accepted pairs rise one after another (README: 7.5 s loop).
-function pairsFrom(recent: LiveRecentT, looks: Map<string, MonitoLook | undefined>): Pair[] {
-  return recent.pairs.map(({ a, b }) => ({ a: { name: a.name, look: looks.get(a.id) }, b: { name: b.name, look: looks.get(b.id) } }));
-}
-
-const first = (name: string) => name.split(" ")[0] ?? name;
+// The card only has to keep moving; the projector's 3 s cadence would cost every phone the full snapshot that often.
+const HOME_POLL_MS = 15_000;
 
 // Shown instead of the live card when the person is not checked in anywhere (gap analysis U7).
 export function OutsideEventCard() {
@@ -41,46 +34,67 @@ export function OutsideEventCard() {
   );
 }
 
-type Props = { recent: LiveRecentT; event: EventDoorT; me: MeT; looks: Map<string, MonitoLook | undefined>; empty: boolean };
+// Read from the browser through the 1 s CDN cache of /api/e/{code}/live, never in the /home render (conference-scale
+// finding 5). Null until the first answer; a failed poll keeps the last snapshot and backs off.
+function useHomeSnapshot(code: string): LiveSnapshotT | null {
+  const [snapshot, setSnapshot] = useState<LiveSnapshotT | null>(null);
+  const tick = useCallback(
+    async (signal: AbortSignal) => {
+      const next = await fetchHomeSnapshot(code, signal);
+      if (!next) throw new Error("home live poll failed");
+      setSnapshot(next);
+    },
+    [code],
+  );
+  // The shared poller waits a full interval before its first tick; the card should not sit empty that long.
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchHomeSnapshot(code, controller.signal).then((next) => next && setSnapshot(next));
+    return () => controller.abort();
+  }, [code]);
+  usePoll(tick, HOME_POLL_MS);
+  return snapshot;
+}
 
-export function LiveCard({ recent, event, me, looks, empty }: Props) {
+const ignoreSelect = () => {};
+
+type Props = { event: EventDoorT; me: MeT; empty: boolean };
+
+// The live visualization itself, sized for Home; one tap opens the full live view (counters, leaderboard, feed).
+export function LiveCard({ event, me, empty }: Props) {
   const { common, home } = useCopy();
   const locale = useLocale();
-  const pairs = pairsFrom(recent, looks);
+  const snapshot = useHomeSnapshot(event.code);
   const rank = me.scores?.event.rank ?? null;
   const points = me.scores?.event.points ?? 0;
+  const connections = snapshot?.counters.connections ?? event.counters.connections;
   return (
     <Card tone="sky" className="flex flex-col gap-[10px] px-4 pt-[14px] pb-4">
-      <div className="flex items-center justify-between">
-        <Pill tone="coral" rotate={-2}>
-          <span className="animate-beat h-2 w-2 rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
-          {common.live}
-        </Pill>
-        <span className="text-[13px] font-extrabold">{home.until(event.name, formatHour(locale, event.endsAt))}</span>
-      </div>
-      <div className="flex items-baseline gap-2">
-        <span className="font-display text-[44px] leading-none font-bold">{event.counters.connections}</span>
-        <span className="font-display text-[18px] font-semibold">{home.connectionsTonight}</span>
-      </div>
-      <div role="img" aria-label={home.pairsNow} className="relative h-[150px] overflow-hidden rounded-button bg-sky-soft border-ink">
-        {pairs.map((pair, index) => (
-          <span
-            key={`${pair.a.name}-${pair.b.name}`}
-            className="animate-pair absolute right-0 left-0 flex items-center justify-center gap-[6px] opacity-0"
-            style={{ top: 16 + index * 42, animationDelay: `${index * 2.5}s` }}
-          >
-            <Avatar person={pair.a} size={36} />
-            <span
-              className="animate-spark inline-flex h-[26px] w-[26px] items-center justify-center rounded-full"
-              style={{ background: SPARKS[index]?.color, border: "2px solid #1E1B2E" }}
-            >
-              <Icon name={SPARKS[index]?.icon ?? "bolt"} size={12} strokeWidth={3} />
-            </span>
-            <Avatar person={pair.b} size={36} />
-            <span className="ml-[6px] text-[12px] font-extrabold whitespace-nowrap">{home.pair(first(pair.a.name), first(pair.b.name))}</span>
+      <Link href={`/e/${event.code}/live`} aria-label={home.seeLiveLabel(event.name)} className="group flex flex-col gap-[10px] rounded-button" data-testid="home-live">
+        <span className="flex items-center justify-between">
+          <Pill tone="coral" rotate={-2}>
+            <span className="animate-beat h-2 w-2 rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
+            {common.live}
+          </Pill>
+          <span className="text-[13px] font-extrabold">{home.until(event.name, formatHour(locale, event.endsAt))}</span>
+        </span>
+        <span className="flex items-baseline gap-2">
+          <span className="font-display text-[44px] leading-none font-bold">{connections}</span>
+          <span className="font-display text-[18px] font-semibold">{home.connectionsTonight}</span>
+        </span>
+        <span className="pressable relative block h-[200px] overflow-hidden rounded-button bg-sky-soft border-ink shadow-hard-2 md:h-[240px] lg:h-[280px]">
+          {/* Inert: the views' own controls (Race rows are buttons) must not be focus stops inside this link. */}
+          <span inert className="absolute inset-0">
+            {snapshot && <LiveStage snapshot={snapshot} selectedId={null} label={home.pairsNow} onSelect={ignoreSelect} locale={locale} />}
           </span>
-        ))}
-      </div>
+          {/* Over the canvas so a tap opens the live view instead of selecting a person on the stage. */}
+          <span aria-hidden="true" className="absolute inset-0" />
+          <span className="absolute top-2 right-2 flex h-8 items-center gap-1 rounded-chip bg-sun pr-2 pl-3 text-[13px] font-extrabold border-ink shadow-hard-2 transition-transform group-hover:translate-x-[2px]">
+            {home.seeLive}
+            <Icon name="chevronRight" size={16} strokeWidth={3} />
+          </span>
+        </span>
+      </Link>
       <Link
         href={empty ? "/connect" : "/ranking"}
         className="flex h-11 items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable"

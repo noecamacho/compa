@@ -9,26 +9,19 @@ import { Tour } from "@/components/tour/Tour";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
-import { ConnectionList, EventDoor, Invites, LiveRecent, Me, Notifications, type ConnectionListT, type EventDoorT, type LiveRecentT } from "@/lib/api/schemas";
+import { ConnectionList, EventDoor, Invites, Me, Notifications, type EventDoorT } from "@/lib/api/schemas";
 import { apiGet, apiGetSafe } from "@/lib/api/server-fetch";
 import { copyFor, type Dictionary } from "@/lib/copy";
 import { firstName } from "@/lib/format";
 import { requestLocale } from "@/lib/server/locale";
-import type { MonitoLook } from "@/lib/monito/look";
 import { StickyBar } from "@/components/ui/StickyBar";
 
 type Props = { searchParams: Promise<{ demo?: string }> };
 
-const NO_CONNECTIONS: ConnectionListT = { incoming: [], people: [], totals: { points: 0, connections: 0, people: 0 } };
-
-type Live = { recent: LiveRecentT; event: EventDoorT };
-
-// The live card needs the current event; its code comes from /api/me (API spec A10). It reads the door (counters) and
-// the newest pairs, never the full big-screen snapshot. A failure hides the card, not the whole screen.
-async function loadLive(code: string | undefined): Promise<Live | null> {
-  if (!code) return null;
-  const [recent, event] = await Promise.all([apiGetSafe(`/api/e/${code}/live/recent`, LiveRecent), apiGetSafe(`/api/e/${code}`, EventDoor)]);
-  return recent && event ? { recent, event } : null;
+// The live card needs the current event; its code comes from /api/me (API spec A10). The render reads only the door
+// (name, close, counters); the card fetches the visualization's snapshot from the browser. A failure hides the card.
+async function loadEvent(code: string | undefined): Promise<EventDoorT | null> {
+  return code ? apiGetSafe(`/api/e/${code}`, EventDoor) : null;
 }
 
 function NoEventCard({ home }: { home: Dictionary["home"] }) {
@@ -45,20 +38,20 @@ export default async function HomePage({ searchParams }: Props) {
   const { demo } = await searchParams;
   // `?demo=empty` previews the first-night state in mock mode.
   const me = await apiGet("/api/me", Me, demo === "empty" ? { mockExample: "empty" } : {});
-  const [live, listOrNull, invites, notificationList, locale] = await Promise.all([
-    loadLive(me.currentEvent?.code),
+  const [event, listOrNull, invites, notificationList, locale] = await Promise.all([
+    loadEvent(me.currentEvent?.code),
     apiGetSafe("/api/connections", ConnectionList),
     apiGetSafe("/api/invites/me", Invites),
     apiGetSafe("/api/notifications", Notifications),
     requestLocale(),
   ]);
   const { home, tour } = copyFor(locale);
-  const list = listOrNull ?? NO_CONNECTIONS;
   const demoEmpty = demo === "empty";
-  const empty = demoEmpty || list.totals.connections === 0;
-  const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
+  // The first-scan prompt follows the API, not client state, so it is gone for good after the first accepted connection.
+  // A list that failed to load hides it rather than showing it to someone who already connected.
+  const empty = demoEmpty || listOrNull?.totals.connections === 0;
   // Only the mock preview blanks real data; a first-night person (no connections yet) still sees requests and invitees.
-  const incoming = demoEmpty ? [] : list.incoming;
+  const incoming = demoEmpty ? [] : (listOrNull?.incoming ?? []);
   return (
     <Screen dock>
       <StickyBar className="flex items-center justify-between">
@@ -74,7 +67,7 @@ export default async function HomePage({ searchParams }: Props) {
       {/* Phone: one column. From 834: the live card on the left, Conectar (grown into a tall tile) and the invite on the right. */}
       <div className="flex flex-col gap-[14px] md:grid md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:items-stretch lg:gap-5">
         <div data-tour="live">
-          {live ? <LiveCard recent={live.recent} event={live.event} me={me} looks={looks} empty={empty} /> : <NoEventCard home={home} />}
+          {event ? <LiveCard event={event} me={me} empty={empty} /> : <NoEventCard home={home} />}
         </div>
 
         <div className="flex flex-col gap-[14px] lg:gap-5">

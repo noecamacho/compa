@@ -618,7 +618,8 @@ export const home: typeof es.home = {
   until: (name, hour) => `${name} · until ${hour}`,
   connectionsTonight: "connections tonight",
   pairsNow: "Connections happening right now",
-  pair: (a, b) => `${a} and ${b}`,
+  seeLive: "See it live",
+  seeLiveLabel: (event) => `See ${event} live: connections, leaderboard and the latest`,
   rank: (rank, points) => ["You're ", `#${rank}`, ` with ${points} pts`],
   firstConnection: "Your first connection puts you on the leaderboard",
   connect: "Connect",
@@ -919,7 +920,7 @@ export const tour: typeof es.tour = {
   done: "Got it!",
   replay: "Quick guide",
   home: [
-    { target: "live", title: "This is what's happening at the event", body: "How many connections tonight, who just connected and where you stand. Tap the row below to see the full leaderboard." },
+    { target: "live", title: "This is what's happening at the event", body: "The live board: how many connections tonight and who is connecting. Tap it for the full view; below, where you stand." },
     { target: "connect", title: "Connect with people here", body: "It's the main button. Show your QR to be scanned, or scan the other person's. Every new connection is worth +50 pts; a reconnection, +20." },
     { target: "invite", title: "Invite your friends", body: "From your event, share your link. Every friend who joins and makes a first connection gives you +100 pts, and with three you earn the golden cap for your monito." },
     { target: "dock", title: "Your bar, always there", body: "Home, Connect (your QR), your Connections with what you talked about, and your Profile with points, badges and the socials you share." },

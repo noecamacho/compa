@@ -171,7 +171,8 @@ export const home = {
   until: (name: string, hour: string) => `${name} · hasta las ${hour}`,
   connectionsTonight: "conexiones esta noche",
   pairsNow: "Conexiones que están pasando ahora",
-  pair: (a: string, b: string) => `${a} y ${b}`,
+  seeLive: "Ver en vivo",
+  seeLiveLabel: (event: string) => `Ver ${event} en vivo: conexiones, ranking y lo más reciente`,
   rank: (rank: number, points: string): readonly [string, string, string] => ["Vas en el ", `#${rank}`, ` con ${points} pts`],
   firstConnection: "Tu primera conexión te mete al ranking",
   connect: "Conectar",
@@ -606,7 +607,7 @@ export const tour = {
   done: "¡Entendido!",
   replay: "Guía rápida",
   home: [
-    { target: "live", title: "Esto es lo que pasa en el evento", body: "Cuántas conexiones van esta noche, quiénes se acaban de conectar y en qué lugar vas tú. Toca la fila de abajo para ver el ranking completo." },
+    { target: "live", title: "Esto es lo que pasa en el evento", body: "El tablero en vivo: cuántas conexiones van y quiénes se conectan. Tócalo para verlo completo; abajo, en qué lugar vas." },
     { target: "connect", title: "Aquí conectas con la gente", body: "Es el botón principal. Muestra tu QR para que te escaneen, o escanea el de la otra persona. Cada conexión nueva vale +50 pts; un reencuentro, +20." },
     { target: "invite", title: "Invita a tus amigos", body: "Desde tu evento, comparte tu enlace. Cada amigo que entre y haga su primera conexión te da +100 pts, y con tres ganas la gorra dorada para tu monito." },
     { target: "dock", title: "Tu barra de siempre", body: "Inicio, Conectar (tu QR), tus Conexiones con lo que platicaron, y tu Perfil con puntos, insignias y las redes que compartes." },
