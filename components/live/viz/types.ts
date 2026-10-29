@@ -9,6 +9,8 @@ export type VizProps = {
   selectedId: string | null;
   // A person's id, or null for empty space (A5: empty space opens the leaderboard).
   onSelect: (id: string | null) => void;
+  // A view that cannot run here (no WebGL) calls this once; the stage drops it from the rotation.
+  onUnavailable?: () => void;
 };
 
 export const PALETTE = {

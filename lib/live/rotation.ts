@@ -3,7 +3,7 @@
 // `?viz=<id>` pins one for a projector; `?rotate=<seconds>` changes the period, `?rotate=0` stops rotating.
 import { z } from "zod";
 
-export const VIZ_IDS = ["loom", "orbit", "race", "wave"] as const;
+export const VIZ_IDS = ["loom", "orbit", "race", "wave", "cosmos", "garden", "marquee", "marbles", "skyline"] as const;
 export type VizId = (typeof VIZ_IDS)[number];
 
 export const DEFAULT_ROTATE_SECONDS = 30;

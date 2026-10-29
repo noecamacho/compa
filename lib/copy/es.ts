@@ -566,7 +566,16 @@ export const live = {
   endedBody: (people: string, links: string) => `${people} personas tejieron ${links} conexiones. Gracias por venir.`,
   podium: "Podio final",
   tie: "empate",
-  vizNames: { loom: "Telar", orbit: "Órbita", race: "Carrera", wave: "Pulso" },
+  vizNames: { loom: "Telar", orbit: "Órbita", race: "Carrera", wave: "Pulso", cosmos: "Cosmos", garden: "Jardín", marquee: "Letras", marbles: "Canicas", skyline: "Ciudad" },
+  pickViz: "Elegir vista",
+  pinned: "fija",
+  release: "Soltar",
+  events: {
+    joined: (name: string) => `${name} entró`,
+    points: (points: string, name: string) => `+${points} ${name}`,
+    rank: (name: string, place: string) => `${name} → #${place}`,
+    more: (count: string) => `+${count} más`,
+  },
 };
 
 // Unknown or rotated event code: says nothing about whether the event exists.

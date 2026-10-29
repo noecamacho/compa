@@ -28,7 +28,10 @@ The plan's podium-plus-topics layout was replaced by **Loom+**, chosen after pro
 
 | Piece | Behavior |
 | --- | --- |
-| Stage | Rotates four views every 30 s with a cross-fade, starting each load on a different one: loom, orbit, race, pulse wave; `?viz=` pins one, `?rotate=` sets the period; all keep moving with no activity, and hold still under reduced motion |
+| Stage | Rotates nine views every 30 s with a cross-fade, starting each load on a different one: loom, orbit, race, pulse wave, cosmos, garden, type, marbles, skyline; `?viz=` pins one, `?rotate=` sets the period; all keep moving with no activity, and hold still under reduced motion |
+| Switcher | The strip of view names at the bottom left is a group of buttons: tap one to hold it (rotation stops, pin shown), tap again to release; keyboard accessible; hidden when `?viz=` pins |
+| Events | Every view of the second wave diffs each snapshot against the last (`lib/live/events.ts`) and celebrates only real changes: check-in, connection, points, climb into the top five, each with a caption naming who and what; a quiet room shows only slow ambient motion. Topics and badges are not in the snapshot, so nothing reacts to them |
+| Cosmos / Garden / Type / Marbles / Skyline | 3D galaxy (Three.js), generative SVG meadow, kinetic typography, physics jar, isometric city; table of idle and event behaviours in [docs/research/live-dataviz.md](../docs/research/live-dataviz.md) "Second wave" |
 | Loom | Pegs on a ring (people), threads (accepted connections; mint new, bubblegum reconnection); new threads draw in, then settle. Instanced and merged, so 2,500 people and 4,000 links stay drawable |
 | Pulse | Connections per minute, last 30 min, with a mood line (steady, rush, quiet, empty, upcoming, final) |
 | Feed | The 4 newest pairs, "Ana ⇄ Luis", names only (p. 6) |

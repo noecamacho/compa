@@ -375,6 +375,83 @@ test.describe("live visualizations @live @mock", () => {
   }
 });
 
+const NEW_VIEWS = ["cosmos", "garden", "marquee", "marbles", "skyline"] as const satisfies readonly VizId[];
+
+test.describe("live visualization switcher @live @mock", () => {
+  test.use({ viewport: VIEWPORTS.screen, ...inLocale("en-US") });
+
+  test("tap a view to hold it past the rotation, tap again to release", async ({ page }) => {
+    await openBoard(page, "trickle", 1, { query: "?rotate=5" });
+    const stage = page.getByTestId("live-stage");
+    const switcher = page.getByTestId("live-viz-indicator");
+    await switcher.getByRole("button", { name: "Garden" }).click();
+    await expect(stage).toHaveAttribute("data-current", "garden");
+    await expect(switcher).toHaveAttribute("data-held", "garden");
+    await expect(switcher.getByRole("button", { name: /Garden/ })).toHaveAttribute("aria-pressed", "true");
+    await page.waitForTimeout(6500);
+    await expect(stage).toHaveAttribute("data-current", "garden");
+    await switcher.getByRole("button", { name: /Garden/ }).click();
+    await expect(switcher).not.toHaveAttribute("data-held", /.+/);
+    await expect.poll(() => stage.getAttribute("data-current"), { timeout: 12_000 }).not.toBe("garden");
+  });
+
+  test("the switcher works from the keyboard", async ({ page }) => {
+    await openBoard(page, "trickle", 1, { query: "?rotate=0" });
+    const button = page.getByTestId("live-viz-indicator").getByRole("button", { name: "Skyline" });
+    await button.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByTestId("live-stage")).toHaveAttribute("data-current", "skyline");
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+  });
+
+  test("a URL-pinned view shows no switcher", async ({ page }) => {
+    await openBoard(page, "trickle", 1, { query: "?viz=marbles" });
+    await expect(page.getByTestId("live-viz-indicator")).toHaveCount(0);
+  });
+});
+
+test.describe("live visualization events @live @mock", () => {
+  test.use({ viewport: VIEWPORTS.screen, ...inLocale("en-US") });
+
+  for (const id of NEW_VIEWS) {
+    test(`${id}: calm while nothing happens, says who connected when it does`, async ({ page }) => {
+      test.slow();
+      // Quiet: the frames only move time forward, so after the first one lands nothing is announced any more.
+      await openBoard(page, "quiet", 2, { query: `?viz=${id}` });
+      await expect(viewIn(page, id)).toBeVisible();
+      await expect(page.getByTestId("live-event-caption")).toHaveCount(0, { timeout: 15_000 });
+      expect(await stageMoves(page)).toBe(true);
+      await shot(page, `viz-${id}-idle-1920`);
+      await page.unrouteAll({ behavior: "ignoreErrors" });
+      await openBoard(page, "rush", 2, { query: `?viz=${id}` });
+      await expect(page.getByTestId("live-event-caption")).toBeVisible({ timeout: 15_000 });
+      await expect(page.getByTestId("live-event-caption")).toHaveAttribute("data-kind", "connection");
+      await expect(page.getByTestId("live-event-caption")).toContainText("⇄");
+      await shot(page, `viz-${id}-reacting-1920`);
+    });
+  }
+
+  test("a quiet room announces nothing, and a rush is cut to the newest few with a count", async ({ page }) => {
+    await openBoard(page, "quiet", 3, { query: "?viz=garden" });
+    await expect(page.getByTestId("live-event-caption")).toHaveCount(0, { timeout: 15_000 });
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+    await openBoard(page, "thousands", 2, { query: "?viz=marquee" });
+    await expect(page.getByTestId("live-event-caption")).toContainText(/\+\d+ more/, { timeout: 15_000 });
+  });
+
+  test("a bilingual caption: Spanish says who joined", async ({ browser }) => {
+    const context = await browser.newContext({ viewport: VIEWPORTS.screen, ...inLocale("es-MX") });
+    const page = await context.newPage();
+    const frames = scenarioFrames("trickle");
+    const first = frames[0]!;
+    const newcomer = { id: "00000000-0000-4000-8000-00000000abcd", name: "Zoe Nueva", photoUrl: null, points: 0, connections: 0 };
+    const second = { ...first, people: [...first.people, newcomer], counters: { ...first.counters, checkedIn: first.counters.checkedIn + 1 }, generatedAt: new Date(Date.parse(first.generatedAt) + FRAME_MS).toISOString() };
+    await openBoard(page, "trickle", 2, { query: "?viz=skyline", frames: [first, second] });
+    await expect(page.getByTestId("live-event-caption")).toContainText("Zoe Nueva entró");
+    await context.close();
+  });
+});
+
 test.describe("live visualizations, reduced motion @live @mock", () => {
   test.use({ viewport: VIEWPORTS.laptop, ...inLocale("en-US"), reducedMotion: "reduce" });
 
