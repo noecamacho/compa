@@ -9,6 +9,8 @@ Date: 2026-10-29 · Ticket: `COMPA-<TBD>` · Baseline: `main` @ `f6f65f3` · Aud
 | [attendee/audit.md](ux-audit-parts/attendee/audit.md) | 18 attendee routes, 334 screenshots | 84 (4 P0, 48 P1, 32 P2) | [UX-A1 – UX-A22](ux-audit-parts/attendee/tickets.md) |
 | [public-admin/audit.md](ux-audit-parts/public-admin/audit.md) | Landing, door, `/live`, admin; 204 screenshots | 55 (1 P0, 27 P1, 27 P2) | [UX-P1 – UX-P18](ux-audit-parts/public-admin/tickets.md) |
 
+> **Staleness.** The audit ran against `main` @ `f6f65f3`. PRs #51 (responsive attendee screens) and #52 (3D landing) merged afterwards. Re-check UX-A1, UX-A2, UX-A9, UX-A18 and the landing findings (UX-P5, P-015) against current `main` before picking them up.
+
 ## Top findings
 
 1. **P0 – Tablet and desktop waste the width.** Every attendee screen is a 390 px column: 53 % blank at 834, 73 % at 1440, 80 % at 1920 (UX-A1, UX-A9).
