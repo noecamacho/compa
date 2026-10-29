@@ -30,7 +30,8 @@ function profileFrom(authUser: User): Profile {
   const joined = [claims.given_name, claims.family_name].filter(Boolean).join(" ");
   return {
     linkedinSub: identity?.id ?? claims.sub ?? claims.provider_id ?? authUser.id,
-    name: claims.name ?? claims.full_name ?? (joined || "COMPA"),
+    // Email sign-ins carry no name claim; the local part is a placeholder the person edits in onboarding.
+    name: claims.name ?? claims.full_name ?? (joined || authUser.email?.split("@")[0] || "COMPA"),
     photoUrl: claims.picture ?? claims.avatar_url ?? null,
     email: authUser.email ?? claims.email ?? null,
     raw: claims,

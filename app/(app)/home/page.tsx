@@ -55,7 +55,7 @@ export default async function HomePage({ searchParams }: Props) {
   return (
     <Screen dock admin={isSuperAdmin(me)}>
       <div className="flex h-[46px] items-center justify-between">
-        <Link href="/me" className="flex items-center gap-3">
+        <Link href="/me" className="flex items-center gap-3 tappable">
           <Avatar person={{ name: me.name, look: me.avatar }} size={46} shadow={3} />
           <span className="font-display text-[24px] leading-none font-bold">{home.hello(firstName(me.name))}</span>
         </Link>

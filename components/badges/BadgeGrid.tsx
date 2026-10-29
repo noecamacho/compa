@@ -34,19 +34,24 @@ export function BadgeGrid({ badges }: Props) {
           { value: "pending", label: copy.filters.pending },
         ]}
       />
-      <div className="mx-[-4px] mt-[-4px] grid flex-1 grid-cols-3 gap-3 px-1 pt-1 pb-[30px]">
-        {shown.map((status) => {
+      {/* Keyed by filter so the tiles rise again, staggered, when the filter changes. */}
+      <div key={filter} className="mx-[-4px] mt-[-4px] grid flex-1 grid-cols-3 gap-3 px-1 pt-1 pb-[30px]">
+        {shown.map((status, index) => {
           const earned = Boolean(status.earnedAt);
           const showBar = !earned && status.progress && !isSecret(status.id);
           return (
-            <div key={status.id} className="flex min-w-0 flex-col items-center gap-[6px] rounded-[18px] bg-white px-2 py-3 text-center border-ink shadow-hard-3">
+            <div
+              key={status.id}
+              className="animate-rise flex min-w-0 flex-col items-center gap-[6px] rounded-[18px] bg-white px-2 py-3 text-center border-ink shadow-hard-3"
+              style={{ animationDelay: `${Math.min(index, 11) * 0.035}s` }}
+            >
               <Badge id={status.id} size={64} state={earned ? "earned" : "locked"} tilted />
               <span className="text-[12px] leading-[1.2] font-extrabold">{BADGES[status.id].name}</span>
               <Muted className="text-[11px] leading-[1.2] font-extrabold">{subtitle(status)}</Muted>
               {showBar && status.progress && (
                 <span className="block h-[10px] w-full overflow-hidden rounded-[5px] bg-white" style={{ border: "2px solid #1E1B2E" }}>
                   <span
-                    className="block h-full bg-mint"
+                    className="animate-fill block h-full bg-mint"
                     style={{ width: `${Math.min(100, (status.progress.current / status.progress.total) * 100)}%`, borderRight: status.progress.current ? "2px solid #1E1B2E" : "none" }}
                   />
                 </span>

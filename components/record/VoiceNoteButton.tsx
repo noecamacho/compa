@@ -49,9 +49,10 @@ export function VoiceNoteButton({ state, onChange }: Props) {
   if (state.status === "recording" || state.status === "transcribing") {
     return (
       <button
+        key="recording"
         type="button"
         onClick={stop}
-        className="flex w-full cursor-pointer items-center gap-3 rounded-[18px] bg-coral-soft px-[14px] py-[10px] text-left font-body text-ink border-ink shadow-hard-3"
+        className="animate-fade-in flex w-full cursor-pointer items-center gap-3 rounded-[18px] bg-coral-soft px-[14px] py-[10px] text-left font-body text-ink border-ink shadow-hard-3 pressable"
       >
         <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-coral border-ink">
           <span className="block h-4 w-4 rounded-[4px] bg-ink" />
@@ -71,7 +72,7 @@ export function VoiceNoteButton({ state, onChange }: Props) {
 
   if (state.status === "ready") {
     return (
-      <div className="flex items-center gap-3 rounded-[18px] bg-mint-soft px-[14px] py-[10px] border-ink shadow-hard-3">
+      <div key="ready" className="animate-fade-in flex items-center gap-3 rounded-[18px] bg-mint-soft px-[14px] py-[10px] border-ink shadow-hard-3">
         <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-mint border-ink">
           <Icon name="check" size={18} strokeWidth={3} />
         </span>
@@ -82,7 +83,7 @@ export function VoiceNoteButton({ state, onChange }: Props) {
         <button
           type="button"
           onClick={start}
-          className="h-[30px] cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[12px] font-bold text-ink border-ink"
+          className="h-[30px] cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[12px] font-bold text-ink border-ink tappable"
         >
           {copy.rerecord}
         </button>
@@ -91,11 +92,11 @@ export function VoiceNoteButton({ state, onChange }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div key="idle" className="animate-fade-in flex flex-col gap-1">
       <button
         type="button"
         onClick={start}
-        className="flex w-full cursor-pointer items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] text-left font-body text-ink border-ink shadow-hard-3"
+        className="flex w-full cursor-pointer items-center gap-3 rounded-[18px] bg-white px-[14px] py-[10px] text-left font-body text-ink border-ink shadow-hard-3 pressable"
       >
         <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-coral border-ink">
           <Icon name="mic" size={20} />

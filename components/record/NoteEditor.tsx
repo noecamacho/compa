@@ -112,7 +112,7 @@ export function NoteEditor({ detail }: Props) {
   if (phase.kind === "recording" || phase.kind === "transcribing") {
     const recordingNow = phase.kind === "recording";
     return (
-      <div className="flex flex-1 flex-col gap-4">
+      <div key="recording" className="animate-fade-in flex flex-1 flex-col gap-4">
         <Card tone="coral-soft" className="flex h-[486px] flex-col items-center gap-[14px] px-5 py-6">
           <span className="inline-flex h-[30px] items-center gap-2 rounded-[10px] bg-coral px-3 font-display text-[13px] font-bold border-ink">
             <span className="animate-blink h-[9px] w-[9px] rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
@@ -132,7 +132,7 @@ export function NoteEditor({ detail }: Props) {
             aria-label={copy.stop}
             disabled={!recordingNow}
             onClick={() => recording.current?.stop()}
-            className="flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full bg-coral p-0 shadow-hard-4 disabled:opacity-60"
+            className="flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full bg-coral p-0 shadow-hard-4 pressable disabled:cursor-default disabled:opacity-60"
             style={{ border: "3px solid #1E1B2E" }}
           >
             <span className="block h-[30px] w-[30px] rounded-[7px] bg-ink" />
@@ -145,7 +145,7 @@ export function NoteEditor({ detail }: Props) {
 
   if (phase.kind === "typing") {
     return (
-      <div className="flex flex-1 flex-col gap-4">
+      <div key="typing" className="animate-fade-in flex flex-1 flex-col gap-4">
         <Card className="flex flex-col gap-3 p-4">
           <SectionLabel>{copy.question}</SectionLabel>
           {phase.error && <Muted className="text-[12px] font-extrabold">{phase.error}</Muted>}
@@ -154,14 +154,14 @@ export function NoteEditor({ detail }: Props) {
             onChange={(event) => setPhase({ ...phase, text: event.target.value })}
             placeholder={copy.notePlaceholder}
             rows={5}
-            className="box-border w-full rounded-[12px] bg-white p-3 font-body text-[14px] font-bold text-ink outline-none border-ink focus:shadow-[0_0_0_4px_#6BE4A3]"
+            className="box-border w-full rounded-[12px] bg-white p-3 font-body text-[14px] font-bold text-ink outline-none border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
           />
           <Button variant="primary" height={46} disabled={!phase.text.trim()} onClick={() => draftFrom(phase.text, null)}>
             {copy.draftButton}
           </Button>
         </Card>
         <div className="mt-auto flex flex-col items-center gap-[14px]">
-          <button type="button" aria-label={copy.rerecord} onClick={record} className="flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full bg-coral p-0 shadow-hard-4" style={{ border: "3px solid #1E1B2E" }}>
+          <button type="button" aria-label={copy.rerecord} onClick={record} className="flex h-[88px] w-[88px] cursor-pointer items-center justify-center rounded-full bg-coral p-0 shadow-hard-4 pressable" style={{ border: "3px solid #1E1B2E" }}>
             <Icon name="mic" size={34} />
           </button>
           <Muted className="text-[13px] font-extrabold">{copy.hint}</Muted>
@@ -172,7 +172,7 @@ export function NoteEditor({ detail }: Props) {
 
   const { summary } = phase;
   return (
-    <div className="flex flex-1 flex-col gap-[14px]">
+    <div key="ready" className="animate-fade-in flex flex-1 flex-col gap-[14px]">
       <Card className="flex flex-col gap-3 p-4">
         <span className="flex items-center justify-between">
           <SectionLabel>{copy.understood}</SectionLabel>
@@ -211,7 +211,7 @@ export function NoteEditor({ detail }: Props) {
             <SectionLabel>{copy.pendingLabel}</SectionLabel>
             <span className="text-[14px] font-extrabold">{summary.pendingAction}</span>
           </span>
-          <button type="button" className="h-8 cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2">
+          <button type="button" className="h-8 cursor-pointer rounded-[10px] bg-white px-[10px] font-display text-[13px] font-bold whitespace-nowrap text-ink border-ink shadow-hard-2 pressable">
             {copy.remind}
           </button>
         </div>

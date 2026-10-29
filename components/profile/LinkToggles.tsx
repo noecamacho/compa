@@ -30,8 +30,13 @@ export function LinkToggles({ value, onChange, label, titles }: Props) {
             aria-label={networks[key]}
             title={titles?.[key]}
             onClick={() => onChange({ ...value, [key]: !on })}
-            className="box-border flex h-11 min-w-0 cursor-pointer items-center justify-center rounded-[12px] p-0 border-ink"
-            style={{ background: on ? STYLE[key].color : "#FFFFFF", opacity: on ? 1 : 0.55, boxShadow: on ? "2px 2px 0 #1E1B2E" : "none" }}
+            className="box-border flex h-11 min-w-0 cursor-pointer items-center justify-center rounded-[12px] p-0 border-ink active:scale-95"
+            style={{
+              background: on ? STYLE[key].color : "#FFFFFF",
+              opacity: on ? 1 : 0.55,
+              boxShadow: on ? "2px 2px 0 #1E1B2E" : "0 0 0 #1E1B2E",
+              transition: "background-color .2s ease, opacity .2s ease, box-shadow .2s ease, transform .16s cubic-bezier(.2,.8,.3,1)",
+            }}
           >
             <Icon name={STYLE[key].icon} />
           </button>

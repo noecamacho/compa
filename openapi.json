@@ -159,6 +159,188 @@
         }
       }
     },
+    "/api/auth/email": {
+      "post": {
+        "operationId": "authEmail",
+        "summary": "Send an email sign-in link",
+        "description": "Emails a one-time link (Supabase magic link) that creates the account or signs in, then lands on `/auth/callback` like LinkedIn. `next` must be a same-site path.",
+        "tags": [
+          "auth"
+        ],
+        "security": [],
+        "x-compa-auth": "public",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/mockMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/errorMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/statusMockHeader"
+          },
+          {
+            "$ref": "#/components/parameters/exampleMockHeader"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "example": {
+                "email": "luis@example.com",
+                "next": "/onboarding/profile"
+              },
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "next": {
+                    "description": "Relative path to return to, e.g. `/u/luis` or `/e/k7m2p9xq4t/join`.",
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "maxLength": 254,
+                    "format": "email",
+                    "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+                    "description": "Where the one-time sign-in link goes."
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Link sent."
+          },
+          "400": {
+            "description": "invalid_input",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "invalid_input"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "invalid_input": {
+                    "summary": "Some fields are invalid.",
+                    "value": {
+                      "error": {
+                        "code": "invalid_input",
+                        "message": "Some fields are invalid.",
+                        "fields": {
+                          "name": [
+                            "Too small: expected string to have >=1 characters"
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "internal_error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "code": {
+                          "type": "string",
+                          "enum": [
+                            "internal_error"
+                          ]
+                        },
+                        "message": {
+                          "type": "string"
+                        },
+                        "fields": {
+                          "type": "object",
+                          "propertyNames": {
+                            "type": "string"
+                          },
+                          "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      },
+                      "required": [
+                        "code",
+                        "message"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
+                },
+                "examples": {
+                  "internal_error": {
+                    "summary": "Something went wrong.",
+                    "value": {
+                      "error": {
+                        "code": "internal_error",
+                        "message": "Something went wrong."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/auth/signout": {
       "post": {
         "operationId": "signOut",
@@ -443,6 +625,88 @@
                         }
                       },
                       "badges": []
+                    }
+                  },
+                  "superAdmin": {
+                    "summary": "A super admin: /admin opens (A11)",
+                    "value": {
+                      "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
+                      "handle": "diego-ramirez",
+                      "name": "Diego Ramírez",
+                      "photoUrl": null,
+                      "avatar": {
+                        "skin": "#F5C9A3",
+                        "hair": "short",
+                        "hairColor": "#5A3825",
+                        "outfit": "event",
+                        "shirt": "#6CC4FF",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none",
+                        "accent": "#FFD93D"
+                      },
+                      "headline": "Cofounder",
+                      "company": "Kuali",
+                      "city": "Guadalajara, Jalisco",
+                      "interests": [
+                        "Startups",
+                        "Product",
+                        "AI Products"
+                      ],
+                      "links": {
+                        "linkedin": "https://www.linkedin.com/in/diegoramirez",
+                        "instagram": "https://www.instagram.com/diego.rmz"
+                      },
+                      "email": "diego@kuali.mx",
+                      "visibility": {
+                        "headline": "public",
+                        "company": "public",
+                        "interests": "public",
+                        "links": {
+                          "linkedin": "connections",
+                          "github": "connections",
+                          "x": "hidden",
+                          "instagram": "connections",
+                          "whatsapp": "hidden",
+                          "web": "connections"
+                        }
+                      },
+                      "nameEdited": false,
+                      "photoEdited": false,
+                      "isAdmin": true,
+                      "role": "super_admin",
+                      "isTest": false,
+                      "currentEvent": {
+                        "code": "k7m2p9xq4t",
+                        "name": "Founders Fest GDL"
+                      },
+                      "stats": {
+                        "newConnections": 42,
+                        "reconnections": 16,
+                        "events": 7
+                      },
+                      "scores": {
+                        "event": {
+                          "rank": 6,
+                          "points": 1265
+                        },
+                        "lifetime": {
+                          "rank": 14,
+                          "points": 5110
+                        }
+                      },
+                      "badges": [
+                        "apreton",
+                        "tresdetres",
+                        "ff2026",
+                        "madrugador",
+                        "og"
+                      ]
                     }
                   }
                 }

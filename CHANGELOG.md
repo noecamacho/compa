@@ -4,20 +4,27 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ## [Unreleased]
 
+### Added
+
+- Sign out on the profile screen (`/me`), with a confirm step that warns you need your event's QR to get back in.
+- Email sign-in on the event door: people without LinkedIn enter their email and get a one-time link (Supabase magic link) that creates the account or signs them in. New route `POST /api/auth/email`. Requires the Supabase Email provider enabled and `/auth/callback` in the redirect allow list.
+
 ### Security
 
 - Events are reachable only through an unguessable access code in the event QR (`compa.lol/e/<code>`). Public event routes moved from `/api/events/{slug}/…` to `/api/e/{code}/…` and answer any wrong code with the same `404 event_not_found`; the old slug routes are removed. Admins rotate a code with `POST /api/admin/events/{slug}/rotate-code`. Migration `0003_event_access_code` adds and backfills `events.access_code` (must be applied to production).
 
 ### Fixed
 
+- Connection confirm screen now shows the event-screen notice before sending `screenConsent: true` (M13).
 - The AI summary prompt is event-neutral: it no longer tells the model it is at a JavaScript conference.
 - Home, Ranking and Badges render a section empty instead of the error page when a secondary call fails; profiles stored before the `whatsapp` link existed parse again.
-
+- Motion pass: the dock now lives in the `(app)` layout, so its pill actually travels between tabs (it used to remount and jump) and moves on tap before the route renders; every screen slides in through `app/(app)/template.tsx`; the segmented control's ink pill slides; the tour's spotlight and card glide between steps; buttons, cards, chips and icon buttons sink into their hard shadow on press (`pressable` / `tappable` utilities); list filters, podium, note phases, progress bars, the bell badge, the monito builder and the scan line animate; `prefers-reduced-motion` no longer hides the live pairs.
 - Accept Chrome and Android voice notes: MediaRecorder webm files carry no duration, so the server now rejects only audio whose known length exceeds two minutes or that contains no audio track.
 - Require explicit screen consent before writing an event check-in; accept multipart transcription uploads with server-side size and two-minute duration limits.
 
 ### Changed
 
+- The landing page offers "Entrar con LinkedIn" (sign-up and sign-in) so people can reach their events without rescanning; joining an event still needs its QR.
 - Database migrations apply automatically on every production deploy: the workflow deploys with a remote Vercel build whose build command runs `db:migrate:deploy` before `next build`.
 - `GET /api/me` returns `currentEvent: { code, name }`; the home and ranking screens reach the live data through it and show an "out of an event" state when it is null. Onboarding copy no longer promises title, company or city from LinkedIn (only name, photo and email come from it).
 
@@ -28,6 +35,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
+- Official COMPA logo (two interlocking speech bubbles): originals in `design/brand/`, web assets in `public/brand/`, favicon, app and Apple icons, and the Open Graph image; the `Logo` component uses it (inline, stacked or mark only).
 - `compa.lol` landing page in the V2 style: one promise, idle monitos, "you get in only by scanning your event's QR", and a "Back to my event" button for checked-in people. No public sign-up.
 - Event door `/e/<code>` (name, live counters, Enter with LinkedIn), check-in screen with the big-screen notice `/e/<code>/join`, and the projected dashboard `/e/<code>/live` (Three.js loom of accepted connections colored new vs reconnection, counters, join QR, leaderboard, person cards; polls every 3 s; 390 to 1920 px).
 - Spanish or English by the visitor's first preferred language (`lib/i18n.ts`, `lib/copy/en.ts`) for the landing and event-entry screens.

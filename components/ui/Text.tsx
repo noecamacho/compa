@@ -50,7 +50,10 @@ export function ProgressBar({ value, color = "#6BE4A3", height = 14, label, max 
       className="block w-full overflow-hidden bg-white"
       style={{ height, borderRadius: height / 2, border: `${border}px solid #1E1B2E` }}
     >
-      <span className="block h-full" style={{ width: `${pct}%`, background: color, borderRight: pct > 0 ? `${border}px solid #1E1B2E` : "none" }} />
+      <span
+        className="animate-fill block h-full"
+        style={{ width: `${pct}%`, background: color, borderRight: pct > 0 ? `${border}px solid #1E1B2E` : "none", transition: "width .6s cubic-bezier(.2,.8,.3,1)" }}
+      />
     </span>
   );
 }

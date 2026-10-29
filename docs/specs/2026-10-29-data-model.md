@@ -11,7 +11,7 @@ Every decision below was made by the captain in this session.
 | # | Decision | Replaces |
 | --- | --- | --- |
 | M1 | COMPA spans **many events**. A person is one user across all of them. | Single-event model (p. 9) |
-| M2 | **LinkedIn is the only sign-in** (Supabase `linkedin_oidc`). No handle + code, no email fallback. | "No login or OAuth" (AGENTS.md §4, ADR-007); handle + code (p. 4–5) |
+| M2 | **Sign-in is LinkedIn** (Supabase `linkedin_oidc`) **or an email magic link** (Supabase OTP, added 2026-10-29 at the team's request for people without LinkedIn). No handle + code, no passwords. Email users get `linkedin_sub` = their auth user id and the email's local part as name until they edit it. | "No login or OAuth" (AGENTS.md §4, ADR-007); handle + code (p. 4–5) |
 | M3 | Points come **only from connections**: `new` = **20**, `reconnection` = **10**, to **both** people. | +10/+15 bridge/+5 first-of-day/+25 summary and the 12/h cap (p. 7) |
 | M4 | A connection is **reconnection** if the pair has an accepted connection at an earlier event (automatic), **or** if either person declares "we already knew each other". History overrides; nobody can force `new` alone. | — |
 | M5 | **One connection per pair per event**, regardless of who scanned whom. Meeting again at a later event creates a new connection (a reconnection). | One connection per pair forever (p. 9–10) |

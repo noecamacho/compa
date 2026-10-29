@@ -18,7 +18,7 @@ type Look = {
 };
 
 const classesFor = (className?: string) =>
-  `box-border flex w-full cursor-pointer items-center justify-center gap-2 rounded-button px-5 font-display text-[16px] font-bold whitespace-nowrap border-ink shadow-hard-4 disabled:opacity-60 ${className ?? ""}`;
+  `box-border flex w-full cursor-pointer items-center justify-center gap-2 rounded-button px-5 font-display text-[16px] font-bold whitespace-nowrap border-ink shadow-hard-4 pressable disabled:cursor-default disabled:opacity-60 ${className ?? ""}`;
 
 const styleFor = ({ variant = "secondary", height = 54 }: Look) => ({ height, ...VARIANT_STYLE[variant] });
 

@@ -1,10 +1,10 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { Dock } from "@/components/nav/Dock";
 
 type Props = {
   children: ReactNode;
   // Screens with the dock leave room for it at the bottom (README: dock on 03, 03b, 04, 07, 09).
+  // The dock itself is rendered once by the (app) layout (components/nav/Dock.tsx, DockHost).
   dock?: boolean;
   gap?: number;
   className?: string;
@@ -27,11 +27,6 @@ export function Screen({ children, dock = false, gap = 14, className, admin = fa
         >
           Admin
         </Link>
-      )}
-      {dock && (
-        <div data-tour="dock" className="fixed bottom-5 left-1/2 z-10 -translate-x-1/2">
-          <Dock />
-        </div>
       )}
     </main>
   );

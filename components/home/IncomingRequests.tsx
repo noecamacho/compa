@@ -42,7 +42,7 @@ export function AlertsBell({ initial }: { initial: Incoming }) {
     <>
       <Icon name="bell" />
       {count > 0 && (
-        <span aria-hidden="true" className="absolute top-[-9px] right-[-9px] flex h-[22px] w-[22px] items-center justify-center rounded-full bg-coral font-display text-[11px] font-bold border-ink">
+        <span aria-hidden="true" className="animate-pop-in absolute top-[-9px] right-[-9px] flex h-[22px] w-[22px] items-center justify-center rounded-full bg-coral font-display text-[11px] font-bold border-ink">
           {count}
         </span>
       )}
@@ -50,7 +50,7 @@ export function AlertsBell({ initial }: { initial: Incoming }) {
   );
   if (!first) return <IconButton label={home.alerts(0)} className="relative">{bell}</IconButton>;
   return (
-    <Link href={`/requests/${first.connectionId}`} aria-label={home.alerts(count)} className="relative box-border flex h-11 w-11 items-center justify-center rounded-[14px] bg-white border-ink shadow-hard-3">
+    <Link href={`/requests/${first.connectionId}`} aria-label={home.alerts(count)} className="relative box-border flex h-11 w-11 items-center justify-center rounded-[14px] bg-white border-ink shadow-hard-3 pressable">
       {bell}
     </Link>
   );
@@ -62,8 +62,15 @@ export function IncomingRequests({ initial }: { initial: Incoming }) {
   if (incoming.length === 0) return null;
   return (
     <div className="flex flex-col gap-[10px]">
-      {incoming.map((request) => (
-        <Card key={request.connectionId} href={`/requests/${request.connectionId}`} tone="gum-soft" size="sm" className="animate-rise flex items-center gap-3 px-[14px] py-[10px]">
+      {incoming.map((request, index) => (
+        <Card
+          key={request.connectionId}
+          href={`/requests/${request.connectionId}`}
+          tone="gum-soft"
+          size="sm"
+          className="animate-rise flex items-center gap-3 px-[14px] py-[10px]"
+          style={{ animationDelay: `${index * 0.06}s` }}
+        >
           <span className="animate-wiggle block">
             <Avatar person={{ name: request.from.name, look: request.from.avatar }} size={46} />
           </span>

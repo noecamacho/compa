@@ -112,6 +112,7 @@ export const register = {
   rerecord: "Regrabar",
   confirm: (points: number) => `Confirmar · +${points} pts`,
   sending: "Enviando…",
+  screenNotice: "Al confirmar, tu nombre y foto aparecerán en la pantalla del evento.",
   micUnavailable: "No pudimos usar el micrófono; puedes seguir sin nota.",
 };
 
@@ -206,6 +207,10 @@ export const me = {
   ranking: "Ranking",
   myMonito: "Mi monito",
   change: "Cambiar",
+  signOut: "Cerrar sesión",
+  signOutWarning: "Podrás volver a entrar con LinkedIn desde compa.lol.",
+  signOutCancel: "Cancelar",
+  signOutConfirm: "Sí, cerrar sesión",
   pointsRank: (points: string, rank: number | null) => (rank ? `${points} pts · #${rank}` : `${points} pts`),
   admin: "Admin",
   adminHint: "Eventos, personas y pruebas",
@@ -278,10 +283,13 @@ export const landing = {
   brand: "compa",
   title: ["Conecta en el evento.", "Recuérdalo después."],
   lead: "Escanea el QR de quien conozcas, quédate con sus redes y de qué hablaron, y gana puntos para tu monito.",
-  doorTitle: "Solo entras escaneando el QR de tu evento.",
+  doorTitle: "¿Tienes el QR de un evento? Escanéalo para unirte.",
   doorHint: "Está en la entrada y en la pantalla del evento. Apúntale con la cámara de tu teléfono.",
   backToEvent: "Volver a mi evento",
-  signInError: "No pudimos entrar con LinkedIn. Escanea el QR de tu evento otra vez.",
+  goToAccount: "Ir a mi cuenta",
+  signIn: "Entrar con LinkedIn",
+  signInNote: "¿Nuevo o ya tienes cuenta? Es el mismo botón. Solo tomamos tu nombre, foto y correo.",
+  signInError: "No pudimos iniciar tu sesión. Inténtalo de nuevo.",
   sceneLabel: "Dos monitos se conectan y ganan +50",
   sampleTopic: "Levantar capital",
 };
@@ -298,6 +306,13 @@ export const door = {
   notStarted: (hour: string) => `Las puertas abren a las ${hour}. Vuelve a escanear entonces.`,
   ended: "Este evento ya terminó. Gracias por venir.",
   watchLive: "Ver la pantalla en vivo",
+  orEmail: "o entra con tu correo",
+  emailLabel: "Correo",
+  emailPlaceholder: "tu@correo.com",
+  emailCta: "Mandarme un enlace",
+  emailSending: "Enviando…",
+  emailSent: (email: string) => `Listo. Abre el enlace que mandamos a ${email} en este teléfono.`,
+  emailFailed: "No pudimos mandar el correo. Revisa la dirección e inténtalo otra vez.",
 };
 
 // /e/<code>/join: check-in with the big-screen notice (A1, M13).

@@ -47,7 +47,7 @@ export default async function PersonPage({ params }: Props) {
             {card.city?.split(",")[0]}
           </Muted>
           {scores && (
-            <Link href="/ranking" className="self-start">
+            <Link href="/ranking" className="self-start tappable">
               <Pill tone="sun" height={34} className="rounded-chip px-3 text-[14px]">
                 <Icon name="bolt" size={14} />
                 {copy.pointsRank(formatPoints(scores.event.points), scores.event.rank)}
@@ -77,14 +77,14 @@ export default async function PersonPage({ params }: Props) {
 
       <Card className="flex flex-col overflow-hidden">
         {lastInteraction && (
-          <Link href={`/connections/${lastInteraction.connectionId}/note`} className="flex h-14 items-center gap-3 px-4 text-[15px] font-extrabold">
+          <Link href={`/connections/${lastInteraction.connectionId}/note`} className="flex h-14 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper">
             <span className="flex-1">{copy.lastTime}</span>
             <Muted className="text-[13px]">{`${copy.today} · ${lastInteraction.title}`}</Muted>
             <Icon name="chevronRight" size={18} strokeWidth={3} />
           </Link>
         )}
         {relationship && relationship.mutual.length > 0 && (
-          <Link href="/connections" className={`flex h-14 items-center gap-3 px-4 text-[15px] font-extrabold ${lastInteraction ? "dashed-ink" : ""}`}>
+          <Link href="/connections" className={`flex h-14 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper ${lastInteraction ? "dashed-ink" : ""}`}>
             <span className="flex-1">{copy.mutualConnections}</span>
             <span className="flex items-center">
               {relationship.mutual.slice(0, 3).map((person, index) => (
