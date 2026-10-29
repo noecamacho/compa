@@ -491,12 +491,12 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Actor | Attendee |
 | Entry | Scanning someone with no current event (A2) |
 | Pre | — |
-| Happy path | — |
-| Alternates | — |
-| Errors | 409 `not_at_event` → *raw msg* |
-| Edge cases | The target checked in to an event that ended a minute ago. The scanner is at an event but the target is not: the request goes nowhere. Copy should suggest asking them to scan the event QR |
-| Status | UI Partial · API Ready · DB Ready |
-| E2E coverage | `e2e/connect/register.spec.ts`: mock `not_at_event` → localized copy with a hint; real: a seeded user without a check-in |
+| Happy path | Since 2026-10-29 (owner decision): the register screen labels it "Conexión fuera de evento: sin puntos", Confirm sends a request with `event: null`; the same pending → accept flow follows, paying 0 points ([connection-flow](../../wiki/connection-flow.md#as-built-scanning-someone-outside-an-event-2026-10-29)) |
+| Alternates | Repeat or reverse scan → `200` with the same request; the target is at an event → their event wins, as before |
+| Errors | 409 `test_user_not_allowed` (a test user with a real user); `not_at_event` was removed |
+| Edge cases | The target checked in to an event that ended a minute ago: outside an event. The scanner is at an event but the target is not: outside an event, no points. Checking in after sending does not move the request into the event |
+| Status | UI Ready · API Ready · DB Ready |
+| E2E coverage | `e2e/connect/outside-event.spec.ts`: neither at an event (UI scan and accept, labels, no points, in the list, not on the live board), repeat/reverse scan and double accept, only the scanner at an event, accept after a check-in and a later +20 reconnection, erasure and self-scan |
 | Tickets | [T-111](backlog.md#t-111), [T-025](backlog.md#t-025) |
 
 <a id="f-23"></a>
@@ -509,7 +509,7 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Pre | — |
 | Happy path | — |
 | Alternates | — |
-| Errors | Accept or decline → 409 `event_ended`; `knew` → `not_pending`; new scan → `not_at_event`; check-in → `event_not_running` |
+| Errors | Accept or decline → 409 `event_ended`; `knew` → `not_pending`; new scan → outside an event (no points); check-in → `event_not_running` |
 | Edge cases | A summary draft or approve is still allowed after the end (`requireAcceptedMembership` does not check the window), which is acceptable. A pending request shows "expired" on read |
 | Status | UI Partial · API Ready · DB Ready |
 | E2E coverage | `e2e/requests/accept-decline.spec.ts`: `page.clock` past `ends_at` or a seeded ended event → accept shows `event_ended` copy; the requester's done page shows expired |
@@ -607,7 +607,7 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Pre | Both at the same running event |
 | Happy path | `POST /api/connections` → 201 `{ connectionId, status: pending }` → `request.received` broadcast to the addressee → `/connections/<id>/done` "Solicitud enviada a …" |
 | Alternates | 200 for an existing pair (F-24) |
-| Errors | `user_not_found`, `self_connection`, `not_at_event`, `consent_required`, `invalid_input` → *raw msg* |
+| Errors | `user_not_found`, `self_connection`, `consent_required`, `invalid_input` → *raw msg* |
 | Edge cases | **The done page calls `GET /api/connections/{id}` → 501 on `main` → error page** (gap analysis U17). A double tap is guarded by `sending`. No "knew" tick on the pending screen (T-043) |
 | Status | UI Mock-only · API Ready (POST), detail IP · DB Ready |
 | E2E coverage | `e2e/requests/pending.spec.ts`: Confirm → pending screen with the name; each mocked error code shows its localized copy and keeps the form |

@@ -12,6 +12,7 @@ import { StickyBar } from "@/components/ui/StickyBar";
 import { Muted } from "@/components/ui/Text";
 import type { PersonHistoryT } from "@/lib/api/schemas";
 import { useCopy } from "@/components/LocaleProvider";
+import { OutsideEventTag } from "./OutsideEventTag";
 import { slugify } from "@/lib/slug";
 
 type PersonType = "new" | "reconnection" | "friend";
@@ -34,7 +35,10 @@ const FILTERS: { key: Filter; color: string; text: string }[] = [
 const typeOf = (entry: PersonHistoryT): PersonType => entry.type ?? (entry.meetings[0]?.kind === "reconnection" ? "reconnection" : "new");
 
 // Me sends the current event's name and code, not its slug, so tonight's meetings are matched by name.
-const metAt = (entry: PersonHistoryT, eventName: string) => entry.meetings.some((meeting) => meeting.event.name === eventName && meeting.status === "accepted");
+const metAt = (entry: PersonHistoryT, eventName: string) => entry.meetings.some((meeting) => meeting.event?.name === eventName && meeting.status === "accepted");
+
+// Everyone met so far was met outside an event: the row says so, since those meetings paid no points.
+const onlyOutsideEvents = (entry: PersonHistoryT) => entry.meetings.every((meeting) => meeting.status !== "accepted" || meeting.event === null);
 
 // `requests` (the incoming requests) renders under the header and chip, above the list.
 type Props = { people: PersonHistoryT[]; eventName: string | null; requests?: ReactNode };
@@ -59,7 +63,9 @@ function EmptyConnections() {
 
 // 07 Conexiones: search by name, the current-event chip narrows to tonight, the type chips filter, each row opens the person.
 export function ConnectionList({ people, eventName, requests }: Props) {
-  const copy = useCopy().connections;
+  const all = useCopy();
+  const copy = all.connections;
+  const outsideLabel = all.common.outsideEventShort;
   const [filter, setFilter] = useState<Filter>("all");
   const [searching, setSearching] = useState(false);
   const [query, setQuery] = useState("");
@@ -143,6 +149,7 @@ export function ConnectionList({ people, eventName, requests }: Props) {
                 <span className="truncate text-[15px] font-extrabold">{entry.person.name}</span>
                 <Muted className="truncate text-[12px] font-bold">{(entry.topics ?? entry.person.interests ?? []).join(" · ")}</Muted>
               </span>
+              {onlyOutsideEvents(entry) && <OutsideEventTag label={outsideLabel} />}
               <span
                 title={copy.types[type]}
                 className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"

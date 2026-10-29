@@ -20,7 +20,7 @@ export const referralPointsFor = (inviterEvent: { id: string } | null | undefine
 export const unlocksGoldenCap = (goldenCapAt: Date | null, referrals: number): boolean => goldenCapAt === null && referrals >= GOLDEN_CAP_INVITES;
 
 export type KindFacts = {
-  // The pair has an accepted connection at another event that started earlier.
+  // The pair has an accepted connection outside an event, or at another event that started earlier.
   metAtEarlierEvent: boolean;
   requesterKnew: boolean | null;
   addresseeKnew: boolean | null;
@@ -32,6 +32,7 @@ export function decideKind({ metAtEarlierEvent, requesterKnew, addresseeKnew }: 
   return requesterKnew === true || addresseeKnew === true ? "reconnection" : "new";
 }
 
-export const pointsFor = (kind: ConnectionKindT): number => CONNECTION_POINTS[kind];
+// A connection outside an event (null) never scores; only its kind is kept.
+export const pointsFor = (kind: ConnectionKindT, event: { id: string } | null): number => (event ? CONNECTION_POINTS[kind] : 0);
 
 export const topicsPointsFor = (topics: readonly string[]): number => (topics.length > 0 ? TOPICS_POINTS : 0);

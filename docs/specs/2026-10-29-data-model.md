@@ -212,6 +212,22 @@ update users set is_admin = true where role = 'super_admin';
 update events set status = 'ended' where ends_at <= now();
 ```
 
+### 3.2 Amendment: connections outside an event (migration `0014_eventless_connections`, 2026-10-29)
+
+Owner decision: a person can scan someone who is at no event. `connections.event_id` becomes nullable; a null event means the connection is outside any event and pays no points.
+
+```sql
+alter table connections alter column event_id drop not null;
+alter table connections add foreign key (requester_id) references users (id) on delete cascade;
+alter table connections add foreign key (addressee_id) references users (id) on delete cascade;
+create unique index connections_pair_eventless_uq
+  on connections (least(requester_id, addressee_id), greatest(requester_id, addressee_id)) where event_id is null;
+-- connections_points_follow_kind_check: outside an event points = 0, at an event 50 new / 20 reconnection
+-- event_scores: skips connections (and their notes) whose event_id is null
+```
+
+The composite attendee foreign keys still bind every row with an event; Postgres skips them when `event_id` is null, so the user foreign keys keep erasure complete. Rules 4.1 to 4.4 below apply to rows with an event; the event-less rules are in [wiki/points-rules.md](../../wiki/points-rules.md#connections-outside-an-event).
+
 ## 4. Rules the data model enforces
 
 ### 4.1 Creating a request

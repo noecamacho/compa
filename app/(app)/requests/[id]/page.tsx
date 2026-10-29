@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { OutsideEventTag } from "@/components/connections/OutsideEventTag";
 import { RequestActions } from "@/components/connections/RequestActions";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Card } from "@/components/ui/Card";
@@ -109,8 +110,13 @@ export default async function RequestPage({ params }: Props) {
       )}
 
       <Muted className="animate-rise text-center text-[12px] font-bold" style={{ animationDelay: ".6s" }}>
-        {copy.bothWin}
+        {detail.event === null ? copy.bothWinOutsideEvent : copy.bothWin}
       </Muted>
+      {detail.event === null && (
+        <span className="flex justify-center">
+          <OutsideEventTag label={all.common.outsideEvent} />
+        </span>
+      )}
 
       {detail.status === "expired" && <Muted className="mt-auto text-center text-[13px] font-extrabold">{all.apiErrors.codes.event_ended}</Muted>}
       {detail.status === "pending" && <RequestActions connectionId={detail.connectionId} />}

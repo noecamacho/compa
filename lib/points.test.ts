@@ -22,12 +22,18 @@ describe("decideKind (M4)", () => {
 });
 
 test("points follow the V2 design table", () => {
-  expect(pointsFor("new")).toBe(50);
-  expect(pointsFor("reconnection")).toBe(20);
+  const event = { id: "e1" };
+  expect(pointsFor("new", event)).toBe(50);
+  expect(pointsFor("reconnection", event)).toBe(20);
   expect(CONNECTION_POINTS).toEqual({ new: 50, reconnection: 20 });
   expect(SUMMARY_POINTS).toBe(15);
   expect(TOPICS_POINTS).toBe(5);
   expect(INVITE_POINTS).toEqual({ inviter: 100, invitee: 50 });
+});
+
+test("a connection outside an event never scores, whatever its kind", () => {
+  expect(pointsFor("new", null)).toBe(0);
+  expect(pointsFor("reconnection", null)).toBe(0);
 });
 
 test("topics score once, whatever their number", () => {

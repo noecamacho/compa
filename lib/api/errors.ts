@@ -61,7 +61,6 @@ export const E = {
   referralNotNew: spec(409, "referral_not_new", "A referral code counts only for someone new to COMPA; you have already been at an event."),
   eventNotRunning: spec(409, "event_not_running", "The event is not running right now."),
   selfConnection: spec(409, "self_connection", "You cannot connect with yourself."),
-  notAtEvent: spec(409, "not_at_event", "That person is not at an event right now."),
   consentRequired: spec(409, "consent_required", "Accept that your name and photo appear on the event screen, then retry with screenConsent: true."),
   notPending: spec(409, "not_pending", "This request was already answered."),
   eventEnded: spec(409, "event_ended", "The event has ended; the request expired."),

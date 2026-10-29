@@ -64,6 +64,7 @@ type Props = { detail: ConnectionDetailT };
 export function NoteEditor({ detail }: Props) {
   const all = useCopy();
   const copy = all.note;
+  const outsideEvent = all.common.outsideEvent;
   const locale = useLocale();
   const router = useRouter();
   const recording = useRef<Recording | null>(null);
@@ -271,7 +272,8 @@ export function NoteEditor({ detail }: Props) {
 
       <div className="flex items-center gap-[10px] px-1">
         <Icon name="trophy" size={18} strokeWidth={2.4} />
-        <span className="text-[13px] font-extrabold">{copy.pointsNote.replace("15", String(SUMMARY_POINTS))}</span>
+        {/* A note on a connection outside an event pays nothing. */}
+        <span className="text-[13px] font-extrabold">{detail.event === null ? outsideEvent : copy.pointsNote.replace("15", String(SUMMARY_POINTS))}</span>
       </div>
 
       <div className="mt-auto flex flex-col gap-3 lg:mt-2">

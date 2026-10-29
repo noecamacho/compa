@@ -28,6 +28,10 @@ test("event window", () => {
   expect(hasEnded(event, new Date("2026-10-29T22:00:00Z"))).toBe(true);
 });
 
+test("a request outside an event never expires", () => {
+  expect(hasEnded(null, new Date("2099-01-01T00:00:00Z"))).toBe(false);
+});
+
 test("an invite can be claimed for a live event until it is over", () => {
   const window = { startsAt: new Date("2026-10-29T16:00:00Z"), endsAt: new Date("2026-10-29T22:00:00Z") };
   expect(isJoinable({ ...window, status: "live" }, new Date("2026-10-29T15:00:00Z"))).toBe(true);

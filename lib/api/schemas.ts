@@ -44,6 +44,8 @@ export const VisibilitySettings = z
   .meta({ id: "VisibilitySettings" });
 
 export const EventRef = z.object({ slug: eventSlug, name: z.string() }).meta({ id: "EventRef" });
+// A connection's event; null when it was made outside any event (no points, no event board).
+const EventlessRef = EventRef.nullable().meta({ description: "The event the connection belongs to; null when it was made outside any event and pays no points." });
 export { accessCode as AccessCodeSchema, eventSlug as EventSlugSchema, handle as HandleSchema, isoDate as IsoDateSchema };
 // What a checked-in attendee needs to reach their event's public routes (A10).
 export const CurrentEvent = z.object({ code: accessCode, name: z.string() }).meta({ id: "CurrentEvent" });
@@ -124,9 +126,13 @@ export const UserProfile = z
   .object({
     card: Card,
     connection: z
-      .object({ status: ConnectionStatusForMe, kind: ConnectionKind.optional(), eventSlug })
+      .object({ status: ConnectionStatusForMe, kind: ConnectionKind.optional(), eventSlug: eventSlug.nullable() })
       .optional()
-      .meta({ description: "Your relation with this person at their current event, if any." }),
+      .meta({ description: "Your relation with this person at their current event, or outside any event (`eventSlug: null`) when they are at none." }),
+    atEvent: z
+      .boolean()
+      .optional()
+      .meta({ description: "Whether the person is at a running event now. When false, a scan creates a connection outside any event, which pays no points." }),
     scores: Scores.optional(),
     stats: ProfileStats.optional(),
     badges: z.array(BadgeId).optional(),
@@ -220,7 +226,7 @@ export const CreateConnectionBody = z
   .meta({ id: "CreateConnectionBody" });
 
 export const ConnectionRequest = z
-  .object({ connectionId: uuid, status: ConnectionStatusForMe, event: EventRef, to: Card })
+  .object({ connectionId: uuid, status: ConnectionStatusForMe, event: EventlessRef, to: Card })
   .meta({ id: "ConnectionRequest" });
 
 export const KnewBody = z.object({ knew: z.boolean() }).meta({ id: "KnewBody" });
@@ -232,13 +238,13 @@ export const Accepted = z
   .meta({ id: "Accepted" });
 
 export const IncomingRequest = z
-  .object({ connectionId: uuid, from: Card, event: EventRef, createdAt: isoDate })
+  .object({ connectionId: uuid, from: Card, event: EventlessRef, createdAt: isoDate })
   .meta({ id: "IncomingRequest" });
 
 export const Meeting = z
   .object({
     connectionId: uuid,
-    event: EventRef,
+    event: EventlessRef,
     status: ConnectionStatusForMe,
     direction: z.enum(["sent", "received"]),
     kind: ConnectionKind.optional(),
@@ -284,7 +290,7 @@ export const ConnectionDetail = z
     status: ConnectionStatusForMe,
     kind: ConnectionKind.optional(),
     direction: z.enum(["sent", "received"]),
-    event: EventRef,
+    event: EventlessRef,
     other: Card,
     topics: z.array(z.string()),
     points: PointsBreakdown,
@@ -332,8 +338,8 @@ export const ConnectionList = z
   .meta({ id: "ConnectionList" });
 
 export const Notification = z.discriminatedUnion("kind", [
-  z.object({ id: z.string(), kind: z.literal("request"), createdAt: isoDate, unseen: z.boolean(), connectionId: uuid, person: Card, eventName: z.string() }),
-  z.object({ id: z.string(), kind: z.literal("accepted"), createdAt: isoDate, unseen: z.boolean(), connectionId: uuid, person: Card, eventName: z.string() }),
+  z.object({ id: z.string(), kind: z.literal("request"), createdAt: isoDate, unseen: z.boolean(), connectionId: uuid, person: Card, eventName: z.string().nullable() }),
+  z.object({ id: z.string(), kind: z.literal("accepted"), createdAt: isoDate, unseen: z.boolean(), connectionId: uuid, person: Card, eventName: z.string().nullable() }),
   z.object({ id: z.string(), kind: z.literal("invitee_connected"), createdAt: isoDate, unseen: z.boolean(), person: Card }),
   z.object({ id: z.string(), kind: z.literal("badge_earned"), createdAt: isoDate, unseen: z.boolean(), badgeId: BadgeId, badgeName: z.string() }),
 ]).meta({ id: "Notification" });

@@ -8,7 +8,7 @@ import { createClient, type RealtimeChannel } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { BrowserContext, Page } from "@playwright/test";
 import type { TestUserT } from "../../lib/api/admin-schemas";
-import { pointsFor } from "../../lib/points";
+import { CONNECTION_POINTS } from "../../lib/points";
 import type { TestSessionCookies } from "../../lib/testing/real-mode";
 import { expect, test } from "../fixtures";
 import { startMockPushService, type MockPushService } from "../support/mock-push-service";
@@ -19,7 +19,7 @@ const POLL_FALLBACK_MS = 4500;
 const PUSH_PORT = Number(process.env.E2E_PUSH_PORT ?? 3199);
 const TOURS = ["home", "connect", "me", "ranking", "register"];
 
-const NEW_POINTS = `+${pointsFor("new")} pts`;
+const NEW_POINTS = `+${CONNECTION_POINTS.new} pts`;
 const firstName = (user: TestUserT) => user.name.split(" ")[0] ?? user.name;
 
 const TLS_CERT = process.env.E2E_PUSH_TLS_CERT;

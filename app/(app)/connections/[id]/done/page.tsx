@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/icons";
+import { OutsideEventTag } from "@/components/connections/OutsideEventTag";
 import { PendingWatcher } from "@/components/connections/PendingWatcher";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { ButtonLink } from "@/components/ui/Button";
@@ -55,10 +56,15 @@ export default async function ConfirmationPage({ params }: Props) {
             <Avatar person={avatarOf(other)} size={84} shadow={3} />
           </span>
         </div>
-        <span className="animate-pop inline-flex h-[62px] items-center gap-[10px] rounded-[18px] bg-sun px-[22px] font-display text-[38px] font-bold whitespace-nowrap shadow-hard-4" style={{ border: "3px solid #1E1B2E" }}>
-          <Icon name="bolt" size={26} />
-          {copy.points(detail.points.total)}
-        </span>
+        {/* Outside an event there is nothing to count, so the label replaces the points badge. */}
+        {detail.event === null ? (
+          <OutsideEventTag label={common.outsideEvent} />
+        ) : (
+          <span className="animate-pop inline-flex h-[62px] items-center gap-[10px] rounded-[18px] bg-sun px-[22px] font-display text-[38px] font-bold whitespace-nowrap shadow-hard-4" style={{ border: "3px solid #1E1B2E" }}>
+            <Icon name="bolt" size={26} />
+            {copy.points(detail.points.total)}
+          </span>
+        )}
         <div className="animate-rise flex flex-col items-center gap-[2px]" style={{ animationDelay: ".25s" }}>
           <h1 className="m-0 font-display text-[24px] leading-[1.15] font-bold">{title}</h1>
           <Muted className="text-[13px] font-bold">{breakdown(detail, copy)}</Muted>
@@ -90,7 +96,7 @@ export default async function ConfirmationPage({ params }: Props) {
             <Muted className="text-[12px] font-bold">{pending ? copy.pendingNote : copy.keepTalking}</Muted>
           </span>
         </span>
-        <SocialLinks links={other.links ?? {}} labelFor={(network) => copy.linkLabel(network, first(other.name))} />
+        <SocialLinks links={other.links ?? {}} owner={first(other.name)} />
       </Card>
 
       <div className="animate-rise" style={{ animationDelay: ".7s" }}>

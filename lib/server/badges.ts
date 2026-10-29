@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNotNull, lt, or, sql } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { connections, eventAttendees, events, interactions, userBadges, users, type EventRow, type UserRow } from "../../db/schema";
 import type { InputOf, ResultOf } from "../api/route-spec";
@@ -23,7 +23,8 @@ async function acceptedFor(userId: string, db: Executor): Promise<AcceptedRow[]>
       kind: connections.kind,
       topics: connections.topics,
       respondedAt: connections.respondedAt,
-      eventId: connections.eventId,
+      // From the inner join: connections outside an event never feed badges.
+      eventId: events.id,
       eventSlug: events.slug,
       startsAt: events.startsAt,
       endsAt: events.endsAt,
@@ -77,11 +78,13 @@ async function signupIndex(user: UserRow, db: Executor): Promise<number> {
   return (row?.before ?? 0) + 1;
 }
 
+// Notes on connections outside an event never count toward badges.
 async function notesApproved(userId: string, db: Executor): Promise<number> {
   const [row] = await db
     .select({ count: sql<number>`count(*)`.mapWith(Number) })
     .from(interactions)
-    .where(and(eq(interactions.authorId, userId), sql`${interactions.approvedAt} is not null`));
+    .innerJoin(connections, eq(connections.id, interactions.connectionId))
+    .where(and(eq(interactions.authorId, userId), sql`${interactions.approvedAt} is not null`, isNotNull(connections.eventId)));
   return row?.count ?? 0;
 }
 
