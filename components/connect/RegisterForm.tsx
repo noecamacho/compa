@@ -123,6 +123,8 @@ export function RegisterForm({ profile }: Props) {
       <VoiceNoteButton state={note} onChange={setNote} />
 
       <div className="mt-auto flex flex-col gap-[10px]">
+        {/* Confirming checks the scanner in, which records `screenConsent`; the notice must be visible first (M13). */}
+        <Muted className="text-center text-[12px] font-bold">{copy.screenNotice}</Muted>
         {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
         <Button variant="primary" onClick={confirm} disabled={sending}>
           {sending ? copy.sending : copy.confirm(total)}

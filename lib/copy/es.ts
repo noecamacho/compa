@@ -121,6 +121,7 @@ export const register = {
   rerecord: "Regrabar",
   confirm: (points: number) => `Confirmar · +${points} pts`,
   sending: "Enviando…",
+  screenNotice: "Al confirmar, tu nombre y foto aparecerán en la pantalla del evento.",
   micUnavailable: "No pudimos usar el micrófono; puedes seguir sin nota.",
 };
 
