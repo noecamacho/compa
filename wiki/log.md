@@ -92,3 +92,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Which V2 screens work outside mock mode?
 
 - Re-checked the gap analysis against the V2 screens (PR #14/#17) and PR #15: 35 use cases, 2 Ready, 15 Partial, 13 Mock-only, 4 Missing, 1 Conflict. `GET /api/connections/{id}`, `/api/badges` and `/api/invites/me` answer 501 in real mode and block 06, 06b, 08b, Home, Badges and Invite; `lib/server/*` ignores the new `city`, `avatar`, `topics` and `scope` fields. Open questions #29, #31, #32 and #42 note what the code now does.
+
+## [2026-10-29] query | Is production migrated to the V2 points?
+
+- Applied `drizzle/0001_v2_points_whatsapp.sql` to the production Supabase project (no rows existed). The points check now enforces 50 for new and 20 for reconnection, matching the deployed code; the points table itself awaits captain ratification (gap analysis, open question #29).
