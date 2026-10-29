@@ -5,25 +5,70 @@ import { Card } from "@/components/ui/Card";
 // Shared building blocks of the console. Desktop shows dense tables, a phone shows stacked cards; each page renders both
 // and CSS picks one (`hidden md:block` / `md:hidden`), so there is no client-side width check and no layout flash.
 
-type TableProps = { label: string; columns: string[]; children: ReactNode };
+export type SortDir = "asc" | "desc";
 
-export function DataTable({ label, columns, children }: TableProps) {
+export type Column = {
+  key: string;
+  label: string;
+  // Makes the header a sort link (spec §5.1).
+  sortKey?: string;
+  // Responsive visibility, for example "hidden lg:table-cell"; give the matching Cell the same class.
+  className?: string;
+  align?: "left" | "right" | "center";
+};
+
+// `hrefFor(sortKey, undefined)` means "this column, its default direction" (the API picks asc for name, desc otherwise).
+export type TableSort = { key: string; dir: SortDir; hrefFor: (sortKey: string, dir: SortDir | undefined) => string };
+
+type TableProps = { label: string; columns: Column[]; sort?: TableSort; children: ReactNode };
+
+const ALIGN = { left: "text-left", right: "text-right", center: "text-center" } as const;
+const ARIA_SORT = { asc: "ascending", desc: "descending" } as const;
+
+// `overflow-clip`, not `overflow-hidden`: a hidden overflow makes the card a scroll container and the sticky header stops
+// sticking (edge case 39). Set `--admin-sticky-top` on an ancestor to park the header under a sticky toolbar.
+export function DataTable({ label, columns, sort, children }: TableProps) {
   return (
-    <Card className="hidden overflow-hidden md:block">
+    <Card className="hidden overflow-clip md:block">
       <table className="w-full border-collapse text-left">
         <caption className="sr-only">{label}</caption>
         <thead>
-          <tr className="bg-paper">
+          <tr>
             {columns.map((column) => (
-              <th key={column} scope="col" className="label-caps px-4 py-3 text-left" style={{ borderBottom: "2.5px solid var(--color-ink)" }}>
-                {column}
-              </th>
+              <HeaderCell key={column.key} column={column} sort={sort} />
             ))}
           </tr>
         </thead>
         <tbody>{children}</tbody>
       </table>
     </Card>
+  );
+}
+
+function HeaderCell({ column, sort }: { column: Column; sort?: TableSort }) {
+  const active = sort && column.sortKey === sort.key ? sort.dir : undefined;
+  const ariaSort = column.sortKey && sort ? (active ? ARIA_SORT[active] : "none") : undefined;
+  return (
+    <th
+      scope="col"
+      aria-sort={ariaSort}
+      className={`label-caps sticky top-[var(--admin-sticky-top,0px)] z-[1] h-12 bg-paper px-4 py-1 whitespace-nowrap ${ALIGN[column.align ?? "left"]} ${column.className ?? ""}`}
+      style={{ boxShadow: "inset 0 -2.5px 0 var(--color-ink)" }}
+    >
+      {column.sortKey && sort ? <SortLink column={column} sortKey={column.sortKey} sort={sort} active={active} /> : column.label}
+    </th>
+  );
+}
+
+function SortLink({ column, sortKey, sort, active }: { column: Column; sortKey: string; sort: TableSort; active: SortDir | undefined }) {
+  const next = active ? (active === "asc" ? "desc" : "asc") : undefined;
+  return (
+    <Link href={sort.hrefFor(sortKey, next)} className={`inline-flex min-h-11 items-center gap-1 rounded-[6px] hover:text-ink focus-visible:outline-2 focus-visible:outline-ink ${active ? "text-ink" : ""}`}>
+      {column.label}
+      <span aria-hidden className="inline-block w-3 text-center">
+        {active === "asc" ? "↑" : active === "desc" ? "↓" : "↕"}
+      </span>
+    </Link>
   );
 }
 
@@ -47,29 +92,34 @@ export function EmptyState({ title, body, action }: EmptyProps) {
   );
 }
 
-export type FilterOption = { key: string; label: string; href: string };
+// `count` arrives formatted (formatCount); `className` handles responsive visibility, e.g. "xl:hidden" for the QR tab.
+export type FilterOption = { key: string; label: string; href: string; count?: string; className?: string };
 
-// URL-backed filter (back, refresh and share all keep it): links styled as a segmented control.
+// URL-backed filter (back, refresh and share all keep it): links styled as a segmented control, 44 px targets. When the
+// options overflow (Spanish at 360) it scrolls, with an edge fade where scroll-driven animations exist (globals.css).
 export function FilterTabs({ label, options, active }: { label: string; options: FilterOption[]; active: string }) {
   return (
-    <nav aria-label={label} className="inline-flex max-w-full gap-1 self-start overflow-x-auto rounded-[14px] bg-white p-1 border-ink">
+    <nav aria-label={label} className="scroll-fade-x inline-flex max-w-full gap-1 self-start overflow-x-auto rounded-[14px] bg-white p-1 [scrollbar-width:none] border-ink">
       {options.map((option) => (
         <Link
           key={option.key}
           href={option.href}
           aria-current={option.key === active ? "page" : undefined}
-          className={`flex h-10 items-center rounded-[10px] px-4 text-[14px] font-extrabold whitespace-nowrap ${option.key === active ? "bg-ink text-paper" : "hover:bg-sun-soft"}`}
+          className={`flex h-11 shrink-0 items-center gap-2 rounded-[10px] px-4 text-[14px] font-extrabold whitespace-nowrap ${option.key === active ? "bg-ink text-paper" : "hover:bg-sun-soft"} ${option.className ?? ""}`}
         >
           {option.label}
+          {option.count !== undefined && (
+            <span className={`rounded-[7px] px-[6px] text-[12px] tabular-nums ${option.key === active ? "bg-paper/20" : "bg-ink/10"}`}>{option.count}</span>
+          )}
         </Link>
       ))}
     </nav>
   );
 }
 
-// The page's primary action, pinned to the thumb on a phone and inline at md+ (render the inline one beside the title).
+// A form's save bar, pinned above the admin bottom nav on a phone (spec §3) and inline at md+.
 export function MobileActionBar({ children }: { children: ReactNode }) {
   return (
-    <div className="sticky bottom-0 z-10 mt-auto -mx-4 -mb-6 border-t-[2.5px] border-ink bg-paper px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] md:hidden">{children}</div>
+    <div className="sticky bottom-[calc(56px+env(safe-area-inset-bottom))] z-10 mt-auto -mx-4 -mb-4 border-t-[2.5px] border-ink bg-paper px-4 py-3 md:hidden">{children}</div>
   );
 }

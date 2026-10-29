@@ -57,12 +57,13 @@ export function TestUsersPanel({ locale, users, testEvents }: Props) {
     });
 
   const details = (user: TestUserT) => [[user.headline, user.company].filter(Boolean).join(" · "), user.currentEvent ? copy.at(user.currentEvent.name) : ""].filter(Boolean).join(" · ");
-  const actions = (user: TestUserT, height: number) => (
+  // Repeated buttons name their person ("Sign in as Ana Garza"), so a screen-reader list of buttons is not ambiguous.
+  const actions = (user: TestUserT) => (
     <span className="flex gap-2">
-      <Button height={height} variant="primary" className="w-auto! px-3 text-[14px]" disabled={busy} onClick={() => signInAs(user)}>
+      <Button height={44} variant="primary" className="w-auto! px-3 text-[14px]" disabled={busy} aria-label={`${copy.signIn} ${user.name}`} onClick={() => signInAs(user)}>
         {copy.signIn}
       </Button>
-      <Button height={height} className="w-auto! px-3 text-[14px]" disabled={busy} onClick={() => remove(user)}>
+      <Button height={44} className="w-auto! px-3 text-[14px]" disabled={busy} aria-label={`${copy.delete} ${user.name}`} onClick={() => remove(user)}>
         {copy.delete}
       </Button>
     </span>
@@ -106,22 +107,28 @@ export function TestUsersPanel({ locale, users, testEvents }: Props) {
       {users.length === 0 && <EmptyState title={copy.empty} body={copy.intro} />}
       {users.length > 0 && (
         <>
-          <DataTable label={copy.title} columns={[full.ui.colPerson, full.ui.colProfile, full.ui.colActions]}>
+          <DataTable label={copy.title} columns={[
+              { key: "person", label: full.ui.colPerson },
+              { key: "profile", label: full.ui.colProfile },
+              { key: "actions", label: full.ui.colActions },
+            ]}>
             {users.map((user) => (
               <Row key={user.id}>
                 <Cell>
                   <span className="block font-display text-[16px] font-bold">{user.name}</span>
-                  <Muted className="text-[13px] font-bold">@{user.handle}</Muted>
+                  <Muted className="block max-w-[260px] truncate text-[13px] font-bold" title={`@${user.handle}`}>
+                    @{user.handle}
+                  </Muted>
                 </Cell>
                 <Cell className="text-muted">
                   {details(user)}
                   {user.role === "super_admin" && (
                     <Pill tone="sun" shadow={false} className="ml-2">
-                      {full.people.superAdmin}
+                      {full.ui.nav.testAdmin}
                     </Pill>
                   )}
                 </Cell>
-                <Cell>{actions(user, 40)}</Cell>
+                <Cell>{actions(user)}</Cell>
               </Row>
             ))}
           </DataTable>
@@ -130,14 +137,16 @@ export function TestUsersPanel({ locale, users, testEvents }: Props) {
               <li key={user.id}>
                 <Card size="sm" className="flex flex-col gap-2 px-4 py-3">
                   <span className="font-display text-[17px] font-bold">{user.name}</span>
-                  <Muted className="text-[13px] font-bold break-all">@{user.handle}</Muted>
+                  <Muted className="truncate text-[13px] font-bold" title={`@${user.handle}`}>
+                    @{user.handle}
+                  </Muted>
                   <Muted className="text-[13px] font-bold">{details(user)}</Muted>
                   {user.role === "super_admin" && (
                     <Pill tone="sun" shadow={false} className="self-start">
-                      {full.people.superAdmin}
+                      {full.ui.nav.testAdmin}
                     </Pill>
                   )}
-                  <span className="mt-1">{actions(user, 44)}</span>
+                  <span className="mt-1">{actions(user)}</span>
                 </Card>
               </li>
             ))}
