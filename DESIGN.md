@@ -214,6 +214,7 @@ Approved decisions (A5, A6, M13, M16). The handoff has no big-screen mock.
 - **Updates:** the public Realtime channel `event:<code>:live` (`connection.accepted`, `attendee.checked_in`, `summary.approved`), with snapshot polling as a fallback (the snapshot is cached for 1 s).
 - **Everyone checked in appears.** There is no anonymous mode, and check-in records the consent (M13).
 - **Size:** 1920×1080, readable from 10 m (`AGENTS.md` §4).
+- **As built (Loom+):** the network is "El Telar" (a ring of pegs, threads between them), with a 30-minute pulse and mood line, a "Just now" feed of the newest pairs, the top 6 (shared places for ties), state cards for upcoming, empty and ended, a final podium after the close, an "Ends in N min" pill in the last ten minutes and a "Reconnecting… last update" pill. Rationale and screenshots: [docs/research/live-dataviz-decision.md](docs/research/live-dataviz-decision.md).
 - **Figma file:** [COMPA — App flows (V2)](https://www.figma.com/design/UEnpABAPbq7WJUfhfoYi46): foundations, components, every flow with happy, empty, error and edge states, and the prototype.
 
 ## Decided vs open
