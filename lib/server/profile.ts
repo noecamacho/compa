@@ -1,13 +1,14 @@
 import "server-only";
-import { and, eq, inArray, or } from "drizzle-orm";
+import { and, asc, eq, ilike, inArray, ne, or } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
-import { connections, events, interests, userInterests, users, type EventRow, type UserRow } from "../../db/schema";
+import { connections, eventAttendees, events, interests, userInterests, users, type EventRow, type UserRow } from "../../db/schema";
 import { E, fail } from "../api/errors";
 import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import type { MeT } from "../api/schemas";
 import { hasEnded, statusForViewer } from "../connection-status";
 import { mergeLinks } from "../links";
+import { slugify } from "../slug";
 import { toCard, withDefaultVisibility } from "../visibility";
 import { earnedBadgeIds } from "./badges";
 import { latestInteraction } from "./connection-detail";
@@ -150,6 +151,34 @@ async function connectedExtras(viewer: UserRow, owner: UserRow, db: Executor) {
         ? { connectionId: latest.row.id, title: note.title ?? note.summary.split(".")[0] ?? note.summary, topics: note.topics, at: (note.approvedAt ?? note.createdAt).toISOString() }
         : null,
   };
+}
+
+const SEARCH_LIMIT = 8;
+
+// People whose name contains the query. Handles are accent-free slugs of names, so matching the slug of the
+// query against the handle makes "lopez" find "López" without a database extension.
+export async function searchUsers({ user, query }: InputOf<typeof R.searchUsers>): ResultOf<typeof R.searchUsers> {
+  const db = getDb();
+  const event = await findCurrentEvent(user.id, new Date(), db);
+  const text = `%${query.q.replace(/[%_]/g, "")}%`;
+  const slug = `%${slugify(query.q)}%`;
+  const matches = or(ilike(users.name, text), ilike(users.handle, slug));
+  const rows = event
+    ? await db
+        .select({ user: users })
+        .from(eventAttendees)
+        .innerJoin(users, eq(users.id, eventAttendees.userId))
+        .where(and(eq(eventAttendees.eventId, event.id), ne(users.id, user.id), matches))
+        .orderBy(asc(users.name))
+        .limit(SEARCH_LIMIT)
+    : await db
+        .select({ user: users })
+        .from(users)
+        .where(and(ne(users.id, user.id), matches))
+        .orderBy(asc(users.name))
+        .limit(SEARCH_LIMIT);
+  const cards = await cardsFor(user.id, rows.map((row) => row.user), db);
+  return { body: { people: rows.flatMap((row) => cards.get(row.user.id) ?? []) } };
 }
 
 export async function getUser({ user, params }: InputOf<typeof R.getUser>): ResultOf<typeof R.getUser> {

@@ -101,6 +101,19 @@ export const listInterests = route({
   errors: [],
 });
 
+export const searchUsers = route({
+  id: "searchUsers",
+  method: "get",
+  path: "/api/users",
+  summary: "Search people by name",
+  description: "People checked in to your current event (or anyone, out of an event) whose name contains `q`, accents ignored, up to 8, filtered for you (API spec §6).",
+  tags: ["profile"],
+  auth: "user",
+  query: S.UserSearchQuery,
+  success: { status: 200, description: "Matching people, best match first.", schema: S.UserSearch, example: { people: [X.valeriaPublic, X.rodrigo] } },
+  errors: [E.invalidInput, E.unauthorized],
+});
+
 export const getUser = route({
   id: "getUser",
   method: "get",
@@ -469,6 +482,7 @@ export const ROUTES: readonly AnyRouteSpec[] = [
   patchMe,
   patchVisibility,
   listInterests,
+  searchUsers,
   getUser,
   createEvent,
   rotateEventCode,
