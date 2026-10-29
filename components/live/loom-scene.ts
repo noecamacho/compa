@@ -107,6 +107,8 @@ export class LoomScene {
   private pegs = new Map<string, Peg>();
   private links: LoomLink[] = [];
   private known = new Set<string>();
+  private layoutKey = "";
+  private linkKey = "";
   private fresh = new Map<string, Thread>();
   private weave: (THREE.Mesh | THREE.LineSegments)[] = [];
   private weaveDirty = false;
@@ -160,14 +162,21 @@ export class LoomScene {
   }
 
   update(data: LoomData): void {
-    this.syncPegs(data.people);
+    // A poll that changed nothing on the loom (points aside) must not rebuild the weave every 3 s.
+    const layoutKey = data.people.map((person) => `${person.id}:${person.points}`).join(",");
+    const linkKey = `${data.links.length}:${data.links[0]?.id}:${data.links.at(-1)?.id}`;
+    if (layoutKey === this.layoutKey && linkKey === this.linkKey) return;
+    const relayout = layoutKey !== this.layoutKey;
+    this.layoutKey = layoutKey;
+    this.linkKey = linkKey;
+    if (relayout) this.syncPegs(data.people);
     const visible = data.links.filter((link) => this.pegs.has(link.a) && this.pegs.has(link.b));
     const arrived = this.seeded && !this.reducedMotion ? visible.filter((link) => !this.known.has(link.id)).slice(-MAX_FRESH) : [];
     this.links = visible;
     this.known = new Set(visible.map((link) => link.id));
     for (const [id, thread] of this.fresh) if (!this.known.has(id)) this.dropFresh(id, thread);
     // Fresh threads follow their pegs when the ring re-seats (someone checked in); new arrivals start drawing.
-    for (const thread of this.fresh.values()) this.reshapeFresh(thread);
+    if (relayout) for (const thread of this.fresh.values()) this.reshapeFresh(thread);
     for (const link of arrived) this.addFresh(link);
     this.weaveDirty = true;
     this.seeded = true;
@@ -366,6 +375,11 @@ export class LoomScene {
     this.scene.traverse((node) => {
       if (node instanceof THREE.Mesh || node instanceof THREE.Line) node.geometry.dispose();
     });
+    this.scene.traverse((node) => {
+      if (node instanceof THREE.Mesh || node instanceof THREE.Line) [node.material].flat().forEach((material) => material.dispose());
+    });
+    for (const material of [this.inkHull, this.inkDisc, this.pegMaterial, ...Object.values(this.threadMaterials), ...Object.values(this.lineMaterials)]) material.dispose();
+    this.renderer.forceContextLoss();
     this.renderer.dispose();
     this.canvas.remove();
   }

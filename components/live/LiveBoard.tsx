@@ -141,7 +141,7 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
         </section>
         <div className="flex min-h-0 flex-col gap-4 lg:gap-[1.6vh]">
           {ended && rows.length > 0 && <Podium rows={rows} locale={locale} onSelect={setSelectedId} />}
-          {selected && <PersonPanel code={code} id={selected} locale={locale} onClose={() => setSelectedId(null)} />}
+          {selected && <PersonPanel code={code} id={selected} rank={rows.find((row) => row.id === selected)?.rank ?? null} locale={locale} onClose={() => setSelectedId(null)} />}
           {!selected && !(ended && rows.length <= 3) && <LeaderboardPanel rows={rows} locale={locale} onSelect={setSelectedId} from={ended ? 3 : 0} limit={ended ? 5 : 6} />}
           {!ended && <Feed snapshot={snapshot} locale={locale} limit={4} />}
         </div>

@@ -56,7 +56,6 @@ export function Pulse({ snapshot, mood, locale }: { snapshot: LiveSnapshotT; moo
         ))}
       </svg>
       <span
-        role="status"
         className={`min-w-0 rounded-chip px-3 py-1 text-[13px] font-extrabold border-ink shadow-hard-2 lg:text-[clamp(13px,1.15vw,28px)] ${mood === "rush" ? "animate-beat" : ""}`}
         style={{ background: MOOD_TONE[mood] }}
       >
@@ -91,7 +90,7 @@ export function Feed({ snapshot, locale, limit }: { snapshot: LiveSnapshotT; loc
               <span className="shrink-0">⇄</span>
               <span className="min-w-0 truncate">{item.b}</span>
             </span>
-            <span className="shrink-0 text-[12px] text-ink/70 tabular-nums lg:text-[clamp(12px,0.95vw,22px)]">{ago(locale, item.at, snapshot.generatedAt)}</span>
+            <span aria-hidden="true" className="shrink-0 text-[12px] text-ink/70 tabular-nums lg:text-[clamp(12px,0.95vw,22px)]">{ago(locale, item.at, snapshot.generatedAt)}</span>
           </li>
         ))}
       </ol>
@@ -131,6 +130,9 @@ const PODIUM_STEPS = [
   { place: 3, color: "#F2A766", height: "h-[46px] lg:h-[clamp(46px,6vh,92px)]", order: "order-3" },
 ] as const;
 
+// A tie for first stands on the gold step too: height and color follow the rank, the column follows the order.
+const stepFor = (rank: number) => PODIUM_STEPS[Math.min(rank, 3) - 1] ?? PODIUM_STEPS[2];
+
 // The close: the top three on steps (first in the middle), ties shown as shared places.
 export function Podium({ rows, locale, onSelect }: { rows: BoardRow[]; locale: Locale; onSelect: (id: string) => void }) {
   const copy = copyFor(locale).live;
@@ -154,8 +156,8 @@ export function Podium({ rows, locale, onSelect }: { rows: BoardRow[]; locale: L
                 </span>
               </button>
               <span
-                className={`flex w-full items-start justify-center rounded-t-[12px] pt-1 font-display text-[22px] font-bold border-ink lg:text-[clamp(22px,1.8vw,44px)] ${step.height}`}
-                style={{ background: step.color }}
+                className={`flex w-full items-start justify-center rounded-t-[12px] pt-1 font-display text-[22px] font-bold border-ink lg:text-[clamp(22px,1.8vw,44px)] ${stepFor(row.rank).height}`}
+                style={{ background: stepFor(row.rank).color }}
               >
                 {row.rank}
                 {tied && <span className="ml-1 self-center text-[11px] font-extrabold lg:text-[clamp(11px,0.7vw,16px)]">{copy.tie}</span>}
