@@ -40,6 +40,15 @@ async function openBoard(page: Page, name: ScenarioName, polls = 1, options: Ser
 
 async function shot(page: Page, name: string) {
   const dir = process.env.LIVE_SHOTS;
+  // Let entrance animations (feed rows, podium) finish; the endless ones (live dot, rush pill) never do.
+  await page.evaluate(() =>
+    Promise.all(
+      document
+        .getAnimations()
+        .filter((animation) => animation.effect?.getComputedTiming().iterations !== Infinity)
+        .map((animation) => animation.finished.catch(() => undefined)),
+    ),
+  );
   await page.screenshot({ path: test.info().outputPath(`${name}.png`) });
   if (dir) await page.screenshot({ path: path.join(dir, `${name}.jpg`), type: "jpeg", quality: 70 });
 }
@@ -159,27 +168,17 @@ test.describe("live board scenarios @live @mock", () => {
     await shot(page, "missing-photos-1920");
   });
 
-  test("thousands: 2,500 people and 4,000+ threads stay responsive", async ({ page }) => {
+  test("thousands: 2,500 people and 4,000+ threads stay flat and responsive", async ({ page }) => {
     await openBoard(page, "thousands", 2);
     await expect(counter(page, "people")).toHaveText("2,500");
-    const fps = await page.evaluate(
-      () =>
-        new Promise<number>((resolve) => {
-          let frames = 0;
-          const start = performance.now();
-          const step = (now: number) => {
-            frames++;
-            if (now - start < 2000) return requestAnimationFrame(step);
-            resolve((frames * 1000) / (now - start));
-          };
-          requestAnimationFrame(step);
-        }),
-    );
-    test.info().annotations.push({ type: "fps", description: fps.toFixed(1) });
-    console.log(`thousands fps: ${fps.toFixed(1)}`);
-    // Headless software WebGL (SwiftShader) draws an empty ring at ~22 fps on CI-class machines, far below a venue
-    // laptop's GPU; this guards against a frozen page (it was 0.2 fps before the instanced loom), not a frame target.
-    expect(fps).toBeGreaterThan(1);
+    // One mesh per peg and per thread drew ~13,000 calls (0.2 fps); instanced pegs and a merged weave stay near 60.
+    // fps is not asserted: headless software WebGL on a loaded machine says nothing about a venue GPU.
+    const host = page.locator("[data-draw-calls]");
+    await expect.poll(async () => Number(await host.getAttribute("data-draw-calls"))).toBeGreaterThan(0);
+    expect(Number(await host.getAttribute("data-draw-calls"))).toBeLessThan(120);
+    await page.getByTestId("live-leaderboard").locator("li button").first().click();
+    await expect(page.getByTestId("live-person")).toBeVisible();
+    await page.getByRole("button", { name: "Show leaderboard" }).click();
     await shot(page, "thousands-1920");
   });
 });

@@ -13,7 +13,7 @@ ranking, pulse, feed and finale are fixed slots, so nothing jumps around on a pr
 | Loom | Every checked-in person a peg, every accepted connection a thread (mint new, bubblegum reconnection); new threads draw in thick and ink-outlined, then settle | `loom-scene.ts` |
 | Pulse | Connections per minute for the last 30 min (current minute in sun) and a mood line: "12 in the last 5 min", "N connections in 5 min!" (rush), "Quiet moment: say hi to someone new" | `Pulse` in `LiveActivity.tsx` |
 | Feed ("Just now") | The 4 newest pairs, "Ana ⇄ Luis", with "2 min ago"; names only, never what was said (p. 6, p. 13) | `Feed` |
-| Ranking | Top 6 with photos; equal points and connections share a place (1, 1, 3) | `LeaderboardPanel` |
+| Ranking | Top 5 with photos; equal points and connections share a place (1, 1, 3) | `LeaderboardPanel` |
 | State card | Over the loom: "Doors open at 7:00 PM" (upcoming), "Nobody is in yet" / "The loom is ready" (empty), "That's a wrap! 120 people wove 300 connections" (ended) | `StateCard` |
 | Finale | After the close: final podium (1st in the middle, ties marked), then places 4–8; the pulse shows the event's last half hour, polling slows to 15 s | `Podium` |
 | Reconnecting | "Reconnecting… last update 7:42 PM" pill; failed polls back off 3 → 30 s; the tab coming back or the network returning polls at once | `useLiveSnapshot.ts` |

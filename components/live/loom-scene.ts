@@ -350,10 +350,17 @@ export class LoomScene {
     for (const [id, thread] of this.fresh) this.advance(id, thread, now, dt);
     if (this.weaveDirty) this.rebuildWeave();
     // Reduced motion with nothing drawing: the frame is unchanged, so skip the GPU work entirely.
-    if (this.needsRender) this.renderer.render(this.scene, this.camera);
+    if (this.needsRender) this.render();
     this.needsRender = false;
     this.frame = requestAnimationFrame(this.tick);
   };
+
+  // Draw calls stay flat however full the room is; the count is published for the e2e scale check.
+  private render(): void {
+    this.renderer.render(this.scene, this.camera);
+    const calls = String(this.renderer.info.render.calls);
+    if (this.host.dataset.drawCalls !== calls) this.host.dataset.drawCalls = calls;
+  }
 
   private advance(id: string, thread: Thread, now: number, dt: number): void {
     this.needsRender = true;
