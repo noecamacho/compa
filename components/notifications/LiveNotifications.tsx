@@ -164,7 +164,7 @@ function NotificationToast({ item, locale, onClose }: { item: NotificationT; loc
   if (pathname === "/notifications") return null;
   return (
     <div role="status" aria-live="polite" className="pointer-events-none fixed inset-x-0 top-[max(12px,env(safe-area-inset-top))] z-50 flex justify-center px-4 lg:top-auto lg:bottom-6 lg:justify-end lg:px-8">
-      <div className="animate-pop-in pointer-events-auto flex w-full max-w-[420px] items-center gap-3 rounded-[18px] bg-gum-soft px-[14px] py-[10px] border-ink shadow-hard-3">
+      <div className="animate-rise pointer-events-auto flex w-full max-w-[420px] items-center gap-3 rounded-[18px] bg-gum-soft px-[14px] py-[10px] border-ink shadow-hard-3">
         <Link href={notificationHref(item)} onClick={onClose} data-testid="notification-toast" className="flex min-w-0 flex-1 items-center gap-3">
           <ToastIcon item={item} />
           <span className="font-display text-[15px] leading-tight font-bold">{notificationText(item, copy)}</span>
