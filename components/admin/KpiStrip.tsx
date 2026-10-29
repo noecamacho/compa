@@ -16,15 +16,16 @@ export type KpiTile = {
   className?: string;
 };
 
-type Props = { label: string; locale: Locale; tiles: KpiTile[] };
+type Props = { label: string; locale: Locale; tiles: KpiTile[]; columns?: string };
 
 const TILE = "box-border flex min-h-[72px] min-w-0 flex-col justify-start gap-1 rounded-[18px] bg-white px-3 py-2 border-ink shadow-hard-3 min-[390px]:px-4 min-[390px]:py-3";
 
-// Overview numbers above a list: 2×2 on a phone, 4 in a row from md, 6 at 2xl. Data comes in already fetched.
-export function KpiStrip({ label, locale, tiles }: Props) {
+// Overview numbers above a list: 2×2 on a phone, 4 in a row from md, 6 at 2xl (`columns` overrides the md+ part, e.g.
+// the event page's 5 tiles). Data comes in already fetched.
+export function KpiStrip({ label, locale, tiles, columns = "md:grid-cols-4 2xl:grid-cols-6" }: Props) {
   return (
     <section aria-label={label}>
-      <ul className="m-0 grid list-none grid-cols-2 gap-3 p-0 md:grid-cols-4 2xl:grid-cols-6">
+      <ul className={`m-0 grid list-none grid-cols-2 gap-3 p-0 ${columns}`}>
         {tiles.map((tile) => (
           <li key={tile.key} className={`min-w-0 ${tile.className ?? "flex"}`}>
             <Tile tile={tile} locale={locale} />
