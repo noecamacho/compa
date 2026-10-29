@@ -2,7 +2,7 @@ import { z } from "zod";
 import { TOPICS } from "../topics";
 
 const SUMMARY_DESCRIPTION =
-  "2-4 sentences, in Spanish, third person: what the two attendees talked about";
+  "2-4 sentences, in the same language as the note, third person: what the two attendees talked about";
 const SUBSTANTIVE_DESCRIPTION = "false if the text does not describe a real conversation";
 
 export const SummaryOutput = z.object({

@@ -56,7 +56,6 @@ export async function transcribe(
   const result = await client.audio.transcriptions.create({
     file,
     model: process.env.OPENAI_STT_MODEL || "gpt-4o-mini-transcribe",
-    language: "es",
     response_format: "json",
   });
   return result.text;
