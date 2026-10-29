@@ -12,9 +12,10 @@ import { Header } from "@/components/ui/Header";
 import { Pill } from "@/components/ui/Pill";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
+import { Tour } from "@/components/tour/Tour";
 import { apiCall } from "@/lib/api/client";
 import { ConnectionRequest, type UserProfileT } from "@/lib/api/schemas";
-import { register as copy } from "@/lib/copy/es";
+import { register as copy, tour } from "@/lib/copy/es";
 import { CONNECTION_POINTS, SUMMARY_POINTS, TOPICS_POINTS } from "@/lib/points";
 import { rememberNote } from "@/lib/note-draft";
 
@@ -82,7 +83,7 @@ export function RegisterForm({ profile }: Props) {
         )}
       </Card>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2" data-tour="kind">
         <SectionLabel>{copy.typeLabel}</SectionLabel>
         <div role="group" aria-label={copy.typeLabel} className="grid grid-cols-2 gap-[10px]">
           {(Object.keys(KIND) as Kind[]).map((option) => {
@@ -109,7 +110,7 @@ export function RegisterForm({ profile }: Props) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-2" data-tour="topics">
         <SectionLabel>{copy.topicsLabel}</SectionLabel>
         <div className="flex flex-wrap gap-2">
           {copy.topics.map((topic) => (
@@ -120,14 +121,19 @@ export function RegisterForm({ profile }: Props) {
         </div>
       </div>
 
-      <VoiceNoteButton state={note} onChange={setNote} />
+      <div data-tour="note">
+        <VoiceNoteButton state={note} onChange={setNote} />
+      </div>
 
       <div className="mt-auto flex flex-col gap-[10px]">
         {error && <span className="text-center text-[12px] font-extrabold text-coral">{error}</span>}
-        <Button variant="primary" onClick={confirm} disabled={sending}>
-          {sending ? copy.sending : copy.confirm(total)}
-        </Button>
+        <div data-tour="confirm">
+          <Button variant="primary" onClick={confirm} disabled={sending}>
+            {sending ? copy.sending : copy.confirm(total)}
+          </Button>
+        </div>
       </div>
+      <Tour id="register" steps={tour.register} />
     </Screen>
   );
 }

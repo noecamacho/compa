@@ -99,3 +99,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] ingest | V2 points model and real handlers
 
 - Migration `0002`: `users.avatar`, `users.city`, `users.golden_cap_at`, `connections.topics`, `interactions.title` and `pending_action`, tables `bonus_points`, `user_badges`, `invites`; both score views rebuilt (notes pay the author, bonus points count). Handlers now fill every V2 field: profile stats, scores and badges, person relationship and last note, connection detail, badge catalog with progress (`lib/badges/rules.ts`), invites with the golden cap, leaderboard scope and `me`, and the AI summary returns a title and a pending action. [points-rules](points-rules.md) rewritten for the V2 table.
+
+## [2026-10-29] ingest | Guided onboarding and request inbox
+
+- Added the spotlight tour (`components/tour/Tour.tsx`): the screen dims except one element and a card explains it, step by step, once per screen (home, connect, register, profile, ranking) and again from "Guía rápida" in the profile or `?tour=1`. Home now shows incoming requests as cards and polls `GET /api/connections` every 3 s (bell links to the newest); the confirmation screen refreshes when a pending request is answered; `/u/[handle]` keeps the handle through LinkedIn sign-in; `/` forwards a signed-in person to `/home`; home renders outside an event. Closes gap-analysis U1, U7, U10, U15 and U16.
