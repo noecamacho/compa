@@ -36,3 +36,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 
 - Added `docs/specs/2026-10-29-data-model.md`, approved by the captain: multi-event, LinkedIn-only sign-in, check-in by event QR, confirmed connections (one per pair per event) scoring 20 new or 10 reconnection to both people, per-field and per-link visibility, always-on big screen with check-in consent. Supersedes the plan's four-table model (p. 9–10) and the MVP API plan's data model.
 - Updated `open-questions`: #5, #7, #8, #9, #10 resolved and #16 partly resolved; added #20–#25.
+
+## [2026-10-29] query | AI core for transcription and summaries
+
+- `lib/ai/*` implements `ai-jobs`: Spanish transcription, Structured Outputs summary, verbatim fallback (p. 12). `lib/topics.ts` ships a 41-topic placeholder list until `open-questions` #4 is settled.
