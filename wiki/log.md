@@ -194,3 +194,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | What rate limits apply, and what does a person see?
 
 - T-036 shipped per-user limits keyed by user id (not IP): scans 30/min and 300/event, transcription 10/min and 60/day, drafts 10/min and 5/connection, minute and day counters stored in `rate_limit_counters`. Windowed limits: 429 `rate_limited` with `Retry-After`; the event and connection caps count stored rows and return 429 `limit_reached`. The UI shows `common.rateLimited` / `common.limitReached`. Search is not limited yet (`docs/flows/backlog.md` T-036; `docs/flows/catalog.md` F-68; open question #51).
+
+## [2026-10-29] query | How do social links, visibility and the LinkedIn photo sync work?
+
+- Links: `lib/links.ts` validates per network (WhatsApp E.164 number, handles, same-network URLs) in the browser and in `PATCH /api/me` (400). Per-item visibility Todos / Conexiones / Solo yo with a before/after preview in `ProfileForm` (onboarding and edit), using the server's `toCard`. Sign-in refreshes the photo only while the person shows their LinkedIn photo and its `linkedin_photo_key` changed (`lib/linkedin-photo.ts`, migration 0008; data model §4.6).

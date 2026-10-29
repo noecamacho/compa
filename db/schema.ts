@@ -64,6 +64,8 @@ export const users = pgTable(
     notificationsSeenAt: timestamp("notifications_seen_at", { withTimezone: true }),
     linkedinRaw: jsonb("linkedin_raw"),
     linkedinSyncedAt: timestamp("linkedin_synced_at", { withTimezone: true }),
+    // The LinkedIn picture we last copied, without its signature (lib/linkedin-photo.ts); null until a copy succeeds.
+    linkedinPhotoKey: text("linkedin_photo_key"),
     // Kept in sync with role for code that still reads it; `role` is the source of truth (M20).
     isAdmin: boolean("is_admin").notNull().default(false),
     role: text("role", { enum: USER_ROLES }).$type<UserRole>().notNull().default("user"),

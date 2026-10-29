@@ -6,7 +6,8 @@ import { getDb } from "../../db/client";
 import { users, type UserRow } from "../../db/schema";
 import { handleBase, pickHandle } from "../handle";
 import { findUserByAuthId } from "./auth";
-import { mirrorPhoto, photoToStore } from "./avatar-storage";
+import { linkedInPhotoKey, shouldSyncPhoto } from "../linkedin-photo";
+import { isMirroredPhoto, mirrorPhoto, photoToStore } from "./avatar-storage";
 import { isUniqueViolation } from "./people";
 
 // Claims Supabase stores for `linkedin_oidc` in user_metadata (untrusted input, so parsed).
@@ -84,15 +85,19 @@ async function syncUser(existing: UserRow, profile: Profile): Promise<UserRow> {
   return row ?? existing;
 }
 
-// The LinkedIn URL expires; replace it with our Storage copy unless the person set their own photo (M14).
+// The LinkedIn URL expires, so we keep a Storage copy. Sign-in downloads the picture only when the person still
+// shows their LinkedIn photo and it changed (lib/linkedin-photo.ts); a monito or an own photo is never touched.
 async function keepPhoto(user: UserRow, linkedinUrl: string | null): Promise<UserRow> {
-  if (!linkedinUrl || user.photoEdited) return user;
-  const photoUrl = photoToStore(await mirrorPhoto(user.id, linkedinUrl), user.photoUrl, linkedinUrl);
-  if (photoUrl === user.photoUrl) return user;
+  if (!linkedinUrl || !shouldSyncPhoto(user, linkedinUrl, isMirroredPhoto(user.photoUrl))) return user;
+  const mirrored = await mirrorPhoto(user.id, linkedinUrl);
+  const photoUrl = photoToStore(mirrored, user.photoUrl, linkedinUrl);
+  // The key is stored only with a successful copy, so a failed one is retried at the next sign-in.
+  const linkedinPhotoKey = mirrored ? linkedInPhotoKey(linkedinUrl) : user.linkedinPhotoKey;
+  if (photoUrl === user.photoUrl && linkedinPhotoKey === user.linkedinPhotoKey) return user;
   const [row] = await getDb()
     .update(users)
-    .set({ photoUrl })
-    .where(and(eq(users.id, user.id), eq(users.photoEdited, false)))
+    .set({ photoUrl, linkedinPhotoKey })
+    .where(and(eq(users.id, user.id), eq(users.photoEdited, false), eq(users.avatarMode, "photo")))
     .returning();
   return row ?? user;
 }

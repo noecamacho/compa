@@ -255,7 +255,9 @@ Hidden data is never sent to the client.
 
 ### 4.6 LinkedIn sync (M14)
 
-On every sign-in: update `linkedin_raw` and `linkedin_synced_at`; update `name` unless `name_edited`; update `photo_url` unless `photo_edited`. Editing either field in COMPA sets its `_edited` flag.
+On every sign-in: update `linkedin_raw` and `linkedin_synced_at`; update `name` unless `name_edited`. Editing a field in COMPA to a different value sets its `_edited` flag; saving it unchanged does not.
+
+The photo (owner decision, 2026-10-29; `lib/linkedin-photo.ts`): sign-in copies the LinkedIn picture to Storage only when the person still shows their LinkedIn photo (`avatar_mode = 'photo'` and not `photo_edited`) **and** the picture changed, or our last copy failed. A chosen monito or an own photo is permanent; sign-in never touches it. "Changed" compares `linkedin_photo_key` (host and path of the picture URL, without the signature that changes on every sign-in; migration 0008) with the new claim, so detecting it costs no request to LinkedIn. The key is stored only with a successful copy.
 
 ### 4.6a Test people and lifecycle (M20)
 

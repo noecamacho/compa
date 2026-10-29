@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Header } from "@/components/ui/Header";
 import { Pill } from "@/components/ui/Pill";
 import { HIT_AREA } from "@/components/ui/hit-area";
+import { SocialLinks } from "@/components/profile/SocialLinks";
 import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { UserProfile } from "@/lib/api/schemas";
@@ -61,6 +62,15 @@ export default async function PersonPage({ params }: Props) {
               )}
             </span>
           </div>
+
+          {/* Same order as the profile row, so on a phone their links come right after who they are. */}
+          {(card.links || !connected) && (
+            <Card className="order-1 flex flex-col gap-[10px] px-[14px] py-3 md:order-none" ariaLabel={copy.links}>
+              <SectionLabel>{copy.links}</SectionLabel>
+              {card.links && <SocialLinks links={card.links} labelFor={(network) => copy.linkLabel(network, card.name)} />}
+              {!connected && <Muted className="text-[12px] font-bold">{copy.linksLocked}</Muted>}
+            </Card>
+          )}
 
           {relationship && (
             <Card className="order-3 md:order-none">

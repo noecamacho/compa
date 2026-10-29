@@ -208,7 +208,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Actor | A signed-out user with an existing `users` row |
 | Entry | Landing or a deep link → LinkedIn |
 | Pre | `users.auth_user_id` matches |
-| Happy path | Callback → `syncUser` refreshes `linkedin_raw` and the email, and refreshes name and photo unless `name_edited` or `photo_edited` (M14) → `next`, or `/me` |
+| Happy path | Callback → `syncUser` refreshes `linkedin_raw` and the email, refreshes the name unless `name_edited`, and the photo only when the person still shows their LinkedIn photo and it changed (M14, `lib/linkedin-photo.ts`) → `next`, or `/me` |
 | Alternates | On `main`, "Ya tengo cuenta" sends to `/home` |
 | Errors | as F-05 |
 | Edge cases | A returning user who never finished onboarding is not resumed (T-014). The LinkedIn photo changed, so a re-copy to Storage is needed (T-015). The same LinkedIn after an account deletion → a fresh user (T-100) |
@@ -781,7 +781,7 @@ In the overview, a flow that shows a transition such as "Missing → IP" is coun
 | Entry | Dock → Perfil (`/me`) |
 | Pre | Session |
 | Happy path | `GET /api/me` → monito, name, job title, city, points and rank, badges shelf, numbers, network toggles, links to Ranking and Mi monito, QR and edit |
-| Alternates | Toggle a network → `PATCH /api/me/visibility` (`MyLinkToggles`) |
+| Alternates | Pick Todos / Conexiones / Solo yo for a link → `PATCH /api/me/visibility` (`MyLinks`) |
 | Errors | Toggle save failed → should revert (`me` copy) |
 | Edge cases | `scores`, `stats` and `badges` are not filled (0 or "—"). **No sign-out button** (T-062). No delete account or export (T-100, T-101) |
 | Status | UI Partial · API Partial · DB Partial |

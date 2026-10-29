@@ -138,7 +138,8 @@ Screen components added with the screens (PR #14):
 | --- | --- | --- |
 | `Header` | `components/ui/Header.tsx` | Back button and title row |
 | `Welcome` | `components/welcome/Welcome.tsx` | 01 with the create / sign-in toggle |
-| `ProfileForm`, `LinkToggles`, `MyLinkToggles` | `components/profile/` | 02 form; network toggles (on → `connections`, off → `hidden`) |
+| `ProfileForm`, `LinkEditor`, `VisibilityPicker`, `ProfilePreview`, `MyLinks`, `SocialLinks` | `components/profile/` | 02 form: per network a brand tile, the field, a labelled "Quitar" with "Deshacer", and Todos / Conexiones / Solo yo per item; a live "Así te ven" preview before and after connecting; 09 list of links with their level; other people's links as labelled brand tiles |
+| `NetworkIcon` | `components/brand/` | each network's own glyph (Simple Icons, CC0) in its brand color |
 | `MonitoBuilder` | `components/monito/MonitoBuilder.tsx` | 02b builder, saves `avatar` through `PATCH /api/me` |
 | `LiveCard`, `InviteCard` | `components/home/` | Home LIVE card with rising pairs; invite progress |
 | `ConnectTabs`, `ScanPanel`, `RegisterForm` | `components/connect/` | 04 tabs, QR (`qrcode` package), camera scan with `BarcodeDetector`, handle lookup; 05 form |

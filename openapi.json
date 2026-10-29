@@ -10699,7 +10699,7 @@
             "$ref": "#/components/schemas/AvatarMode"
           },
           "links": {
-            "description": "`@user` or a URL; an empty string removes the link.",
+            "description": "A handle (`@user`), for WhatsApp a phone number with country code, or a URL of that network; an empty string removes the link. A value that fails these rules returns 400.",
             "type": "object",
             "propertyNames": {
               "$ref": "#/components/schemas/LinkKey"
