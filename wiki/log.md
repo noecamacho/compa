@@ -35,3 +35,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | AI summaries API contract
 
 - `docs/contracts/ai-summaries-api.md` documents routes 14–16 of the MVP API plan for the summary screen, with camelCase `nextSteps`, the extra `fallback` flag and proposed error codes; `lib/audio/recorder.ts` records audio client-side with the 2-minute limit.
+
+## [2026-10-29] query | Do AI summaries stay in the MVP?
+
+- Team decision: yes. `docs/specs/2026-10-29-summaries.md` extends the approved data model (lifts M17 for summaries only): `interactions` table, no points (M3), accepted connections only, one approved summary per connection, audio never stored. The API contract drops `pointsAwarded` and adds 409 `connection_not_accepted`.

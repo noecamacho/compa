@@ -60,3 +60,4 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 - [docs/agent-tooling.md](../docs/agent-tooling.md) — caveman, ponytail, Serena, repomix.
 - [docs/jira/compa-bootstrap-ticket.md](../docs/jira/compa-bootstrap-ticket.md) — the Epic draft, ready to paste.
 - [docs/contracts/ai-summaries-api.md](../docs/contracts/ai-summaries-api.md) — transcribe, draft and approve routes, recorder usage and UI mocks.
+- [docs/specs/2026-10-29-summaries.md](../docs/specs/2026-10-29-summaries.md) — summaries stay in the MVP: `interactions` table, no points, accepted connections only.

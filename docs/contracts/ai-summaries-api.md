@@ -20,7 +20,9 @@ For the front end of `/connection/[id]/summary` ([screens/summary](../../wiki/sc
 2. Recording → `POST /api/transcribe` → the text lands in the note field. The text field is **always visible**.
 3. `POST /api/interactions/draft` with the note → an editable summary, topics and next steps.
 4. The user edits.
-5. `POST /api/interactions/:id/approve` with the edited values → +25 points each; both people see the summary.
+5. `POST /api/interactions/:id/approve` with the edited values → both people see the summary. Summaries award **no points**: points come only from connections (data model M3, [summaries spec](../specs/2026-10-29-summaries.md)).
+
+Summaries exist only for **accepted** connections (data model M6). Hide the summary entry point while a connection is pending.
 
 ## 1. `POST /api/transcribe`
 
@@ -43,7 +45,7 @@ Success `200`:
 | Status | Code | UI must |
 | --- | --- | --- |
 | 400 | `invalid_audio` (**proposed**) | Show the text field: "No pudimos leer el audio, escríbelo." |
-| 401 | `unauthorized` (**proposed**) | Send the user to `/recover`. |
+| 401 | `unauthorized` (**proposed**) | Send the user to sign in with LinkedIn (data model M2). |
 | 502 | `transcription_failed` (**proposed**) | Show the text field and keep the user on the screen (plan p. 12). |
 
 Network failure: `uploadForTranscript` throws `ApiError` with status `0` and code `network_error`; treat it like 502.
@@ -81,8 +83,9 @@ Success `201`:
 | 201 with `fallback: true` | — | Show the user's text as the editable summary with a note "No pudimos generar el resumen; revisa tu texto." Approve stays enabled. |
 | 201 with `substantive: false` | — | Show "Cuéntanos de qué hablaron" and disable Approve until a new draft is substantive. |
 | 400 | `invalid_input` (**proposed**) | Highlight `fields.text`; empty notes cannot be sent. |
-| 401 | `unauthorized` (**proposed**) | Send the user to `/recover`. |
+| 401 | `unauthorized` (**proposed**) | Send the user to sign in with LinkedIn (data model M2). |
 | 404 | `not_found` (**proposed**) | "Esta conexión no existe." Back to `/me`. |
+| 409 | `connection_not_accepted` (**proposed**) | "Primero la otra persona tiene que aceptar la conexión." Back to the connection. |
 | 502 | `summary_failed` (**proposed**) | Same as `fallback: true`, but there is no `interactionId`: keep the typed text editable and retry the draft before approving. |
 
 The 502 is only a safety net: `draftSummary` already falls back without throwing, so the normal AI failure arrives as `201` with `fallback: true`.
@@ -110,21 +113,20 @@ Success `200` (the `interaction` shape is **proposed**; the plan only names it):
     "topics": ["React", "Vue"],
     "nextSteps": ["Luis comparte el repo con Ana"],
     "approvedAt": "2026-10-29T08:15:00.000Z"
-  },
-  "pointsAwarded": 25
+  }
 }
 ```
 
 | Status | Code | UI must |
 | --- | --- | --- |
 | 400 | `invalid_input` (**proposed**) | Highlight the fields in `fields`. |
-| 401 | `unauthorized` (**proposed**) | Send the user to `/recover`. |
+| 401 | `unauthorized` (**proposed**) | Send the user to sign in with LinkedIn (data model M2). |
 | 403 | `not_author` (**proposed**) | "Solo quien escribió el resumen puede aprobarlo." |
 | 404 | `not_found` (**proposed**) | Back to the connection. |
 | 409 | `not_substantive` | Block approval: "El resumen no describe una conversación real. Cuéntanos de qué hablaron." Let the user edit the note and draft again. |
 | 409 | `already_approved` | This connection already has an approved summary (one per connection). Show it read-only; do not retry. |
 
-Replay is safe: a second approve returns 409 and never awards points twice. Disable the button while the request runs.
+Replay is safe: a second approve returns 409 and never creates a second approved summary. Disable the button while the request runs.
 
 ## Using `lib/audio/recorder.ts`
 
@@ -201,7 +203,6 @@ export const mocks = {
         nextSteps: ["Luis comparte el repo con Ana"],
         approvedAt: "2026-10-29T08:15:00.000Z",
       },
-      pointsAwarded: 25,
     },
   },
   approveNotSubstantive: {

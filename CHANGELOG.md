@@ -11,6 +11,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Added
 
 - Browser audio recorder in `lib/audio/recorder.ts` (2-minute auto-stop, typed errors, transcript upload) and the AI summaries API contract in `docs/contracts/ai-summaries-api.md`.
+- `docs/specs/2026-10-29-summaries.md`: summaries stay in the MVP on top of the approved data model, with no points and one approved summary per accepted connection.
 - AI core in `lib/ai/`: audio transcription and Spanish summary drafts with Structured Outputs and a verbatim fallback; placeholder topics vocabulary in `lib/topics.ts`.
 - LLM wiki (`raw/`, `wiki/`) ingesting the 21-page COMPA build plan and the 14-slide Build Day deck with 34 cross-linked, cited pages, an index, an append-only log, a glossary and an open-questions page.
 - `AGENTS.md` as the single agent and contributor instruction file, including the hackathon fast path for the 2026-10-29 10:00 submission deadline; `CLAUDE.md` imports it.
