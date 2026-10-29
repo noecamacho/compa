@@ -23,7 +23,7 @@ export function Screen({ children, dock = false, gap = 14, className, admin = fa
       {admin && (
         <Link
           href="/admin"
-          className="fixed top-4 right-4 z-10 hidden h-9 items-center rounded-chip bg-ink px-3 font-display text-[13px] font-bold text-paper border-ink lg:flex"
+          className="fixed top-4 right-4 z-40 hidden h-9 items-center rounded-chip bg-ink px-3 font-display text-[13px] font-bold text-paper border-ink lg:flex"
         >
           Admin
         </Link>
