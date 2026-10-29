@@ -3,6 +3,7 @@ import { Icon } from "@/components/icons";
 import { Monito } from "@/components/monito/Monito";
 import { Pill } from "@/components/ui/Pill";
 import { SAMPLE_PEOPLE, type SampleId } from "@/lib/monito/sample-people";
+import { HeroStage } from "./HeroStage";
 
 type Spot = { who: SampleId; left: string; width: string; tilt: number; delay: number; flip?: boolean; back?: boolean };
 
@@ -17,11 +18,15 @@ const SPOTS: Spot[] = [
 const spotStyle = (spot: Spot): CSSProperties =>
   ({ left: spot.left, width: spot.width, animationDelay: `${spot.delay}s`, "--tilt": `${spot.tilt}deg` }) as CSSProperties;
 
-type Props = { label: string; topic: string };
+// Words the animated hero says: extra topics after `topic`, the greeting on hover, and the reconnection badge.
+export type CrowdStory = { topics: readonly string[]; hello: string; reconnection: string };
 
-export function Crowd({ label, topic }: Props) {
+type Props = { label: string; topic: string; story?: CrowdStory };
+
+// The static crowd: server-rendered, and the fallback for reduced motion, missing WebGL and while Three.js loads.
+function CrowdArt({ topic }: { topic: string }) {
   return (
-    <div role="img" aria-label={label} className="relative mx-auto aspect-[16/10] w-full max-w-[560px]">
+    <>
       <span className="absolute right-[4%] bottom-[9%] left-[4%] h-[2.5px] rounded-full bg-ink opacity-80" />
       <span className="absolute top-[42%] right-[36%] left-[36%]" style={{ borderTop: "3px dashed #1E1B2E" }} />
       {SPOTS.map((spot) => (
@@ -42,6 +47,21 @@ export function Crowd({ label, topic }: Props) {
           {topic}
         </Pill>
       </span>
+    </>
+  );
+}
+
+// The landing hero. With `story`, a Three.js vignette (components/landing/HeroScene.tsx) plays over the same box.
+export function Crowd({ label, topic, story }: Props) {
+  return (
+    <div role="img" aria-label={label} className="relative mx-auto aspect-[16/10] w-full max-w-[560px]">
+      {story ? (
+        <HeroStage story={{ topics: [topic, ...story.topics], hello: story.hello, reconnection: story.reconnection }}>
+          <CrowdArt topic={topic} />
+        </HeroStage>
+      ) : (
+        <CrowdArt topic={topic} />
+      )}
     </div>
   );
 }

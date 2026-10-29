@@ -15,6 +15,7 @@ export const landing: typeof es.landing = {
   signInError: "We couldn't sign you in. Please try again.",
   sceneLabel: "Two monitos connect and earn +50",
   sampleTopic: "Raising capital",
+  scene: { topics: ["Product design", "AI in production"], hello: "Hi!", reconnection: "reconnection" },
 };
 
 export const door: typeof es.door = {

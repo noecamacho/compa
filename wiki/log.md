@@ -155,3 +155,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Why did compa.lol go down?
 
 - PR #40 merged with a typecheck error (a teammate change made the monito body required). The Vercel build failed, and the keep-one-deployment cleanup still deleted the working deployment, so the site served 404 until the fix (PR #41) deployed. Now: PR checks gate merges, the deploy runs lint/typecheck/tests first, and cleanup only runs when the new deployment is READY.
+
+## [2026-10-29] change | Landing hero in Three.js
+
+- The landing hero (`components/landing/Crowd.tsx`) now plays a looping Three.js connection story (`components/landing/hero-scene.ts`, timeline in `lib/landing/hero-timeline.ts`); the SVG crowd remains the SSR, reduced-motion and no-WebGL fallback.

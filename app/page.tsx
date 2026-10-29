@@ -24,7 +24,7 @@ export default async function LandingPage({ searchParams }: Props) {
 
         <div className="grid flex-1 items-center gap-8 py-8 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] md:gap-12 lg:py-12">
           <div className="flex max-w-[520px] flex-col gap-5 md:order-2 md:max-w-none">
-            <Crowd label={copy.sceneLabel} topic={copy.sampleTopic} />
+            <Crowd label={copy.sceneLabel} topic={copy.sampleTopic} story={copy.scene} />
           </div>
 
           <div className="flex max-w-[560px] flex-col gap-6 md:order-1">

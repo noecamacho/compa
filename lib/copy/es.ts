@@ -295,6 +295,8 @@ export const landing = {
   signInError: "No pudimos iniciar tu sesión. Inténtalo de nuevo.",
   sceneLabel: "Dos monitos se conectan y ganan +50",
   sampleTopic: "Levantar capital",
+  // The animated hero (components/landing/HeroScene.tsx): more topics, the hover greeting and the reconnection badge.
+  scene: { topics: ["Diseño de producto", "IA en producción"], hello: "¡Hola!", reconnection: "reencuentro" },
 };
 
 // /e/<code>: the event door.
