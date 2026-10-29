@@ -48,9 +48,11 @@ export default async function HomePage({ searchParams }: Props) {
     apiGetOrNull("/api/invites/me", Invites),
   ]);
   const list = listOrNull ?? NO_CONNECTIONS;
-  const empty = demo === "empty" || list.totals.connections === 0;
+  // Only the mock preview blanks real data; a person with no connections yet still sees their requests and invitees.
+  const demoEmpty = demo === "empty";
+  const empty = demoEmpty || list.totals.connections === 0;
   const looks = new Map<string, MonitoLook | undefined>(list.people.map((entry) => [entry.person.id, entry.person.avatar]));
-  const incoming = empty ? [] : list.incoming;
+  const incoming = demoEmpty ? [] : list.incoming;
   return (
     <Screen dock>
       <div className="flex h-[46px] items-center justify-between">
@@ -87,7 +89,7 @@ export default async function HomePage({ searchParams }: Props) {
 
       {invites && (
         <div data-tour="invite">
-          <InviteCard invites={empty ? { ...invites, invitees: [] } : invites} />
+          <InviteCard invites={demoEmpty ? { ...invites, invitees: [] } : invites} />
         </div>
       )}
 
