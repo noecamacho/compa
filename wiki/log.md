@@ -60,3 +60,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | API scaffold from the data-model and API specs
 
 - Code implements `docs/specs/2026-10-29-data-model.md` and `2026-10-29-api.md` (branch `docs/COMPA-TBD-mvp-api-plan`): `db/schema.ts`, `drizzle/0000_init.sql`, `lib/api/routes.ts` (contract, mock mode, `openapi.json`) and `lib/server/*`; usage in `docs/api-quickstart.md`. Summaries award `SUMMARY_POINTS = 25` per M18, which the summaries contract still contradicts ("no points").
+
+## [2026-10-29] query | Why were teammates' deploys blocked?
+
+- Vercel Pro blocks native git deploys whose commit author is not on the Vercel team. Deploys now run from GitHub Actions with the owner's token (repo secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`); `vercel.json` sets `git.deploymentEnabled: false`. Production is `https://compa.lol`.
