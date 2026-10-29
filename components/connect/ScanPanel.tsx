@@ -152,7 +152,8 @@ export function ScanPanel() {
     <div className="flex flex-col gap-3">
       <div className="relative h-[360px] overflow-hidden rounded-[28px] bg-ink border-ink" style={{ boxShadow: "4px 4px 0 #6F6A7E" }}>
         <video ref={videoRef} muted playsInline className="absolute inset-0 h-full w-full object-cover opacity-80" />
-        <span role="status" className="absolute top-[14px] right-0 left-0 px-4 text-center text-[12px] font-extrabold tracking-[1.2px] text-paper uppercase">
+        {/* A camera problem is a sentence to read, not a label: no caps, so the longer hint stays legible. */}
+        <span role="status" className={`absolute top-[14px] right-0 left-0 px-4 text-center font-extrabold text-paper ${available ? "text-[12px] tracking-[1.2px] uppercase" : "text-[13px] leading-[1.35]"}`}>
           {copy.camera[status]}
         </span>
         {/* A fixed 205×220 frame, centered, so the corners stay square however wide the viewfinder gets. */}

@@ -116,7 +116,9 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
           )}
           {stale && (
             <span role="status" className="absolute top-2 right-2">
-              <Pill tone="sun-soft">{gone ? copy.codeChanged : copy.staleFor(staleForS)}</Pill>
+              <Pill tone="sun-soft" className="whitespace-normal! py-1 lg:text-[clamp(12px,1.1vw,26px)]" style={{ height: "auto", minHeight: 28 }}>
+                {gone ? copy.codeChanged : copy.staleFor(staleForS)}
+              </Pill>
             </span>
           )}
         </section>
