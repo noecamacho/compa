@@ -241,3 +241,7 @@ Append-only. Newest entry at the bottom. Entry format: `## [YYYY-MM-DD] <operati
 ## [2026-10-29] query | Codex marketing evidence
 
 Added five bilingual, 20-second marketing compositions using Brag full and Hyperframes, with actual Codex process/session evidence, mock attendee UI, the existing Codex Conf test event, a labeled network research prototype and an event QR poster. Sources, licenses and verification limits are recorded in [the evidence index](../docs/evidence/codex/README.md); this satisfies the concrete-artifact portion of [hackathon requirements](hackathon-requirements.md#evidence-of-codex-use-s-8-s-14), pending submission review. No real JSConf event is featured and no production data was written.
+
+## [2026-10-29] query | Should generated video evidence be linted?
+
+- `eslint.config.mjs` excludes `docs/evidence/**` so the vendored GSAP render runtime is preserved without application lint rules. The follow-up `bun run lint` passed with two existing research-prototype warnings; details in [video verification](../docs/evidence/codex/verification.md).
