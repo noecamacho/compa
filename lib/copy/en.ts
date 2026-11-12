@@ -998,3 +998,9 @@ export const datesAndPeople: typeof es.datesAndPeople = {
   showAll: "View all my connections",
   noMutual: "You have no mutual connections yet.",
 };
+
+// F2: the live screen's own controls.
+export const liveScreen: typeof es.liveScreen = {
+  fullscreen: "Full screen",
+  back: "Back",
+};

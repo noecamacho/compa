@@ -1,7 +1,9 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useMemo, useState, useSyncExternalStore } from "react";
+import { FullscreenButton } from "@/components/admin/FullscreenButton";
 import { Pill } from "@/components/ui/Pill";
 import type { LiveSnapshotT } from "@/lib/api/schemas";
 import { copyFor, formatNumber, type Dictionary } from "@/lib/copy";
@@ -17,7 +19,25 @@ const LiveStage = dynamic(() => import("./LiveStage"), { ssr: false });
 
 type LiveCopy = Dictionary["live"];
 
-type Props = { code: string; initial: LiveSnapshotT; qrSvg: string; joinUrl: string; locale: Locale };
+type Props = { code: string; initial: LiveSnapshotT; qrSvg: string; joinUrl: string; locale: Locale; backHref: string | null };
+
+const CONTROL = "box-border h-11 shrink-0 cursor-pointer items-center rounded-button bg-white px-3 text-[13px] font-extrabold text-ink no-underline border-ink shadow-hard-2 pressable lg:text-[clamp(13px,0.85vw,20px)]";
+
+// Full screen for the projector (gone once it is on: nothing to press on a wall; no room for it on a phone), and the
+// way back to the app.
+function Controls({ backHref, locale }: { backHref: string | null; locale: Locale }) {
+  const copy = copyFor(locale).liveScreen;
+  return (
+    <span className="ml-auto flex items-center gap-2 [:fullscreen_&]:hidden">
+      <FullscreenButton label={copy.fullscreen} className={`${CONTROL} hidden sm:inline-flex`} />
+      {backHref && (
+        <Link href={backHref} className={`${CONTROL} inline-flex`} data-testid="live-back">
+          {copy.back}
+        </Link>
+      )}
+    </span>
+  );
+}
 
 const COUNTERS = [
   { key: "checkedIn", tone: "#DDF1FF" },
@@ -81,7 +101,7 @@ function Legend({ copy }: { copy: LiveCopy }) {
 
 // The projected dashboard (API spec A5): the loom and the counters, a person's card on tap, the leaderboard otherwise.
 // Built for 1920×1080 at 10 m; fluid down to a 1280 laptop, an 834 tablet and a 390 phone.
-export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale }: Props) {
+export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale, backHref }: Props) {
   const locale = useLocale(serverLocale);
   const copy = copyFor(locale).live;
   const { snapshot, stale, gone, staleForS } = useLiveSnapshot(code, initial);
@@ -115,6 +135,7 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
                 {snapshot.event.phase === "ended" ? copy.ended : copy.soon}
               </Pill>
             )}
+            <Controls backHref={backHref} locale={locale} />
           </span>
           <h1 className="m-0 truncate font-display text-[28px] leading-[1.05] font-bold lg:text-[clamp(28px,2.6vw,64px)]">{snapshot.event.name}</h1>
         </div>
@@ -138,7 +159,12 @@ export function LiveBoard({ code, initial, qrSvg, joinUrl, locale: serverLocale 
           {ended && rows.length > 0 && <Podium rows={rows} locale={locale} onSelect={setSelectedId} />}
           {selected && <PersonPanel code={code} id={selected} rank={rows.find((row) => row.id === selected)?.rank ?? null} locale={locale} onClose={() => setSelectedId(null)} />}
           {!selected && !(ended && rows.length <= 3) && <LeaderboardPanel rows={rows} locale={locale} onSelect={setSelectedId} from={ended ? 3 : 0} limit={LIVE_BOARD_ROWS} />}
-          {!ended && <Feed snapshot={snapshot} locale={locale} limit={4} />}
+          {/* A short laptop keeps three pairs, so the five leaders above fit (P18). */}
+          {!ended && (
+            <div className="contents lg:[@media(max-height:800px)]:[&_li:nth-child(n+4)]:hidden">
+              <Feed snapshot={snapshot} locale={locale} limit={4} />
+            </div>
+          )}
         </div>
       </div>
 

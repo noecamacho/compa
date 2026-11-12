@@ -27,7 +27,7 @@ test.describe("home in mock mode", () => {
     await expect(page.getByRole("link", { name: tour.incoming.title(firstName(paola.name)) })).toHaveAttribute("href", `/requests/${ids.connection3}`);
     await expect(page.getByRole("main").getByText(home.until(eventDoor.name, formatHour(locale, eventDoor.endsAt)))).toBeVisible();
     await expect(page.getByRole("main").getByText(String(eventDoor.counters.connections), { exact: true })).toBeVisible();
-    await expect(page.getByRole("link", { name: liveCopy(testInfo.project.use.locale).seeLiveLabel(eventDoor.name) })).toHaveAttribute("href", `/e/${eventDoor.code}/live`);
+    await expect(page.getByRole("link", { name: liveCopy(testInfo.project.use.locale).seeLiveLabel(eventDoor.name) })).toHaveAttribute("href", `/e/${eventDoor.code}/live?from=home`);
     const [before, rank, after] = home.rank(6, formatPoints(locale, 1265));
     await expect(page.getByRole("link", { name: `${before}${rank}${after}` })).toHaveAttribute("href", "/ranking");
     await expect(page.getByRole("link", { name: new RegExp(home.connectHint) })).toHaveAttribute("href", "/connect");
@@ -70,8 +70,19 @@ test.describe("home in mock mode", () => {
     await expect(card).toContainText(copy.seeLive);
     await expect(card.getByTestId("live-stage")).toBeVisible();
     await card.click();
-    await expect(page).toHaveURL(new RegExp(`/e/${eventDoor.code}/live$`));
+    await expect(page).toHaveURL(new RegExp(`/e/${eventDoor.code}/live\\?from=home$`));
     await expect(page.getByRole("heading", { name: eventDoor.name })).toBeVisible();
+  });
+
+  test("the live card has no view chips and skips the views that do not fit it @mock", async ({ page }, testInfo) => {
+    const copy = liveCopy(testInfo.project.use.locale);
+    // ?viz= pins a view on the big screen; on Home it must not bring back the race the card cuts.
+    await page.goto("/home?viz=race");
+    const card = page.getByRole("link", { name: copy.seeLiveLabel(eventDoor.name) });
+    const stage = card.getByTestId("live-stage");
+    await expect(stage).toHaveAttribute("data-current", /.+/);
+    await expect(stage).not.toHaveAttribute("data-current", "race");
+    await expect(card.getByTestId("live-viz-indicator")).toHaveCount(0);
   });
 
   test("a failed snapshot keeps the card and its door counters, still tappable @mock", async ({ page }, testInfo) => {
@@ -81,7 +92,7 @@ test.describe("home in mock mode", () => {
     const card = page.getByRole("link", { name: copy.seeLiveLabel(eventDoor.name) });
     await expect(card).toContainText(String(eventDoor.counters.connections));
     await expect(card.getByTestId("live-stage")).toHaveCount(0);
-    await expect(card).toHaveAttribute("href", `/e/${eventDoor.code}/live`);
+    await expect(card).toHaveAttribute("href", `/e/${eventDoor.code}/live?from=home`);
   });
 
   test("polling drops an answered request and clears the bell @mock", async ({ page }, testInfo) => {

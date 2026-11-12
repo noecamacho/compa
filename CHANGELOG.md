@@ -17,6 +17,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Big screen and Home card: the Home card no longer shows view chips that looked tappable but only opened the live screen, and skips the race, whose names it cut. The big screen has a full screen button and, when opened from Home, a link back to Home; on a phone its view chips are 44 px tall on one row. At 1280×720 all five leaders fit, and the type view no longer cuts names at 1920.
 - Connect and note details: the search by name on the scan tab has a visible search button (it only answered to Enter); a fourth topic on the register screen says the limit is three instead of doing nothing; and when the microphone is refused on the note screen the message says so instead of "we couldn't summarize the note".
 - Activity switches to days after 24 hours and calendar dates after a week. Profiles show the actual last interaction date; mutual connections open a filtered list. Notifications include dates and use the same localized clock as Home.
 - The big screen and the ranking show each person's own monito. They used to draw the default monito for everyone (the ranking, for everyone but your connections), and a person who chose their monito over their LinkedIn photo still appeared with the photo. Leaderboard rows and the first 8 people of the live snapshot now carry `avatar` and `avatarMode`; the snapshot grows by 2 KB whatever the size of the room.

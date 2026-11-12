@@ -1015,3 +1015,9 @@ export const datesAndPeople = {
   showAll: "Ver todas mis conexiones",
   noMutual: "Todavía no tienen conexiones en común.",
 };
+
+// F2: the live screen's own controls.
+export const liveScreen = {
+  fullscreen: "Pantalla completa",
+  back: "Volver",
+};
