@@ -25,7 +25,7 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
   - [screens/scan](screens/scan.md) — `/c/[handle]`: connect with or without a session.
   - [screens/connection](screens/connection.md) — "Connected with…" card and the record or summarize choice.
   - [screens/summary](screens/summary.md) — dictate or write, AI draft, approve.
-  - [screens/connections](screens/connections.md) — list of connections, pending summaries first.
+  - [screens/connections](screens/connections.md) — connections list, profile history dates and mutual-person filtering.
 - [live-dashboard](live-dashboard.md) — the projected `/live` layout, data feeds and privacy limits; as built: Loom+ with pulse, feed and state cards.
 - [points-rules](points-rules.md) — the points table, hourly cap and idempotency rules.
 - [topics-vocabulary](topics-vocabulary.md) — the fixed list of about 40 topics and where it is used.

@@ -39,7 +39,7 @@ test.describe("another person in mock mode", () => {
     await expect(page.getByRole("link", { name: new RegExp(person.badges) })).toHaveAttribute("href", `/me/badges?of=${valeria.handle}`);
     await expect(page.getByRole("main").getByText(person.badgesCount(valeriaProfile.badges?.length ?? 0, BADGE_IDS.length))).toBeVisible();
     await expect(page.getByRole("link", { name: new RegExp(person.lastTime) })).toHaveAttribute("href", `/connections/${ids.connection}/note`);
-    await expect(page.getByRole("link", { name: new RegExp(person.mutualConnections) })).toHaveAttribute("href", "/connections");
+    await expect(page.getByRole("link", { name: new RegExp(person.mutualConnections) })).toHaveAttribute("href", `/connections?mutual=${valeria.handle}`);
     await expect(page.getByRole("link", { name: common.back })).toHaveAttribute("href", "/connections");
   });
 

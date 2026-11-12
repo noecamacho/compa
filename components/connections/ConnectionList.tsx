@@ -41,7 +41,7 @@ const metAt = (entry: PersonHistoryT, eventName: string) => entry.meetings.some(
 const onlyOutsideEvents = (entry: PersonHistoryT) => entry.meetings.every((meeting) => meeting.status !== "accepted" || meeting.event === null);
 
 // `requests` (the incoming requests) renders under the header and chip, above the list.
-type Props = { people: PersonHistoryT[]; eventName: string | null; requests?: ReactNode };
+type Props = { people: PersonHistoryT[]; eventName: string | null; requests?: ReactNode; mutual?: { name: string; ids: string[] } };
 
 // No connections at all: say what will appear here and point to the one action that fills it.
 function EmptyConnections() {
@@ -62,7 +62,7 @@ function EmptyConnections() {
 }
 
 // 07 Conexiones: search by name, the current-event chip narrows to tonight, the type chips filter, each row opens the person.
-export function ConnectionList({ people, eventName, requests }: Props) {
+export function ConnectionList({ people, eventName, requests, mutual }: Props) {
   const all = useCopy();
   const copy = all.connections;
   const outsideLabel = all.common.outsideEventShort;
@@ -73,7 +73,8 @@ export function ConnectionList({ people, eventName, requests }: Props) {
   const searchId = useId();
   // Closing the search box drops its filter, so the list never looks cut with no field to clear it.
   const needle = searching ? slugify(query) : "";
-  const shown = people
+  const candidates = mutual ? people.filter((entry) => mutual.ids.includes(entry.person.id)) : people;
+  const shown = candidates
     .filter((entry) => filter === "all" || typeOf(entry) === filter)
     .filter((entry) => !needle || slugify(entry.person.name).includes(needle))
     .filter((entry) => !onlyEvent || !eventName || metAt(entry, eventName));
@@ -86,25 +87,28 @@ export function ConnectionList({ people, eventName, requests }: Props) {
   );
   const heading = (
     <StickyBar className="flex items-center justify-between">
-      <h1 className="m-0 font-display text-[28px] leading-[1.1] font-bold">{copy.title}</h1>
+      <h1 className="m-0 font-display text-[28px] leading-[1.1] font-bold">{mutual ? all.datesAndPeople.mutualWith(mutual.name) : copy.title}</h1>
       <IconButton label={copy.search} aria-expanded={searching} aria-controls={searchId} onClick={() => setSearching(!searching)}>
         <Icon name="search" size={20} />
       </IconButton>
     </StickyBar>
   );
-  if (people.length === 0) {
+  const clearMutual = mutual && <ButtonLink href="/connections" variant="secondary" height={44}>{all.datesAndPeople.showAll}</ButtonLink>;
+  if (candidates.length === 0) {
     return (
       <>
         {heading}
+        {clearMutual}
         {eventChip}
         {requests}
-        <EmptyConnections />
+        {mutual ? <Muted className="text-[14px] font-bold">{all.datesAndPeople.noMutual}</Muted> : <EmptyConnections />}
       </>
     );
   }
   return (
     <>
       {heading}
+      {clearMutual}
       {searching && (
         <div id={searchId} className="animate-fade-in relative">
           <label htmlFor={`${searchId}-input`} className="sr-only">

@@ -257,3 +257,11 @@ The first full branch CI run left one Linux WebKit creation failure. The [audit]
 ## [2026-11-11] query | Clock-driven demo scenario contract (D1)
 
 - Added the isolated, pure [D1 scenario contract](../docs/contracts/demo-scenario.md): 150 fictional profiles, a synchronized 120-second cycle, fresh snapshots and a connection every 3 seconds. Types and integration boundaries for D2 are fixed in `lib/demo/cast.ts` and `lib/demo/scenario.ts`; the existing live fixtures and production routes are unchanged. Point constants follow [points rules](points-rules.md). Wiki lint: the new contract and its relative links are indexed; no existing open question is resolved by this foundation.
+
+## [2026-11-11] query | Profile history dates and mutual connections
+
+F3 corrects profile history dates, mutual-person filtering, relative activity older than a day, and dated notifications. Sources and regression coverage: [connections](screens/connections.md).
+
+## [2026-11-11] lint | F3 profile and activity documentation
+
+Checked relative links in index, log and connections page; the updated page remains indexed and its new behavior cites implementation and regression tests.
