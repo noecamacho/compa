@@ -253,3 +253,7 @@ Compared failing mock shards across the four current changes and historical CI, 
 ## [2026-11-11] query | Linux WebKit event creation follow-up
 
 The first full branch CI run left one Linux WebKit creation failure. The [audit](../docs/testing/e2e-stability.md#linux-webkit-event-creation) records both CI attempts, a deterministic lost-input-event regression, and the hydration/clear/refill fix; all assertions remain active.
+
+## [2026-11-11] query | Clock-driven demo scenario contract (D1)
+
+- Added the isolated, pure [D1 scenario contract](../docs/contracts/demo-scenario.md): 150 fictional profiles, a synchronized 120-second cycle, fresh snapshots and a connection every 3 seconds. Types and integration boundaries for D2 are fixed in `lib/demo/cast.ts` and `lib/demo/scenario.ts`; the existing live fixtures and production routes are unchanged. Point constants follow [points rules](points-rules.md). Wiki lint: the new contract and its relative links are indexed; no existing open question is resolved by this foundation.
