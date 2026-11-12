@@ -21,7 +21,7 @@ test.describe("incoming requests @mock", () => {
   test("/connections lists incoming requests on top", async ({ page }, testInfo) => {
     const { tour } = copyOf(testInfo);
     await page.goto("/connections");
-    const card = page.locator(`a[href="/requests/${ids.connection3}"]`);
+    const card = page.getByRole("main").locator(`a[href="/requests/${ids.connection3}"]`);
     await expect(card).toContainText(tour.incoming.title(firstName(paola.name)));
   });
 
@@ -30,12 +30,12 @@ test.describe("incoming requests @mock", () => {
     // The page renders on the server; only the browser's polls see the new request.
     await page.route("**/api/connections", (route) => route.fulfill({ json: { ...connectionList, incoming: [fresh, ...connectionList.incoming] } }));
     await page.goto("/connections");
-    await expect(page.locator(`a[href="/requests/${ids.connection3}"]`)).toBeVisible();
-    await expect(page.locator(`a[href="/requests/${NEW_REQUEST_ID}"]`)).toHaveCount(0);
+    await expect(page.getByRole("main").locator(`a[href="/requests/${ids.connection3}"]`)).toBeVisible();
+    await expect(page.getByRole("main").locator(`a[href="/requests/${NEW_REQUEST_ID}"]`)).toHaveCount(0);
     // A cold dev server hydrates late; the 4 s budget starts once the poller is running.
     await page.waitForLoadState("networkidle");
     await page.waitForRequest("**/api/connections", { timeout: 4_000 });
-    await expect(page.locator(`a[href="/requests/${NEW_REQUEST_ID}"]`)).toContainText(firstName(andrea.name));
+    await expect(page.getByRole("main").locator(`a[href="/requests/${NEW_REQUEST_ID}"]`)).toContainText(firstName(andrea.name));
   });
 
   test("accepting after the event ended shows the expired copy", async ({ page, mock }, testInfo) => {

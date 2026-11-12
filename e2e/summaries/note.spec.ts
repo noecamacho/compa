@@ -1,14 +1,20 @@
 // 08b NotaVoz (F-37): read the saved draft, type or record a note, draft it (default, fallback, not substantive),
-// approve it (+15) and every documented error. The note copy is Spanish-only, so both locales assert lib/copy/es.
+// approve it (+15) and every documented error. Copy follows each project's locale.
 import { errorCopy } from "../fixtures";
 import type { Page, Request } from "@playwright/test";
 import { E } from "../../lib/api/errors";
 import { connectionDetail, draft, ids, valeriaConnected } from "../../lib/api/examples";
 import { approveSummary, draftSummary, transcribe } from "../../lib/api/routes";
 import { Me } from "../../lib/api/schemas";
-import { common, connections, note } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { SUMMARY_POINTS } from "../../lib/points";
 import { acceptedConnection, call, expect, expectApiError, expectNotFound, sendRequest, test } from "../profiles/helpers";
+
+let { common, connections, note } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, connections, note } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const NOTE = `/connections/${ids.connection}/note`;
 const DRAFT_URL = "**/api/interactions/draft";
@@ -40,14 +46,14 @@ test.describe("voice note in mock mode", () => {
     const interaction = connectionDetail.interaction;
     if (!interaction) throw new Error("the mock detail has no interaction");
     await expect(page.getByRole("heading", { name: note.title })).toBeVisible();
-    await expect(page.getByText(valeriaConnected.name, { exact: true })).toBeVisible();
-    await expect(page.getByText(new RegExp(`^${connections.types.reconnection} · `))).toBeVisible();
-    await expect(page.getByText(note.understood)).toBeVisible();
-    await expect(page.getByText(interaction.title, { exact: true })).toBeVisible();
-    for (const bullet of interaction.bullets) await expect(page.getByText(bullet, { exact: true })).toBeVisible();
-    for (const topic of interaction.topics) await expect(page.getByText(topic, { exact: true }).first()).toBeVisible();
-    await expect(page.getByText(note.pendingLabel)).toBeVisible();
-    await expect(page.getByText(pointsNote)).toBeVisible();
+    await expect(page.getByRole("main").getByText(valeriaConnected.name, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(new RegExp(`^${connections.types.reconnection} · `))).toBeVisible();
+    await expect(page.getByRole("main").getByText(note.understood)).toBeVisible();
+    await expect(page.getByRole("main").getByText(interaction.title, { exact: true })).toBeVisible();
+    for (const bullet of interaction.bullets) await expect(page.getByRole("main").getByText(bullet, { exact: true })).toBeVisible();
+    for (const topic of interaction.topics) await expect(page.getByRole("main").getByText(topic, { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole("main").getByText(note.pendingLabel)).toBeVisible();
+    await expect(page.getByRole("main").getByText(pointsNote)).toBeVisible();
     await expect(page.getByRole("link", { name: common.back })).toHaveAttribute("href", `/people/${valeriaConnected.handle}`);
   });
 
@@ -79,8 +85,8 @@ test.describe("voice note in mock mode", () => {
     await expect(page.getByRole("button", { name: note.draftButton })).toBeDisabled();
     const request = await draftTyped(page);
     expect(request.postDataJSON()).toEqual({ connectionId: ids.connection, text: TYPED });
-    await expect(page.getByText(draft.summary, { exact: true })).toBeVisible();
-    for (const step of draft.nextSteps) await expect(page.getByText(step, { exact: true }).first()).toBeVisible();
+    await expect(page.getByRole("main").getByText(draft.summary, { exact: true })).toBeVisible();
+    for (const step of draft.nextSteps) await expect(page.getByRole("main").getByText(step, { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("button", { name: note.save })).toBeEnabled();
   });
 
@@ -89,8 +95,8 @@ test.describe("voice note in mock mode", () => {
     await mock.mockExample("fallback", DRAFT_URL);
     await openTyping(page);
     await draftTyped(page);
-    await expect(page.getByText(fallbackExample.summary, { exact: true })).toBeVisible();
-    await expect(page.getByText(draft.nextSteps[1] ?? "", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("main").getByText(fallbackExample.summary, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(draft.nextSteps[1] ?? "", { exact: true })).toHaveCount(0);
   });
 
   test("a not substantive draft cannot be approved @mock", async ({ page, mock }) => {
@@ -99,39 +105,39 @@ test.describe("voice note in mock mode", () => {
     await openTyping(page);
     await draftTyped(page, "hola");
     await page.getByRole("button", { name: note.save }).click();
-    await expect(page.getByText(errorCopy(E.notSubstantive))).toBeVisible();
+    await expect(page.getByRole("main").getByText(errorCopy(E.notSubstantive))).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`${NOTE}$`));
   });
 
-  for (const [code, text] of [
-    ["summary_failed", errorCopy(E.summaryFailed)],
-    ["connection_not_accepted", errorCopy(E.connectionNotAccepted)],
-    ["not_found", errorCopy(E.notFound)],
-    ["invalid_input", errorCopy(E.invalidInput)],
-    ["rate_limited", common.rateLimited],
-    ["limit_reached", common.limitReached],
+  for (const [code, error] of [
+    ["summary_failed", E.summaryFailed],
+    ["connection_not_accepted", E.connectionNotAccepted],
+    ["not_found", E.notFound],
+    ["invalid_input", E.invalidInput],
+    ["rate_limited", E.rateLimited],
+    ["limit_reached", E.limitReached],
   ] as const) {
     test(`a draft that fails with ${code} keeps the text and says why @mock`, async ({ page, mock }) => {
       expect(draftSummary.errors.map((error) => error.code)).toContain(code);
       await mock.mockError(code, DRAFT_URL);
       await openTyping(page);
       await draftTyped(page);
-      await expect(page.getByText(text, { exact: true })).toBeVisible();
+      await expect(page.getByRole("main").getByText(errorCopy(error), { exact: true })).toBeVisible();
       await expect(page.getByPlaceholder(note.notePlaceholder)).toHaveValue(TYPED);
     });
   }
 
-  for (const [code, text] of [
-    ["already_approved", errorCopy(E.alreadyApproved)],
-    ["not_author", errorCopy(E.notAuthor)],
-    ["not_found", errorCopy(E.notFound)],
+  for (const [code, error] of [
+    ["already_approved", E.alreadyApproved],
+    ["not_author", E.notAuthor],
+    ["not_found", E.notFound],
   ] as const) {
     test(`an approval that fails with ${code} stays on the note @mock`, async ({ page, mock }) => {
       expect(approveSummary.errors.map((error) => error.code)).toContain(code);
       await mock.mockError(code, APPROVE_URL);
       await page.goto(NOTE);
       await page.getByRole("button", { name: note.save }).click();
-      await expect(page.getByText(text, { exact: true })).toBeVisible();
+      await expect(page.getByRole("main").getByText(errorCopy(error), { exact: true })).toBeVisible();
       await expect(page).toHaveURL(new RegExp(`${NOTE}$`));
       await expect(page.getByRole("button", { name: note.save })).toBeEnabled();
     });
@@ -141,11 +147,11 @@ test.describe("voice note in mock mode", () => {
     test.skip(browserName !== "chromium", "only Chromium has the fake microphone");
     await page.goto(NOTE);
     await page.getByRole("button", { name: note.rerecord }).click();
-    await expect(page.getByText(/^Grabando · /)).toBeVisible();
+    await expect(page.getByRole("main").getByText(note.recording(""), { exact: false })).toBeVisible();
     const drafted = page.waitForRequest(isPost("/api/interactions/draft"));
     await page.getByRole("button", { name: note.stop }).click();
     expect((await drafted).postDataJSON()).toEqual({ connectionId: ids.connection, text: transcriptExample?.text });
-    await expect(page.getByText(draft.summary, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(draft.summary, { exact: true })).toBeVisible();
   });
 
   test("an unknown connection is not found @mock", async ({ page, mock }) => {
