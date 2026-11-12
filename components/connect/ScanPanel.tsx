@@ -171,7 +171,8 @@ export function ScanPanel() {
   async function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const text = query.trim();
-    if (text.length < 2) return;
+    // Too short to search: the visible button still answers, by putting the cursor in the field.
+    if (text.length < 2) return event.currentTarget.querySelector("input")?.focus();
     try {
       const { people } = await apiCall("GET", `/api/users?q=${encodeURIComponent(text)}`, PeopleSearch);
       setResults(people);
@@ -211,15 +212,20 @@ export function ScanPanel() {
         <label htmlFor="search-handle" className="sr-only">
           {copy.searchLabel}
         </label>
-        <Icon name="search" size={20} className="absolute top-[14px] left-[14px] text-muted" />
         <input
           id="search-handle"
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder={copy.searchPlaceholder}
-          className="box-border block h-12 w-full rounded-[14px] bg-white pr-[14px] pl-11 font-body text-[15px] font-bold text-ink outline-none placeholder:text-muted border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
+          className="box-border block h-12 w-full rounded-[14px] bg-white pr-[54px] pl-[14px] font-body text-[15px] font-bold text-ink outline-none placeholder:text-muted border-ink transition-shadow duration-200 focus:shadow-[0_0_0_4px_#6BE4A3]"
         />
+        {/* HIT_AREA cannot sit on an absolutely positioned control, so the span carries the position. */}
+        <span className="absolute top-1 right-1">
+          <button type="submit" aria-label={copy.searchButton} className={`${HIT_AREA} flex h-10 w-10 cursor-pointer items-center justify-center rounded-[10px] bg-mint p-0 text-ink border-ink pressable`}>
+            <Icon name="search" size={20} strokeWidth={2.8} />
+          </button>
+        </span>
       </form>
       {results.length > 0 && (
         <ul aria-label={copy.searchLabel} className="m-0 flex list-none flex-col gap-2 p-0">

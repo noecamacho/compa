@@ -127,7 +127,7 @@ export function NoteEditor({ detail }: Props) {
       if (!mounted.current) return recording.current.cancel();
       setPhase({ kind: "recording", seconds: 0 });
     } catch {
-      setPhase({ kind: "typing", text: "", error: copy.failed });
+      setPhase({ kind: "typing", text: "", error: copy.micUnavailable });
     }
   }
 

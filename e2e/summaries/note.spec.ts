@@ -154,6 +154,17 @@ test.describe("voice note in mock mode", () => {
     await expect(page.getByRole("main").getByText(draft.summary, { exact: true })).toBeVisible();
   });
 
+  test("a refused microphone says so and the note can still be typed @mock", async ({ page, context }) => {
+    await context.addInitScript(() => {
+      const deny = () => Promise.reject(new DOMException("Permission denied", "NotAllowedError"));
+      if (navigator.mediaDevices) Reflect.set(navigator.mediaDevices, "getUserMedia", deny);
+    });
+    await page.goto(NOTE);
+    await page.getByRole("button", { name: note.rerecord }).click();
+    await expect(page.getByText(note.micUnavailable)).toBeVisible();
+    await expect(page.getByPlaceholder(note.notePlaceholder)).toBeEditable();
+  });
+
   test("an unknown connection is not found @mock", async ({ page, mock }) => {
     await mock.mockServerError("connection_not_found");
     await page.goto(NOTE);

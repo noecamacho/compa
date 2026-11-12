@@ -254,6 +254,10 @@ Compared failing mock shards across the four current changes and historical CI, 
 
 The first full branch CI run left one Linux WebKit creation failure. The [audit](../docs/testing/e2e-stability.md#linux-webkit-event-creation) records both CI attempts, a deterministic lost-input-event regression, and the hydration/clear/refill fix; all assertions remain active.
 
+## [2026-11-11] query | Clock-driven demo scenario contract (D1)
+
+- Added the isolated, pure [D1 scenario contract](../docs/contracts/demo-scenario.md): 150 fictional profiles, a synchronized 120-second cycle, fresh snapshots and a connection every 3 seconds. Types and integration boundaries for D2 are fixed in `lib/demo/cast.ts` and `lib/demo/scenario.ts`; the existing live fixtures and production routes are unchanged. Point constants follow [points rules](points-rules.md). Wiki lint: the new contract and its relative links are indexed; no existing open question is resolved by this foundation.
+
 ## [2026-11-11] change | Each person's own monito on the big screen and the ranking
 
 - The live snapshot and the leaderboard rows now carry the person's monito (`avatar`) and which picture they chose (`avatarMode`), so the board, the race, the final podium and `/ranking` stop drawing the default monito for everyone. Only the first 8 people of the snapshot carry it (`LIVE_LOOK_ROWS`), the rows the board draws: measured on the 2,500-person scenario the snapshot goes from 454.1 KB to 456.1 KB, against 1,115.7 KB if everyone carried theirs. `/ranking` no longer reads `GET /api/connections` to find looks. Pages updated: [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (finding 9); API spec §5.

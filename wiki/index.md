@@ -79,3 +79,4 @@ Read this page first. Every page in `wiki/` is listed here with a one-line summa
 - [docs/specs/2026-10-29-api.md](../docs/specs/2026-10-29-api.md) — approved API: LinkedIn auth, profile and visibility, check-in, scan → pending → accept (20/10), silent decline, connections by person, public `/live` snapshot, leaderboard, Realtime channels.
 - [docs/plans/2026-10-28-mvp-api-plan.md](../docs/plans/2026-10-28-mvp-api-plan.md) — MVP API plan: LinkedIn OIDC sign-up with handle+code fallback, field visibility, entities, 18 routes, connection tracking, `/live` contract, tonight's build plan.
 - [docs/contracts/ai-summaries-api.md](../docs/contracts/ai-summaries-api.md) — transcribe, draft and approve routes, recorder usage and UI mocks.
+- [docs/contracts/demo-scenario.md](../docs/contracts/demo-scenario.md) — D1 clock-driven fictional room, exported types and integration responsibilities for D2.

@@ -680,6 +680,7 @@ export const connect: typeof es.connect = {
   },
   notFound: "We couldn't find anyone with that name.",
   invalidQr: "That QR isn't from Compa. Scan someone's personal QR.",
+  searchButton: "Search",
 };
 
 export const register: typeof es.register = {
@@ -705,6 +706,7 @@ export const register: typeof es.register = {
   outsideEventNotice: "This person isn't at an event right now: the connection is saved to your connections, with no points or ranking.",
   retryUpload: "Retry sending",
   micUnavailable: "We couldn't use the microphone; you can go on without a note.",
+  maxTopics: (max) => `Up to ${max} topics. Remove one to pick another.`,
 };
 
 export const confirmation: typeof es.confirmation = {
@@ -788,7 +790,7 @@ export const note: typeof es.note = {
   rerecord: "Record again",
   edit: "Edit",
   transcribing: "Compa is listening…",
-  failed: "We couldn't summarize the note. Type what you talked about:",
+  micUnavailable: "We couldn't use the microphone. Check the permission or type what you talked about:",
   notePlaceholder: "Type what you talked about",
   draftButton: "Summarize",
   retryUpload: "Retry sending the note",

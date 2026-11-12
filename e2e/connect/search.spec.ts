@@ -63,6 +63,24 @@ test.describe("connect: search by name", () => {
     await expect(page.getByText(connect.notFound)).toHaveCount(0);
   });
 
+  test("the search button runs the search; with nothing typed it puts the cursor in the field @mock", async ({ page }, testInfo) => {
+    const { connect } = copyOf(testInfo);
+    const box = page.getByRole("searchbox", { name: connect.searchLabel });
+    const button = page.getByRole("button", { name: connect.searchButton, exact: true });
+    await page.goto("/connect?tab=scan");
+    await waitForHydration(page, "#search-handle");
+    await box.fill("Valeria");
+    const sent = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/users");
+    await button.click();
+    expect(new URL((await sent).url()).searchParams.get("q")).toBe("Valeria");
+    await expect(page.getByRole("listitem").filter({ hasText: valeriaPublic.name })).toBeVisible();
+    await box.fill("");
+    await page.getByRole("heading", { name: connect.title }).click();
+    await expect(box).not.toBeFocused();
+    await button.click();
+    await expect(box).toBeFocused();
+  });
+
   test("a real attendee is found by handle; an unknown one is not @real", async ({ page, realUser, testUsers }, testInfo) => {
     const { connect } = copyOf(testInfo);
     const [target] = await testUsers(1);

@@ -44,6 +44,7 @@ export function RegisterForm({ profile }: Props) {
   // The scanned person is at no running event: the request is made outside any event and pays nothing.
   const outside = profile.atEvent === false;
   const [topics, setTopics] = useState<string[]>([]);
+  const [topicRefused, setTopicRefused] = useState(false);
   const [note, setNote] = useState<NoteState>({ status: "idle" });
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -51,8 +52,10 @@ export function RegisterForm({ profile }: Props) {
   const total = outside ? 0 : KIND[kind].points + (topics.length ? TOPICS_POINTS : 0) + (note.status === "ready" ? SUMMARY_POINTS : 0);
 
   const toggleTopic = (topic: string) => {
-    if (topics.includes(topic)) return setTopics(topics.filter((item) => item !== topic));
-    if (topics.length < MAX_TOPICS) setTopics([...topics, topic]);
+    const refused = !topics.includes(topic) && topics.length >= MAX_TOPICS;
+    setTopicRefused(refused);
+    if (refused) return;
+    setTopics(topics.includes(topic) ? topics.filter((item) => item !== topic) : [...topics, topic]);
   };
 
   async function confirm() {
@@ -136,6 +139,11 @@ export function RegisterForm({ profile }: Props) {
             </Chip>
           ))}
         </div>
+        {topicRefused && (
+          <span role="status" className="text-[12px] font-extrabold text-muted">
+            {copy.maxTopics(MAX_TOPICS)}
+          </span>
+        )}
       </div>
 
       <div data-tour="note">
