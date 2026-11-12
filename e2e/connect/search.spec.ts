@@ -4,7 +4,7 @@ import type { Page } from "@playwright/test";
 import { valeriaPublic } from "../../lib/api/examples";
 import { connect, register } from "../../lib/copy/es";
 import { expect, test } from "../fixtures";
-import { connectLink, skipTours } from "./helpers";
+import { connectLink, copyOf, skipTours } from "./helpers";
 
 const searchBox = (page: Page) => page.getByRole("searchbox", { name: connect.searchLabel });
 
@@ -50,6 +50,23 @@ test.describe("connect: search by name", () => {
     await search(page, "Valeria Ochoa");
     await expect(page.getByText(valeriaPublic.name)).toBeVisible();
     await expect(page.getByText(connect.notFound)).toHaveCount(0);
+  });
+
+  test("the search button runs the search; with nothing typed it puts the cursor in the field @mock", async ({ page }, testInfo) => {
+    const copy = copyOf(testInfo).connect;
+    const box = page.getByRole("searchbox", { name: copy.searchLabel });
+    const button = page.getByRole("button", { name: copy.searchButton, exact: true });
+    await page.goto("/connect?tab=scan");
+    await box.fill("Valeria");
+    const sent = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/users");
+    await button.click();
+    expect(new URL((await sent).url()).searchParams.get("q")).toBe("Valeria");
+    await expect(page.getByText(valeriaPublic.name)).toBeVisible();
+    await box.fill("");
+    await page.getByRole("heading", { name: copy.title }).click();
+    await expect(box).not.toBeFocused();
+    await button.click();
+    await expect(box).toBeFocused();
   });
 
   test("a real attendee is found by handle; an unknown one is not @real", async ({ page, realUser, testUsers }) => {

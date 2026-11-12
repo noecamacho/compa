@@ -7,6 +7,7 @@ import { connectionDetail, draft, ids, valeriaConnected } from "../../lib/api/ex
 import { approveSummary, draftSummary, transcribe } from "../../lib/api/routes";
 import { Me } from "../../lib/api/schemas";
 import { common, connections, note } from "../../lib/copy/es";
+import { copyOf } from "../connect/helpers";
 import { SUMMARY_POINTS } from "../../lib/points";
 import { acceptedConnection, call, expect, expectApiError, expectNotFound, sendRequest, test } from "../profiles/helpers";
 
@@ -146,6 +147,18 @@ test.describe("voice note in mock mode", () => {
     await page.getByRole("button", { name: note.stop }).click();
     expect((await drafted).postDataJSON()).toEqual({ connectionId: ids.connection, text: transcriptExample?.text });
     await expect(page.getByText(draft.summary, { exact: true })).toBeVisible();
+  });
+
+  test("a refused microphone says so and the note can still be typed @mock", async ({ page, context }, testInfo) => {
+    const copy = copyOf(testInfo).note;
+    await context.addInitScript(() => {
+      const deny = () => Promise.reject(new DOMException("Permission denied", "NotAllowedError"));
+      if (navigator.mediaDevices) Reflect.set(navigator.mediaDevices, "getUserMedia", deny);
+    });
+    await page.goto(NOTE);
+    await page.getByRole("button", { name: copy.rerecord }).click();
+    await expect(page.getByText(copy.micUnavailable)).toBeVisible();
+    await expect(page.getByPlaceholder(copy.notePlaceholder)).toBeEditable();
   });
 
   test("an unknown connection is not found @mock", async ({ page, mock }) => {

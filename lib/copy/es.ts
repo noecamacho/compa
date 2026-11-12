@@ -236,6 +236,7 @@ export const connect = {
   },
   notFound: "No encontramos a nadie con ese nombre.",
   invalidQr: "Ese QR no es de Compa. Escanea el QR personal de alguien.",
+  searchButton: "Buscar",
 };
 
 export const register = {
@@ -261,6 +262,7 @@ export const register = {
   outsideEventNotice: "Esta persona no está en un evento ahora: la conexión se guarda en tus conexiones, sin puntos ni ranking.",
   micUnavailable: "No pudimos usar el micrófono; puedes seguir sin nota.",
   retryUpload: "Reintentar envío",
+  maxTopics: (max: number) => `Máximo ${max} temas. Quita uno para elegir otro.`,
 };
 
 export const confirmation = {
@@ -344,7 +346,7 @@ export const note = {
   rerecord: "Regrabar",
   edit: "Editar",
   transcribing: "Compa está escuchando…",
-  failed: "No pudimos resumir la nota. Escribe de qué hablaron:",
+  micUnavailable: "No pudimos usar el micrófono. Revisa el permiso o escribe de qué hablaron:",
   notePlaceholder: "Escribe de qué hablaron",
   draftButton: "Resumir",
   retryUpload: "Reintentar envío de la nota",

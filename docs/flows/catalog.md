@@ -441,14 +441,14 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Field | Detail |
 | --- | --- |
 | Actor | Checked-in attendee |
-| Entry | Search field on the Escanear tab |
+| Entry | Search field on the Escanear tab: Enter or the search button |
 | Pre | — |
 | Happy path (intended) | Type 2+ characters → `GET` search over my event's attendees → choose → 05 |
 | Alternates | Today: `slugify(query)` → `GET /api/users/{slug}`, an exact handle match only |
 | Errors | `user_not_found` → `connect.notFound` |
 | Edge cases | Fails on handle suffixes (`-2`) and partial names (gap analysis U11). Today any signed-in user can probe handles of people at any event, an enumeration risk ([R-30](edge-cases-and-risks.md#security)). Homonyms |
 | Status | UI Partial · API Missing · DB Ready |
-| E2E coverage | `e2e/connect/search.spec.ts`: prefix, case and accent match; only same-event attendees; me excluded; no current event message; 429 copy |
+| E2E coverage | `e2e/connect/search.spec.ts`: prefix, case and accent match; only same-event attendees; me excluded; no current event message; 429 copy; the search button runs the search and, with nothing typed, focuses the field |
 | Tickets | [T-034](backlog.md#t-034) |
 
 <a id="f-20"></a>
@@ -576,9 +576,9 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Happy path | Pick Nueva (+50) or Reencuentro (+20) → `knew`; pick up to 3 topic chips (+5) → total on the button → Confirmar |
 | Alternates | No topics (allowed) |
 | Errors | 400 `invalid_input` (more than 3 topics, more than 40 characters) |
-| Edge cases | The chips are a free list in `lib/copy/es.ts` (`register.topics`), not `interests` (T-051). On `main` topics are **dropped** by `insertRequest` (IP stores them). +5 is never awarded (T-040). The total on the button is an estimate: the server decides the kind on acceptance (M4). The 3-chip limit is client-side, and the server also caps at 3 |
+| Edge cases | The chips are a free list in `lib/copy/es.ts` (`register.topics`), not `interests` (T-051). On `main` topics are **dropped** by `insertRequest` (IP stores them). +5 is never awarded (T-040). The total on the button is an estimate: the server decides the kind on acceptance (M4). The 3-chip limit is client-side, and the server also caps at 3; a fourth tap shows `register.maxTopics` until the next accepted tap |
 | Status | UI Partial · API Partial · DB Missing (IP `connections.topics`) |
-| E2E coverage | `e2e/connect/register.spec.ts`: the fourth chip is disabled; the total updates; topics persist and show on the done page; +5 credited after accept (T-040) |
+| E2E coverage | `e2e/connect/register.spec.ts`: the fourth chip is refused with the limit notice; the total updates; topics persist and show on the done page; +5 credited after accept (T-040) |
 | Tickets | [T-040](backlog.md#t-040), [T-051](backlog.md#t-051) |
 
 <a id="f-28"></a>
@@ -739,10 +739,10 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Pre | Accepted |
 | Happy path | Record or type → `POST /api/transcribe` → `POST /api/interactions/draft { connectionId, text }` → summary, topics, next steps → edit → `POST /api/interactions/{id}/approve` → +15 → `summary.approved` broadcast → `/people/<handle>` |
 | Alternates | Note from 05 in `sessionStorage` is drafted automatically. Re-record. Edit |
-| Errors | `connection_not_accepted`, `not_found`, 502 `summary_failed`, `fallback: true` (own text kept), `not_substantive` (cannot approve), `already_approved`, `not_author` → `note.failed` or *raw msg* |
+| Errors | `connection_not_accepted`, `not_found`, 502 `summary_failed`, `fallback: true` (own text kept), `not_substantive` (cannot approve), `already_approved`, `not_author` → `apiErrors` copy; microphone refused when recording again → `note.micUnavailable` |
 | Edge cases | **The page loads through the 501 detail on `main`.** Every draft inserts a row (T-057), and drafts are unlimited (T-052). The view credits +15 to **both** (T-050). PII and hallucination (T-055). "Recordar" has no handler (T-056). The summary is in the speaker's language. Approve edits are capped at 1 200 characters (DB check) |
 | Status | UI Mock-only · API Ready · DB Ready |
-| E2E coverage | `e2e/summaries/note.spec.ts`: type → draft (mock example) → approve → +15; mock `fallback`, `notSubstantive` examples; `summary_failed`, `already_approved`, `not_author` error copy; double approve → one award |
+| E2E coverage | `e2e/summaries/note.spec.ts`: type → draft (mock example) → approve → +15; mock `fallback`, `notSubstantive` examples; `summary_failed`, `already_approved`, `not_author` error copy; double approve → one award; mic refused → copy and the text box |
 | Tickets | [T-030](backlog.md#t-030), [T-050](backlog.md#t-050), [T-052](backlog.md#t-052), [T-055](backlog.md#t-055), [T-056](backlog.md#t-056) |
 
 <a id="f-38"></a>
