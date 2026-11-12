@@ -2,9 +2,15 @@
 // BarcodeDetector, so a stand-in detector returns whatever QR text the spec shows it. WebKit grants no camera.
 import type { BrowserContext, Page } from "@playwright/test";
 import { valeriaPublic } from "../../lib/api/examples";
-import { connect, register } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { expect, test } from "../fixtures";
 import { connectLink, skipTours } from "./helpers";
+
+let { connect, register } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ connect, register } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 // The stand-in counts its calls so a spec can wait for detection rounds instead of sleeping.
 async function fakeDetector(context: BrowserContext): Promise<void> {

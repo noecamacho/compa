@@ -3,8 +3,14 @@
 import type { Page, Request } from "@playwright/test";
 import { Me } from "../../lib/api/schemas";
 import { me as diego } from "../../lib/api/examples";
-import { common, networks, profile as copy, visibility } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { expect, test, waitForHydration } from "./helpers";
+
+let { common, networks, profile: copy, visibility, screenState } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, networks, profile: copy, visibility, screenState } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const isPatch = (path: string) => (request: Request) => request.method() === "PATCH" && new URL(request.url()).pathname === path;
 
@@ -27,9 +33,9 @@ test.describe("profile (mock)", () => {
     await expect(field(page, copy.company)).toHaveValue(diego.company ?? "");
     await expect(field(page, copy.city)).toHaveValue(diego.city ?? "");
     await expect(field(page, networks.instagram)).toHaveValue(/diego\.rmz/);
-    await expect(page.getByText(copy.step)).toBeVisible();
-    await expect(page.getByText(copy.fromLinkedIn)).toBeVisible();
-    await expect(page.getByText(visibility.legend.connections)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.step)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.fromLinkedIn)).toBeVisible();
+    await expect(page.getByRole("main").getByText(visibility.legend.connections)).toBeVisible();
     await expect(picker(page, copy.role).getByRole("button", { name: visibility.levels.public })).toHaveAttribute("aria-pressed", "true");
   });
 
@@ -39,7 +45,7 @@ test.describe("profile (mock)", () => {
     await field(page, copy.city).fill("Zapopan");
     await picker(page, copy.role).getByRole("button", { name: visibility.levels.connections }).click();
     await picker(page, copy.company).getByRole("button", { name: visibility.levels.hidden }).click();
-    await expect(page.getByText(/Al conectar también verán: .*Puesto/)).toBeVisible();
+    await expect(page.getByRole("main").getByText(visibility.unlocks("").split(":")[0] ?? "").filter({ hasText: copy.role })).toBeVisible();
 
     const mePatch = page.waitForRequest(isPatch("/api/me"));
     const visibilityPatch = page.waitForRequest(isPatch("/api/me/visibility"));
@@ -57,7 +63,7 @@ test.describe("profile (mock)", () => {
     const instagram = field(page, networks.instagram);
     await instagram.fill("no válido!!");
     await instagram.blur();
-    await expect(page.getByText(copy.linkError.instagram)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.linkError.instagram)).toBeVisible();
     await expect(instagram).toHaveAttribute("aria-invalid", "true");
     await submit(page, copy.next).click();
     await expect(page.getByRole("alert").filter({ hasText: copy.fixErrors })).toBeVisible();
@@ -71,7 +77,7 @@ test.describe("profile (mock)", () => {
     await field(page, networks.github).fill("@diego-dev");
     await page.getByRole("button", { name: copy.removeLabel(networks.instagram) }).click();
     await expect(field(page, networks.instagram)).toHaveValue("");
-    await expect(page.getByText(copy.removed(networks.instagram))).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.removed(networks.instagram))).toBeVisible();
     await page.getByRole("button", { name: copy.undo }).click();
     await expect(field(page, networks.instagram)).toHaveValue(/diego\.rmz/);
     await page.getByRole("button", { name: copy.removeLabel(networks.instagram) }).click();
@@ -106,7 +112,7 @@ test.describe("profile (mock)", () => {
 
   test("?from=me edits the profile and returns to /me @mock", async ({ page }) => {
     await openProfile(page, "?from=me");
-    await expect(page.getByText(copy.step)).toHaveCount(0);
+    await expect(page.getByRole("main").getByText(copy.step)).toHaveCount(0);
     await expect(page.getByRole("link", { name: common.back })).toHaveAttribute("href", "/me");
     await field(page, copy.name).fill("Diego R.");
     const mePatch = page.waitForRequest(isPatch("/api/me"));
@@ -118,8 +124,8 @@ test.describe("profile (mock)", () => {
   test("a failed /api/me while rendering shows the error screen @mock", async ({ page, mock }) => {
     await mock.mockServerError("unauthorized");
     await page.goto("/onboarding/profile");
-    await expect(page.getByRole("alert").filter({ hasText: /Algo se atoró/ })).toBeVisible();
-    await expect(page.getByRole("link", { name: /Ir al inicio/ })).toHaveAttribute("href", "/");
+    await expect(page.getByRole("alert").filter({ hasText: screenState.errorTitle })).toBeVisible();
+    await expect(page.getByRole("link", { name: screenState.goHome })).toHaveAttribute("href", "/");
   });
 });
 
@@ -155,7 +161,7 @@ test.describe("profile (real)", () => {
     await field(page, copy.name).fill(`${user.name} QA`);
     await submit(page, copy.save).click();
     await expect(page).toHaveURL(/\/me$/);
-    await expect(page.getByText(`${user.name} QA`).first()).toBeVisible();
+    await expect(page.getByRole("main").getByText(`${user.name} QA`).first()).toBeVisible();
     const me = Me.parse(await (await page.request.get("/api/me")).json());
     expect(me.name).toBe(`${user.name} QA`);
     expect(me.nameEdited).toBe(true);

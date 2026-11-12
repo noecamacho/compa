@@ -1,12 +1,17 @@
 // 08 PerfilOtro (F-40): another person's card filtered by our relation (stranger, pending, peer), hidden links never
-// shown, and unknown handles. Mock assertions follow the visitor locale.
+// shown, and unknown handles. Copy follows each project's locale.
 import { ids, valeriaProfile } from "../../lib/api/examples";
 import { UserProfile } from "../../lib/api/schemas";
 import { BADGE_IDS } from "../../lib/badges/catalog";
-import { networks, person } from "../../lib/copy/es";
-import { copyOf } from "../connect/helpers";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { formatPoints } from "../../lib/format";
 import { acceptedConnection, call, expect, expectApiError, expectNotFound, sendRequest, skipTours, test } from "./helpers";
+
+let { common, networks, person } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, networks, person } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const valeria = valeriaProfile.card;
 
@@ -19,8 +24,7 @@ const OWNER = {
 test.describe("another person in mock mode", () => {
   test.beforeEach(async ({ page }) => skipTours(page));
 
-  test("a peer's card shows who they are, our numbers and their links @mock", async ({ page }, testInfo) => {
-    const { person, networks, common } = copyOf(testInfo);
+  test("a peer's card shows who they are, our numbers and their links @mock", async ({ page }) => {
     await page.goto(`/people/${valeria.handle}`);
     await expect(page.getByRole("heading", { name: valeria.name })).toBeVisible();
     await expect(page.getByRole("main").getByText(`${valeria.headline} · ${valeria.company}`)).toBeVisible();
@@ -39,8 +43,7 @@ test.describe("another person in mock mode", () => {
     await expect(page.getByRole("link", { name: common.back })).toHaveAttribute("href", "/connections");
   });
 
-  test("the last-time row opens the note and the badges card opens their badges @mock", async ({ page }, testInfo) => {
-    const { person, common } = copyOf(testInfo);
+  test("the last-time row opens the note and the badges card opens their badges @mock", async ({ page }) => {
     await page.goto(`/people/${valeria.handle}`);
     await page.getByRole("link", { name: new RegExp(person.lastTime) }).click();
     await expect(page).toHaveURL(new RegExp(`/connections/${ids.connection}/note$`));
@@ -50,10 +53,10 @@ test.describe("another person in mock mode", () => {
     await expect(page.getByRole("link", { name: common.back })).toHaveAttribute("href", `/people/${valeria.handle}`);
   });
 
-  test("an unknown handle is not found @mock", async ({ page, mock }, testInfo) => {
+  test("an unknown handle is not found @mock", async ({ page, mock }) => {
     await mock.mockServerError("user_not_found");
     await page.goto("/people/nobody-here");
-    await expect(page.getByRole("heading", { name: copyOf(testInfo).notFound.title, exact: true })).toBeVisible();
+    await expectNotFound(page);
   });
 });
 

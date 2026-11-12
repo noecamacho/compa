@@ -4,7 +4,8 @@ import type { APIRequestContext, APIResponse, BrowserContext, Page } from "@play
 import type { z } from "zod";
 import type { TestProfileInput, TestUserT } from "../../lib/api/admin-schemas";
 import { Accepted, ConnectionRequest } from "../../lib/api/schemas";
-import { screenState } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { expect, test as base, TEST_EVENT_SLUG } from "../fixtures";
 import type { SignedInUser } from "../fixtures/two-users";
 
@@ -50,15 +51,13 @@ export async function acceptedConnection(from: SignedInUser, to: SignedInUser): 
 }
 
 export async function expectErrorScreen(page: Page): Promise<void> {
+  const { screenState } = copyFor(localeFromAcceptLanguage(base.info().project.use.locale));
   await expect(page.getByRole("alert").filter({ hasText: screenState.errorTitle })).toBeVisible();
   await expect(page.getByRole("button", { name: screenState.retry })).toBeVisible();
   await expect(page.getByRole("link", { name: screenState.goHome, exact: true })).toHaveAttribute("href", "/home");
 }
 
-// Next.js' built-in 404 screen: the app has no custom not-found page outside /e/<code>.
-export async function expectNotFound(page: Page): Promise<void> {
-  await expect(page.getByText(/could not be found/i)).toBeVisible();
-}
+export { expectNotFound } from "../fixtures/screens";
 
 type ProfileInput = z.input<typeof TestProfileInput>;
 

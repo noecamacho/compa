@@ -25,8 +25,8 @@ test.describe("home in mock mode", () => {
     await expect(page.getByRole("link", { name: home.hello(firstName(me.name)) })).toHaveAttribute("href", "/me");
     await expect(page.getByRole("link", { name: bellLabel(testInfo.project.use.locale, 3) })).toHaveAttribute("href", "/notifications");
     await expect(page.getByRole("link", { name: tour.incoming.title(firstName(paola.name)) })).toHaveAttribute("href", `/requests/${ids.connection3}`);
-    await expect(page.getByText(home.until(eventDoor.name, formatHour(locale, eventDoor.endsAt)))).toBeVisible();
-    await expect(page.getByText(String(eventDoor.counters.connections), { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(home.until(eventDoor.name, formatHour(locale, eventDoor.endsAt)))).toBeVisible();
+    await expect(page.getByRole("main").getByText(String(eventDoor.counters.connections), { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: liveCopy(testInfo.project.use.locale).seeLiveLabel(eventDoor.name) })).toHaveAttribute("href", `/e/${eventDoor.code}/live`);
     const [before, rank, after] = home.rank(6, formatPoints(locale, 1265));
     await expect(page.getByRole("link", { name: `${before}${rank}${after}` })).toHaveAttribute("href", "/ranking");
@@ -35,7 +35,7 @@ test.describe("home in mock mode", () => {
     await expect(invite).toHaveAttribute("href", "/invite");
     await expect(invite.getByLabel(home.inviteProgress(1, 3))).toBeVisible();
     await expect(invite).toContainText(home.inviteLeft(2));
-    await expect(page.getByText(home.startHere)).toHaveCount(0);
+    await expect(page.getByRole("main").getByText(home.startHere)).toHaveCount(0);
   });
 
   test("the cards navigate: request, ranking, connect, invite, bell and my profile @mock", async ({ page }, testInfo) => {
@@ -55,7 +55,7 @@ test.describe("home in mock mode", () => {
 
   test("the first night shows the empty variant @mock", async ({ page }) => {
     await page.goto("/home?demo=empty");
-    await expect(page.getByText(home.startHere)).toBeVisible();
+    await expect(page.getByRole("main").getByText(home.startHere)).toBeVisible();
     await expect(page.getByRole("link", { name: new RegExp(home.connectHintEmpty) })).toHaveAttribute("href", "/connect");
     // The live card's ranking row turns into a nudge to the first connection.
     await expect(page.getByRole("link", { name: new RegExp(`${home.firstConnection}.*\\+50`) })).toHaveAttribute("href", "/connect");
@@ -149,7 +149,7 @@ test.describe("home in real mode", () => {
     await ana.page.goto("/home");
     await expect(ana.page.getByRole("link", { name: home.hello(firstName(ana.user.name)) })).toBeVisible();
     await expect(ana.page.getByText(new RegExp(`^${testEvent.name} · `))).toBeVisible();
-    await expect(ana.page.getByText(home.startHere)).toBeVisible();
+    await expect(ana.page.getByRole("main").getByText(home.startHere)).toBeVisible();
     await expect(ana.page.getByRole("link", { name: new RegExp(home.firstConnection) })).toHaveAttribute("href", "/connect");
     await expect(ana.page.getByRole("link", { name: new RegExp(home.inviteTitle) })).toContainText(home.inviteLeft(3));
   });
@@ -167,7 +167,7 @@ test.describe("home in real mode", () => {
     const [ana, bruno] = await people([{}, {}]);
     if (!ana || !bruno) throw new Error("test users not created");
     await bruno.page.goto("/home");
-    await expect(bruno.page.getByText(home.startHere)).toBeVisible();
+    await expect(bruno.page.getByRole("main").getByText(home.startHere)).toBeVisible();
     const id = await sendRequest(ana, bruno.user);
     await expect(bruno.page.getByRole("link", { name: tour.incoming.title(firstName(ana.user.name)) })).toHaveAttribute("href", `/requests/${id}`);
   });
@@ -181,7 +181,7 @@ test.describe("home in real mode", () => {
       await ana.page.goto("/home");
       await expect(ana.page.getByRole("link", { name: new RegExp(home.rank(0, "50").join("").replace("#0", "#\\d+")) })).toHaveAttribute("href", "/ranking", { timeout: 2_000 });
     }).toPass({ timeout: 15_000 });
-    await expect(ana.page.getByText(home.startHere)).toHaveCount(0);
+    await expect(ana.page.getByRole("main").getByText(home.startHere)).toHaveCount(0);
     await expect(ana.page.getByRole("link", { name: new RegExp(home.connectHint) })).toBeVisible();
   });
 });

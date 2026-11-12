@@ -46,16 +46,16 @@ test.describe("invite in mock mode", () => {
     const { home, invite: copy, common } = copyOf(testInfo);
     await page.goto("/invite");
     await expect(page.getByRole("heading", { name: copy.title })).toBeVisible();
-    await expect(page.getByText(copy.prize)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.prize)).toBeVisible();
     await expect(page.getByRole("img", { name: home.goldenCapLabel })).toBeVisible();
-    await expect(page.getByText(copy.progress(1, invitesExample.target), { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.progress(1, invitesExample.target), { exact: true })).toBeVisible();
     const [andrea] = invitesExample.invitees;
-    await expect(page.getByText(firstName(andrea?.person.name ?? ""), { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(firstName(andrea?.person.name ?? ""), { exact: true })).toBeVisible();
     // The prize line also says "+100 pts"; the invitee's slot is the second one on the page.
-    await expect(page.getByText(`+${andrea?.points ?? 0} pts`, { exact: true }).nth(1)).toBeVisible();
-    for (const slot of [2, 3]) await expect(page.getByText(copy.friendSlot(slot), { exact: true })).toBeVisible();
-    await expect(page.getByText(copy.cap, { exact: true })).toBeVisible();
-    await expect(page.getByText(shownLink(mockLink.url), { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(`+${andrea?.points ?? 0} pts`, { exact: true }).nth(1)).toBeVisible();
+    for (const slot of [2, 3]) await expect(page.getByRole("main").getByText(copy.friendSlot(slot), { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.cap, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(shownLink(mockLink.url), { exact: true })).toBeVisible();
     await expect(page.getByRole("main").getByTestId("invite-points")).toContainText(copy.pointsAt(mockEvent.name));
     await expect(page.getByRole("link", { name: copy.showQr })).toHaveAttribute("href", "/connect");
     await expect(page.getByRole("link", { name: common.close })).toHaveAttribute("href", "/home");

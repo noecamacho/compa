@@ -2,8 +2,14 @@
 // sent to sign-in with `next` for every session-only screen, and GET/PATCH /api/me plus /api/me/visibility.
 import type { BrowserContext, Page } from "@playwright/test";
 import { Me, VisibilitySettings } from "../../lib/api/schemas";
-import { me as meCopy } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { AUTHORIZE_URL, copyOf, expect, expireSession, nextOf, redirectOf, signInPath, skipTours, stubSignIn, test, waitForHydration } from "../onboarding/helpers";
+
+let { me: meCopy } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ me: meCopy } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const UUID = "0d9c8b7a-6f5e-4d3c-8b1a-0f9e8d7c6b5a";
 
