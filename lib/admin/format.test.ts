@@ -10,6 +10,7 @@ describe("eventWhen", () => {
 
   test("multi-day: both dates in the event's zone", () => {
     expect(eventWhen("en", "2026-10-29T16:00:00Z", "2026-10-30T08:00:00Z", ZONE)).toBe("Oct 29, 10:00 – Oct 30, 02:00 CST");
+    expect(eventWhen("es", "2026-10-29T16:00:00Z", "2026-10-30T08:00:00Z", ZONE)).toMatch(/^29 oct, 10:00 – 30 oct, 02:00 (CST|GMT-6)$/);
   });
 
   test("Spanish (Mexico) wording and zone name", () => {
