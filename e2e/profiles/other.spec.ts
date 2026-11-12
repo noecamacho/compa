@@ -1,11 +1,17 @@
 // 08 PerfilOtro (F-40): another person's card filtered by our relation (stranger, pending, peer), hidden links never
-// shown, and unknown handles. The profile copy is Spanish-only, so both locales assert lib/copy/es.
+// shown, and unknown handles. Copy follows each project's locale.
 import { ids, valeriaProfile } from "../../lib/api/examples";
 import { UserProfile } from "../../lib/api/schemas";
 import { BADGE_IDS } from "../../lib/badges/catalog";
-import { common, networks, person } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { formatPoints } from "../../lib/format";
 import { acceptedConnection, call, expect, expectApiError, expectNotFound, sendRequest, skipTours, test } from "./helpers";
+
+let { common, networks, person } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, networks, person } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const valeria = valeriaProfile.card;
 
@@ -21,17 +27,17 @@ test.describe("another person in mock mode", () => {
   test("a peer's card shows who they are, our numbers and their links @mock", async ({ page }) => {
     await page.goto(`/people/${valeria.handle}`);
     await expect(page.getByRole("heading", { name: valeria.name })).toBeVisible();
-    await expect(page.getByText(`${valeria.headline} · ${valeria.company}`)).toBeVisible();
-    await expect(page.getByText(person.connected, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(`${valeria.headline} · ${valeria.company}`)).toBeVisible();
+    await expect(page.getByRole("main").getByText(person.connected, { exact: true })).toBeVisible();
     const scores = valeriaProfile.scores?.event;
     await expect(page.getByRole("link", { name: person.pointsRank(formatPoints("es", scores?.points ?? 0), scores?.rank ?? null) })).toHaveAttribute("href", "/ranking");
     for (const [key, url] of Object.entries(valeria.links ?? {})) {
       await expect(page.getByRole("link", { name: person.linkLabel(networks[key as keyof typeof networks], valeria.name) })).toHaveAttribute("href", url);
     }
-    await expect(page.getByText(person.linksLocked)).toHaveCount(0);
-    for (const label of [person.reconnections, person.eventsTogether, person.mutual]) await expect(page.getByText(label, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(person.linksLocked)).toHaveCount(0);
+    for (const label of [person.reconnections, person.eventsTogether, person.mutual]) await expect(page.getByRole("main").getByText(label, { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: new RegExp(person.badges) })).toHaveAttribute("href", `/me/badges?of=${valeria.handle}`);
-    await expect(page.getByText(person.badgesCount(valeriaProfile.badges?.length ?? 0, BADGE_IDS.length))).toBeVisible();
+    await expect(page.getByRole("main").getByText(person.badgesCount(valeriaProfile.badges?.length ?? 0, BADGE_IDS.length))).toBeVisible();
     await expect(page.getByRole("link", { name: new RegExp(person.lastTime) })).toHaveAttribute("href", `/connections/${ids.connection}/note`);
     await expect(page.getByRole("link", { name: new RegExp(person.mutualConnections) })).toHaveAttribute("href", "/connections");
     await expect(page.getByRole("link", { name: common.back })).toHaveAttribute("href", "/connections");

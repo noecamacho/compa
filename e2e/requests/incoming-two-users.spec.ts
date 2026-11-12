@@ -2,10 +2,16 @@
 // card and the bell count. The full two-user run: A scans B, B accepts from Home, both see +50 and the notices.
 import type { Page } from "@playwright/test";
 import { ids, paola } from "../../lib/api/examples";
-import { confirmation, register, request, tour } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { firstName } from "../../lib/format";
 import { expect, test } from "../fixtures";
 import { copyOf, notificationsOf, skipTours } from "../connect/helpers";
+
+let { confirmation, register, request, tour } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ confirmation, register, request, tour } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const incomingCard = (page: Page, name: string) => page.getByRole("link", { name: new RegExp(tour.incoming.title(firstName(name))) });
 

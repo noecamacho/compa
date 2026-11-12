@@ -47,14 +47,15 @@ function setup(testInfo: TestInfo) {
 test.describe("admin console", () => {
   test.describe.configure({ timeout: 120_000 });
 
-  test("shell: skip link and the nav for this width reach every section @mock", async ({ page }, testInfo) => {
+  test("shell: skip link and the nav for this width reach every section @mock", async ({ page, browserName }, testInfo) => {
     const { viewport, copy, phone } = setup(testInfo);
     await open(page, "/admin");
     // The loading skeleton (app/admin/loading.tsx) has its own shell and main; skip from the streamed page, not from it.
     await expect(page.getByRole("heading", { level: 1, name: copy.events.title })).toBeVisible();
     // The active element, not toBeFocused: parallel workers share one browser, so the window itself may lack focus.
     const activeId = () => page.evaluate(() => document.activeElement?.id || document.activeElement?.getAttribute("href"));
-    await page.keyboard.press("Tab");
+    // WebKit on macOS uses Option+Tab to include links in keyboard navigation.
+    await page.keyboard.press(browserName === "webkit" && process.platform === "darwin" ? "Alt+Tab" : "Tab");
     await expect.poll(activeId).toBe("#admin-main");
     await expect(page.getByRole("link", { name: copy.ui.nav.skip })).toHaveAttribute("href", "#admin-main");
     await page.keyboard.press("Enter");

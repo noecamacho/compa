@@ -16,9 +16,9 @@ test.describe("notifications (mock)", () => {
     await expect(page.getByRole("heading", { level: 1, name: copy.title })).toBeVisible();
     const request = page.getByRole("link", { name: new RegExp(copy.request(valeriaPublic.name, "Founders Fest GDL")) });
     const accepted = page.getByRole("link", { name: new RegExp(copy.accepted(rodrigo.name, "Founders Fest GDL")) });
-    const badge = page.getByRole("link", { name: new RegExp(copy.badgeEarned("Primer apretón")) });
+    const badge = page.getByRole("link", { name: new RegExp(copy.badgeEarned(copyOf(testInfo).badgeNames.apreton.name)) });
     await expect(request).toHaveAttribute("href", `/requests/${ids.connection}`);
-    await expect(accepted).toHaveAttribute("href", "/connections");
+    await expect(accepted).toHaveAttribute("href", `/connections/${ids.connection2}/done`);
     await expect(badge).toHaveAttribute("href", "/me/badges");
     await expect(page.getByLabel(copy.newLabel, { exact: true })).toHaveCount(example.unseenCount);
     await request.click();
@@ -28,7 +28,7 @@ test.describe("notifications (mock)", () => {
   test("the back arrow goes home @mock", async ({ page }, testInfo) => {
     await page.goto("/notifications");
     // The dock has an "Inicio" tab as text; the back arrow is the link labelled by aria-label.
-    await page.locator(`a[aria-label="${copyOf(testInfo).notifications.home}"]`).click();
+    await page.getByRole("main").locator(`a[aria-label="${copyOf(testInfo).notifications.home}"]`).click();
     await expect(page).toHaveURL(/\/home$/);
   });
 
@@ -103,9 +103,9 @@ test.describe("notifications (real)", () => {
     await skipTours(ana.context);
     await ana.page.goto("/notifications");
     const acceptedItem = ana.page.getByRole("link", { name: new RegExp(copy.accepted(bruno.user.name, testEvent.name)) });
-    await expect(acceptedItem).toHaveAttribute("href", "/connections");
+    await expect(acceptedItem).toHaveAttribute("href", `/connections/${sent.connectionId}/done`);
     await acceptedItem.click();
-    await expect(ana.page).toHaveURL(/\/connections$/);
+    await expect(ana.page).toHaveURL(new RegExp(`/connections/${sent.connectionId}/done$`));
   });
 
   test("POST /api/notifications/seen: 204, 400 on a bad body, 401 signed out @real", async ({ page, realUser, browser, baseURL }) => {

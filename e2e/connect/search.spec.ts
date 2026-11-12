@@ -1,75 +1,88 @@
-// F-19 Search by name on the scan tab. Today the query is slugified and looked up as an exact handle
-// (GET /api/users/{handle}); prefix, partial and same-event search are T-034 and not built.
+// F-19: name search uses GET /api/users?q=; an empty result falls back to the slugified handle.
 import type { Page } from "@playwright/test";
 import { valeriaPublic } from "../../lib/api/examples";
-import { connect, register } from "../../lib/copy/es";
 import { expect, test } from "../fixtures";
-import { connectLink, copyOf, skipTours } from "./helpers";
-
-const searchBox = (page: Page) => page.getByRole("searchbox", { name: connect.searchLabel });
+import { waitForHydration } from "../onboarding/helpers";
+import { copyOf, skipTours } from "./helpers";
 
 async function search(page: Page, query: string): Promise<void> {
-  await searchBox(page).fill(query);
-  await searchBox(page).press("Enter");
+  await waitForHydration(page, "#search-handle");
+  const box = page.getByRole("searchbox");
+  await box.fill(query);
+  await box.press("Enter");
 }
 
 test.describe("connect: search by name", () => {
   test.beforeEach(async ({ context }) => skipTours(context));
 
-  test("a name with accents and capitals finds the person and opens the register screen @mock", async ({ page }) => {
+  test("a name with accents and capitals finds the person and opens the register screen @mock", async ({ page }, testInfo) => {
+    const { connect, register } = copyOf(testInfo);
     await page.goto("/connect?tab=scan");
-    await expect(searchBox(page)).toHaveAttribute("placeholder", connect.searchPlaceholder);
-    const lookup = page.waitForRequest((request) => request.method() === "GET" && request.url().includes("/api/users/"));
+    await expect(page.getByRole("searchbox", { name: connect.searchLabel })).toHaveAttribute("placeholder", connect.searchPlaceholder);
+    const lookup = page.waitForRequest((request) => request.method() === "GET" && new URL(request.url()).pathname === "/api/users");
     await search(page, "  VALERIA Óchoa ");
-    expect(new URL((await lookup).url()).pathname).toBe(`/api/users/${valeriaPublic.handle}`);
-    await expect(page.getByText(valeriaPublic.name)).toBeVisible();
-    await connectLink(page).click();
+    expect(new URL((await lookup).url()).searchParams.get("q")).toBe("VALERIA Óchoa");
+    const result = page.getByRole("listitem").filter({ hasText: valeriaPublic.name });
+    await expect(result).toContainText(valeriaPublic.name);
+    await result.getByRole("link", { name: `${connect.connectButton}: ${valeriaPublic.name}`, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`/connect/${valeriaPublic.handle}$`));
     await expect(page.getByRole("heading", { name: register.title })).toBeVisible();
   });
 
-  test("fewer than two characters sends nothing @mock", async ({ page }) => {
+  test("fewer than two characters sends nothing @mock", async ({ page }, testInfo) => {
     await page.goto("/connect?tab=scan");
     const lookups: string[] = [];
-    page.on("request", (request) => request.url().includes("/api/users/") && lookups.push(request.url()));
+    page.on("request", (request) => new URL(request.url()).pathname === "/api/users" && lookups.push(request.url()));
     await search(page, "v");
-    await search(page, "¿?");
+    await search(page, " ");
     // The next valid search proves the form is live, so the two above really were skipped.
-    const lookup = page.waitForRequest((request) => request.url().includes("/api/users/"));
+    const lookup = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/users");
     await search(page, "valeria-ochoa");
     await lookup;
     expect(lookups).toHaveLength(1);
+    await expect(page.getByRole("listitem").filter({ hasText: valeriaPublic.name })).toBeVisible();
+    const handles: string[] = [];
+    page.on("request", (request) => new URL(request.url()).pathname.startsWith("/api/users/") && handles.push(request.url()));
+    await page.route(/\/api\/users\?q=/, (route) => route.fulfill({ json: { people: [] } }));
+    await search(page, "¿?");
+    await expect(page.getByRole("alert").filter({ hasText: copyOf(testInfo).connect.notFound })).toBeVisible();
+    expect(handles).toHaveLength(0);
   });
 
-  test("nobody found shows the message, and a later hit clears it @mock", async ({ page, mock, browserName }) => {
-    test.fixme(browserName === "webkit", "WebKit (CI only): the not-found message never shows after a search; unverified locally");
-    await page.goto("/connect?tab=scan");
+  test("nobody found shows the message, and a later hit clears it @mock", async ({ page, mock }, testInfo) => {
+    const { connect } = copyOf(testInfo);
+    await page.route(/\/api\/users\?q=/, (route) => route.fulfill({ json: { people: [] } }));
     await mock.mockError("user_not_found", "**/api/users/nadie-aqui");
+    await page.goto("/connect?tab=scan");
     await search(page, "Nadie Aquí");
-    await expect(page.getByText(connect.notFound)).toBeVisible();
-    await search(page, "Valeria Ochoa");
-    await expect(page.getByText(valeriaPublic.name)).toBeVisible();
+    await expect(page.getByRole("alert").filter({ hasText: connect.notFound })).toBeVisible();
+    const fallback = page.waitForRequest((request) => new URL(request.url()).pathname === `/api/users/${valeriaPublic.handle}`);
+    await search(page, "  VALERIA Óchoa ");
+    await fallback;
+    await expect(page.getByText(valeriaPublic.name, { exact: true }).filter({ visible: true })).toBeVisible();
     await expect(page.getByText(connect.notFound)).toHaveCount(0);
   });
 
   test("the search button runs the search; with nothing typed it puts the cursor in the field @mock", async ({ page }, testInfo) => {
-    const copy = copyOf(testInfo).connect;
-    const box = page.getByRole("searchbox", { name: copy.searchLabel });
-    const button = page.getByRole("button", { name: copy.searchButton, exact: true });
+    const { connect } = copyOf(testInfo);
+    const box = page.getByRole("searchbox", { name: connect.searchLabel });
+    const button = page.getByRole("button", { name: connect.searchButton, exact: true });
     await page.goto("/connect?tab=scan");
+    await waitForHydration(page, "#search-handle");
     await box.fill("Valeria");
     const sent = page.waitForRequest((request) => new URL(request.url()).pathname === "/api/users");
     await button.click();
     expect(new URL((await sent).url()).searchParams.get("q")).toBe("Valeria");
-    await expect(page.getByText(valeriaPublic.name)).toBeVisible();
+    await expect(page.getByRole("listitem").filter({ hasText: valeriaPublic.name })).toBeVisible();
     await box.fill("");
-    await page.getByRole("heading", { name: copy.title }).click();
+    await page.getByRole("heading", { name: connect.title }).click();
     await expect(box).not.toBeFocused();
     await button.click();
     await expect(box).toBeFocused();
   });
 
-  test("a real attendee is found by handle; an unknown one is not @real", async ({ page, realUser, testUsers }) => {
+  test("a real attendee is found by handle; an unknown one is not @real", async ({ page, realUser, testUsers }, testInfo) => {
+    const { connect } = copyOf(testInfo);
     const [target] = await testUsers(1);
     if (!target) throw new Error("test user not created");
     expect(target.id).not.toBe(realUser.user.id);

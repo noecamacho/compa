@@ -1,8 +1,14 @@
 // 07 Conexiones (F-39): grouped people, the kind filters, the event chip, the empty state, a row to the profile and
-// the error screen. The list copy is Spanish-only (lib/copy/index.ts), so both locales assert lib/copy/es.
+// the error screen. Copy follows each project's locale.
 import { connectionList, foundersDoor, valeriaConnected } from "../../lib/api/examples";
-import { connections as copy } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { expect, expectErrorScreen, acceptedConnection, skipTours, test } from "../profiles/helpers";
+
+let { connections: copy } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ connections: copy } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 type Filter = keyof typeof copy.filters;
 
@@ -48,8 +54,8 @@ test.describe("connections list in mock mode", () => {
 
   test("no connections yet shows the empty state and its call to action @mock", async ({ page }) => {
     await page.goto("/connections?demo=empty");
-    await expect(page.getByText(copy.emptyTitle)).toBeVisible();
-    await expect(page.getByText(copy.empty)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.emptyTitle)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.empty)).toBeVisible();
     await expect(page.getByRole("group", { name: copy.filterLabel })).toHaveCount(0);
     await page.getByRole("link", { name: copy.emptyCta }).click();
     await expect(page).toHaveURL(/\/connect$/);
@@ -67,7 +73,7 @@ test.describe("connections list in real mode", () => {
     const [ana] = await people([{}]);
     if (!ana) throw new Error("test user not created");
     await ana.page.goto("/connections");
-    await expect(ana.page.getByText(copy.emptyTitle)).toBeVisible();
+    await expect(ana.page.getByRole("main").getByText(copy.emptyTitle)).toBeVisible();
     await expect(ana.page.getByRole("button", { name: testEvent.name })).toBeVisible();
   });
 
