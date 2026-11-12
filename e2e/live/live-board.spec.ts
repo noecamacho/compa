@@ -3,8 +3,10 @@
 // with scripted frames from lib/testing/live-scenarios.ts. No database, no LinkedIn.
 // LIVE_SHOTS=<dir> also writes the screenshots used in the research doc. Each test sets its own viewport and locale,
 // so the spec runs once, in the live-1920-en project.
-import type { Page, Route } from "@playwright/test";
+import type { Locator, Page, Route } from "@playwright/test";
 import path from "node:path";
+import { LIVE_BOARD_ROWS } from "../../lib/live/live-model";
+import { RACE_SIZE } from "../../lib/live/race";
 import { VIZ_IDS, type VizId } from "../../lib/live/rotation";
 import { FRAME_MS, SCENARIOS, scenarioFrames, type ScenarioName } from "../../lib/testing/live-scenarios";
 import { expect, test } from "../fixtures";
@@ -63,6 +65,9 @@ async function expectNoHorizontalScroll(page: Page) {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 }
+
+// The look of every monito drawn inside `scope`, in DOM order (Monito writes it to `data-look`).
+const looksIn = (scope: Locator) => scope.locator("svg[data-look]").evaluateAll((monitos) => monitos.map((monito) => JSON.parse(monito.getAttribute("data-look") ?? "null")));
 
 test.beforeEach(async ({}, testInfo) => test.skip(testInfo.project.name.endsWith("-es"), "each test sets its own locale"));
 
@@ -133,6 +138,11 @@ test.describe("live board scenarios @live @mock", () => {
     await expect(page.getByTestId("live-ended")).toContainText(`${last.counters.connections} connections`);
     await expect(page.getByTestId("live-podium").locator("li")).toHaveCount(3);
     await expect(page.getByTestId("live-podium")).toContainText(last.people[0]!.name);
+    // Each place wears that person's own monito, and so does the list under the podium.
+    const looks = last.people.map((person) => person.avatar);
+    expect(await looksIn(page.getByTestId("live-podium"))).toEqual(looks.slice(0, 3));
+    expect(await looksIn(page.getByTestId("live-leaderboard"))).toEqual(looks.slice(3, 3 + LIVE_BOARD_ROWS));
+    expect(new Set(looks.slice(0, 3).map((look) => JSON.stringify(look))).size).toBe(3);
     await expect(page.getByTestId("live-feed")).toHaveCount(0);
     await expect(page.getByText("ENDED")).toBeVisible();
     await shot(page, "ended-1920");
@@ -327,6 +337,12 @@ test.describe("live visualizations @live @mock", () => {
       await shot(page, `viz-race-${name}-1920`);
     });
   }
+
+  test("race: every row wears that person's own monito", async ({ page }) => {
+    const frame = scenarioFrames("quiet").at(-1)!;
+    await openBoard(page, "quiet", 1, { query: "?viz=race" });
+    expect(await looksIn(viewIn(page, "race"))).toEqual(frame.people.slice(0, RACE_SIZE).map((person) => person.avatar));
+  });
 
   test("network loss keeps the view moving under the reconnecting pill", async ({ page }) => {
     await openBoard(page, "trickle", 3, { query: "?viz=orbit", fail: (poll) => poll >= 1 });

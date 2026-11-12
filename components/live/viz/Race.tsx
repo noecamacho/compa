@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Avatar } from "@/components/monito/Avatar";
+import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import type { LiveSnapshotT } from "@/lib/api/schemas";
 import { boardRows, type BoardRow } from "@/lib/live/live-model";
 import { BUBBLE_COUNT, GHOST_WIDTHS, barRatio, bubbleRadius, bubbleX, bubbleY, flipDeltas, gainedIds, pointsById, raceRows } from "@/lib/live/race";
@@ -120,7 +120,7 @@ function RaceRow({ row, ratio, selected, reduced, avatar, gain, liRef, barRef, o
           {row.rank}
         </span>
         <span className="shrink-0">
-          <Avatar person={{ name: row.name, photoUrl: row.photoUrl, accessories: row.accessories }} size={avatar} />
+          <Avatar person={avatarOf(row)} size={avatar} />
         </span>
         <span className="min-w-0 shrink-0 basis-[22%] truncate font-display font-bold">{row.name}</span>
         <span className="flex min-w-0 flex-1 items-center">

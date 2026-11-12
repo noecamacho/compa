@@ -60,6 +60,22 @@ test.describe("ranking in mock mode", () => {
     await expect(page).toHaveURL(/\/connect$/);
   });
 
+  // The links are found by rank and full name and the toggle by position, which no locale changes. Paola, the row
+  // above me all year, is not one of my connections: a stranger wears their own monito too.
+  test("every podium place and the row above me wear that person's own monito @mock", async ({ page }) => {
+    await page.goto("/ranking");
+    for (const board of [leaderboard, leaderboardLifetime]) {
+      const rows = [...board.rows.slice(0, 3), board.me?.above];
+      for (const row of rows) {
+        if (!row) throw new Error("the example board is missing a row");
+        const monito = page.getByRole("link", { name: new RegExp(`^#${row.rank} ${row.name}`) }).locator("svg[data-look]");
+        expect(JSON.parse((await monito.getAttribute("data-look")) ?? "null")).toEqual(row.avatar);
+      }
+      expect(new Set(rows.map((row) => JSON.stringify(row?.avatar))).size).toBe(rows.length);
+      await page.locator("[data-tour=scope] button").nth(1).click();
+    }
+  });
+
   test("a failed /api/me shows the error screen @mock", async ({ page, mock }) => {
     await mock.mockServerError("unauthorized");
     await page.goto("/ranking");

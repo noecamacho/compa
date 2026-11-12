@@ -10637,6 +10637,21 @@
                       "id": "7a1d4e2b-5c3f-4b6a-8d9e-0f1a2b3c4d22",
                       "name": "Valeria Ochoa",
                       "photoUrl": null,
+                      "avatar": {
+                        "skin": "#E0A97F",
+                        "hair": "long",
+                        "hairColor": "#2A2438",
+                        "outfit": "plain",
+                        "shirt": "#6CC4FF",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none"
+                      },
                       "points": 1980,
                       "connections": 24
                     },
@@ -10644,6 +10659,21 @@
                       "id": "c2e9f0a1-3b4c-4d5e-8f60-718293a4b533",
                       "name": "Rodrigo Peña",
                       "photoUrl": null,
+                      "avatar": {
+                        "skin": "#BF8360",
+                        "hair": "shaved",
+                        "hairColor": "#2A2438",
+                        "outfit": "plain",
+                        "shirt": "#FFD93D",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "mustache",
+                        "beard": false,
+                        "extra": "none"
+                      },
                       "points": 1720,
                       "connections": 20
                     },
@@ -10651,6 +10681,21 @@
                       "id": "9b2c1d0e-4f5a-4b6c-8d7e-1f2a3b4c5d66",
                       "name": "Sofía Treviño",
                       "photoUrl": null,
+                      "avatar": {
+                        "skin": "#FFE0C7",
+                        "hair": "bun",
+                        "hairColor": "#D9664F",
+                        "outfit": "plain",
+                        "shirt": "#FF8FAB",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none"
+                      },
                       "points": 1540,
                       "connections": 18
                     },
@@ -10658,6 +10703,21 @@
                       "id": "c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e99",
                       "name": "Paola Núñez",
                       "photoUrl": null,
+                      "avatar": {
+                        "skin": "#F5C9A3",
+                        "hair": "bangs",
+                        "hairColor": "#2A2438",
+                        "outfit": "plain",
+                        "shirt": "#FFD93D",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "glasses",
+                        "beard": false,
+                        "extra": "none"
+                      },
                       "points": 1410,
                       "connections": 16
                     },
@@ -10665,6 +10725,21 @@
                       "id": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c77",
                       "name": "Ximena Salcedo",
                       "photoUrl": null,
+                      "avatar": {
+                        "skin": "#94603F",
+                        "hair": "curly",
+                        "hairColor": "#2A2438",
+                        "outfit": "plain",
+                        "shirt": "#FF6B4A",
+                        "pants": "#2E2B40",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none"
+                      },
                       "points": 1300,
                       "connections": 15
                     },
@@ -10672,6 +10747,22 @@
                       "id": "3f6c2a1e-8b4d-4c2a-9e1f-2a7b5c9d0e11",
                       "name": "Diego Ramírez",
                       "photoUrl": null,
+                      "avatar": {
+                        "skin": "#F5C9A3",
+                        "hair": "short",
+                        "hairColor": "#5A3825",
+                        "outfit": "event",
+                        "shirt": "#6CC4FF",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none",
+                        "accent": "#FFD93D"
+                      },
                       "points": 1265,
                       "connections": 15
                     },
@@ -10679,6 +10770,21 @@
                       "id": "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d88",
                       "name": "Carlos Ibarra",
                       "photoUrl": null,
+                      "avatar": {
+                        "skin": "#6B4129",
+                        "hair": "spiky",
+                        "hairColor": "#E8B44A",
+                        "outfit": "compa",
+                        "shirt": "#FFFFFF",
+                        "pants": "#4A6FA5",
+                        "shoes": "#FFFFFF",
+                        "hat": "none",
+                        "hatColor": "#FF6B4A",
+                        "hatAccent": "#FFFFFF",
+                        "face": "none",
+                        "beard": false,
+                        "extra": "none"
+                      },
                       "points": 980,
                       "connections": 11
                     }
@@ -11173,6 +11279,21 @@
                           "handle": "valeria-ochoa",
                           "name": "Valeria Ochoa",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#E0A97F",
+                            "hair": "long",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#6CC4FF",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 1980,
                           "connections": 24
                         },
@@ -11182,6 +11303,21 @@
                           "handle": "rodrigo-pena",
                           "name": "Rodrigo Peña",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#BF8360",
+                            "hair": "shaved",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#FFD93D",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "mustache",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 1720,
                           "connections": 20
                         },
@@ -11191,6 +11327,21 @@
                           "handle": "sofia-trevino",
                           "name": "Sofía Treviño",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#FFE0C7",
+                            "hair": "bun",
+                            "hairColor": "#D9664F",
+                            "outfit": "plain",
+                            "shirt": "#FF8FAB",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 1540,
                           "connections": 18
                         },
@@ -11200,6 +11351,21 @@
                           "handle": "paola-nunez",
                           "name": "Paola Núñez",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#F5C9A3",
+                            "hair": "bangs",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#FFD93D",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "glasses",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 1410,
                           "connections": 16
                         },
@@ -11209,6 +11375,21 @@
                           "handle": "ximena-salcedo",
                           "name": "Ximena Salcedo",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#94603F",
+                            "hair": "curly",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#FF6B4A",
+                            "pants": "#2E2B40",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 1300,
                           "connections": 15
                         },
@@ -11218,6 +11399,22 @@
                           "handle": "diego-ramirez",
                           "name": "Diego Ramírez",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#F5C9A3",
+                            "hair": "short",
+                            "hairColor": "#5A3825",
+                            "outfit": "event",
+                            "shirt": "#6CC4FF",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none",
+                            "accent": "#FFD93D"
+                          },
                           "points": 1265,
                           "connections": 15
                         },
@@ -11227,6 +11424,21 @@
                           "handle": "carlos-ibarra",
                           "name": "Carlos Ibarra",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#6B4129",
+                            "hair": "spiky",
+                            "hairColor": "#E8B44A",
+                            "outfit": "compa",
+                            "shirt": "#FFFFFF",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 980,
                           "connections": 11
                         }
@@ -11240,6 +11452,21 @@
                           "handle": "ximena-salcedo",
                           "name": "Ximena Salcedo",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#94603F",
+                            "hair": "curly",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#FF6B4A",
+                            "pants": "#2E2B40",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 1300,
                           "connections": 15
                         },
@@ -11258,6 +11485,21 @@
                           "handle": "rodrigo-pena",
                           "name": "Rodrigo Peña",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#BF8360",
+                            "hair": "shaved",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#FFD93D",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "mustache",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 9410,
                           "connections": 120
                         },
@@ -11267,6 +11509,21 @@
                           "handle": "valeria-ochoa",
                           "name": "Valeria Ochoa",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#E0A97F",
+                            "hair": "long",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#6CC4FF",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 8870,
                           "connections": 104
                         },
@@ -11276,6 +11533,21 @@
                           "handle": "carlos-ibarra",
                           "name": "Carlos Ibarra",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#6B4129",
+                            "hair": "spiky",
+                            "hairColor": "#E8B44A",
+                            "outfit": "compa",
+                            "shirt": "#FFFFFF",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 7920,
                           "connections": 96
                         },
@@ -11285,6 +11557,21 @@
                           "handle": "paola-nunez",
                           "name": "Paola Núñez",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#F5C9A3",
+                            "hair": "bangs",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#FFD93D",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "glasses",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 5350,
                           "connections": 60
                         },
@@ -11294,6 +11581,22 @@
                           "handle": "diego-ramirez",
                           "name": "Diego Ramírez",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#F5C9A3",
+                            "hair": "short",
+                            "hairColor": "#5A3825",
+                            "outfit": "event",
+                            "shirt": "#6CC4FF",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "none",
+                            "beard": false,
+                            "extra": "none",
+                            "accent": "#FFD93D"
+                          },
                           "points": 5110,
                           "connections": 58
                         }
@@ -11307,6 +11610,21 @@
                           "handle": "paola-nunez",
                           "name": "Paola Núñez",
                           "photoUrl": null,
+                          "avatar": {
+                            "skin": "#F5C9A3",
+                            "hair": "bangs",
+                            "hairColor": "#2A2438",
+                            "outfit": "plain",
+                            "shirt": "#FFD93D",
+                            "pants": "#4A6FA5",
+                            "shoes": "#FFFFFF",
+                            "hat": "none",
+                            "hatColor": "#FF6B4A",
+                            "hatAccent": "#FFFFFF",
+                            "face": "glasses",
+                            "beard": false,
+                            "extra": "none"
+                          },
                           "points": 5350,
                           "connections": 60
                         },
@@ -17082,6 +17400,12 @@
                     "null"
                   ]
                 },
+                "avatar": {
+                  "$ref": "#/components/schemas/MonitoLookOutput"
+                },
+                "avatarMode": {
+                  "$ref": "#/components/schemas/AvatarMode"
+                },
                 "accessories": {
                   "description": "Accessories the person wears; absent when none or hidden.",
                   "type": "array",
@@ -17108,7 +17432,8 @@
                 "connections"
               ],
               "additionalProperties": false
-            }
+            },
+            "description": "Checked-in people in leaderboard order; only the first 8 carry `avatar` and `avatarMode`."
           },
           "connections": {
             "type": "array",
@@ -17372,6 +17697,12 @@
               "string",
               "null"
             ]
+          },
+          "avatar": {
+            "$ref": "#/components/schemas/MonitoLookOutput"
+          },
+          "avatarMode": {
+            "$ref": "#/components/schemas/AvatarMode"
           },
           "accessories": {
             "description": "Accessories the person wears; absent when none or hidden.",

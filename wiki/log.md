@@ -245,3 +245,7 @@ Added five bilingual, 20-second marketing compositions using Brag full and Hyper
 ## [2026-10-29] query | Should generated video evidence be linted?
 
 - `eslint.config.mjs` excludes `docs/evidence/**` so the vendored GSAP render runtime is preserved without application lint rules. The follow-up `bun run lint` passed with two existing research-prototype warnings; details in [video verification](../docs/evidence/codex/verification.md).
+
+## [2026-11-11] change | Each person's own monito on the big screen and the ranking
+
+- The live snapshot and the leaderboard rows now carry the person's monito (`avatar`) and which picture they chose (`avatarMode`), so the board, the race, the final podium and `/ranking` stop drawing the default monito for everyone. Only the first 8 people of the snapshot carry it (`LIVE_LOOK_ROWS`), the rows the board draws: measured on the 2,500-person scenario the snapshot goes from 454.1 KB to 456.1 KB, against 1,115.7 KB if everyone carried theirs. `/ranking` no longer reads `GET /api/connections` to find looks. Pages updated: [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (finding 9); API spec §5.

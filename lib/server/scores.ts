@@ -2,7 +2,9 @@ import "server-only";
 import { and, asc, desc, eq, isNotNull, or, sql } from "drizzle-orm";
 import { getDb, type Executor } from "../../db/client";
 import { bonusPoints, connections, eventAttendees, eventScores, events, interactions, lifetimeScores, users, type EventRow } from "../../db/schema";
+import type { AvatarMode } from "../avatar-mode";
 import { accessoriesOf, type Accessory } from "../monito/accessories";
+import type { MonitoLook } from "../monito/look";
 import { realPeopleOnly } from "./events";
 
 export type Standing = { rank: number | null; points: number };
@@ -11,14 +13,36 @@ export type Scores = { event: Standing; lifetime: Standing };
 const points = sql<number>`coalesce(${eventScores.points}, 0)`.mapWith(Number);
 const connectionCount = sql<number>`coalesce(${eventScores.connections}, 0)`.mapWith(Number);
 
-export type Ranked = { userId: string; handle: string; name: string; photoUrl: string | null; accessories?: Accessory[]; points: number; connections: number };
+export type Ranked = {
+  userId: string;
+  handle: string;
+  name: string;
+  photoUrl: string | null;
+  avatar?: MonitoLook;
+  avatarMode: AvatarMode;
+  accessories?: Accessory[];
+  points: number;
+  connections: number;
+};
 
-// The picture columns every board reads; the accessories travel with the photo to the big screen and the ranking.
-const pictured = { userId: users.id, handle: users.handle, name: users.name, photoUrl: users.photoUrl, goldenCapAt: users.goldenCapAt, showAccessories: users.showAccessories };
+// The picture columns every board reads; the monito and the accessories travel with the photo to the big screen and the ranking.
+const pictured = {
+  userId: users.id,
+  handle: users.handle,
+  name: users.name,
+  photoUrl: users.photoUrl,
+  avatar: users.avatar,
+  avatarMode: users.avatarMode,
+  goldenCapAt: users.goldenCapAt,
+  showAccessories: users.showAccessories,
+};
 
-const toRanked = ({ goldenCapAt, showAccessories, ...row }: Omit<Ranked, "accessories"> & { goldenCapAt: Date | null; showAccessories: boolean }): Ranked => {
+type PicturedRow = Omit<Ranked, "avatar" | "accessories"> & { avatar: MonitoLook | null; goldenCapAt: Date | null; showAccessories: boolean };
+
+// Absent instead of null or empty: a board row is sent thousands of times.
+export const toRanked = ({ avatar, goldenCapAt, showAccessories, ...row }: PicturedRow): Ranked => {
   const accessories = accessoriesOf({ goldenCapAt, showAccessories });
-  return accessories.length ? { ...row, accessories } : row;
+  return { ...row, ...(avatar ? { avatar } : {}), ...(accessories.length ? { accessories } : {}) };
 };
 
 // Rankings read every score of an event (or of everyone), so many phones asking at once share one result per

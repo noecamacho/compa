@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { scenarioFrames, type ScenarioName } from "@/lib/testing/live-scenarios";
-import { boardRows, closingMinutes, feed, isNewer, moodOf, pulse, recentCount } from "./live-model";
+import { LIVE_LOOK_ROWS, boardRows, closingMinutes, feed, isNewer, moodOf, pulse, recentCount } from "./live-model";
 
 const last = (name: ScenarioName) => {
   const frame = scenarioFrames(name).at(-1);
@@ -96,5 +96,16 @@ describe("closingMinutes", () => {
 
   test("is silent once the event is over", () => {
     expect(closingMinutes(last("ended"))).toBeNull();
+  });
+});
+
+describe("monitos on the snapshot", () => {
+  test("thousands: only the rows the board draws carry a monito, each their own, about 2 KB in all", () => {
+    const { people } = last("thousands");
+    const looks = people.flatMap((person) => (person.avatar ? [JSON.stringify(person.avatar)] : []));
+    expect(people.slice(0, LIVE_LOOK_ROWS).every((person) => person.avatar)).toBe(true);
+    expect(looks).toHaveLength(LIVE_LOOK_ROWS);
+    expect(new Set(looks).size).toBeGreaterThan(LIVE_LOOK_ROWS / 2);
+    expect(looks.join("").length).toBeLessThan(LIVE_LOOK_ROWS * 300);
   });
 });

@@ -11,11 +11,10 @@ import { Tour } from "@/components/tour/Tour";
 import type { LeaderboardScopeT, LeaderboardT, MeT } from "@/lib/api/schemas";
 import { useCopy, useLocale } from "@/components/LocaleProvider";
 import { firstName, formatPoints } from "@/lib/format";
-import type { MonitoLook } from "@/lib/monito/look";
 
 type Row = LeaderboardT["rows"][number];
 
-type Props = { me: MeT; boards: Record<LeaderboardScopeT, LeaderboardT>; looks: Record<string, MonitoLook | undefined> };
+type Props = { me: MeT; boards: Record<LeaderboardScopeT, LeaderboardT> };
 
 const CONFETTI = [
   { left: 14, top: 30, color: "#FF8FAB", r: 20, delay: 0 },
@@ -32,7 +31,7 @@ const BLOCKS: Record<1 | 2 | 3, { height: number; color: string; number: number;
   3: { height: 86, color: "#F2A766", number: 30, px: 5 },
 };
 
-function Column({ row, place, look, delay }: { row: Row | undefined; place: 1 | 2 | 3; look?: MonitoLook; delay: number }) {
+function Column({ row, place, delay }: { row: Row | undefined; place: 1 | 2 | 3; delay: number }) {
   const locale = useLocale();
   const block = BLOCKS[place];
   if (!row) return <span aria-hidden="true" />;
@@ -44,7 +43,7 @@ function Column({ row, place, look, delay }: { row: Row | undefined; place: 1 | 
           <circle cx="22" cy="24" r="3" fill="#FF6B4A" stroke="#1E1B2E" strokeWidth="1.5" />
         </svg>
       )}
-      <Avatar person={{ name: row.name, look, accessories: row.accessories }} px={block.px} />
+      <Avatar person={{ name: row.name, look: row.avatar, accessories: row.accessories }} px={block.px} />
       <span className="font-display font-bold" style={{ fontSize: place === 1 ? 18 : 16 }}>
         {firstName(row.name)}
       </span>
@@ -64,7 +63,7 @@ function Column({ row, place, look, delay }: { row: Row | undefined; place: 1 | 
 }
 
 // 11 Ranking: podium with confetti, tonight / all year, my card with the gap to the next person.
-export function RankingView({ me, boards, looks }: Props) {
+export function RankingView({ me, boards }: Props) {
   const { ranking: copy, rankingTips, tour } = useCopy();
   const locale = useLocale();
   const [scope, setScope] = useState<LeaderboardScopeT>("event");
@@ -99,9 +98,9 @@ export function RankingView({ me, boards, looks }: Props) {
               style={{ ...piece, background: piece.color, border: "2px solid #1E1B2E", animationDelay: `${piece.delay}s`, ["--r" as string]: `${piece.r}deg` }}
             />
           ))}
-          <Column row={second} place={2} look={second && looks[second.userId]} delay={0.15} />
-          <Column row={first} place={1} look={first && looks[first.userId]} delay={0} />
-          <Column row={third} place={3} look={third && looks[third.userId]} delay={0.3} />
+          <Column row={second} place={2} delay={0.15} />
+          <Column row={first} place={1} delay={0} />
+          <Column row={third} place={3} delay={0.3} />
         </div>
         <span aria-hidden="true" className="mx-1 mt-[-12px] block h-0" style={{ borderTop: "3px solid #1E1B2E" }} />
       </div>
@@ -133,7 +132,7 @@ export function RankingView({ me, boards, looks }: Props) {
         {mine?.above && (
           <Link href={`/people/${mine.above.handle}`} className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable">
             <span className="w-[30px] font-display text-[15px] font-bold text-muted">#{mine.above.rank}</span>
-            <Avatar person={{ name: mine.above.name, look: looks[mine.above.userId], accessories: mine.above.accessories }} size={30} />
+            <Avatar person={{ name: mine.above.name, look: mine.above.avatar, accessories: mine.above.accessories }} size={30} />
             <span className="flex-1 truncate text-[14px] font-extrabold">{mine.above.name}</span>
             <Muted className="text-[13px] font-extrabold">{formatPoints(locale, mine.above.points)}</Muted>
           </Link>
