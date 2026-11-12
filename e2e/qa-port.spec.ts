@@ -97,6 +97,6 @@ test.describe("ranking and badges", () => {
   test("another person's badges are theirs, not mine @mock", async ({ page }, testInfo) => {
     const { badges } = copyOf(testInfo);
     await page.goto(`/me/badges?of=${valeriaPublic.handle}`);
-    await expect(page.getByText(badges.earned(valeriaProfile.badges?.length ?? 0, BADGE_IDS.length))).toBeVisible();
+    await expect(page.getByRole("main").getByText(badges.earned(valeriaProfile.badges?.length ?? 0, BADGE_IDS.length))).toBeVisible();
   });
 });

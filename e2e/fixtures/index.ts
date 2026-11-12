@@ -3,7 +3,7 @@ import { mergeTests } from "@playwright/test";
 import { ApiClientError } from "../../lib/api/client";
 import { errorText } from "../../lib/api/error-text";
 import { copyFor } from "../../lib/copy";
-import type { Locale } from "../../lib/i18n";
+import { localeFromAcceptLanguage, type Locale } from "../../lib/i18n";
 import type { ErrorSpec } from "../../lib/api/errors";
 import { test as mockTest } from "./mock";
 import { test as realTest } from "./two-users";
@@ -13,4 +13,4 @@ export { expect } from "@playwright/test";
 export { TEST_EVENT_SLUG } from "./real-mode";
 
 // What the attendee reads for an API error: the copy errorText picks (lib/api/error-text.ts), never the API message.
-export const errorCopy = (error: ErrorSpec, locale: Locale = "es"): string => errorText(copyFor(locale), new ApiClientError(error.status, error.code, error.message));
+export const errorCopy = (error: ErrorSpec, locale: Locale = localeFromAcceptLanguage(test.info().project.use.locale)): string => errorText(copyFor(locale), new ApiClientError(error.status, error.code, error.message));

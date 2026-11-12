@@ -3,9 +3,15 @@ import { existsSync, readFileSync } from "node:fs";
 import QRCode from "qrcode";
 import type { Page } from "@playwright/test";
 import { me } from "../../lib/api/examples";
-import { connect, screenState } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { expect, test } from "../fixtures";
 import { skipTours } from "./helpers";
+
+let { connect, screenState } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ connect, screenState } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 // Same options as app/(app)/connect/page.tsx, so an identical SVG proves an identical payload.
 const QR_OPTIONS = { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#1E1B2E", light: "#FFFFFF" } } as const;
@@ -47,7 +53,7 @@ test.describe("connect: my QR", () => {
     await expect(page.getByRole("heading", { level: 1, name: connect.title })).toBeVisible();
     await expect(page.getByRole("button", { name: connect.myQr })).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByText(me.name).first()).toBeVisible();
-    await expect(page.getByText(connect.showIt)).toBeVisible();
+    await expect(page.getByRole("main").getByText(connect.showIt)).toBeVisible();
     expect(await qrPayload(page, me.name, me.handle, baseURL)).toMatch(new RegExp(`/u/${me.handle}$`));
   });
 

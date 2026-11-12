@@ -4,9 +4,15 @@ import { E } from "../../lib/api/errors";
 import { errorCopy } from "../fixtures";
 import type { Locator, Page, Request } from "@playwright/test";
 import { Me } from "../../lib/api/schemas";
-import { common, monito as copy } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { MonitoLook } from "../../lib/monito/look";
 import { expect, test, waitForHydration } from "./helpers";
+
+let { common, monito: copy } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, monito: copy } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const isMePatch = (request: Request) => request.method() === "PATCH" && new URL(request.url()).pathname === "/api/me";
 
