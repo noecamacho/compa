@@ -47,9 +47,11 @@ test.describe("connect: register screen (mock)", () => {
     await topic(page, TOPIC_D).click();
     await expect(topic(page, TOPIC_D)).toHaveAttribute("aria-pressed", "false");
     for (const name of [TOPIC_A, TOPIC_B, TOPIC_C]) await expect(topic(page, name)).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("status").filter({ hasText: register.maxTopics(3) })).toBeVisible();
 
     await topic(page, TOPIC_A).click();
     await expect(topic(page, TOPIC_A)).toHaveAttribute("aria-pressed", "false");
+    await expect(page.getByText(register.maxTopics(3))).toHaveCount(0);
     await topic(page, TOPIC_D).click();
     await expect(topic(page, TOPIC_D)).toHaveAttribute("aria-pressed", "true");
   });
