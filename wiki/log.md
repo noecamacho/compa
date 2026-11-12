@@ -269,3 +269,7 @@ Checked relative links in index, log and connections page; the updated page rema
 ## [2026-11-11] change | Each person's own monito on the big screen and the ranking
 
 - The live snapshot and the leaderboard rows now carry the person's monito (`avatar`) and which picture they chose (`avatarMode`), so the board, the race, the final podium and `/ranking` stop drawing the default monito for everyone. Only the first 8 people of the snapshot carry it (`LIVE_LOOK_ROWS`), the rows the board draws: measured on the 2,500-person scenario the snapshot goes from 454.1 KB to 456.1 KB, against 1,115.7 KB if everyone carried theirs. `/ranking` no longer reads `GET /api/connections` to find looks. Pages updated: [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (finding 9); API spec §5.
+
+## [2026-11-12] change | Demo mode routes and the visitor cookie (D2)
+
+- `API_MODE=demo` answers every API route from the D1 room plus one validated cookie per visitor: no account, database, Supabase or OpenAI. A scan is accepted 4 s later and moves the visitor's points, ranking and link on the big screen; two cast people send requests; voice notes get a prepared transcript and a summary without AI; `/admin` reads the room and refuses writes. Interface for D3 and D4: [demo-routes](../docs/contracts/demo-routes.md).
