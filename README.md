@@ -39,10 +39,10 @@ COMPA is a networking companion for live events. An attendee signs in with Linke
 | --- | --- |
 | **LinkedIn sign-in, QR-gated events** | Sign in with LinkedIn OIDC or an email magic link; join an event with its QR or access code and consent to check-in. |
 | **Scan-to-connect** | Show your personal QR or scan another one. Connections and points are idempotent, so double scans never double count. |
-| **Points, ranking and badges** | Points for new connections, reconnections and summaries; a live ranking; collectible badges and a golden cap for inviting friends. |
+| **Points, ranking and badges** | Points for new connections, reconnections and summaries; a live ranking; collectible badges; a referral code per person and a golden cap after three invited friends. Connections outside an event work too, without points. |
 | **AI voice summaries** | Dictate a note after a conversation; the server transcribes it and drafts a structured summary both people approve before it is shared. |
 | **Incoming requests and notifications** | A live bell fed by private Realtime channels, plus Web Push for when the app is closed. |
-| **Live big screen** | `/e/<code>/live` shows counters, the top connectors and an animated network of people and topics, built for a 1920×1080 projector. |
+| **Live big screen** | `/e/<code>/live` shows counters, the top connectors and nine rotating views of the room (loom, orbit, race, wave, cosmos, garden, type, marbles, skyline) that react to real check-ins and connections, built for a 1920×1080 projector. Home shows the same live view. |
 | **Super-admin console** | Create and archive events, manage organizers and attendees, rotate access codes, create test users. |
 | **Animated QR poster** | A printable, animated QR so a whole room can join in seconds. |
 | **Bilingual and responsive** | Spanish and English (`es*` locale → Spanish), designed mobile-first at 390, tablet 834 and desktop 1440. |
@@ -123,11 +123,13 @@ Everything in this repository was built for the event, starting 2026-10-28 (see 
 - QR connections, incoming requests (accept / decline), idempotent points, ranking, badges, invites
 - Voice transcription and AI conversation summaries with approval
 - Live notifications (Realtime) and Web Push
-- Live big screen, super-admin console, animated QR poster, test users and a seeded demo mode
+- Live big screen with nine rotating views, super-admin console, animated QR poster, test users and a seeded demo event
+- Referral codes with the golden cap, and connections outside an event (no points)
 - Full OpenAPI reference, Playwright e2e specs, unit tests, bilingual UI
 
 **Not built or still open**
 
+- The sign-in-free `/demo` page: its clock-driven scenario and fictional cast exist in `lib/demo/` ([contract](docs/contracts/demo-scenario.md)); the routes and the page do not yet
 - Organizer "ask your event" analyst (stretch goal) and recording with the other person's consent are out of the MVP cut order ([wiki/mvp-scope.md](wiki/mvp-scope.md))
 - Open product questions and known gaps are tracked in [wiki/open-questions.md](wiki/open-questions.md)
 
@@ -135,7 +137,7 @@ Everything in this repository was built for the event, starting 2026-10-28 (see 
 
 ## Demo video
 
-> The demo video is added here before submission: _link pending_ (see [docs/evidence/codex/](docs/evidence/codex/)).
+> The walkthrough video is not recorded yet. Five 20-second marketing edits made with Codex are in [docs/evidence/codex/](docs/evidence/codex/README.md).
 
 Suggested walkthrough (3 minutes, [wiki/demo-script.md](wiki/demo-script.md)): sign in → join the event by QR → connect with the person next to you → dictate and approve a summary → watch the points land on the big screen.
 
@@ -156,11 +158,10 @@ How Codex was used:
 
 Evidence (screenshots without sensitive data and short video segments) lives in [`docs/evidence/codex/`](docs/evidence/codex/).
 
-<!-- EVIDENCE-LIST: the evidence PR fills this list. One line per item: what task, where Codex was used, how the result was reviewed or tested. -->
-
 | Item | Task done with Codex | How it was reviewed or tested |
 | --- | --- | --- |
-| _pending_ | _filled by the evidence PR_ | _filled by the evidence PR_ |
+| [Five marketing edits](docs/evidence/codex/README.md) | Problem, QR connection, event journey, live board and organizer console, 20 s each in Spanish and English (Brag and Hyperframes) | Hyperframes `check --json` with 0 errors and 0 warnings, FFmpeg decode, frame review ([verification](docs/evidence/codex/verification.md)) |
+| [Launch process](docs/evidence/codex/codex-launch-process.txt), [session capture](docs/evidence/codex/codex-session-capture.txt) | The Codex worker session that produced the edits | Captured from the actual session, paths removed ([source material](docs/evidence/codex/SOURCE-MATERIAL.md)) |
 
 ## Team
 

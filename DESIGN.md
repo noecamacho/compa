@@ -151,7 +151,7 @@ Screen components added with the screens (PR #14):
 | `BadgeGrid` | `components/badges/BadgeGrid.tsx` | 10 grid and filters |
 | `InviteActions` | `components/invite/InviteActions.tsx` | Copy and share (`navigator.clipboard`, `navigator.share`) |
 
-Not built yet: the `/live` page, the event check-in page, the screen-consent notice, the toast or sheet for incoming requests (the bell is not a link), the "NUEVA" sticker, skeletons, an offline banner, a sign-out button.
+Built since this list was first written: the `/e/<code>/live` page, the check-in page `/e/<code>/join` with the screen-consent notice (`components/event/JoinConsent.tsx`), the incoming-request toast (`components/notifications/LiveNotifications.tsx`), the bell as a link to `/notifications`, loading skeletons (`app/(app)/loading.tsx`), the offline banner (`components/ui/OfflineBanner.tsx`) and sign-out (`components/profile/SignOutButton.tsx`). Not built yet: the "NUEVA" sticker.
 
 ## Internationalization
 

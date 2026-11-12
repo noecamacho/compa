@@ -269,3 +269,11 @@ Checked relative links in index, log and connections page; the updated page rema
 ## [2026-11-11] change | Each person's own monito on the big screen and the ranking
 
 - The live snapshot and the leaderboard rows now carry the person's monito (`avatar`) and which picture they chose (`avatarMode`), so the board, the race, the final podium and `/ranking` stop drawing the default monito for everyone. Only the first 8 people of the snapshot carry it (`LIVE_LOOK_ROWS`), the rows the board draws: measured on the 2,500-person scenario the snapshot goes from 454.1 KB to 456.1 KB, against 1,115.7 KB if everyone carried theirs. `/ranking` no longer reads `GET /api/connections` to find looks. Pages updated: [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (finding 9); API spec §5.
+
+## [2026-11-11] change | Connect and note details (F4)
+
+- The scan tab's name search has a visible search button, a fourth topic on the register screen says the limit is three, and a refused microphone on the note screen says so instead of a summary error. Flows: [catalog](../docs/flows/catalog.md) (connect and summaries).
+
+## [2026-11-12] lint | Top-level documents after #61 to #84
+
+- `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `AGENTS.md` §6 and `CHANGELOG.md` no longer say that no code exists or that built screens are missing; the changelog now lists the live views, the QR poster, referral codes, connections outside an event, the admin redesign, the e2e work and the D1 demo scenario. The README's demo video stays unrecorded and its evidence table points to the [Codex evidence](../docs/evidence/codex/README.md).
