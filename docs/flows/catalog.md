@@ -901,12 +901,12 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Actor | Signed-in attendee |
 | Entry | Home invite card, or the chip on 04 → `/invite`; always shown |
 | Pre | — |
-| Happy path | `GET /api/invites/me` → `link` (code = handle, url, `event` = where a friend joining now pays +100, or null), 4 slots, golden-cap reward → before the share buttons, "+100 pts en <event>" or "Estás fuera de un evento: cuentan para la gorra dorada, pero no suman puntos" → Copiar (clipboard) or share (WhatsApp, Instagram, Más via `navigator.share`) |
-| Alternates | "Mostrar mi QR de invitación" → 04. Golden cap earned: the prize card shows my own picture wearing it and a switch to wear or hide it (`PATCH /api/me {showAccessories}`) |
+| Happy path | `GET /api/invites/me` → `link` (code = handle, url, `event` = where a friend joining now pays +100, or null), 4 slots, golden-cap reward → before the share buttons, "+100 pts en <event>" or "Estás fuera de un evento: cuentan para la gorra dorada, pero no suman puntos" → a QR of the invite link (`/i/<code>`, scanned with the native camera it counts as a referral) → Copiar (clipboard) or share (WhatsApp, Más via `navigator.share`) |
+| Alternates | Golden cap earned: the prize card shows my own picture wearing it and a switch to wear or hide it (`PATCH /api/me {showAccessories}`) |
 | Errors | **501 on `main` → page throws** (probed) |
-| Edge cases | Clipboard denied → select the text (DESIGN.md). `navigator.share` is unavailable on desktop. Instagram has no web share target |
+| Edge cases | Clipboard denied → select the text (DESIGN.md). `navigator.share` is unavailable on desktop, so Más copies. Instagram has no web share target, so it has no button |
 | Status | UI Mock-only · API Mock-only (IP) · DB Missing (IP) |
-| E2E coverage | `e2e/gamification/invites.spec.ts`: code = handle with "+100 pts at <event>" inside an event and the no-points notice outside one (page, home card, 04 chip); Copiar puts it on the clipboard (`permissions: ['clipboard-read','clipboard-write']`); denied clipboard → selectable text; desktop without `navigator.share` → fallback |
+| E2E coverage | `e2e/gamification/invites.spec.ts`: code = handle with "+100 pts at <event>" inside an event and the no-points notice outside one (page, home card, 04 chip); the QR encodes the invite link (SVG compared with `qrcode`); no Instagram button; Copiar puts it on the clipboard (`permissions: ['clipboard-read','clipboard-write']`); denied clipboard → selectable text; desktop without `navigator.share` → fallback |
 | Tickets | [T-074](backlog.md#t-074) |
 
 <a id="f-48"></a>
