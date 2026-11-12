@@ -7,6 +7,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Added
 
 - Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
+- Keyless demo deployment: a separate Vercel project with only `API_MODE=demo`; the deploy skips migrations when `API_MODE` is `demo` or `mock`. Setup steps in the README, "Demo deployment (no keys)".
 
 ### Changed
 
@@ -18,6 +19,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Fixed
 
 - Invite screen: the QR is now the invite link itself (`/i/<code>`), shown on the page, so a friend who scans it counts as your invitee; the old "Mostrar mi QR de invitación" button opened your personal QR (`/u/<handle>`), which never counted. The Instagram button is gone: Instagram has no share link, so it only repeated "Más".
+- Admin event dates that span two days read "Oct 29, 10:00 – Oct 30, 02:00" everywhere. On macOS (Bun, Safari) they read "Oct 29 at 10:00", because the system ICU joins date and time with "at"; the unit test failed on every Mac for the same reason.
 - Connect and note details: the search by name on the scan tab has a visible search button (it only answered to Enter); a fourth topic on the register screen says the limit is three instead of doing nothing; and when the microphone is refused on the note screen the message says so instead of "we couldn't summarize the note".
 - Activity switches to days after 24 hours and calendar dates after a week. Profiles show the actual last interaction date; mutual connections open a filtered list. Notifications include dates and use the same localized clock as Home.
 - The big screen and the ranking show each person's own monito. They used to draw the default monito for everyone (the ranking, for everyone but your connections), and a person who chose their monito over their LinkedIn photo still appeared with the photo. Leaderboard rows and the first 8 people of the live snapshot now carry `avatar` and `avatarMode`; the snapshot grows by 2 KB whatever the size of the room.

@@ -270,6 +270,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - The live snapshot and the leaderboard rows now carry the person's monito (`avatar`) and which picture they chose (`avatarMode`), so the board, the race, the final podium and `/ranking` stop drawing the default monito for everyone. Only the first 8 people of the snapshot carry it (`LIVE_LOOK_ROWS`), the rows the board draws: measured on the 2,500-person scenario the snapshot goes from 454.1 KB to 456.1 KB, against 1,115.7 KB if everyone carried theirs. `/ranking` no longer reads `GET /api/connections` to find looks. Pages updated: [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (finding 9); API spec §5.
 
+## [2026-11-12] change | Keyless demo deployment (D5)
+
+- The demo is a separate Vercel project whose only variable is `API_MODE=demo`; `vercel.json` now runs `db:migrate:deploy` only for production builds whose `API_MODE` is neither `demo` nor `mock`, so the demo build never needs `DATABASE_URL`. Setup steps: `README.md` "Demo deployment (no keys)". Depends on the D2 demo routes for content.
+
 ## [2026-11-12] change | Invite QR is the invite link; no Instagram button
 
 - `/invite` shows a QR of `/i/<code>` (P2: the old button led to the personal `/u/<handle>` QR, which never counted as a referral) and drops the Instagram share button, which only repeated Más (P12). Pages updated: `DESIGN.md` row 12, `docs/flows/catalog.md` F-47.
