@@ -7,7 +7,7 @@ import type { InputOf, ResultOf } from "../api/route-spec";
 import type * as R from "../api/routes";
 import { isRunning } from "../connection-status";
 import { copyFor } from "../copy";
-import { LIVE_LINK_LIMIT } from "../live/live-model";
+import { LIVE_LINK_LIMIT, LIVE_LOOK_ROWS } from "../live/live-model";
 import { requestLocale } from "./locale";
 import { currentUserOrNull } from "./auth";
 import { connectionsOfRealPeople, LIVE_CACHE, phaseOf, requireEventByCode } from "./events";
@@ -16,6 +16,7 @@ import { onBoard, rankedAtEvent, rankedLifetime, type Ranked } from "./scores";
 
 // The snapshot carries the most recent links only (LIVE_LINK_LIMIT), so its size stays flat as the room connects
 // (about 1.15 MB at 1,000 people and 6k links before the cap; Vercel refuses bodies over 4.5 MB). Counters count all.
+// For the same reason only the rows the board draws carry their monito (LIVE_LOOK_ROWS).
 
 const acceptedAt = (event: EventRow) =>
   and(eq(connections.eventId, event.id), eq(connections.status, "accepted"), connectionsOfRealPeople(event));
@@ -39,11 +40,21 @@ async function linkCounters(event: EventRow) {
   return { total: row?.total ?? 0, reconnections: row?.reconnections ?? 0 };
 }
 
+export const toLivePerson = ({ userId, name, photoUrl, avatar, avatarMode, accessories, points, connections }: Ranked, index: number) => ({
+  id: userId,
+  name,
+  photoUrl,
+  ...(index < LIVE_LOOK_ROWS ? { avatar, avatarMode } : {}),
+  accessories,
+  points,
+  connections,
+});
+
 export async function liveSnapshot({ params }: InputOf<typeof R.liveSnapshot>): ResultOf<typeof R.liveSnapshot> {
   const event = await requireEventByCode(params.code);
   const now = new Date();
   const [ranked, recent, totals] = await Promise.all([rankedAtEvent(event), recentLinks(event), linkCounters(event)]);
-  const people = ranked.map(({ userId, name, photoUrl, accessories, points, connections }) => ({ id: userId, name, photoUrl, accessories, points, connections }));
+  const people = ranked.map(toLivePerson);
   const shown = new Set(people.map((person) => person.id));
   // An edge to someone left off the screen (a test user at a real event, M20, or a removed attendee) is left off too.
   const links = recent

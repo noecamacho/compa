@@ -213,17 +213,11 @@ export const incomingDetail: z.input<typeof S.ConnectionDetail> = {
   at: "2026-10-29T18:42:10.000Z",
 };
 
+const livePerson = ({ id, name, avatar }: Card, points: number, connections: number) => ({ id, name, photoUrl: null, avatar, points, connections });
+
 export const liveSnapshot: z.input<typeof S.LiveSnapshot> = {
   event: { ...foundersDoor, isRunning: true, phase: "running", startsAt: event.startsAt, endsAt: event.endsAt },
-  people: [
-    { id: ids.valeria, name: valeriaPublic.name, photoUrl: null, points: 1980, connections: 24 },
-    { id: ids.rodrigo, name: rodrigo.name, photoUrl: null, points: 1720, connections: 20 },
-    { id: ids.sofia, name: sofia.name, photoUrl: null, points: 1540, connections: 18 },
-    { id: ids.paola, name: paola.name, photoUrl: null, points: 1410, connections: 16 },
-    { id: ids.ximena, name: ximena.name, photoUrl: null, points: 1300, connections: 15 },
-    { id: ids.diego, name: diego.name, photoUrl: null, points: 1265, connections: 15 },
-    { id: ids.carlos, name: carlos.name, photoUrl: null, points: 980, connections: 11 },
-  ],
+  people: [livePerson(valeriaPublic, 1980, 24), livePerson(rodrigo, 1720, 20), livePerson(sofia, 1540, 18), livePerson(paola, 1410, 16), livePerson(ximena, 1300, 15), livePerson(diego, 1265, 15), livePerson(carlos, 980, 11)],
   connections: [
     { id: ids.connection, a: ids.valeria, b: ids.rodrigo, kind: "new", at: "2026-10-29T18:44:00.000Z" },
     { id: ids.connection2, a: ids.sofia, b: ids.paola, kind: "new", at: "2026-10-29T18:43:00.000Z" },
@@ -249,6 +243,7 @@ const row = (rank: number, person: Card, points: number, connections: number): z
   handle: person.handle,
   name: person.name,
   photoUrl: null,
+  avatar: person.avatar,
   points,
   connections,
 });

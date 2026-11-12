@@ -1,7 +1,8 @@
 // Scripted activity for the projected live board (/e/<code>/live): deterministic snapshot sequences for every
 // scenario the big screen must survive (docs/research/live-dataviz.md). Playwright serves the frames to the board's
 // poll; unit tests and prototypes read them directly. No database, no LinkedIn: everything is generated here.
-import { LIVE_LINK_LIMIT } from "../live/live-model";
+import { LIVE_LINK_LIMIT, LIVE_LOOK_ROWS } from "../live/live-model";
+import { BODIES, lookFromBuilder, randomBuilder, type MonitoLook } from "../monito/look";
 import { CONNECTION_POINTS } from "../points";
 import type { ConnectionKindT, LiveSnapshotT } from "../api/schemas";
 
@@ -75,6 +76,9 @@ const hex = (value: number, width: number) => value.toString(16).padStart(width,
 // A valid v4-shaped uuid derived from a namespace digit and a counter, so ids are stable and readable in failures.
 export const scenarioId = (space: number, index: number): string => `${hex(space, 8)}-0000-4000-8000-${hex(index, 12)}`;
 
+// One look per person, the same on every frame, so a monito follows its owner up and down the board.
+const scenarioLook = (index: number): MonitoLook => lookFromBuilder(randomBuilder(BODIES[index % BODIES.length], rng(index + 1)));
+
 const defaultName = (index: number) => `${FIRST[index % FIRST.length]} ${LAST[Math.floor(index / FIRST.length) % LAST.length]}`;
 
 const SPECS: Record<ScenarioName, Spec> = {
@@ -140,10 +144,12 @@ function snapshotAt(spec: Spec, links: Link[], now: number, start: number): Live
   const order = Array.from({ length: spec.people }, (_, index) => index).sort(
     (x, y) => (points[y] ?? 0) - (points[x] ?? 0) || (degree[y] ?? 0) - (degree[x] ?? 0) || x - y,
   );
-  const people = order.map((index) => ({
+  // Mirrors the server: only the rows the board draws carry their monito.
+  const people = order.map((index, place) => ({
     id: scenarioId(1, index),
     name: (spec.name ?? defaultName)(index),
     photoUrl: spec.photo?.(index) ?? null,
+    ...(place < LIVE_LOOK_ROWS ? { avatar: scenarioLook(index) } : {}),
     points: spec.ties ? 100 : (points[index] ?? 0),
     connections: degree[index] ?? 0,
   }));

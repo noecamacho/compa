@@ -10,6 +10,11 @@ export const LIVE_LINK_LIMIT = 1000;
 // Ranking rows on the big screen: five stay readable from 10 m next to the feed (more clip at 1920×1080).
 export const LIVE_BOARD_ROWS = 5;
 
+// Only the first rows of the snapshot carry their monito (`avatar`, `avatarMode`): the board draws a picture for the
+// race (RACE_SIZE) and for the list under the closing podium (3 + LIVE_BOARD_ROWS), never further down. A look is
+// ~235 bytes, so sending everyone's would add 0.65 MB per poll at 2,500 people (8 rows add 2 KB). Read by lib/server/live.ts.
+export const LIVE_LOOK_ROWS = 8;
+
 export type Mood = "upcoming" | "empty" | "quiet" | "steady" | "rush" | "ended";
 
 export const PULSE_MINUTES = 30;

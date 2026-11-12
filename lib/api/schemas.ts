@@ -361,13 +361,23 @@ export const PushSubscriptionBody = z
 export const PushUnsubscribeBody = z.object({ endpoint: z.url().max(2048) }).meta({ id: "PushUnsubscribeBody" });
 
 // `connections` is the person's accepted count at the event; the `connections` list below holds only the most recent links.
-const LivePerson = z.object({ id: uuid, name: z.string(), photoUrl: z.string().nullable(), accessories, points: z.int(), connections: z.int() });
+// `avatar` and `avatarMode` travel only with the first rows, the ones the board draws (LIVE_LOOK_ROWS).
+const LivePerson = z.object({
+  id: uuid,
+  name: z.string(),
+  photoUrl: z.string().nullable(),
+  avatar: Avatar.optional(),
+  avatarMode: AvatarMode.optional(),
+  accessories,
+  points: z.int(),
+  connections: z.int(),
+});
 const LiveConnection = z.object({ id: uuid, a: uuid, b: uuid, kind: ConnectionKind, at: isoDate });
 
 export const LiveSnapshot = z
   .object({
     event: z.object({ code: accessCode, name: z.string(), isRunning: z.boolean(), phase: EventPhase, startsAt: isoDate, endsAt: isoDate }),
-    people: z.array(LivePerson),
+    people: z.array(LivePerson).meta({ description: "Checked-in people in leaderboard order; only the first 8 carry `avatar` and `avatarMode`." }),
     connections: z.array(LiveConnection).meta({ description: "Accepted connections, oldest first; at most the newest 1,000 (the counters count all)." }),
     counters: z.object({
       checkedIn: z.int(),
@@ -399,6 +409,8 @@ export const LeaderboardRow = z
     handle,
     name: z.string(),
     photoUrl: z.string().nullable(),
+    avatar: Avatar.optional(),
+    avatarMode: AvatarMode.optional(),
     accessories,
     points: z.int(),
     connections: z.int(),

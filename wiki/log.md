@@ -265,3 +265,7 @@ F3 corrects profile history dates, mutual-person filtering, relative activity ol
 ## [2026-11-11] lint | F3 profile and activity documentation
 
 Checked relative links in index, log and connections page; the updated page remains indexed and its new behavior cites implementation and regression tests.
+
+## [2026-11-11] change | Each person's own monito on the big screen and the ranking
+
+- The live snapshot and the leaderboard rows now carry the person's monito (`avatar`) and which picture they chose (`avatarMode`), so the board, the race, the final podium and `/ranking` stop drawing the default monito for everyone. Only the first 8 people of the snapshot carry it (`LIVE_LOOK_ROWS`), the rows the board draws: measured on the 2,500-person scenario the snapshot goes from 454.1 KB to 456.1 KB, against 1,115.7 KB if everyone carried theirs. `/ranking` no longer reads `GET /api/connections` to find looks. Pages updated: [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (finding 9); API spec §5.

@@ -66,6 +66,19 @@ test.describe("big screen in mock mode @mock", () => {
     expect(seen.errors).toEqual([]);
   });
 
+  test("every board row wears that person's own monito, on the screen and on a phone", async ({ page }, testInfo) => {
+    const copy = copyOf(testInfo);
+    const looks = liveSnapshot.people.slice(0, LIVE_BOARD_ROWS).map((person) => person.avatar);
+    await page.goto(`/e/${code}/live`);
+    for (const viewport of [{ width: 1920, height: 1080 }, { width: 390, height: 844 }]) {
+      await page.setViewportSize(viewport);
+      await expect(board(page, copy).locator("svg[data-look]")).toHaveCount(looks.length);
+      const drawn = await board(page, copy).locator("svg[data-look]").evaluateAll((monitos) => monitos.map((monito) => JSON.parse(monito.getAttribute("data-look") ?? "null")));
+      expect(drawn).toEqual(looks);
+    }
+    expect(new Set(looks.map((look) => JSON.stringify(look))).size).toBe(looks.length);
+  });
+
   test("tapping a board row opens the public card, and closing returns to the board", async ({ page }, testInfo) => {
     const copy = copyOf(testInfo);
     const locale = localeOf(testInfo);
