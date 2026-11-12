@@ -4,6 +4,9 @@ import { ConnectTabs } from "@/components/connect/ConnectTabs";
 import { Me } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
 import { requestOrigin } from "@/lib/server/site";
+import { pageTitle } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("connect");
 
 // 04 Conectar. The QR encodes the personal link /u/<handle> so the native camera also works (ADR-004).
 export default async function ConnectPage() {

@@ -5,6 +5,9 @@ import { parsePageParams, type RawSearchParams } from "@/lib/admin/page-params";
 import { AdminEventList, TestUserList, TestUserQuery } from "@/lib/api/admin-schemas";
 import { apiGet, apiGetSafe } from "@/lib/api/server-fetch";
 import { adminCopy, requireAdminPage } from "@/lib/server/admin-page";
+import { pageTitle } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("adminTestUsers");
 
 type Props = { searchParams: Promise<RawSearchParams> };
 

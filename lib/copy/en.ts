@@ -998,3 +998,34 @@ export const datesAndPeople: typeof es.datesAndPeople = {
   showAll: "View all my connections",
   noMutual: "You have no mutual connections yet.",
 };
+
+// F6: browser tab titles (the root layout appends " · Compa") and the leaderboard title for the all-year scope.
+export const titles: typeof es.titles = {
+  tabs: {
+    home: "Home",
+    ranking: "Leaderboard",
+    invite: "Invite",
+    connections: "Connections",
+    me: "Your profile",
+    badges: "Badges",
+    connect: "Connect",
+    register: "Log a connection",
+    note: "Voice note",
+    done: "Connection saved",
+    notifications: "Notifications",
+    request: "Request",
+    person: "Profile",
+    onboardingProfile: "Create your profile",
+    onboardingMonito: "Your monito",
+    event: "Event",
+    join: "Join the event",
+    live: "Live",
+    adminEvents: "Events · Admin",
+    adminEvent: "Event · Admin",
+    adminNewEvent: "New event · Admin",
+    adminPoster: "QR poster · Admin",
+    adminPeople: "People · Admin",
+    adminTestUsers: "Test users · Admin",
+  },
+  rankingAllYear: "All-year leaderboard",
+};

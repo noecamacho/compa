@@ -1015,3 +1015,34 @@ export const datesAndPeople = {
   showAll: "Ver todas mis conexiones",
   noMutual: "Todavía no tienen conexiones en común.",
 };
+
+// F6: browser tab titles (the root layout appends " · Compa") and the leaderboard title for the all-year scope.
+export const titles = {
+  tabs: {
+    home: "Inicio",
+    ranking: "Ranking",
+    invite: "Invitar",
+    connections: "Conexiones",
+    me: "Tu perfil",
+    badges: "Insignias",
+    connect: "Conectar",
+    register: "Registrar conexión",
+    note: "Nota de voz",
+    done: "Conexión registrada",
+    notifications: "Avisos",
+    request: "Solicitud",
+    person: "Perfil",
+    onboardingProfile: "Crea tu perfil",
+    onboardingMonito: "Tu monito",
+    event: "Evento",
+    join: "Entrar al evento",
+    live: "En vivo",
+    adminEvents: "Eventos · Admin",
+    adminEvent: "Evento · Admin",
+    adminNewEvent: "Nuevo evento · Admin",
+    adminPoster: "Póster QR · Admin",
+    adminPeople: "Personas · Admin",
+    adminTestUsers: "Usuarios de prueba · Admin",
+  },
+  rankingAllYear: "Top del año",
+};

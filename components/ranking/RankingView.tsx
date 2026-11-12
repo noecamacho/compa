@@ -5,6 +5,8 @@ import { useState } from "react";
 import { Icon } from "@/components/icons";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { ButtonLink } from "@/components/ui/Button";
+import { Header } from "@/components/ui/Header";
+import { Pill } from "@/components/ui/Pill";
 import { Segmented } from "@/components/ui/Segmented";
 import { Muted, ProgressBar } from "@/components/ui/Text";
 import { Tour } from "@/components/tour/Tour";
@@ -64,7 +66,7 @@ function Column({ row, place, delay }: { row: Row | undefined; place: 1 | 2 | 3;
 
 // 11 Ranking: podium with confetti, tonight / all year, my card with the gap to the next person.
 export function RankingView({ me, boards }: Props) {
-  const { ranking: copy, rankingTips, tour } = useCopy();
+  const { common, ranking: copy, rankingTips, titles, tour } = useCopy();
   const locale = useLocale();
   const [scope, setScope] = useState<LeaderboardScopeT>("event");
   const board = boards[scope];
@@ -73,79 +75,93 @@ export function RankingView({ me, boards }: Props) {
   const pct = mine && mine.above ? Math.round((mine.points / mine.above.points) * 100) : 100;
   const sub = scope === "event" ? copy.tonightSub : copy.inEvents(me.stats?.events ?? 0);
   return (
-    // Phone: one column. From 834: the scope toggle and the podium on the left, my card and the next step on the right.
-    <div className="flex flex-1 flex-col gap-3 md:grid md:grid-cols-2 md:gap-x-8 lg:gap-x-12">
-      <div className="flex flex-col gap-3">
-        <div data-tour="scope">
-          <Segmented
-            label={copy.scopeLabel}
-            value={scope}
-            onChange={setScope}
-            height={34}
-            options={[
-              { value: "event", label: copy.tonight },
-              { value: "lifetime", label: copy.allYear },
-            ]}
-          />
-        </div>
-        {/* Keyed by scope so the podium rises again when switching tonight / all year. */}
-        <div key={scope} className="relative grid h-[372px] grid-cols-3 items-end gap-2 px-1">
-          {CONFETTI.map((piece, index) => (
-            <span
-              key={index}
-              aria-hidden="true"
-              className="animate-confetti absolute h-[14px] w-[10px] rounded-[3px]"
-              style={{ ...piece, background: piece.color, border: "2px solid #1E1B2E", animationDelay: `${piece.delay}s`, ["--r" as string]: `${piece.r}deg` }}
+    <>
+      {/* The title follows the scope toggle, so the header lives here rather than in the page. */}
+      <Header
+        back="/home"
+        title={scope === "event" ? copy.title : titles.rankingAllYear}
+        titleSize={22}
+        right={
+          <Pill tone="coral" height={30} shadow={false} className="rounded-[10px]">
+            <span className="h-[7px] w-[7px] rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
+            {common.liveShort}
+          </Pill>
+        }
+      />
+      {/* Phone: one column. From 834: the scope toggle and the podium on the left, my card and the next step on the right. */}
+      <div className="flex flex-1 flex-col gap-3 md:grid md:grid-cols-2 md:gap-x-8 lg:gap-x-12">
+        <div className="flex flex-col gap-3">
+          <div data-tour="scope">
+            <Segmented
+              label={copy.scopeLabel}
+              value={scope}
+              onChange={setScope}
+              height={34}
+              options={[
+                { value: "event", label: copy.tonight },
+                { value: "lifetime", label: copy.allYear },
+              ]}
             />
-          ))}
-          <Column row={second} place={2} delay={0.15} />
-          <Column row={first} place={1} delay={0} />
-          <Column row={third} place={3} delay={0.3} />
-        </div>
-        <span aria-hidden="true" className="mx-1 mt-[-12px] block h-0" style={{ borderTop: "3px solid #1E1B2E" }} />
-      </div>
-
-      <div className="flex flex-1 flex-col gap-3 md:flex-none md:self-center">
-        <div key={`you-${scope}`} data-tour="you" className="animate-rise mt-[2px] flex flex-col gap-[10px] rounded-[20px] bg-gum-soft px-[14px] py-3 shadow-hard-4" style={{ border: "3px solid #1E1B2E", animationDelay: ".2s" }}>
-          <div className="flex items-center gap-3">
-            <Avatar person={avatarOf(me)} size={50} />
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="font-display text-[24px] leading-none font-bold">{copy.youRank(mine?.rank ?? null)}</span>
-              <Muted className="text-[13px] font-extrabold">{copy.youSub(formatPoints(locale, mine?.points ?? 0), sub)}</Muted>
-            </span>
           </div>
-          {mine?.above ? (
-            <div className="flex flex-col gap-[5px]">
-              <span className="flex justify-between text-[13px] font-extrabold">
-                <span>{copy.toPass(firstName(mine.above.name))}</span>
-                <span>{copy.pointsShort(mine.gap)}</span>
+          {/* Keyed by scope so the podium rises again when switching tonight / all year. */}
+          <div key={scope} className="relative grid h-[372px] grid-cols-3 items-end gap-2 px-1">
+            {CONFETTI.map((piece, index) => (
+              <span
+                key={index}
+                aria-hidden="true"
+                className="animate-confetti absolute h-[14px] w-[10px] rounded-[3px]"
+                style={{ ...piece, background: piece.color, border: "2px solid #1E1B2E", animationDelay: `${piece.delay}s`, ["--r" as string]: `${piece.r}deg` }}
+              />
+            ))}
+            <Column row={second} place={2} delay={0.15} />
+            <Column row={first} place={1} delay={0} />
+            <Column row={third} place={3} delay={0.3} />
+          </div>
+          <span aria-hidden="true" className="mx-1 mt-[-12px] block h-0" style={{ borderTop: "3px solid #1E1B2E" }} />
+        </div>
+
+        <div className="flex flex-1 flex-col gap-3 md:flex-none md:self-center">
+          <div key={`you-${scope}`} data-tour="you" className="animate-rise mt-[2px] flex flex-col gap-[10px] rounded-[20px] bg-gum-soft px-[14px] py-3 shadow-hard-4" style={{ border: "3px solid #1E1B2E", animationDelay: ".2s" }}>
+            <div className="flex items-center gap-3">
+              <Avatar person={avatarOf(me)} size={50} />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="font-display text-[24px] leading-none font-bold">{copy.youRank(mine?.rank ?? null)}</span>
+                <Muted className="text-[13px] font-extrabold">{copy.youSub(formatPoints(locale, mine?.points ?? 0), sub)}</Muted>
               </span>
-              <ProgressBar value={pct} color="#FFD93D" label={copy.toPass(firstName(mine.above.name))} />
-              {/* The API tip is Spanish; the tip is derived from the gap here so it follows the locale. */}
-              <Muted className="text-[12px] font-extrabold">{rankingTips.gap(mine.gap)}</Muted>
             </div>
-          ) : (
-            <Muted className="text-[12px] font-extrabold">{mine?.rank === 1 ? copy.first : copy.noRank}</Muted>
+            {mine?.above ? (
+              <div className="flex flex-col gap-[5px]">
+                <span className="flex justify-between text-[13px] font-extrabold">
+                  <span>{copy.toPass(firstName(mine.above.name))}</span>
+                  <span>{copy.pointsShort(mine.gap)}</span>
+                </span>
+                <ProgressBar value={pct} color="#FFD93D" label={copy.toPass(firstName(mine.above.name))} />
+                {/* The API tip is Spanish; the tip is derived from the gap here so it follows the locale. */}
+                <Muted className="text-[12px] font-extrabold">{rankingTips.gap(mine.gap)}</Muted>
+              </div>
+            ) : (
+              <Muted className="text-[12px] font-extrabold">{mine?.rank === 1 ? copy.first : copy.noRank}</Muted>
+            )}
+          </div>
+
+          {mine?.above && (
+            <Link href={`/people/${mine.above.handle}`} className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable">
+              <span className="w-[30px] font-display text-[15px] font-bold text-muted">#{mine.above.rank}</span>
+              <Avatar person={{ name: mine.above.name, look: mine.above.avatar, accessories: mine.above.accessories }} size={30} />
+              <span className="flex-1 truncate text-[14px] font-extrabold">{mine.above.name}</span>
+              <Muted className="text-[13px] font-extrabold">{formatPoints(locale, mine.above.points)}</Muted>
+            </Link>
           )}
-        </div>
 
-        {mine?.above && (
-          <Link href={`/people/${mine.above.handle}`} className="flex h-[46px] items-center gap-[10px] rounded-[14px] bg-white px-3 border-ink shadow-hard-2 pressable">
-            <span className="w-[30px] font-display text-[15px] font-bold text-muted">#{mine.above.rank}</span>
-            <Avatar person={{ name: mine.above.name, look: mine.above.avatar, accessories: mine.above.accessories }} size={30} />
-            <span className="flex-1 truncate text-[14px] font-extrabold">{mine.above.name}</span>
-            <Muted className="text-[13px] font-extrabold">{formatPoints(locale, mine.above.points)}</Muted>
-          </Link>
-        )}
-
-        <div className="mt-auto flex flex-col gap-2 md:mt-2">
-          <ButtonLink href="/connect" variant="primary" height={50}>
-            <Icon name="qr" size={18} />
-            {copy.connectNow}
-          </ButtonLink>
+          <div className="mt-auto flex flex-col gap-2 md:mt-2">
+            <ButtonLink href="/connect" variant="primary" height={50}>
+              <Icon name="qr" size={18} />
+              {copy.connectNow}
+            </ButtonLink>
+          </div>
         </div>
+        <Tour id="ranking" steps={tour.ranking} />
       </div>
-      <Tour id="ranking" steps={tour.ranking} />
-    </div>
+    </>
   );
 }

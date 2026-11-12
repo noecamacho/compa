@@ -14,10 +14,12 @@ import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { Me } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
 import { BADGE_IDS } from "@/lib/badges/catalog";
-import { requestCopy } from "@/lib/server/locale";
+import { pageTitle, requestCopy } from "@/lib/server/locale";
 import { formatPoints } from "@/lib/format";
 import { isSuperAdmin } from "@/lib/roles";
 import { StickyBar } from "@/components/ui/StickyBar";
+
+export const generateMetadata = pageTitle("me");
 
 // 09 MiPerfil.
 export default async function MePage() {

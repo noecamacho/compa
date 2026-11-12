@@ -26,6 +26,22 @@ test.describe("i18n", () => {
     }
   });
 
+  test("every screen names its browser tab in the browser language @mock", async ({ page }, testInfo) => {
+    const { tabs } = copyOf(testInfo).copy.titles;
+    const titles: [string, string][] = [
+      ["/", "Compa"],
+      ["/home", `${tabs.home} · Compa`],
+      ["/ranking", `${tabs.ranking} · Compa`],
+      ["/connections", `${tabs.connections} · Compa`],
+      ["/me/badges", `${tabs.badges} · Compa`],
+      ["/admin", `${tabs.adminEvents} · Compa`],
+    ];
+    for (const [path, title] of titles) {
+      await page.goto(path);
+      await expect(page).toHaveTitle(title);
+    }
+  });
+
   test("badge names and progress follow the locale @mock", async ({ page }, testInfo) => {
     const { copy } = copyOf(testInfo);
     await page.goto("/me/badges");
