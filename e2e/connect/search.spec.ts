@@ -40,6 +40,7 @@ test.describe("connect: search by name", () => {
     await search(page, "valeria-ochoa");
     await lookup;
     expect(lookups).toHaveLength(1);
+    await expect(page.getByRole("listitem").filter({ hasText: valeriaPublic.name })).toBeVisible();
     const handles: string[] = [];
     page.on("request", (request) => new URL(request.url()).pathname.startsWith("/api/users/") && handles.push(request.url()));
     await page.route(/\/api\/users\?q=/, (route) => route.fulfill({ json: { people: [] } }));

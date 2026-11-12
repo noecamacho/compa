@@ -117,6 +117,12 @@ The full local matrix observed one WebKit Spanish `/admin/events/new` responsive
 
 The full local matrix also timed out in `e2e/live/live-board.spec.ts`, `thousands: 2,500 people and 4,000+ threads stay flat and responsive`, at `page.screenshot` after fonts loaded. This used unchanged main application code, not the live-monito change. The scenario's assertions and capture remain active and blocking, with an `unstable` annotation pointing here. This could reflect renderer load rather than a harmless test race; it is not cleared or changed into an expected failure. Measure the capture separately before changing either the load or its assertions.
 
+## Overlapping searches
+
+A final repeat of the added punctuation check exposed a separate main behavior: an earlier valid lookup can overwrite a later lookup's empty/error state. The trace records the `valeria-ochoa` query starting at 02:46:23.749Z and taking 126.091 ms, while the later `¿?` query starts at 02:46:23.852Z and takes 15.513 ms. The newer empty response finishes first; the snapshot then shows the older people under `¿?`. Application code was unchanged main. This is a concurrency risk in `ScanPanel`, not evidence against one of today's changes.
+
+The minimum-length test now waits for the valid result to render before starting its separate punctuation scenario. Its original no-empty-handle assertion is retained. Concurrent-search cancellation/latest-response ownership still needs its own product regression test and fix; this audit does not clear that behavior.
+
 ## Verification
 
 The PR records the three consecutive final mock-shard runs and their exact scope. Expected failures above must be counted separately from ordinary passes; existing skips are not new coverage.
