@@ -175,6 +175,7 @@ test.describe("live board scenarios @live @mock", () => {
   });
 
   test("thousands: 2,500 people and 4,000+ threads stay flat and responsive", async ({ page }) => {
+    test.info().annotations.push({ type: "unstable", description: "Large-board screenshot timed out on unchanged main; docs/testing/e2e-stability.md#large-board-capture" });
     await openBoard(page, "thousands", 2);
     await expect(counter(page, "people")).toHaveText("2,500");
     // One mesh per peg and per thread drew ~13,000 calls (0.2 fps); instanced pegs and a merged weave stay near 60.

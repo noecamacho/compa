@@ -89,6 +89,7 @@ These 53 unique test titles appear as failures or retry failures in **all four**
 | Broken on main: locale | Session sign-out, QR/tabs, register, profile/monito, notes, requests, ranking/badges and resilience | English projects asserted imports from `lib/copy/es`, literal Spanish strings, or Spanish strings captured at test discovery. Select copy at test time, including errors, locked badge names and rate limits. Both locales still run. |
 | Broken on main: 404 contract | `register`, `deep-links`, `profiles/other`, `summaries/note` unknown-resource cases | Expected Next.js's old English 404; the app now has a bilingual custom page. Assert its heading, body and return link. Streamed not-found pages can retain HTTP 200. |
 | Broken on main: search contract | All three mock name-search cases | Main already calls `GET /api/users?q=...`; an empty list alone falls back to `GET /api/users/{handle}`. Old tests waited for the fallback after a successful name search. Exercise both paths, including accented names, minimum length, not found and recovery. Wait for hydration before typing. |
+| Broken on main: badge selector | The failed badge-list mock case | A substring match for an earned badge also matched its locked name. Require the exact earned accessible name while retaining the zero-earned assertion. |
 | Broken on main: accessible labels | Three ranking mock cases | Podium links have an explicit `#rank full name` accessible label. Check that label, destination, visible name and points separately; retain the rank/gap assertions and use the localized derived tip. |
 | Broken on main: navigation contract | Notification list and real acceptance flow | `notificationHref` sends an acceptance to `/connections/{id}/done`, not the general list. Assert the precise destination. |
 | Local platform behavior | Admin shell skip-link test | macOS WebKit's Tab skipped links and focused `list-q`. Option+Tab reaches the skip link; both WebKit locale tests pass with that shortcut. Linux keeps Tab. |
@@ -111,6 +112,10 @@ Holding the entire navigation RSC response also holds the streamed fallback. Mai
 ## Admin form hydration
 
 The full local matrix observed one WebKit Spanish `/admin/events/new` responsive check fail on React hydration error 418 while serving unchanged main application code. Its console-error assertion remains blocking and unchanged. This case carries an `unstable` annotation pointing here, rather than an expected-failure exemption: a hydration error could expose a real regression. The exact server/browser text mismatch still needs a development-mode trace; do not dismiss subsequent errors as harmless or clear a PR based on this annotation.
+
+## Large board capture
+
+The full local matrix also timed out in `e2e/live/live-board.spec.ts`, `thousands: 2,500 people and 4,000+ threads stay flat and responsive`, at `page.screenshot` after fonts loaded. This used unchanged main application code, not the live-monito change. The scenario's assertions and capture remain active and blocking, with an `unstable` annotation pointing here. This could reflect renderer load rather than a harmless test race; it is not cleared or changed into an expected failure. Measure the capture separately before changing either the load or its assertions.
 
 ## Verification
 

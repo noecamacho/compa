@@ -13,13 +13,14 @@ import { detailOf, expectError, expectNotFound, listOf, sendRequest, skipTours }
 let { common, confirmation, register } = copyFor("es");
 test.beforeEach(({}, testInfo) => {
   ({ common, confirmation, register } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+  ([TOPIC_A = "", TOPIC_B = "", TOPIC_C = "", TOPIC_D = ""] = register.topics);
 });
 
 const kindButton = (page: Page, label: string) => page.getByRole("group", { name: register.typeLabel }).getByRole("button", { name: new RegExp(label) });
 const topic = (page: Page, name: string) => page.getByRole("button", { name, exact: true });
 const confirmButton = (page: Page, points: number) => page.getByRole("button", { name: register.confirm(points) });
 
-const [TOPIC_A = "", TOPIC_B = "", TOPIC_C = "", TOPIC_D = ""] = register.topics;
+let [TOPIC_A = "", TOPIC_B = "", TOPIC_C = "", TOPIC_D = ""] = register.topics;
 
 test.describe("connect: register screen (mock)", () => {
   test.beforeEach(async ({ context }) => skipTours(context));

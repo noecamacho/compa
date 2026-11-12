@@ -24,7 +24,7 @@ const fallbackExample = draftSummary.success.examples?.fallback?.value;
 const transcriptExample = transcribe.success.example;
 
 const isPost = (suffix: string) => (request: Request) => request.method() === "POST" && new URL(request.url()).pathname.endsWith(suffix);
-const pointsNote = note.pointsNote.replace("15", String(SUMMARY_POINTS));
+const pointsNote = () => note.pointsNote.replace("15", String(SUMMARY_POINTS));
 
 // From the saved draft, "Editar" opens the text box with the note so far.
 async function openTyping(page: Page): Promise<void> {
@@ -53,7 +53,7 @@ test.describe("voice note in mock mode", () => {
     for (const bullet of interaction.bullets) await expect(page.getByRole("main").getByText(bullet, { exact: true })).toBeVisible();
     for (const topic of interaction.topics) await expect(page.getByRole("main").getByText(topic, { exact: true }).first()).toBeVisible();
     await expect(page.getByRole("main").getByText(note.pendingLabel)).toBeVisible();
-    await expect(page.getByRole("main").getByText(pointsNote)).toBeVisible();
+    await expect(page.getByRole("main").getByText(pointsNote())).toBeVisible();
     await expect(page.getByRole("link", { name: common.back })).toHaveAttribute("href", `/people/${valeriaConnected.handle}`);
   });
 
