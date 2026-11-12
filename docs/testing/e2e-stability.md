@@ -123,6 +123,12 @@ A final repeat of the added punctuation check exposed a separate main behavior: 
 
 The minimum-length test now waits for the valid result to render before starting its separate punctuation scenario. Its original no-empty-handle assertion is retained. Concurrent-search cancellation/latest-response ownership still needs its own product regression test and fix; this audit does not clear that behavior.
 
+## Linux WebKit event creation
+
+The first [full branch workflow](https://github.com/noecamacho/compa/actions/runs/43144708908) passed seven mock shards; shard 4 failed only `creating sends the event and opens its page` in `mobile-390-webkit-en` (351 passed, 84 skipped, one failure). Both its original attempt and retry timed out waiting for `Unsaved changes`. The snapshot showed `Mock Night` in the DOM, an empty slug and no dirty indicator, so React had not observed the edit. The same test also failed in earlier [dates/profile CI](https://github.com/noecamacho/compa/actions/runs/43135664590) and [live-monito CI](https://github.com/noecamacho/compa/actions/runs/43136564931); it is not a new product regression from this test-maintenance change.
+
+The old helper refilled the same DOM value repeatedly. A regression setup now pre-populates the input without emitting a React change event; the old helper reproduces the failure locally. The helper waits for hydration, clears the value before refilling so React observes a change, and bounds the condition retry at ten seconds. Its dirty-indicator and final POST-payload assertions remain intact. With that fix, all 27 local creation cases passed: three repetitions across nine browser/locale projects, with retries disabled. The initial CI failure is an observed intermittent platform/input-readiness failure; a later green workflow is reported as recovery with that history, not a clean baseline.
+
 ## Verification
 
 Command: `CI=1 API_MODE=mock E2E_BASE_URL=http://localhost:3920 bun run e2e --shard=1/8 --workers=8 --retries=0 --reporter=json` against the mock production build. Final code: `5ed7f38`. These are three consecutive local runs of **mock shard 1**, not three complete eight-shard CI workflows.

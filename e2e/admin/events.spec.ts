@@ -6,6 +6,7 @@ import { phaseOf } from "../../lib/admin/event-phase";
 import { adminEvent, adminIds, testEvent } from "../../lib/api/admin-examples";
 import { founders } from "../../lib/api/examples";
 import { TEST_EVENT_SLUG } from "../fixtures";
+import { waitForHydration } from "../onboarding/helpers";
 import { codeOf, expect, rowOf, test, UNKNOWN_SLUG, uniqueSlug, type AdminCopy } from "./helpers";
 
 const DETAIL = `/admin/events/${adminEvent.slug}`;
@@ -32,12 +33,15 @@ async function fillNewEvent(page: Page, copy: AdminCopy, name: string, slug: str
   await page.getByLabel(copy.form.slug).fill(slug);
 }
 
-// Typing before hydration never reaches React's onChange, so retype until the form marks itself unsaved.
+// Clear a pre-hydration DOM value so React observes a change even when retrying the same text.
 async function fillOnceHydrated(page: Page, copy: AdminCopy, label: string, value: string): Promise<void> {
+  await waitForHydration(page, "form");
+  const input = page.getByLabel(label, { exact: true });
   await expect(async () => {
-    await page.getByLabel(label, { exact: true }).fill(value);
+    await input.clear();
+    await input.fill(value);
     await expect(page.getByText(copy.ui.form.unsaved).filter({ visible: true })).toBeVisible({ timeout: 2_000 });
-  }).toPass();
+  }).toPass({ timeout: 10_000 });
 }
 
 // A click on a button that only React handles is lost before hydration; retry until `opened` shows.
@@ -188,6 +192,11 @@ test.describe("admin events console (mock)", () => {
 
   test("creating sends the event and opens its page @mock", async ({ page, copy }, testInfo) => {
     await page.goto("/admin/events/new");
+    // A fill before hydration changes the DOM without updating React's form state.
+    await page.getByLabel(copy.form.name, { exact: true }).evaluate((input) => {
+      if (!(input instanceof HTMLInputElement)) throw new Error("event name is not an input");
+      input.value = "Mock Night";
+    });
     await fillOnceHydrated(page, copy, copy.form.name, "Mock Night");
     await page.getByLabel(copy.form.slug).fill("mock-night");
     await page.getByLabel(copy.form.city).fill("Guadalajara");

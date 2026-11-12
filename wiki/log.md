@@ -249,3 +249,7 @@ Added five bilingual, 20-second marketing compositions using Brag full and Hyper
 ## [2026-11-11] query | E2E baseline and stability
 
 Compared failing mock shards across the four current changes and historical CI, reproduced unchanged main locally, and recorded the root causes and expected-failure notes in the [E2E stability audit](../docs/testing/e2e-stability.md). The [workflow](../.github/workflows/e2e.yml) now also records main pushes; all existing assertions and the viewport/locale matrix remain.
+
+## [2026-11-11] query | Linux WebKit event creation follow-up
+
+The first full branch CI run left one Linux WebKit creation failure. The [audit](../docs/testing/e2e-stability.md#linux-webkit-event-creation) records both CI attempts, a deterministic lost-input-event regression, and the hydration/clear/refill fix; all assertions remain active.
