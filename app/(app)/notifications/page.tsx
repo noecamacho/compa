@@ -8,7 +8,8 @@ import { PushToggle } from "@/components/notifications/PushToggle";
 import { RefreshOnNotification } from "@/components/notifications/RefreshOnNotification";
 import { Notifications as NotificationsSchema, type NotificationT } from "@/lib/api/schemas";
 import { apiGet, apiPostQuietly } from "@/lib/api/server-fetch";
-import { copyFor, formatTime } from "@/lib/copy";
+import { copyFor } from "@/lib/copy";
+import { formatDateTime } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import { notificationHref, notificationText } from "@/lib/notifications/present";
 import { requestLocale } from "@/lib/server/locale";
@@ -25,7 +26,7 @@ function NotificationCard({ item, locale, all }: { item: NotificationT; locale: 
       <NotificationIcon item={item} />
       <span className="flex min-w-0 flex-1 flex-col gap-1">
         <span className="font-display text-[15px] leading-tight font-bold">{notificationText(item, copy, all.badgeNames)}</span>
-        <Muted className="text-[12px] font-bold">{formatTime(locale, item.createdAt)}</Muted>
+        <Muted className="text-[12px] font-bold"><time dateTime={item.createdAt}>{formatDateTime(locale, item.createdAt)}</time></Muted>
       </span>
       {item.unseen && <span aria-label={copy.newLabel} className="h-3 w-3 shrink-0 rounded-full border-ink bg-coral" />}
     </Card>

@@ -1006,3 +1006,12 @@ export const admin = {
     bulkFailed: (names: string[]) => `No se pudo borrar: ${listNames(names, "y", "más")}.`,
   },
 };
+
+// F3: dated activity and another person's mutual connections.
+export const datesAndPeople = {
+  daysAgo: (days: number) => (days === 1 ? "hace 1 día" : `hace ${days} días`),
+  unknownDate: "Fecha no disponible",
+  mutualWith: (name: string) => `Conexiones en común con ${name}`,
+  showAll: "Ver todas mis conexiones",
+  noMutual: "Todavía no tienen conexiones en común.",
+};

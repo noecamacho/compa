@@ -258,6 +258,14 @@ The first full branch CI run left one Linux WebKit creation failure. The [audit]
 
 - Added the isolated, pure [D1 scenario contract](../docs/contracts/demo-scenario.md): 150 fictional profiles, a synchronized 120-second cycle, fresh snapshots and a connection every 3 seconds. Types and integration boundaries for D2 are fixed in `lib/demo/cast.ts` and `lib/demo/scenario.ts`; the existing live fixtures and production routes are unchanged. Point constants follow [points rules](points-rules.md). Wiki lint: the new contract and its relative links are indexed; no existing open question is resolved by this foundation.
 
+## [2026-11-11] query | Profile history dates and mutual connections
+
+F3 corrects profile history dates, mutual-person filtering, relative activity older than a day, and dated notifications. Sources and regression coverage: [connections](screens/connections.md).
+
+## [2026-11-11] lint | F3 profile and activity documentation
+
+Checked relative links in index, log and connections page; the updated page remains indexed and its new behavior cites implementation and regression tests.
+
 ## [2026-11-11] change | Each person's own monito on the big screen and the ranking
 
 - The live snapshot and the leaderboard rows now carry the person's monito (`avatar`) and which picture they chose (`avatarMode`), so the board, the race, the final podium and `/ranking` stop drawing the default monito for everyone. Only the first 8 people of the snapshot carry it (`LIVE_LOOK_ROWS`), the rows the board draws: measured on the 2,500-person scenario the snapshot goes from 454.1 KB to 456.1 KB, against 1,115.7 KB if everyone carried theirs. `/ranking` no longer reads `GET /api/connections` to find looks. Pages updated: [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (finding 9); API spec §5.
