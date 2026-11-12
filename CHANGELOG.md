@@ -7,6 +7,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Added
 
 - Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
+- Keyless demo deployment: a separate Vercel project with only `API_MODE=demo`; the deploy skips migrations when `API_MODE` is `demo` or `mock`. Setup steps in the README, "Demo deployment (no keys)".
 
 ### Changed
 
