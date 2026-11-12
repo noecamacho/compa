@@ -1,12 +1,11 @@
 // Helpers shared by the connect, requests and notifications specs: tours off, typed API calls as the signed-in
 // browser context, and a throwaway test event (created as the seeded test admin) for window-dependent cases.
-import { expect, type APIRequestContext, type APIResponse, type BrowserContext, type Page, type TestInfo } from "@playwright/test";
+import { expect, type APIRequestContext, type APIResponse, type BrowserContext, type Page, type TestInfo, test } from "@playwright/test";
 import type { z } from "zod";
 import { TEST_ADMIN_HANDLE } from "../../db/seed-test-event";
 import { AddedAttendee, AdminEventBody, type TestUserT } from "../../lib/api/admin-schemas";
 import { ConnectionDetail, ConnectionList, ConnectionRequest, CreatedEvent, Notifications } from "../../lib/api/schemas";
 import { copyFor, type Dictionary } from "../../lib/copy";
-import { connect } from "../../lib/copy/es";
 import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { asUser, type RealModeClient, type TestSessionCookies } from "../../lib/testing/real-mode";
 
@@ -125,9 +124,6 @@ export class AdminEvents {
 }
 
 // The found-person "Conectar" link; the dock has a "Conectar" tab too, so match the target as well.
-export const connectLink = (page: Page) => page.getByRole("link", { name: connect.connectButton }).and(page.locator('a[href^="/connect/"]'));
+export const connectLink = (page: Page) => page.getByRole("link", { name: copyOf(test.info()).connect.connectButton }).and(page.locator('a[href^="/connect/"]'));
 
-// notFound() inside a streamed (app) page keeps HTTP 200 (the loading boundary already flushed), so check the page.
-export async function expectNotFound(page: Page): Promise<void> {
-  await expect(page.getByText("This page could not be found.")).toBeVisible();
-}
+export { expectNotFound } from "../fixtures/screens";

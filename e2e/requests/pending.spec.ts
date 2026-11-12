@@ -1,9 +1,15 @@
 // F-29, F-35, F-50: the requester's pending screen /connections/<id>/done flips once the other person accepts
 // (PendingWatcher polls every 3 s), and PATCH /api/connections/{id}/knew with its documented errors.
-import { confirmation, register } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { firstName } from "../../lib/format";
 import { expect, test } from "../fixtures";
 import { accept, detailOf, expectError, sendRequest, skipTours } from "../connect/helpers";
+
+let { confirmation, register } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ confirmation, register } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 test.describe("requests: pending screen and knew", () => {
   test("A's pending screen turns into the connection when B accepts, without a reload @real", async ({ twoUsers }) => {

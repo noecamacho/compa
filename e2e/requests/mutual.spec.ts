@@ -1,8 +1,14 @@
 // F-25 Simultaneous mutual scans: the unique pair index keeps one connection per event. Routing the second
 // scanner to Accept (T-037) is not built; today they land on the pending screen of the same connection.
-import { register } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { expect, test } from "../fixtures";
 import { accept, listOf, sendRequest, skipTours } from "../connect/helpers";
+
+let { register } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ register } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 test.describe("requests: mutual scans", () => {
   test("A and B scan each other at the same moment: one connection @real", async ({ twoUsers }) => {

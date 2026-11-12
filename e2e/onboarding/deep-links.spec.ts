@@ -4,7 +4,7 @@ import { TEST_ADMIN_HANDLE } from "../../db/seed-test-event";
 import { valeriaProfile } from "../../lib/api/examples";
 import { AUTHORIZE_URL, expect, nextOf, redirectOf, signInPath, skipTours, stubSignIn, test } from "./helpers";
 
-const NOT_FOUND = /could not be found|404/i;
+import { expectNotFound } from "../fixtures/screens";
 
 test.describe("personal QR link signed out", () => {
   test("keeps the handle through sign-in @real", async ({ request, baseURL }) => {
@@ -42,7 +42,7 @@ test.describe("personal QR link signed in", () => {
     expect(realUser.user.handle).not.toBe("zz-nobody-here");
     await page.goto("/u/zz-nobody-here");
     await expect(page).toHaveURL(/\/connect\/zz-nobody-here$/);
-    await expect(page.getByText(NOT_FOUND).first()).toBeVisible();
+    await expectNotFound(page);
   });
 
   test("opens the register screen in mock mode @mock", async ({ page }) => {
@@ -57,6 +57,6 @@ test.describe("personal QR link signed in", () => {
     await mock.mockServerError("user_not_found");
     await page.goto("/u/zz-nobody-here");
     await expect(page).toHaveURL(/\/connect\/zz-nobody-here$/);
-    await expect(page.getByText(NOT_FOUND).first()).toBeVisible();
+    await expectNotFound(page);
   });
 });
