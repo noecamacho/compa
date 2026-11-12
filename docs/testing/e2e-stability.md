@@ -125,7 +125,19 @@ The minimum-length test now waits for the valid result to render before starting
 
 ## Verification
 
-The PR records the three consecutive final mock-shard runs and their exact scope. Expected failures above must be counted separately from ordinary passes; existing skips are not new coverage.
+Command: `CI=1 API_MODE=mock E2E_BASE_URL=http://localhost:3920 bun run e2e --shard=1/8 --workers=8 --retries=0 --reporter=json` against the mock production build. Final code: `5ed7f38`. These are three consecutive local runs of **mock shard 1**, not three complete eight-shard CI workflows.
+
+| Run | Ordinary passes | Explicit expected failures | Existing skips | Unexpected failures | Time |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Unchanged main, before | 282 | 0 | 125 | 29 | 173.2 s |
+| Final 1 (2026-11-12T02:49:48.747Z) | 308 | 3 | 125 | 0 | 66.0 s |
+| Final 2 (2026-11-12T02:50:55.042Z) | 308 | 3 | 125 | 0 | 62.5 s |
+| Final 3 (2026-11-12T02:51:57.844Z) | 308 | 3 | 125 | 0 | 60.3 s |
+
+No retries and no new skips. The three expected failures are the two expired admin-fixture cases and the loading simulation, not ordinary passes. Targeted checks: all 27 search matrix cases and 36 custom-404 matrix cases passed; 41 English register/profile/note cases passed after the final locale fixes; both macOS WebKit skip-link cases passed.
+
+The full exploratory matrix ran while fixes were being applied (2,755 expected, 682 skipped, 48 unexpected); it is diagnostic evidence, not final full-matrix proof. The remaining hydration/capture annotations still block on failure, and the measured overlapping-search risk is documented. CI on this PR must validate all eight shards.
+
 
 Local unit tests also expose an unchanged-main ICU formatting expectation in `lib/admin/format.test.ts`: expected `Oct 29, 10:00`, received `Oct 29 at 10:00`. It reproduces with Bun 1.4.4 and CI's Bun 1.3.10 on macOS. This B2 change does not alter that formatter or weaken its assertion.
 
