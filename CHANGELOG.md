@@ -15,6 +15,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Super-admin console redesign: a sidebar, rail and bottom-tab shell; paged, searchable and sortable lists for events, people and attendees; headline numbers from `GET /api/admin/stats`.
 - E2E coverage of every view, button and API route in mock and real mode, with the mock run sharded in four; the mock baseline is stabilized and its known failures are tracked without skipping their assertions ([e2e stability](docs/testing/e2e-stability.md)).
 - Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
+- Keyless demo deployment: a separate Vercel project with only `API_MODE=demo`; the deploy skips migrations when `API_MODE` is `demo` or `mock`. Setup steps in the README, "Demo deployment (no keys)".
 
 ### Changed
 
@@ -25,6 +26,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Admin event dates that span two days read "Oct 29, 10:00 – Oct 30, 02:00" everywhere. On macOS (Bun, Safari) they read "Oct 29 at 10:00", because the system ICU joins date and time with "at"; the unit test failed on every Mac for the same reason.
 - Fixes found by the full e2e pass: padded event codes open their door, the door shows the opening time in the event's time zone, a 401 on check-in sends the person to sign in, only the addressee sees accept and decline, a half-typed time zone no longer crashes the event form, and "Copy" selects the link when the clipboard is refused.
 - Connect and note details: the search by name on the scan tab has a visible search button (it only answered to Enter); a fourth topic on the register screen says the limit is three instead of doing nothing; and when the microphone is refused on the note screen the message says so instead of "we couldn't summarize the note".
 - Activity switches to days after 24 hours and calendar dates after a week. Profiles show the actual last interaction date; mutual connections open a filtered list. Notifications include dates and use the same localized clock as Home.

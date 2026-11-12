@@ -274,6 +274,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - The scan tab's name search has a visible search button, a fourth topic on the register screen says the limit is three, and a refused microphone on the note screen says so instead of a summary error. Flows: [catalog](../docs/flows/catalog.md) (connect and summaries).
 
+## [2026-11-12] change | Keyless demo deployment (D5)
+
+- The demo is a separate Vercel project whose only variable is `API_MODE=demo`; `vercel.json` now runs `db:migrate:deploy` only for production builds whose `API_MODE` is neither `demo` nor `mock`, so the demo build never needs `DATABASE_URL`. Setup steps: `README.md` "Demo deployment (no keys)". Depends on the D2 demo routes for content.
+
 ## [2026-11-12] lint | Top-level documents after #61 to #84
 
 - `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `AGENTS.md` §6 and `CHANGELOG.md` no longer say that no code exists or that built screens are missing; the changelog now lists the live views, the QR poster, referral codes, connections outside an event, the admin redesign, the e2e work and the D1 demo scenario. The README's demo video stays unrecorded and its evidence table points to the [Codex evidence](../docs/evidence/codex/README.md).

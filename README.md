@@ -194,7 +194,7 @@ Names only; never commit values. Copy [.env.example](.env.example) to `.env.loca
 
 | Variable | Purpose |
 | --- | --- |
-| `API_MODE` | `mock` runs without Supabase or OpenAI |
+| `API_MODE` | `mock` runs without Supabase or OpenAI; `demo` runs the clock-driven demo, also without keys |
 | `DATABASE_URL` | Postgres connection (Supabase) |
 | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase client |
 | `SUPABASE_SERVICE_ROLE_KEY` | Server-only Supabase admin access |
@@ -220,6 +220,29 @@ Flows and scenarios: [docs/flows/catalog.md](docs/flows/catalog.md). Testing aga
 ## Deployment
 
 Vercel hosts the app at [compa.lol](https://compa.lol). Every push to `main` runs `bun run db:migrate:deploy` (Drizzle migrations against `DATABASE_URL_DIRECT`) before the build, so migrations are additive and backward-compatible. Health check: `/api/health`. Runbook: [wiki/event-day-runbook.md](wiki/event-day-runbook.md).
+
+### Demo deployment (no keys)
+
+The public demo is a separate Vercel project built from the same repository. Its only environment variable is `API_MODE=demo`: no database, Supabase, OpenAI or push keys, so it cannot reach real data even through a bug. `vercel.json` skips migrations when `API_MODE` is `demo` or `mock`.
+
+One-time setup, by a member of the Vercel team (Vercel CLI, same version as CI):
+
+```sh
+# 1. A fresh clone, so no local .env* or .vercel/ is uploaded.
+git clone https://github.com/noecamacho/compa.git compa-demo && cd compa-demo
+bunx vercel@60.1.3 login
+# 2. Create the project and link this folder to it (<team> is the team slug that owns the production project).
+bunx vercel@60.1.3 project add compa-demo --scope <team>
+bunx vercel@60.1.3 link --yes --project compa-demo --team <team>
+# 3. The one variable. Add nothing else.
+bunx vercel@60.1.3 env add API_MODE production --value demo
+# 4. Build on Vercel and publish to https://compa-demo.vercel.app.
+bunx vercel@60.1.3 deploy --prod
+```
+
+Check: the build log has no `drizzle-kit migrate` line, the environment variables page lists only `API_MODE`, the site opens in a private window without signing in, and `/api/health` answers `503` with `"db":"down"` (it has no database). Optional custom domain: `bunx vercel@60.1.3 domains add demo.compa.lol compa-demo --scope <team>`.
+
+The CI deploy updates only the production project. To update the demo, run `git pull && bunx vercel@60.1.3 deploy --prod` in that clone.
 
 ## Project knowledge
 
