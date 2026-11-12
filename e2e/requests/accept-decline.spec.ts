@@ -3,10 +3,16 @@
 import type { Page } from "@playwright/test";
 import { diego, ids } from "../../lib/api/examples";
 import { E } from "../../lib/api/errors";
-import { common, confirmation, networks, request } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { firstName } from "../../lib/format";
 import { errorCopy, expect, test } from "../fixtures";
 import { AdminEvents, accept, detailOf, expectError, expectNotFound, listOf, notificationsOf, sendRequest, skipTours } from "../connect/helpers";
+
+let { common, confirmation, networks, request } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, confirmation, networks, request } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const INCOMING = ids.connection3;
 const acceptButton = (page: Page) => page.getByRole("button", { name: request.accept });
@@ -17,9 +23,9 @@ test.describe("requests: accept and decline (mock)", () => {
   test("the request screen shows who asked and both answers @mock", async ({ page }) => {
     await page.goto(`/requests/${INCOMING}`);
     await expect(page.getByRole("heading", { level: 1, name: request.title(firstName(diego.name)) })).toBeVisible();
-    await expect(page.getByText(request.badge)).toBeVisible();
-    await expect(page.getByText(request.bothWin)).toBeVisible();
-    await expect(page.getByText(request.interestsLabel)).toBeVisible();
+    await expect(page.getByRole("main").getByText(request.badge)).toBeVisible();
+    await expect(page.getByRole("main").getByText(request.bothWin)).toBeVisible();
+    await expect(page.getByRole("main").getByText(request.interestsLabel)).toBeVisible();
     await expect(acceptButton(page)).toBeEnabled();
     await expect(declineButton(page)).toBeEnabled();
     await page.getByRole("link", { name: common.close }).click();
@@ -92,10 +98,10 @@ test.describe("requests: accept and decline (mock)", () => {
     await skipTours(page.context());
     await page.goto(`/connections/${ids.connection}/done`);
     await expect(page.getByRole("heading", { name: confirmation.titleReconnection("Valeria") })).toBeVisible();
-    await expect(page.getByText(confirmation.points(35))).toBeVisible();
-    await expect(page.getByText([confirmation.breakdownKind("reconnection", 20), confirmation.breakdownNote(15)].join(" · "))).toBeVisible();
+    await expect(page.getByRole("main").getByText(confirmation.points(35))).toBeVisible();
+    await expect(page.getByRole("main").getByText([confirmation.breakdownKind("reconnection", 20), confirmation.breakdownNote(15)].join(" · "))).toBeVisible();
     await expect(page.getByRole("link", { name: new RegExp(confirmation.talkedAbout) })).toHaveAttribute("href", `/connections/${ids.connection}/note`);
-    await expect(page.getByText(confirmation.keepTalking)).toBeVisible();
+    await expect(page.getByRole("main").getByText(confirmation.keepTalking)).toBeVisible();
     await expect(page.getByRole("link", { name: confirmation.linkLabel(networks.linkedin, "Valeria") })).toBeVisible();
     await page.getByRole("link", { name: common.done }).click();
     await expect(page).toHaveURL(/\/home$/);

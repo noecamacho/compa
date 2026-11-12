@@ -3,11 +3,17 @@
 import { E } from "../../lib/api/errors";
 import type { Page } from "@playwright/test";
 import { ids, valeriaPublic } from "../../lib/api/examples";
-import { register } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { formatClock } from "../../lib/format";
 import { transcribe } from "../../lib/api/routes";
 import { errorCopy, expect, test } from "../fixtures";
 import { expectError, skipTours } from "./helpers";
+
+let { register } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ register } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const TRANSCRIPT = transcribe.success.example?.text ?? "";
 const noteButton = (page: Page) => page.getByRole("button", { name: new RegExp(register.noteTitle) });

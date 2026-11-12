@@ -1,14 +1,20 @@
 // 09 MiPerfil and its edit flow (F-41, F-42): points and rank, every shortcut, per-link visibility that saves at once
-// and reverts on failure, editing name, role and city, and interests. Spanish-only copy, so both locales assert lib/copy/es.
+// and reverts on failure, editing name, role and city, and interests. Copy follows each project's locale.
 import { errorCopy } from "../fixtures";
 import type { Page } from "@playwright/test";
 import { E } from "../../lib/api/errors";
 import { me as diego } from "../../lib/api/examples";
 import { InterestList, Me, VisibilitySettings } from "../../lib/api/schemas";
 import { BADGE_IDS } from "../../lib/badges/catalog";
-import { common, me as copy, networks, person, profile, tour, visibility } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { formatPoints } from "../../lib/format";
 import { acceptedConnection, call, expect, expectApiError, skipTours, test } from "./helpers";
+
+let { common, me: copy, networks, person, profile, tour, visibility } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, me: copy, networks, person, profile, tour, visibility } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const picker = (page: Page, network: keyof typeof networks) => page.getByRole("group", { name: visibility.pickerLabel(networks[network]) });
 
@@ -19,15 +25,15 @@ test.describe("my profile in mock mode", () => {
 
   test("shows who I am, my points, numbers, badges and links @mock", async ({ page }) => {
     await page.goto("/me");
-    await expect(page.getByText(diego.name, { exact: true })).toBeVisible();
-    await expect(page.getByText(`${diego.headline} · ${diego.company}`)).toBeVisible();
-    await expect(page.getByText(copy.pointsRank(formatPoints("es", 1265), 6))).toBeVisible();
-    for (const label of [copy.newConnections, copy.reconnections, copy.events]) await expect(page.getByText(label, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(diego.name, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(`${diego.headline} · ${diego.company}`)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.pointsRank(formatPoints("es", 1265), 6))).toBeVisible();
+    for (const label of [copy.newConnections, copy.reconnections, copy.events]) await expect(page.getByRole("main").getByText(label, { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: new RegExp(copy.badgesCount(diego.badges?.length ?? 0, BADGE_IDS.length)) })).toHaveAttribute("href", "/me/badges");
     await expect(picker(page, "linkedin").getByRole("button", { name: visibility.levels.connections })).toHaveAttribute("aria-pressed", "true");
     await expect(picker(page, "instagram").getByRole("button", { name: visibility.levels.connections })).toHaveAttribute("aria-pressed", "true");
     await expect(picker(page, "github")).toHaveCount(0);
-    await expect(page.getByText(copy.testUser)).toHaveCount(0);
+    await expect(page.getByRole("main").getByText(copy.testUser)).toHaveCount(0);
     await expect(page.getByRole("link", { name: new RegExp(copy.admin) })).toHaveCount(0);
   });
 

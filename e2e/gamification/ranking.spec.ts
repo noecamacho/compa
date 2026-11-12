@@ -1,30 +1,39 @@
 // 11 Ranking (F-45, F-46): tonight's podium and my card with the gap to the next person, the all-year board, the links
-// and the leaderboard API. Spanish-only copy, so both locales assert lib/copy/es.
+// and the leaderboard API. Copy follows each project's locale.
 import type { Page } from "@playwright/test";
 import { leaderboard, leaderboardLifetime, me as diego, valeriaPublic } from "../../lib/api/examples";
 import { Leaderboard, Me, type LeaderboardT } from "../../lib/api/schemas";
-import { common, ranking as copy, tour } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { firstName, formatPoints } from "../../lib/format";
 import { acceptedConnection, call, expect, expectApiError, expectErrorScreen, skipTours, test } from "../profiles/helpers";
+
+let { common, ranking: copy, rankingTips, tour } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, ranking: copy, rankingTips, tour } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+});
 
 const scopeButton = (page: Page, label: string) => page.getByRole("group", { name: copy.scopeLabel }).getByRole("button", { name: label });
 
 // The podium is three links in the order 2, 1, 3 on screen; each holds the first name and the points.
 async function expectPodium(page: Page, board: LeaderboardT): Promise<void> {
   for (const row of board.rows.slice(0, 3)) {
-    await expect(page.getByRole("link", { name: new RegExp(`${firstName(row.name)}.*${row.rank}.*${formatPoints("es", row.points)}`) }).first()).toBeVisible();
+    const podium = page.getByRole("link", { name: `#${row.rank} ${row.name}`, exact: true });
+    await expect(podium).toHaveAttribute("href", `/people/${row.handle}`);
+    await expect(podium).toContainText(firstName(row.name));
+    await expect(podium).toContainText(formatPoints(localeFromAcceptLanguage(test.info().project.use.locale), row.points));
   }
 }
 
 async function expectMyCard(page: Page, board: LeaderboardT, sub: string): Promise<void> {
   const mine = board.me;
   if (!mine) throw new Error("the board has no `me`");
-  await expect(page.getByText(copy.youRank(mine.rank), { exact: true })).toBeVisible();
-  await expect(page.getByText(copy.youSub(formatPoints("es", mine.points), sub), { exact: true })).toBeVisible();
+  await expect(page.getByRole("main").getByText(copy.youRank(mine.rank), { exact: true })).toBeVisible();
+  await expect(page.getByRole("main").getByText(copy.youSub(formatPoints(localeFromAcceptLanguage(test.info().project.use.locale), mine.points), sub), { exact: true })).toBeVisible();
   if (!mine.above) return;
-  await expect(page.getByText(copy.toPass(firstName(mine.above.name)), { exact: true })).toBeVisible();
-  await expect(page.getByText(copy.pointsShort(mine.gap), { exact: true })).toBeVisible();
-  if (mine.tip) await expect(page.getByText(mine.tip)).toBeVisible();
+  await expect(page.getByRole("main").getByText(copy.toPass(firstName(mine.above.name)), { exact: true })).toBeVisible();
+  await expect(page.getByRole("main").getByText(copy.pointsShort(mine.gap), { exact: true })).toBeVisible();
+  if (mine.tip) await expect(page.getByRole("main").getByText(rankingTips.gap(mine.gap))).toBeVisible();
   await expect(page.getByRole("link", { name: new RegExp(`#${mine.above.rank}.*${mine.above.name}`) })).toBeVisible();
 }
 
@@ -34,7 +43,7 @@ test.describe("ranking in mock mode", () => {
   test("tonight shows the podium, my place and the gap to the next @mock", async ({ page }) => {
     await page.goto("/ranking");
     await expect(page.getByRole("heading", { name: copy.title })).toBeVisible();
-    await expect(page.getByText(common.liveShort, { exact: true })).toBeVisible();
+    await expect(page.getByRole("main").getByText(common.liveShort, { exact: true })).toBeVisible();
     await expect(scopeButton(page, copy.tonight)).toHaveAttribute("aria-pressed", "true");
     await expectPodium(page, leaderboard);
     await expectMyCard(page, leaderboard, copy.tonightSub);
@@ -54,7 +63,7 @@ test.describe("ranking in mock mode", () => {
 
   test("a podium place I am connected with opens their profile @mock", async ({ page }) => {
     await page.goto("/ranking");
-    const first = page.getByRole("link", { name: new RegExp(`${firstName(valeriaPublic.name)}.*1.*${formatPoints("es", 1980)}`) });
+    const first = page.getByRole("link", { name: `#1 ${valeriaPublic.name}`, exact: true });
     await expect(first).toHaveAttribute("href", `/people/${valeriaPublic.handle}`);
     await page.getByRole("link", { name: copy.connectNow }).click();
     await expect(page).toHaveURL(/\/connect$/);
@@ -84,11 +93,11 @@ test.describe("ranking in real mode", () => {
     const [outside] = await people([{}], { checkIn: false });
     if (!ana || !outside) throw new Error("test users not created");
     await ana.page.goto("/ranking");
-    await expect(ana.page.getByText(copy.youRank(null), { exact: true })).toBeVisible();
-    await expect(ana.page.getByText(copy.noRank)).toBeVisible();
+    await expect(ana.page.getByRole("main").getByText(copy.youRank(null), { exact: true })).toBeVisible();
+    await expect(ana.page.getByRole("main").getByText(copy.noRank)).toBeVisible();
     await outside.page.goto("/ranking");
-    await expect(outside.page.getByText(copy.youRank(null), { exact: true })).toBeVisible();
-    await expect(outside.page.getByText(copy.youSub("0", copy.tonightSub), { exact: true })).toBeVisible();
+    await expect(outside.page.getByRole("main").getByText(copy.youRank(null), { exact: true })).toBeVisible();
+    await expect(outside.page.getByRole("main").getByText(copy.youSub("0", copy.tonightSub), { exact: true })).toBeVisible();
   });
 
   test("after an accepted connection my card matches the leaderboard, tonight and all year @real", async ({ people }) => {
@@ -105,7 +114,7 @@ test.describe("ranking in real mode", () => {
         const board = await call(ana.page.request, "GET", `/api/e/${code}/leaderboard?scope=${scope}`, Leaderboard);
         expect(board.me?.points).toBe(50);
         expect(board.me?.rank).not.toBeNull();
-        await expect(ana.page.getByText(copy.youRank(board.me?.rank ?? null), { exact: true })).toBeVisible({ timeout: 2_000 });
+        await expect(ana.page.getByRole("main").getByText(copy.youRank(board.me?.rank ?? null), { exact: true })).toBeVisible({ timeout: 2_000 });
       }).toPass({ timeout: 30_000 });
     }
   });

@@ -4,16 +4,23 @@
 import type { Page, Route } from "@playwright/test";
 import { ids, valeriaPublic } from "../../lib/api/examples";
 import { E } from "../../lib/api/errors";
-import { common, confirmation, register } from "../../lib/copy/es";
+import { copyFor } from "../../lib/copy";
+import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { firstName } from "../../lib/format";
 import { errorCopy, expect, test } from "../fixtures";
 import { detailOf, expectError, expectNotFound, listOf, sendRequest, skipTours } from "./helpers";
+
+let { common, confirmation, register } = copyFor("es");
+test.beforeEach(({}, testInfo) => {
+  ({ common, confirmation, register } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+  ([TOPIC_A = "", TOPIC_B = "", TOPIC_C = "", TOPIC_D = ""] = register.topics);
+});
 
 const kindButton = (page: Page, label: string) => page.getByRole("group", { name: register.typeLabel }).getByRole("button", { name: new RegExp(label) });
 const topic = (page: Page, name: string) => page.getByRole("button", { name, exact: true });
 const confirmButton = (page: Page, points: number) => page.getByRole("button", { name: register.confirm(points) });
 
-const [TOPIC_A = "", TOPIC_B = "", TOPIC_C = "", TOPIC_D = ""] = register.topics;
+let [TOPIC_A = "", TOPIC_B = "", TOPIC_C = "", TOPIC_D = ""] = register.topics;
 
 test.describe("connect: register screen (mock)", () => {
   test.beforeEach(async ({ context }) => skipTours(context));
@@ -21,8 +28,8 @@ test.describe("connect: register screen (mock)", () => {
   test("a person I already knew starts as a reconnection; kind and topics move the total @mock", async ({ page }) => {
     await page.goto(`/connect/${valeriaPublic.handle}`);
     await expect(page.getByRole("heading", { name: register.title })).toBeVisible();
-    await expect(page.getByText(valeriaPublic.name).first()).toBeVisible();
-    await expect(page.getByText(register.alreadyKnew)).toBeVisible();
+    await expect(page.getByRole("main").getByText(valeriaPublic.name).first()).toBeVisible();
+    await expect(page.getByRole("main").getByText(register.alreadyKnew)).toBeVisible();
     await expect(kindButton(page, register.reconnectionType)).toHaveAttribute("aria-pressed", "true");
     await expect(confirmButton(page, 20)).toBeVisible();
 
@@ -49,7 +56,7 @@ test.describe("connect: register screen (mock)", () => {
 
   test("Confirm shows the screen notice first, sends the request and opens the done page @mock", async ({ page }) => {
     await page.goto(`/connect/${valeriaPublic.handle}`);
-    await expect(page.getByText(register.screenNotice)).toBeVisible();
+    await expect(page.getByRole("main").getByText(register.screenNotice)).toBeVisible();
     await kindButton(page, register.newType).click();
     await topic(page, TOPIC_A).click();
     await topic(page, TOPIC_B).click();
@@ -99,21 +106,21 @@ test.describe("connect: register screen (mock)", () => {
       const answered = page.waitForResponse((response) => response.request().method() === "POST" && response.url().endsWith("/api/connections"));
       await confirmButton(page, 20).click();
       expect((await answered).status()).toBe(error.status);
-      await expect(page.getByText(errorCopy(error))).toBeVisible();
+      await expect(page.getByRole("main").getByText(errorCopy(error))).toBeVisible();
       await expect(confirmButton(page, 20)).toBeEnabled();
       await expect(page).toHaveURL(new RegExp(`/connect/${valeriaPublic.handle}$`));
     });
   }
 
   for (const [code, text] of [
-    ["rate_limited", common.rateLimited],
-    ["limit_reached", common.limitReached],
+    ["rate_limited", () => common.rateLimited],
+    ["limit_reached", () => common.limitReached],
   ] as const) {
     test(`${code} shows its own copy @mock`, async ({ page, mock }) => {
       await page.goto(`/connect/${valeriaPublic.handle}`);
       await mock.mockError(code, "**/api/connections");
       await confirmButton(page, 20).click();
-      await expect(page.getByText(text)).toBeVisible();
+      await expect(page.getByRole("main").getByText(text())).toBeVisible();
       await expect(confirmButton(page, 20)).toBeEnabled();
     });
   }
@@ -161,9 +168,9 @@ test.describe("connect: register screen (real)", () => {
   test("scanning myself fails on Confirm with self_connection @real", async ({ page, realUser }) => {
     await skipTours(page.context());
     await page.goto(`/connect/${realUser.user.handle}`);
-    await expect(page.getByText(realUser.user.name).first()).toBeVisible();
+    await expect(page.getByRole("main").getByText(realUser.user.name).first()).toBeVisible();
     await page.getByRole("button", { name: /^Confirmar/ }).click();
-    await expect(page.getByText(errorCopy(E.selfConnection))).toBeVisible();
+    await expect(page.getByRole("main").getByText(errorCopy(E.selfConnection))).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/connect/${realUser.user.handle}$`));
     await expectError(await page.request.post("/api/connections", { data: { toHandle: realUser.user.handle, screenConsent: true } }), 409, "self_connection");
   });
@@ -177,7 +184,7 @@ test.describe("connect: register screen (real)", () => {
       await skipTours(page.context());
       await expectError(await page.request.post("/api/connections", { data: { toHandle: target.handle } }), 409, "consent_required");
       await page.goto(`/connect/${target.handle}`);
-      await expect(page.getByText(register.screenNotice)).toBeVisible();
+      await expect(page.getByRole("main").getByText(register.screenNotice)).toBeVisible();
       await confirmButton(page, 50).click();
       await expect(page).toHaveURL(/\/done$/);
       const list = await listOf(page.request);
