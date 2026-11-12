@@ -987,3 +987,12 @@ export const tour: typeof es.tour = {
     body: "When you get to one, scan the QR at the entrance to check in and start connecting.",
   },
 };
+
+// F3: dated activity and another person's mutual connections.
+export const datesAndPeople: typeof es.datesAndPeople = {
+  daysAgo: (days) => (days === 1 ? "1 day ago" : `${days} days ago`),
+  unknownDate: "Date unavailable",
+  mutualWith: (name) => `Mutual connections with ${name}`,
+  showAll: "View all my connections",
+  noMutual: "You have no mutual connections yet.",
+};

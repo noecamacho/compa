@@ -1,8 +1,9 @@
 // 07 Conexiones (F-39): grouped people, the kind filters, the event chip, the empty state, a row to the profile and
-// the error screen. The list copy is Spanish-only (lib/copy/index.ts), so both locales assert lib/copy/es.
+// the error screen. Mock assertions follow the visitor locale.
 import { connectionList, foundersDoor, valeriaConnected } from "../../lib/api/examples";
+import { copyOf } from "../connect/helpers";
 import { connections as copy } from "../../lib/copy/es";
-import { expect, expectErrorScreen, acceptedConnection, skipTours, test } from "../profiles/helpers";
+import { expect, acceptedConnection, skipTours, test } from "../profiles/helpers";
 
 type Filter = keyof typeof copy.filters;
 
@@ -13,7 +14,8 @@ const namesFor = (filter: Filter): string[] =>
 test.describe("connections list in mock mode", () => {
   test.beforeEach(async ({ page }) => skipTours(page));
 
-  test("lists every person with their topics, kind and event chip @mock", async ({ page }) => {
+  test("lists every person with their topics, kind and event chip @mock", async ({ page }, testInfo) => {
+    const copy = copyOf(testInfo).connections;
     await page.goto("/connections");
     await expect(page.getByRole("heading", { name: copy.title })).toBeVisible();
     await expect(page.getByRole("button", { name: copy.search })).toBeVisible();
@@ -26,7 +28,8 @@ test.describe("connections list in mock mode", () => {
     }
   });
 
-  test("each kind filter keeps only its people @mock", async ({ page }) => {
+  test("each kind filter keeps only its people @mock", async ({ page }, testInfo) => {
+    const copy = copyOf(testInfo).connections;
     await page.goto("/connections");
     const group = page.getByRole("group", { name: copy.filterLabel });
     for (const filter of ["new", "reconnection", "friend", "all"] as const) {
@@ -46,19 +49,20 @@ test.describe("connections list in mock mode", () => {
     await expect(page.getByRole("heading", { name: valeriaConnected.name })).toBeVisible();
   });
 
-  test("no connections yet shows the empty state and its call to action @mock", async ({ page }) => {
+  test("no connections yet shows the empty state and its call to action @mock", async ({ page }, testInfo) => {
+    const copy = copyOf(testInfo).connections;
     await page.goto("/connections?demo=empty");
-    await expect(page.getByText(copy.emptyTitle)).toBeVisible();
-    await expect(page.getByText(copy.empty)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.emptyTitle)).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.empty)).toBeVisible();
     await expect(page.getByRole("group", { name: copy.filterLabel })).toHaveCount(0);
     await page.getByRole("link", { name: copy.emptyCta }).click();
     await expect(page).toHaveURL(/\/connect$/);
   });
 
-  test("a failed list shows the error screen @mock", async ({ page, mock }) => {
+  test("a failed list shows the error screen @mock", async ({ page, mock }, testInfo) => {
     await mock.mockServerError("unauthorized");
     await page.goto("/connections");
-    await expectErrorScreen(page);
+    await expect(page.getByRole("button", { name: copyOf(testInfo).screenState.retry })).toBeVisible();
   });
 });
 

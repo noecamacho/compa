@@ -13,7 +13,7 @@ import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { UserProfile } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
 import { requestCopy } from "@/lib/server/locale";
-import { formatPoints } from "@/lib/format";
+import { formatDate, formatPoints } from "@/lib/format";
 import { BADGE_IDS } from "@/lib/badges/catalog";
 
 type Props = { params: Promise<{ handle: string }> };
@@ -96,14 +96,17 @@ export default async function PersonPage({ params }: Props) {
           {hasLinks && (
             <Card className="order-4 flex flex-col overflow-hidden md:order-none">
               {lastInteraction && (
-                <Link href={`/connections/${lastInteraction.connectionId}/note`} className="flex h-14 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper">
+                <Link href={`/connections/${lastInteraction.connectionId}/note`} className="flex min-h-14 items-center gap-3 px-4 py-3 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper">
                   <span className="flex-1">{copy.lastTime}</span>
-                  <Muted className="text-[13px]">{`${copy.today} · ${lastInteraction.title}`}</Muted>
+                  <Muted className="min-w-0 flex-1 text-right text-[13px]">
+                    <time dateTime={lastInteraction.at}>{formatDate(locale, lastInteraction.at)}</time>
+                    {` · ${lastInteraction.title}`}
+                  </Muted>
                   <Icon name="chevronRight" size={18} strokeWidth={3} />
                 </Link>
               )}
               {relationship && relationship.mutual.length > 0 && (
-                <Link href="/connections" className={`flex h-14 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper ${lastInteraction ? "dashed-ink" : ""}`}>
+                <Link href={`/connections?mutual=${card.handle}`} className={`flex h-14 items-center gap-3 px-4 text-[15px] font-extrabold transition-colors duration-200 active:bg-paper ${lastInteraction ? "dashed-ink" : ""}`}>
                   <span className="flex-1">{copy.mutualConnections}</span>
                   <span className="flex items-center">
                     {relationship.mutual.slice(0, 3).map((person, index) => (

@@ -245,3 +245,11 @@ Added five bilingual, 20-second marketing compositions using Brag full and Hyper
 ## [2026-10-29] query | Should generated video evidence be linted?
 
 - `eslint.config.mjs` excludes `docs/evidence/**` so the vendored GSAP render runtime is preserved without application lint rules. The follow-up `bun run lint` passed with two existing research-prototype warnings; details in [video verification](../docs/evidence/codex/verification.md).
+
+## [2026-11-11] query | Profile history dates and mutual connections
+
+F3 corrects profile history dates, mutual-person filtering, relative activity older than a day, and dated notifications. Sources and regression coverage: [connections](screens/connections.md).
+
+## [2026-11-11] lint | F3 profile and activity documentation
+
+Checked relative links in index, log and connections page; the updated page remains indexed and its new behavior cites implementation and regression tests.
