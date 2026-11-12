@@ -6,7 +6,7 @@ const UNKNOWN_ZONE = "UTC (?)";
 
 const TIME: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
 const DAY: Intl.DateTimeFormatOptions = { weekday: "short", day: "numeric", month: "short" };
-const DAY_TIME: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", ...TIME };
+const DATE: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
 const YMD: Intl.DateTimeFormatOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
 
 // An unknown stored zone makes Intl throw a RangeError; fall back to UTC and flag it rather than crash a list (edge case 14).
@@ -20,6 +20,9 @@ function zoneOrUtc(timeZone: string): { timeZone: string; known: boolean } {
 }
 
 const format = (locale: Locale, date: Date, timeZone: string, options: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(TAG[locale], { ...options, timeZone }).format(date);
+
+// Date and time formatted apart and joined by hand: ICU's own glue differs by build ("Oct 29, 10:00" on Linux, "Oct 29 at 10:00" on macOS).
+const dayTime = (locale: Locale, date: Date, timeZone: string) => `${format(locale, date, timeZone, DATE)}, ${format(locale, date, timeZone, TIME)}`;
 
 const zoneName = (locale: Locale, date: Date, timeZone: string) =>
   new Intl.DateTimeFormat(TAG[locale], { timeZone, timeZoneName: "short" }).formatToParts(date).find((part) => part.type === "timeZoneName")?.value ?? timeZone;
@@ -43,7 +46,7 @@ export function eventWhen(locale: Locale, startsAt: string, endsAt: string, time
   const abbreviation = known ? zoneName(locale, start, zone) : UNKNOWN_ZONE;
   const sameDay = format("en", start, zone, YMD) === format("en", end, zone, YMD);
   if (sameDay) return `${format(locale, start, zone, DAY)} · ${format(locale, start, zone, TIME)}–${format(locale, end, zone, TIME)} ${abbreviation}`;
-  return `${format(locale, start, zone, DAY_TIME)} – ${format(locale, end, zone, DAY_TIME)} ${abbreviation}`;
+  return `${dayTime(locale, start, zone)} – ${dayTime(locale, end, zone)} ${abbreviation}`;
 }
 
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
