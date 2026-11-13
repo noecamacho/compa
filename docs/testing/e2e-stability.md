@@ -131,6 +131,10 @@ The first [full branch workflow](https://github.com/noecamacho/compa/actions/run
 
 The old helper refilled the same DOM value repeatedly. A regression setup now pre-populates the input without emitting a React change event; the old helper reproduces the failure locally. The helper waits for hydration, clears the value before refilling so React observes a change, and bounds the condition retry at ten seconds. Its dirty-indicator and final POST-payload assertions remain intact. With that fix, all 27 local creation cases passed: three repetitions across nine browser/locale projects, with retries disabled. The initial CI failure is an observed intermittent platform/input-readiness failure; a later green workflow is reported as recovery with that history, not a clean baseline.
 
+## Profile invalid link on Linux WebKit
+
+Open, intermittent. On [the docs-only change](https://github.com/noecamacho/compa/pull/86), the first attempt of [workflow 43332830047](https://github.com/noecamacho/compa/actions/runs/43332830047) failed mock shard 3 on `an invalid link is flagged before saving` (`e2e/profiles/me.spec.ts:93`) in `mobile-390-webkit-en`, both on the attempt and its retry: after `blur()` on the X field, the alert `Use your X username (up to 15 letters, numbers or underscores).` never appeared within 10 s (360 passed, 84 skipped, one failure; `admin/events.spec.ts:211` in `mobile-390-webkit-es` was flaky in the same shard). The diff touched no code, and main at `7f083d1` was green just before. One diagnostic rerun of the failed shard passed. It looks like the same lost-input-before-hydration class as [Linux WebKit event creation](#linux-webkit-event-creation), not confirmed; the assertion stays active until the cause is measured.
+
 ## Verification
 
 Command: `CI=1 API_MODE=mock E2E_BASE_URL=http://localhost:3920 bun run e2e --shard=1/8 --workers=8 --retries=0 --reporter=json` against the mock production build. Final code: `5ed7f38`. These are three consecutive local runs of **mock shard 1**, not three complete eight-shard CI workflows.
