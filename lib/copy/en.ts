@@ -1006,3 +1006,33 @@ export const demoApi: typeof es.demoApi = {
   nextStep: (name) => `Message ${name} to ask for the guide`,
   eventDescription: "A sample evening that replays every two minutes: 150 fictional attendees and a new connection every 3 seconds.",
 };
+
+// D3: the /demo page, the big screen and the phone side by side with a six-step guide.
+export const demo: typeof es.demo = {
+  notice: "Demo with sample data",
+  title: "The big screen and your phone, side by side",
+  lead: "An event that is always running, with 150 fictional attendees. You get in without an account: what you do on the phone shows up on the screen.",
+  stepsLabel: "Demo steps",
+  steps: [
+    { label: "Get in without an account", text: "Open the link and you are in, at an event that is always running. No LinkedIn, no email." },
+    { label: "Show your QR", text: "Connect: your QR or the scanner. Whoever scans your code sends you a request." },
+    { label: "Log the connection", text: "New or a reconnection, up to three topics and an optional voice note." },
+    { label: "Earn points, see it on screen", text: "Confirm, and the screen next to you draws your thread, bumps the counter and lists you under “Just now”." },
+    { label: "Compa sums up the note", text: "Tell Compa what you talked about and it leaves you a summary and the next step." },
+    { label: "Climb the ranking", text: "Your place and your points change with what you did." },
+  ],
+  stepOf: (step, total) => `${step} of ${total}.`,
+  play: "Play",
+  pause: "Pause",
+  previous: "Previous",
+  next: "Next",
+  reducedMotion: "Your system asks for less motion: the demo does not advance on its own. Use Next.",
+  openScreen: "Open only the screen",
+  openPhone: "Open only the phone",
+  openConsole: "Organizer console",
+  startOver: "Start over",
+  screenTitle: "The event's live screen",
+  phoneTitle: "The app on the phone",
+  connectFailed: "The connection could not be logged. Try again.",
+  landingCta: "See the demo",
+};
