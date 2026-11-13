@@ -7,13 +7,13 @@ import { HIT_AREA } from "@/components/ui/hit-area";
 
 type Props = { url: string; eventName: string | null };
 
-const VIA: { key: "whatsapp" | "instagram" | "more"; color: string; icon: IconName }[] = [
+// No Instagram button: it has no share URL, so it could only repeat Más (P12).
+const VIA: { key: "whatsapp" | "more"; color: string; icon: IconName }[] = [
   { key: "whatsapp", color: "#DDF8EA", icon: "whatsapp" },
-  { key: "instagram", color: "#FFE3EA", icon: "instagram" },
   { key: "more", color: "#DDF1FF", icon: "share" },
 ];
 
-// Copy the link or share it; Instagram has no share URL, so it copies and opens the app's share sheet.
+// Copy the link or share it; Más opens the system share sheet, or copies where there is none (desktop).
 export function InviteActions({ url, eventName }: Props) {
   const copy = useCopy().invite;
   const [copied, setCopied] = useState(false);
@@ -51,7 +51,7 @@ export function InviteActions({ url, eventName }: Props) {
           {copied ? copy.copied : copy.copy}
         </button>
       </div>
-      <div className="grid grid-cols-3 gap-[10px]">
+      <div className="grid grid-cols-2 gap-[10px]">
         {VIA.map((via) => (
           <button
             key={via.key}

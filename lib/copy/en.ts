@@ -895,10 +895,10 @@ export const invite: typeof es.invite = {
   copy: "Copy",
   copied: "Copied",
   whatsapp: "WhatsApp",
-  instagram: "Instagram",
   more: "More",
   footer: ["Your friend signs in with LinkedIn, just like you, and gets +50 at their first connection.", "Only friends new to COMPA count."],
-  showQr: "Show my invite QR",
+  qrLabel: "Your invite code QR",
+  qrHint: "Whoever scans it with their camera joins as your invitee.",
   shareText: (url, eventName) =>
     eventName ? `Come join me at ${eventName} on Compa: we connect at the event and keep each other's socials: ${url}` : `Come join me on Compa: we connect at events and keep each other's socials: ${url}`,
   pointsEach: "+100 pts",
