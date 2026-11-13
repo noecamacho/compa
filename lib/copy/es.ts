@@ -1055,6 +1055,12 @@ export const titles = {
   rankingAllYear: "Top del año",
 };
 
+// F2: the live screen's own controls.
+export const liveScreen = {
+  fullscreen: "Pantalla completa",
+  back: "Volver",
+};
+
 // D3: the /demo page, the big screen and the phone side by side with a six-step guide.
 export const demo = {
   tabTitle: "Demo en vivo",

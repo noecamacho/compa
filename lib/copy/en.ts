@@ -1038,6 +1038,12 @@ export const titles: typeof es.titles = {
   rankingAllYear: "All-year leaderboard",
 };
 
+// F2: the live screen's own controls.
+export const liveScreen: typeof es.liveScreen = {
+  fullscreen: "Full screen",
+  back: "Back",
+};
+
 // D3: the /demo page, the big screen and the phone side by side with a six-step guide.
 export const demo: typeof es.demo = {
   tabTitle: "Live demo",

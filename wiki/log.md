@@ -282,6 +282,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - Open question 60 resolved: `--color-muted` is `#575266` (AA on paper and every soft tint). Every page sets a localized tab title through `pageTitle()` (`lib/server/locale.ts`, copy section `titles`) under the root template "%s · Compa"; admin tabs read "<page> · Admin · Compa". `/ranking` titles the all-year scope "Top del año". Pages updated: [open-questions](open-questions.md), [DESIGN.md](../DESIGN.md).
 
+## [2026-11-12] change | Big screen and Home card fit (F2)
+
+- The Home card drops the view chips and the race; the big screen gains full screen and, from the Home card, a way back; phone chips are 44 px; the five leaders fit at 1280×720; Type names fit at 1920. Page updated: [live-dashboard](live-dashboard.md).
+
 ## [2026-11-12] change | The /demo page (D3)
 
 - `/demo` (demo mode only) shows the big screen and the phone side by side with a six-step guide; step 4 connects the visitor so the board shows their link. Flow [F-75](../docs/flows/catalog.md#f-75); interface in [demo-routes](../docs/contracts/demo-routes.md).

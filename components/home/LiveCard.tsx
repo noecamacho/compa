@@ -70,7 +70,7 @@ export function LiveCard({ event, me, empty }: Props) {
   const connections = snapshot?.counters.connections ?? event.counters.connections;
   return (
     <Card tone="sky" className="flex flex-col gap-[10px] px-4 pt-[14px] pb-4">
-      <Link href={`/e/${event.code}/live`} aria-label={home.seeLiveLabel(event.name)} className="group flex flex-col gap-[10px] rounded-button" data-testid="home-live">
+      <Link href={`/e/${event.code}/live?from=home`} aria-label={home.seeLiveLabel(event.name)} className="group flex flex-col gap-[10px] rounded-button" data-testid="home-live">
         <span className="flex items-center justify-between">
           <Pill tone="coral" rotate={-2}>
             <span className="animate-beat h-2 w-2 rounded-full bg-white" style={{ border: "1.5px solid #1E1B2E" }} />
@@ -85,7 +85,7 @@ export function LiveCard({ event, me, empty }: Props) {
         <span className="pressable relative block h-[200px] overflow-hidden rounded-button bg-sky-soft border-ink shadow-hard-2 md:h-[240px] lg:h-[280px]">
           {/* Inert: the views' own controls (Race rows are buttons) must not be focus stops inside this link. */}
           <span inert className="absolute inset-0">
-            {snapshot && <LiveStage snapshot={snapshot} selectedId={null} label={home.pairsNow} onSelect={ignoreSelect} locale={locale} />}
+            {snapshot && <LiveStage snapshot={snapshot} selectedId={null} label={home.pairsNow} onSelect={ignoreSelect} locale={locale} compact />}
           </span>
           {/* Over the canvas so a tap opens the live view instead of selecting a person on the stage. */}
           <span aria-hidden="true" className="absolute inset-0" />
