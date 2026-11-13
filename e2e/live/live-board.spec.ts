@@ -5,6 +5,7 @@
 // so the spec runs once, in the live-1920-en project.
 import type { Locator, Page, Route } from "@playwright/test";
 import path from "node:path";
+import { copyFor } from "../../lib/copy";
 import { LIVE_BOARD_ROWS } from "../../lib/live/live-model";
 import { RACE_SIZE } from "../../lib/live/race";
 import { VIZ_IDS, type VizId } from "../../lib/live/rotation";
@@ -424,6 +425,65 @@ test.describe("live visualization switcher @live @mock", () => {
   test("a URL-pinned view shows no switcher", async ({ page }) => {
     await openBoard(page, "trickle", 1, { query: "?viz=marbles" });
     await expect(page.getByTestId("live-viz-indicator")).toHaveCount(0);
+  });
+});
+
+// F2: the way back to the app, full screen for the projector, touch-size chips, and nothing cut at laptop size.
+test.describe("live screen controls and fit @live @mock", () => {
+  test.use({ viewport: VIEWPORTS.screen, ...inLocale("en-US") });
+  const controls = copyFor("en").liveScreen;
+  // No row of the list runs past the list's own (scrolling) box.
+  const rowsFitWhole = (list: Locator) =>
+    list.evaluate((ol) => [...ol.children].every((row) => row.getBoundingClientRect().bottom <= ol.getBoundingClientRect().bottom + 1));
+
+  test("from Home, a back link returns to Home; opened directly, there is none", async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.phone);
+    await openBoard(page, "trickle", 1, { query: "?viz=loom&from=home" });
+    const back = page.getByRole("link", { name: controls.back });
+    await expect(back).toHaveAttribute("href", "/home");
+    await back.click();
+    await expect(page).toHaveURL(/\/home$/);
+    await openBoard(page, "trickle", 1, { query: "?viz=loom&from=elsewhere" });
+    await expect(page.getByTestId("live-back")).toHaveCount(0);
+  });
+
+  test("full screen on the big screen, gone once on and on a phone", async ({ page }) => {
+    await openBoard(page, "trickle");
+    const button = page.getByRole("button", { name: controls.fullscreen });
+    await button.click();
+    await expect.poll(() => page.evaluate(() => document.fullscreenElement !== null)).toBe(true);
+    await expect(button).toBeHidden();
+    await page.evaluate(() => document.exitFullscreen());
+    await page.setViewportSize(VIEWPORTS.phone);
+    await expect(button).toBeHidden();
+  });
+
+  test("the view chips are 44 px touch targets on a phone, on one row", async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS.phone);
+    await openBoard(page, "trickle", 1, { query: "?rotate=0" });
+    const chips = page.getByTestId("live-viz-indicator").getByRole("button");
+    const heights = await chips.evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
+    expect(Math.min(...heights)).toBeGreaterThanOrEqual(44);
+    const tops = await chips.evaluateAll((buttons) => new Set(buttons.map((button) => Math.round(button.getBoundingClientRect().top))).size);
+    expect(tops).toBe(1);
+  });
+
+  test("a 1280×720 laptop shows all five leaders whole", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await openBoard(page, "rush", 2);
+    const board = page.getByTestId("live-leaderboard");
+    await expect(board.locator("li")).toHaveCount(LIVE_BOARD_ROWS);
+    expect(await rowsFitWhole(board.locator("ol"))).toBe(true);
+    await expectNoHorizontalScroll(page);
+    await shot(page, "rush-1280x720");
+  });
+
+  test("marquee at 1920 spells every leader's name out", async ({ page }) => {
+    await openBoard(page, "rush", 2, { query: "?viz=marquee" });
+    const names = viewIn(page, "marquee").locator("button > span.truncate");
+    await expect(names.first()).toBeVisible();
+    const cut = await names.evaluateAll((spans) => spans.filter((span) => span.scrollWidth > span.clientWidth).map((span) => span.textContent));
+    expect(cut).toEqual([]);
   });
 });
 

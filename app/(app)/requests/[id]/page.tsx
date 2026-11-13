@@ -11,8 +11,10 @@ import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { Icon } from "@/components/icons";
 import { ConnectionDetail, Me, UserProfile } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
-import { requestCopy } from "@/lib/server/locale";
+import { pageTitle, requestCopy } from "@/lib/server/locale";
 import { firstName, timeAgo } from "@/lib/format";
+
+export const generateMetadata = pageTitle("request");
 
 type Props = { params: Promise<{ id: string }> };
 

@@ -13,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const description = copyFor(await requestLocale()).meta.description;
   return {
     metadataBase: new URL("https://compa.lol"),
-    title: "Compa",
+    title: { default: "Compa", template: "%s · Compa" },
     description,
     openGraph: { title: "Compa", description, url: "https://compa.lol", siteName: "Compa", type: "website" },
     twitter: { card: "summary_large_image", title: "Compa", description },

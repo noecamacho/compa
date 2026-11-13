@@ -8,9 +8,9 @@ import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { firstName, formatPoints } from "../../lib/format";
 import { acceptedConnection, call, expect, expectApiError, expectErrorScreen, skipTours, test } from "../profiles/helpers";
 
-let { common, ranking: copy, rankingTips, tour } = copyFor("es");
+let { common, ranking: copy, rankingTips, titles, tour } = copyFor("es");
 test.beforeEach(({}, testInfo) => {
-  ({ common, ranking: copy, rankingTips, tour } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
+  ({ common, ranking: copy, rankingTips, titles, tour } = copyFor(localeFromAcceptLanguage(testInfo.project.use.locale)));
 });
 
 const scopeButton = (page: Page, label: string) => page.getByRole("group", { name: copy.scopeLabel }).getByRole("button", { name: label });
@@ -57,8 +57,10 @@ test.describe("ranking in mock mode", () => {
     await expect(scopeButton(page, copy.allYear)).toHaveAttribute("aria-pressed", "true");
     await expectPodium(page, leaderboardLifetime);
     await expectMyCard(page, leaderboardLifetime, copy.inEvents(diego.stats?.events ?? 0));
+    await expect(page.getByRole("heading", { name: titles.rankingAllYear })).toBeVisible();
     await scopeButton(page, copy.tonight).click();
     await expectMyCard(page, leaderboard, copy.tonightSub);
+    await expect(page.getByRole("heading", { name: copy.title })).toBeVisible();
   });
 
   test("a podium place I am connected with opens their profile @mock", async ({ page }) => {

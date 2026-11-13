@@ -13,8 +13,10 @@ import { ConnectionList, EventDoor, Invites, Me, Notifications, type EventDoorT 
 import { apiGet, apiGetSafe } from "@/lib/api/server-fetch";
 import { copyFor, type Dictionary } from "@/lib/copy";
 import { firstName } from "@/lib/format";
-import { requestLocale } from "@/lib/server/locale";
+import { pageTitle, requestLocale } from "@/lib/server/locale";
 import { StickyBar } from "@/components/ui/StickyBar";
+
+export const generateMetadata = pageTitle("home");
 
 type Props = { searchParams: Promise<{ demo?: string }> };
 

@@ -117,6 +117,8 @@ The full local matrix observed one WebKit Spanish `/admin/events/new` responsive
 
 The full local matrix also timed out in `e2e/live/live-board.spec.ts`, `thousands: 2,500 people and 4,000+ threads stay flat and responsive`, at `page.screenshot` after fonts loaded. This used unchanged main application code, not the live-monito change. The scenario's assertions and capture remain active and blocking, with an `unstable` annotation pointing here. This could reflect renderer load rather than a harmless test race; it is not cleared or changed into an expected failure. Measure the capture separately before changing either the load or its assertions.
 
+Seen again on 2026-11-12 (branch `fm/compa-tele-inicio`): a 60 s timeout in a six-project run of `e2e/live` and `e2e/home` with four workers; the single diagnostic rerun passed in 48 s. Still intermittent, not cleared.
+
 ## Overlapping searches
 
 A final repeat of the added punctuation check exposed a separate main behavior: an earlier valid lookup can overwrite a later lookup's empty/error state. The trace records the `valeria-ochoa` query starting at 02:46:23.749Z and taking 126.091 ms, while the later `¿?` query starts at 02:46:23.852Z and takes 15.513 ms. The newer empty response finishes first; the snapshot then shows the older people under `¿?`. Application code was unchanged main. This is a concurrency risk in `ScanPanel`, not evidence against one of today's changes.
@@ -128,6 +130,10 @@ The minimum-length test now waits for the valid result to render before starting
 The first [full branch workflow](https://github.com/noecamacho/compa/actions/runs/43144708908) passed seven mock shards; shard 4 failed only `creating sends the event and opens its page` in `mobile-390-webkit-en` (351 passed, 84 skipped, one failure). Both its original attempt and retry timed out waiting for `Unsaved changes`. The snapshot showed `Mock Night` in the DOM, an empty slug and no dirty indicator, so React had not observed the edit. The same test also failed in earlier [dates/profile CI](https://github.com/noecamacho/compa/actions/runs/43135664590) and [live-monito CI](https://github.com/noecamacho/compa/actions/runs/43136564931); it is not a new product regression from this test-maintenance change.
 
 The old helper refilled the same DOM value repeatedly. A regression setup now pre-populates the input without emitting a React change event; the old helper reproduces the failure locally. The helper waits for hydration, clears the value before refilling so React observes a change, and bounds the condition retry at ten seconds. Its dirty-indicator and final POST-payload assertions remain intact. With that fix, all 27 local creation cases passed: three repetitions across nine browser/locale projects, with retries disabled. The initial CI failure is an observed intermittent platform/input-readiness failure; a later green workflow is reported as recovery with that history, not a clean baseline.
+
+## Profile invalid link on Linux WebKit
+
+Open, intermittent. On [the docs-only change](https://github.com/noecamacho/compa/pull/86), the first attempt of [workflow 43332830047](https://github.com/noecamacho/compa/actions/runs/43332830047) failed mock shard 3 on `an invalid link is flagged before saving` (`e2e/profiles/me.spec.ts:93`) in `mobile-390-webkit-en`, both on the attempt and its retry: after `blur()` on the X field, the alert `Use your X username (up to 15 letters, numbers or underscores).` never appeared within 10 s (360 passed, 84 skipped, one failure; `admin/events.spec.ts:211` in `mobile-390-webkit-es` was flaky in the same shard). The diff touched no code, and main at `7f083d1` was green just before. One diagnostic rerun of the failed shard passed. It looks like the same lost-input-before-hydration class as [Linux WebKit event creation](#linux-webkit-event-creation), not confirmed; the assertion stays active until the cause is measured.
 
 ## Verification
 

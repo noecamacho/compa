@@ -2,6 +2,9 @@ import { MonitoBuilder } from "@/components/monito/MonitoBuilder";
 import { Me } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
 import { safeNext } from "@/lib/safe-next";
+import { pageTitle } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("onboardingMonito");
 
 type Props = { searchParams: Promise<{ from?: string; next?: string }> };
 

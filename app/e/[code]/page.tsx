@@ -13,7 +13,9 @@ import { copyFor, formatNumber, formatTime, type Dictionary } from "@/lib/copy";
 import type { Locale } from "@/lib/i18n";
 import { currentMe } from "@/lib/server/current-event";
 import { loadEventDoor } from "@/lib/server/event-door";
-import { requestLocale } from "@/lib/server/locale";
+import { pageTitle, requestLocale } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("event");
 
 type Props = { params: Promise<{ code: string }>; searchParams: Promise<{ invite?: string }> };
 

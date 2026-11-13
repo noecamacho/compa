@@ -23,7 +23,11 @@ const VIEWS: Record<VizId, ComponentType<VizProps>> = {
 const LAST_KEY = "compa.live.viz";
 const FADE_MS = 700;
 
-type Props = Omit<VizProps, "reducedMotion"> & { locale: Locale };
+// `compact`: the Home card. No switcher (the whole card is one link to the live view), and only the views that read at
+// card size: the race is a table of names that the card cuts to "Valeria O…".
+type Props = Omit<VizProps, "reducedMotion"> & { locale: Locale; compact?: boolean };
+
+const CARD_VIZ: readonly VizId[] = VIZ_IDS.filter((id) => id !== "race");
 
 const reducedQuery = "(prefers-reduced-motion: reduce)";
 const subscribeReduced = (onChange: () => void) => {
@@ -59,16 +63,17 @@ type Shown = { current: VizId; leaving: VizId | null; rotation: Rotation; availa
 
 // Picks a different visualization than the last load, then moves on every `rotation.seconds` with a cross-fade.
 // The stage only ever renders in the browser (LiveBoard loads it with ssr: false), so it can read the URL at once.
-function initialStage(): Shown {
-  const rotation = rotationFrom(window.location.search);
-  const current = rotation.pinned ?? firstViz(readLast(), Math.random());
-  return { current, leaving: null, rotation, available: [...VIZ_IDS], held: null };
+function initialStage(views: readonly VizId[]): Shown {
+  const url = rotationFrom(window.location.search);
+  const rotation = url.pinned && !views.includes(url.pinned) ? { ...url, pinned: null } : url;
+  const current = rotation.pinned ?? firstViz(readLast(), Math.random(), views);
+  return { current, leaving: null, rotation, available: [...views], held: null };
 }
 
 type Stage = { shown: Shown | null; drop: (id: VizId) => void; pick: (id: VizId) => void };
 
-function useStage(reducedMotion: boolean): Stage {
-  const [shown, setShown] = useState<Shown | null>(initialStage);
+function useStage(reducedMotion: boolean, views: readonly VizId[]): Stage {
+  const [shown, setShown] = useState<Shown | null>(() => initialStage(views));
 
   const current = shown?.current;
   // Reduced motion: no hard cut every 30 s unless the URL asked for a period.
@@ -117,11 +122,12 @@ type SwitcherProps = { shown: Shown; locale: Locale; reducedMotion: boolean; onP
 
 // Which view is on and how long until the next, as a strip of buttons: tap one to hold it (the bar stops), tap it
 // again to release. Keyboard reaches it like any button, so it works on a projector with a remote keyboard.
+// Below lg the chips are touch targets (44 px) on one scrolling row, so they never cover half the stage.
 function Switcher({ shown, locale, reducedMotion, onPick }: SwitcherProps) {
   const copy = copyFor(locale).live;
   const seconds = shown.held ? 0 : shown.rotation.seconds;
   return (
-    <div role="group" aria-label={copy.pickViz} className="absolute bottom-2 left-2 flex max-w-[calc(100%-16px)] flex-wrap items-center gap-1 rounded-chip bg-white/90 px-1.5 py-1 border-ink shadow-hard-2" data-testid="live-viz-indicator" data-held={shown.held ?? undefined}>
+    <div role="group" aria-label={copy.pickViz} className="absolute bottom-2 left-2 flex max-w-[calc(100%-16px)] items-center gap-1 overflow-x-auto lg:flex-wrap lg:overflow-visible rounded-chip bg-white/90 px-1.5 py-1 border-ink shadow-hard-2" data-testid="live-viz-indicator" data-held={shown.held ?? undefined}>
       {shown.available.map((id) => {
         const on = id === shown.current;
         return (
@@ -134,7 +140,7 @@ function Switcher({ shown, locale, reducedMotion, onPick }: SwitcherProps) {
               event.stopPropagation();
               onPick(id);
             }}
-            className={`relative cursor-pointer overflow-hidden rounded-full px-2 py-0.5 text-[12px] font-extrabold lg:text-[clamp(12px,0.8vw,18px)] ${on ? "bg-sun text-ink" : "text-ink/60 hover:bg-sun-soft"} ${shown.held === id ? "ring-2 ring-ink" : ""}`}
+            className={`relative min-h-11 shrink-0 cursor-pointer overflow-hidden rounded-full px-3 py-0.5 text-[13px] lg:min-h-0 lg:px-2 font-extrabold lg:text-[clamp(12px,0.8vw,18px)] ${on ? "bg-sun text-ink" : "text-ink/60 hover:bg-sun-soft"} ${shown.held === id ? "ring-2 ring-ink" : ""}`}
           >
             {copy.vizNames[id]}
             {shown.held === id && <span className="ml-1 text-[0.8em] opacity-70">📌</span>}
@@ -147,9 +153,9 @@ function Switcher({ shown, locale, reducedMotion, onPick }: SwitcherProps) {
 }
 
 // The stage behind the counters: one visualization at a time, a new one on every load and every 30 s by default.
-export default function LiveStage({ locale, ...rest }: Props) {
+export default function LiveStage({ locale, compact = false, ...rest }: Props) {
   const reducedMotion = usePrefersReducedMotion();
-  const { shown, drop, pick } = useStage(reducedMotion);
+  const { shown, drop, pick } = useStage(reducedMotion, compact ? CARD_VIZ : VIZ_IDS);
   if (!shown) return null;
   const layers = shown.leaving && !reducedMotion ? [shown.leaving, shown.current] : [shown.current];
   return (
@@ -163,7 +169,7 @@ export default function LiveStage({ locale, ...rest }: Props) {
           <View id={id} props={{ ...rest, reducedMotion, onUnavailable: () => drop(id) }} />
         </div>
       ))}
-      {!shown.rotation.pinned && shown.available.length > 1 && <Switcher shown={shown} locale={locale} reducedMotion={reducedMotion} onPick={pick} />}
+      {!compact && !shown.rotation.pinned && shown.available.length > 1 && <Switcher shown={shown} locale={locale} reducedMotion={reducedMotion} onPick={pick} />}
     </div>
   );
 }

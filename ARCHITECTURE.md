@@ -56,6 +56,7 @@ Each entry: context, decision, consequences, source.
 ### ADR-007 No accounts: handle + recovery code in a cookie
 - Decision: no login, no OAuth, no password; the session is a cookie recoverable with handle + 3-character code (p. 1, p. 3, p. 4–5, p. 17).
 - Consequences: a recovery path is needed when Safari drops the cookie (p. 20); social networks are links only.
+- As built: replaced by sign-in with LinkedIn OIDC or an email magic link ([data model](docs/specs/2026-10-29-data-model.md) M2).
 
 ### ADR-008 Idempotent pairs and points by database constraints
 - Decision: unique index on `(least(a_id,b_id), greatest(a_id,b_id))`; `unique (attendee_id, reason, ref_id)` on `points` (p. 9–10).
@@ -63,6 +64,7 @@ Each entry: context, decision, consequences, source.
 
 ### ADR-009 Seed data and a simulator keep the demo alive
 - Decision: about 150 `is_seed` attendees, about 300 connections, about 80 summaries, optional simulator, hide toggle (p. 3, p. 13, p. 18).
+- As built: `SEED_DEMO` seeds a demo event (`db/seed.ts`), and `lib/demo/` holds a pure, clock-driven scenario with 150 fictional people for a sign-in-free demo ([demo scenario contract](docs/contracts/demo-scenario.md)); with `API_MODE=demo` every route answers from it plus one cookie per visitor ([demo routes contract](docs/contracts/demo-routes.md)). The `/demo` page is not built yet.
 
 ## Decided versus open
 
@@ -76,4 +78,4 @@ Decided: everything above. Open (see [wiki/open-questions.md](wiki/open-question
 - `lib/points.ts` — points rules, server only (contract)
 - `app/` — Next.js App Router pages and route handlers
 
-No application code exists yet; the Jira Epic in `docs/jira/compa-bootstrap-ticket.md` tracks the build.
+As built: the schema lives in `db/schema.ts` with Drizzle migrations in `drizzle/` (`0000_init.sql` to `0014_eventless_connections.sql`); request and response types are inferred from the zod schemas in `lib/api/schemas.ts` (there is no `lib/types.ts`); `lib/topics.ts` and `lib/points.ts` exist as planned. The routes differ from the plan's list above: the generated reference is `openapi.json` (`/api/docs`).

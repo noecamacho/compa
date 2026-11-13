@@ -17,6 +17,7 @@ const titleClass = "m-0 font-display text-[22px] leading-[1.1] font-bold lg:text
 type BoardProps = { rows: BoardRow[]; locale: Locale; onSelect: (id: string) => void; from?: number; limit?: number };
 
 // Ranks come from the rows (ties share a place); the first three wear the podium colors.
+// A short laptop (1280×720) gets tighter rows: the avatar does not scale with the screen, and the fifth row was cut.
 export function LeaderboardPanel({ rows, locale, onSelect, from = 0, limit = 10 }: BoardProps) {
   const copy = copyFor(locale).live;
   return (
@@ -25,13 +26,13 @@ export function LeaderboardPanel({ rows, locale, onSelect, from = 0, limit = 10 
         {copy.leaderboard}
       </h2>
       {rows.length === 0 && <p className="m-0 text-[15px] font-extrabold text-muted">{copy.empty}</p>}
-      <ol className="m-0 flex min-h-0 list-none flex-col gap-2 overflow-y-auto p-0 lg:gap-[0.8vh]">
+      <ol className="m-0 flex min-h-0 list-none flex-col gap-2 overflow-y-auto p-0 lg:gap-[0.8vh] lg:[@media(max-height:800px)]:gap-1">
         {rows.slice(from, from + limit).map((row) => (
           <li key={row.id} className="[&:nth-child(n+6)]:hidden sm:[&:nth-child(n+6)]:block">
             <button
               type="button"
               onClick={() => onSelect(row.id)}
-              className="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-button px-3 py-2 text-left text-ink border-ink shadow-hard-2 lg:py-[0.8vh]"
+              className="flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-button px-3 py-2 text-left text-ink border-ink shadow-hard-2 lg:py-[0.8vh] lg:[@media(max-height:800px)]:py-1"
               style={{ background: PODIUM[row.rank - 1] ?? "#FFF6E5" }}
             >
               <span className="w-7 shrink-0 text-center font-display text-[20px] font-bold tabular-nums lg:text-[clamp(18px,1.5vw,34px)]">{row.rank}</span>
