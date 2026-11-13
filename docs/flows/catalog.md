@@ -137,7 +137,7 @@ Updated 2026-10-29 (branch `fm/compa-e2e-coverage`). Specs run at 390, 834 and 1
 | Admin | F-55–F-57, F-60 | `e2e/admin/` access, api, events, people, test-users |
 | API contract | all 46 operations | `e2e/api/` contract-mock, contract-real, real-success, openapi |
 | System | F-66–F-68, F-72–F-74 | `e2e/system/` resilience, rate-limits, i18n, a11y, responsive |
-| Demo | F-75 | `e2e/demo/` flow, page (`@demo`, against a server with `API_MODE=demo`) |
+| Demo | F-75 | `e2e/demo/` flow, page (`@demo`, against a server with `API_MODE=demo`); record, the opt-in video director (`DEMO_RECORD=1`) |
 
 Not covered, because the feature is not built: withdraw (F-34), saved-summary edit and delete (F-38), seed toggle and moderation (F-58, F-59), delete, export and block (F-63–F-65), offline banner, security headers, axe scans (not installed), English copy on Spanish-only app screens (T-110, T-111), the 500-node load run (F-53). Not covered for other reasons: clicking a WebGL node on the big screen (no hooks; the board and API snapshot are asserted instead), a real transcription or draft (needs OpenAI), the 300-request and 5-draft caps in real mode (mock only).
 

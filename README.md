@@ -138,7 +138,20 @@ Everything in this repository was built for the event, starting 2026-10-28 (see 
 
 ## Demo video
 
-> The walkthrough video is not recorded yet. Five 20-second marketing edits made with Codex are in [docs/evidence/codex/](docs/evidence/codex/README.md).
+Five 20-second marketing edits made with Codex are in [docs/evidence/codex/](docs/evidence/codex/README.md).
+
+### Record the demo video
+
+`e2e/demo/record.spec.ts` is a director: it walks the `/demo` guide with fixed pauses (the big screen and the phone side by side, the simulated scan, the connection landing on the screen, the voice note summary, the ranking), then shows the organizer console, and saves a 1920×1080 WebM of about a minute. It needs no account or keys. A production build keeps the pacing even (`next dev` compiles each page on its first visit):
+
+```sh
+API_MODE=demo bun run build
+API_MODE=demo bun run start -p 3930 &   # any free port
+DEMO_RECORD=1 API_MODE=demo E2E_BASE_URL=http://localhost:3930 \
+  bunx playwright test e2e/demo/record.spec.ts --project desktop-1440-es   # desktop-1440-en for English
+```
+
+The video lands in `recordings/compa-demo-es.webm` (git-ignored; `DEMO_RECORD_DIR=<folder>` picks another folder). LinkedIn accepts WebM; trim, crop to 4:5 or add captions in any video editor. Stop the server when done. Without `DEMO_RECORD=1` the spec is skipped, so normal `@demo` runs stay fast.
 
 Suggested walkthrough (3 minutes, [wiki/demo-script.md](wiki/demo-script.md)): sign in → join the event by QR → connect with the person next to you → dictate and approve a summary → watch the points land on the big screen.
 
