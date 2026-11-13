@@ -16,6 +16,8 @@ coverage/
 playwright-report/
 test-results/
 blob-report/
+# Demo videos from e2e/demo/record.spec.ts
+/recordings/
 
 # Environment and deploy
 .env

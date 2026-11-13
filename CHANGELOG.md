@@ -18,6 +18,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 - Super-admin console redesign: a sidebar, rail and bottom-tab shell; paged, searchable and sortable lists for events, people and attendees; headline numbers from `GET /api/admin/stats`.
 - E2E coverage of every view, button and API route in mock and real mode, with the mock run sharded in four; the mock baseline is stabilized and its known failures are tracked without skipping their assertions ([e2e stability](docs/testing/e2e-stability.md)).
 - Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
+- Demo video director (D6): `e2e/demo/record.spec.ts` plays the `/demo` guide with fixed pauses, ends on the organizer console and saves a 1920×1080 video to the git-ignored `recordings/`; it runs only with `DEMO_RECORD=1` (README, "Record the demo video").
 - Keyless demo deployment: a separate Vercel project with only `API_MODE=demo`; the deploy skips migrations when `API_MODE` is `demo` or `mock`. Setup steps in the README, "Demo deployment (no keys)".
 
 ### Changed

@@ -305,3 +305,7 @@ Checked relative links in index, log and connections page; the updated page rema
 ## [2026-11-12] change | The /demo page (D3)
 
 - `/demo` (demo mode only) shows the big screen and the phone side by side with a six-step guide; step 4 connects the visitor so the board shows their link. Flow [F-75](../docs/flows/catalog.md#f-75); interface in [demo-routes](../docs/contracts/demo-routes.md).
+
+## [2026-11-12] change | Demo video director (D6)
+
+- `e2e/demo/record.spec.ts` records the `/demo` guide and the organizer console to a git-ignored `recordings/` video when run with `DEMO_RECORD=1`; how to run it is in the README, "Record the demo video". Flow [F-75](../docs/flows/catalog.md#f-75).
