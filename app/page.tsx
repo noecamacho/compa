@@ -4,6 +4,7 @@ import { Icon } from "@/components/icons";
 import { Crowd } from "@/components/landing/Crowd";
 import { ButtonLink } from "@/components/ui/Button";
 import { copyFor, type Dictionary } from "@/lib/copy";
+import { isDemoMode } from "@/lib/demo/respond";
 import { currentMe } from "@/lib/server/current-event";
 import { requestLocale } from "@/lib/server/locale";
 
@@ -81,6 +82,11 @@ export default async function LandingPage({ searchParams }: Props) {
 
             <div className="sticky bottom-0 z-10 -mx-[18px] flex flex-col gap-2 px-[18px] pt-3 pb-[max(12px,env(safe-area-inset-bottom))] [background:linear-gradient(to_bottom,transparent,var(--color-paper)_14px)] sm:mx-0 sm:max-w-[400px] sm:px-0 lg:static lg:p-0 lg:[background:none]">
               <PrimaryAction copy={copy} signedIn={Boolean(me)} inEvent={Boolean(me?.currentEvent)} />
+              {isDemoMode() && (
+                <ButtonLink href="/demo" height={54}>
+                  {copyFor(locale).demo.landingCta}
+                </ButtonLink>
+              )}
             </div>
 
             <div className="sm:max-w-[440px]">

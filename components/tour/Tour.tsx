@@ -40,7 +40,7 @@ function wasSeen(id: string): boolean {
   }
 }
 
-function markSeen(id: string): void {
+export function markSeen(id: string): void {
   try {
     localStorage.setItem(storageKey(id), "done");
   } catch {

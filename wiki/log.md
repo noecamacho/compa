@@ -301,3 +301,7 @@ Checked relative links in index, log and connections page; the updated page rema
 ## [2026-11-12] change | Invite QR is the invite link; no Instagram button
 
 - `/invite` shows a QR of `/i/<code>` (P2: the old button led to the personal `/u/<handle>` QR, which never counted as a referral) and drops the Instagram share button, which only repeated Más (P12). Pages updated: `DESIGN.md` row 12, `docs/flows/catalog.md` F-47.
+
+## [2026-11-12] change | The /demo page (D3)
+
+- `/demo` (demo mode only) shows the big screen and the phone side by side with a six-step guide; step 4 connects the visitor so the board shows their link. Flow [F-75](../docs/flows/catalog.md#f-75); interface in [demo-routes](../docs/contracts/demo-routes.md).
