@@ -10,6 +10,7 @@ import { firstName } from "../../lib/format";
 import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { GOLDEN_CAP } from "../../lib/monito/look";
 import { GOLDEN_CAP_INVITES, INVITE_POINTS } from "../../lib/points";
+import { navigationsSettled } from "../fixtures";
 import type { SignedInUser } from "../fixtures/two-users";
 import { acceptedConnection, call, expect, expectApiError, expectErrorScreen, skipTours, test } from "../profiles/helpers";
 
@@ -120,9 +121,11 @@ test.describe("invite in mock mode", () => {
 
   test("the QR button and the close button navigate @mock", async ({ page }, testInfo) => {
     const { invite: copy, common } = copyOf(testInfo);
+    const settled = navigationsSettled(page);
     await page.goto("/invite");
     await page.getByRole("link", { name: copy.showQr }).click();
     await expect(page).toHaveURL(/\/connect$/);
+    await settled();
     await page.goto("/invite");
     await page.getByRole("link", { name: common.close }).click();
     await expect(page).toHaveURL(/\/home$/);

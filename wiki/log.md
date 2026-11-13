@@ -279,6 +279,6 @@ Checked relative links in index, log and connections page; the updated page rema
 - `API_MODE=demo` answers every API route from the D1 room plus one validated cookie per visitor: no account, database, Supabase or OpenAI. A scan is accepted 4 s later and moves the visitor's points, ranking and link on the big screen; two cast people send requests; voice notes get a prepared transcript and a summary without AI; `/admin` reads the room and refuses writes. Interface for D3 and D4: [demo-routes](../docs/contracts/demo-routes.md).
 
 
-## [2026-11-12] change | Five e2e flakes on main fixed
+## [2026-11-12] change | Seven e2e flakes on main fixed
 
-- big-screen card, home card navigation (WebKit), profile link error, admin taken slug and console slug were test races (random stage view, Next's hard-navigation fallback on a cancelled RSC fetch, pre-hydration typing). Causes and reproductions: [e2e stability](../docs/testing/e2e-stability.md#main-flakes-2026-11-12).
+- big-screen card, home, other-profile and invite navigation (WebKit), profile link error, admin taken slug and console slug were test races (random stage view, Next's hard-navigation fallback on a cancelled RSC fetch, pre-hydration typing). Causes and reproductions: [e2e stability](../docs/testing/e2e-stability.md#main-flakes-2026-11-12).

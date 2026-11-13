@@ -1,10 +1,10 @@
 // Home (03 Inicio, 03b InicioVacio): every card and link, the empty and outside-event variants, live polling and the
 // guided tour, in the project's locale.
-import type { Request } from "@playwright/test";
 import { connectionList, eventDoor, ids, me, paola } from "../../lib/api/examples";
 import { copyFor } from "../../lib/copy";
 import { firstName, formatHour, formatPoints } from "../../lib/format";
 import { localeFromAcceptLanguage } from "../../lib/i18n";
+import { navigationsSettled } from "../fixtures";
 import { acceptedConnection, expect, expectErrorScreen, sendRequest, skipTours, test } from "../profiles/helpers";
 
 const bellLabel = (locale: string | undefined, count: number) => copyFor(localeFromAcceptLanguage(locale)).notifications.bellLabel(count);
@@ -47,19 +47,13 @@ test.describe("home in mock mode", () => {
       [bellLabel(testInfo.project.use.locale, 3), /\/notifications$/],
       [home.hello(firstName(me.name)), /\/me$/],
     ];
-    // The URL commits with the loading skeleton; a goto that cancels the rest makes WebKit report "Load failed", and
-    // Next falls back to a hard navigation to the card's screen that interrupts the goto. Let the navigation payloads
-    // finish (prefetches have no fallback and Chromium may never report them done).
-    const inFlight = new Set<Request>();
-    const isNavigationPayload = (request: Request) => request.headers()["rsc"] === "1" && !request.headers()["next-router-prefetch"];
-    page.on("request", (request) => isNavigationPayload(request) && inFlight.add(request));
-    page.on("requestfinished", (request) => inFlight.delete(request));
-    page.on("requestfailed", (request) => inFlight.delete(request));
+    // The URL commits with the loading skeleton; the payload must finish before the next goto (navigationsSettled).
+    const settled = navigationsSettled(page);
     for (const [name, url] of targets) {
       await page.goto("/home");
       await page.getByRole("link", { name }).click();
       await expect(page).toHaveURL(url);
-      await expect.poll(() => inFlight.size).toBe(0);
+      await settled();
     }
   });
 
