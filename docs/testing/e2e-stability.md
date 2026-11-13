@@ -147,4 +147,16 @@ The full exploratory matrix ran while fixes were being applied (2,755 expected, 
 
 Local unit tests also expose an unchanged-main ICU formatting expectation in `lib/admin/format.test.ts`: expected `Oct 29, 10:00`, received `Oct 29 at 10:00`. It reproduces with Bun 1.4.4 and CI's Bun 1.3.10 on macOS. This B2 change does not alter that formatter or weaken its assertion.
 
+## Main flakes, 2026-11-12
+
+Five tests failed or needed a retry on `main` and on unrelated PRs ([main run 43153939079](https://github.com/noecamacho/compa/actions/runs/43153939079), [43335704432](https://github.com/noecamacho/compa/actions/runs/43335704432), [43332638990](https://github.com/noecamacho/compa/actions/runs/43332638990), PR runs [43328569516](https://github.com/noecamacho/compa/actions/runs/43328569516) and [43331184801](https://github.com/noecamacho/compa/actions/runs/43331184801)). All five are test races, not product bugs. Each was reproduced on unchanged `main` against a local mock production build, then rerun with the fix. Assertions are unchanged, and nothing is skipped.
+
+| Test | Cause | Reproduction: before → after | Fix |
+| --- | --- | --- | --- |
+| `live/big-screen.spec.ts` tapping a board row | The stage picks a random view (`firstViz(…, Math.random())`); the marquee repeats every row's points, so `1,980` matched three elements (about 1 load in 9) | `?viz=marquee` pinned: 6/6 failed → 6/6 passed | Read the card through `data-testid="live-person"` |
+| `home/home.spec.ts` the cards navigate (WebKit) | A card's client navigation commits the URL with the loading skeleton. The next `page.goto` cancels the RSC payload, WebKit reports `TypeError: Load failed`, and Next falls back to a hard navigation to the card's screen, interrupting the goto | 18/30 failed on WebKit → 80/80 passed (WebKit and Chromium) | Wait for non-prefetch RSC requests to settle before the next goto. Prefetches are excluded: they have no fallback, and Chromium may never report them finished |
+| `profiles/me.spec.ts` an invalid link is flagged | Typing and blur before hydration never reach React | 20× CPU throttle: 7/10 failed → 20/20 passed | `waitForHydration` on the form's submit button |
+| `admin/events.spec.ts` a taken slug… | `fillNewEvent` filled before hydration; the form state stayed empty, so no POST was sent | Name pre-populated as before hydration: 4/4 failed → 4/4 passed | `fillNewEvent` fills the name through `fillOnceHydrated` |
+| `admin/console.spec.ts` forms and lists (WebKit) | The retry loop refilled the same text, which React had already adopted before hydration, so `onChange` never fired again | Same setup: 4/4 failed → 4/4 passed | Clear before each refill |
+
 Related: [E2E harness](../flows/README.md#e2e-tests), [flow catalog](../flows/catalog.md), [engineering standards](../engineering-standards.md).

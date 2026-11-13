@@ -29,7 +29,7 @@ const hasQrColumn = (testInfo: TestInfo) => widthOf(testInfo) >= 1280;
 const shownLink = (joinUrl: string) => joinUrl.replace(/^https?:\/\//, "");
 
 async function fillNewEvent(page: Page, copy: AdminCopy, name: string, slug: string): Promise<void> {
-  await page.getByLabel(copy.form.name, { exact: true }).fill(name);
+  await fillOnceHydrated(page, copy, copy.form.name, name);
   await page.getByLabel(copy.form.slug).fill(slug);
 }
 

@@ -216,8 +216,10 @@ test.describe("admin console", () => {
   test("forms and lists: new-event slug, people filters and sort, test-user generator @mock", async ({ page }, testInfo) => {
     const { copy, phone } = setup(testInfo);
     await open(page, "/admin/events/new");
-    // Typing before hydration never reaches React's onChange (slow on WebKit), so retype until the slug follows.
+    // Typing before hydration never reaches React's onChange (slow on WebKit), so retype until the slug follows. Clear
+    // first: React adopts the pre-hydration text as its own, so the same text again would not be a change.
     await expect(async () => {
+      await page.locator("#event-name").clear();
       await page.locator("#event-name").fill("Noche Tapatía 2026");
       await expect(page.locator("#event-slug")).toHaveValue("noche-tapatia-2026", { timeout: 2_000 });
     }).toPass();
