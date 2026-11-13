@@ -111,11 +111,13 @@ Holding the entire navigation RSC response also holds the streamed fallback. Mai
 
 ## Admin form hydration
 
-The full local matrix observed one WebKit Spanish `/admin/events/new` responsive check fail on React hydration error 418 while serving unchanged main application code. Its console-error assertion remains blocking and unchanged. This case carries an `unstable` annotation pointing here, rather than an expected-failure exemption: a hydration error could expose a real regression. The exact server/browser text mismatch still needs a development-mode trace; do not dismiss subsequent errors as harmless or clear a PR based on this annotation.
+The full local matrix observed one WebKit Spanish `/admin/events/new` responsive check fail on React hydration error 418 while serving unchanged main application code. It was not intermittent: on macOS WebKit it failed 15/15 (es only; Chromium and English passed). The event preview formatted its hours with `{ hour: "numeric" }`. Node wrote `2:00 a.m.`, while macOS Safari's ICU writes `2:00 am`, so the server's text never matched the browser's; Linux CI WebKit happens to match Node. Fixed 2026-11-12: the preview uses the events list's 24-hour format, which has no day-period marker, and the `unstable` annotation was removed. The console-error assertion is unchanged and blocking.
 
 ## Large board capture
 
 The full local matrix also timed out in `e2e/live/live-board.spec.ts`, `thousands: 2,500 people and 4,000+ threads stay flat and responsive`, at `page.screenshot` after fonts loaded. This used unchanged main application code, not the live-monito change. The scenario's assertions and capture remain active and blocking, with an `unstable` annotation pointing here. This could reflect renderer load rather than a harmless test race; it is not cleared or changed into an expected failure. Measure the capture separately before changing either the load or its assertions.
+
+Seen again on 2026-11-12, still open: across four local full mock runs (three on `a9ec4d1`, one on `020e304`, 6 workers, no retries, machine load average 21–35 from other sessions), it timed out once (60 s, `live-1920-en`) in the fourth run. One rerun for diagnosis passed in 13.5 s. That makes it an intermittent, not a clean green.
 
 Seen again on 2026-11-12 (branch `fm/compa-tele-inicio`): a 60 s timeout in a six-project run of `e2e/live` and `e2e/home` with four workers; the single diagnostic rerun passed in 48 s. Still intermittent, not cleared.
 
@@ -152,5 +154,18 @@ The full exploratory matrix ran while fixes were being applied (2,755 expected, 
 
 
 Local unit tests also expose an unchanged-main ICU formatting expectation in `lib/admin/format.test.ts`: expected `Oct 29, 10:00`, received `Oct 29 at 10:00`. It reproduces with Bun 1.4.4 and CI's Bun 1.3.10 on macOS. This B2 change does not alter that formatter or weaken its assertion.
+
+## Main flakes, 2026-11-12
+
+Five tests failed or needed a retry on `main` and on unrelated PRs ([main run 43153939079](https://github.com/noecamacho/compa/actions/runs/43153939079), [43335704432](https://github.com/noecamacho/compa/actions/runs/43335704432), [43332638990](https://github.com/noecamacho/compa/actions/runs/43332638990), PR runs [43328569516](https://github.com/noecamacho/compa/actions/runs/43328569516) and [43331184801](https://github.com/noecamacho/compa/actions/runs/43331184801)). All five, and two more of the same kind found locally, are test races, not product bugs. Each was reproduced on unchanged `main` against a local mock production build, then rerun with the fix. Assertions are unchanged, and nothing is skipped.
+
+| Test | Cause | Reproduction: before → after | Fix |
+| --- | --- | --- | --- |
+| `live/big-screen.spec.ts` tapping a board row | The stage picks a random view (`firstViz(…, Math.random())`); the marquee repeats every row's points, so `1,980` matched three elements (about 1 load in 9) | `?viz=marquee` pinned: 6/6 failed → 6/6 passed | Read the card through `data-testid="live-person"` |
+| `home/home.spec.ts` the cards navigate (WebKit) | A card's client navigation commits the URL with the loading skeleton. The next `page.goto` cancels the RSC payload, WebKit reports `TypeError: Load failed`, and Next falls back to a hard navigation to the card's screen, interrupting the goto | 18/30 failed on WebKit → 80/80 passed (WebKit and Chromium) | `navigationsSettled` (`e2e/fixtures`) waits for non-prefetch RSC requests to settle before the next goto. Prefetches are excluded: they have no fallback, and Chromium may never report them finished |
+| `profiles/other.spec.ts` the last-time row…, `gamification/invites.spec.ts` the QR button… (WebKit) | Same click → URL → goto pattern; found in a full local run. The invite case left with its QR button in #88 | 3/40 failed → 40/40 passed | `navigationsSettled` |
+| `profiles/me.spec.ts` an invalid link is flagged | Typing and blur before hydration never reach React | 20× CPU throttle: 7/10 failed → 20/20 passed | `waitForHydration` on the form's submit button |
+| `admin/events.spec.ts` a taken slug… | `fillNewEvent` filled before hydration; the form state stayed empty, so no POST was sent | Name pre-populated as before hydration: 4/4 failed → 4/4 passed | `fillNewEvent` fills the name through `fillOnceHydrated` |
+| `admin/console.spec.ts` forms and lists (WebKit) | The retry loop refilled the same text, which React had already adopted before hydration, so `onChange` never fired again | Same setup: 4/4 failed → 4/4 passed | Clear before each refill |
 
 Related: [E2E harness](../flows/README.md#e2e-tests), [flow catalog](../flows/catalog.md), [engineering standards](../engineering-standards.md).

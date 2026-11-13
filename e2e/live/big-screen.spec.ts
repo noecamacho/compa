@@ -86,12 +86,14 @@ test.describe("big screen in mock mode @mock", () => {
     const cardRequest = page.waitForResponse((response) => response.url().endsWith(`/api/e/${code}/live/people/${valeriaPublic.id}`));
     await board(page, copy).getByRole("button", { name: new RegExp(valeriaPublic.name) }).click();
     expect((await cardRequest).status()).toBe(200);
-    await expect(page.getByRole("heading", { level: 2, name: valeriaPublic.name })).toBeVisible();
-    await expect(page.getByText([valeriaPublic.headline, valeriaPublic.company, valeriaPublic.city].join(" · "))).toBeVisible();
-    await expect(page.getByText(formatNumber(locale, 1980), { exact: true })).toBeVisible();
-    await expect(page.getByText("#1", { exact: true })).toBeVisible();
-    for (const interest of valeriaPublic.interests ?? []) await expect(page.getByRole("listitem").filter({ hasText: interest })).toBeVisible();
-    await page.getByRole("button", { name: copy.live.close }).click();
+    // The stage picks a random view; the marquee repeats every row's points, so read the card itself.
+    const card = page.getByTestId("live-person");
+    await expect(card.getByRole("heading", { level: 2, name: valeriaPublic.name })).toBeVisible();
+    await expect(card.getByText([valeriaPublic.headline, valeriaPublic.company, valeriaPublic.city].join(" · "))).toBeVisible();
+    await expect(card.getByText(formatNumber(locale, 1980), { exact: true })).toBeVisible();
+    await expect(card.getByText("#1", { exact: true })).toBeVisible();
+    for (const interest of valeriaPublic.interests ?? []) await expect(card.getByRole("listitem").filter({ hasText: interest })).toBeVisible();
+    await card.getByRole("button", { name: copy.live.close }).click();
     await expect(board(page, copy)).toBeVisible();
   });
 

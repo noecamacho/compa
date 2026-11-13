@@ -6,6 +6,7 @@ import { BADGE_IDS } from "../../lib/badges/catalog";
 import { copyFor } from "../../lib/copy";
 import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { formatPoints } from "../../lib/format";
+import { navigationsSettled } from "../fixtures";
 import { acceptedConnection, call, expect, expectApiError, expectNotFound, sendRequest, skipTours, test } from "./helpers";
 
 let { common, networks, person } = copyFor("es");
@@ -44,9 +45,11 @@ test.describe("another person in mock mode", () => {
   });
 
   test("the last-time row opens the note and the badges card opens their badges @mock", async ({ page }) => {
+    const settled = navigationsSettled(page);
     await page.goto(`/people/${valeria.handle}`);
     await page.getByRole("link", { name: new RegExp(person.lastTime) }).click();
     await expect(page).toHaveURL(new RegExp(`/connections/${ids.connection}/note$`));
+    await settled();
     await page.goto(`/people/${valeria.handle}`);
     await page.getByRole("link", { name: new RegExp(person.badges) }).click();
     await expect(page).toHaveURL(new RegExp(`/me/badges\\?of=${valeria.handle}$`));

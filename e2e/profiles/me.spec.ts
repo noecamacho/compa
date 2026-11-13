@@ -9,6 +9,7 @@ import { BADGE_IDS } from "../../lib/badges/catalog";
 import { copyFor } from "../../lib/copy";
 import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { formatPoints } from "../../lib/format";
+import { waitForHydration } from "../onboarding/helpers";
 import { acceptedConnection, call, expect, expectApiError, skipTours, test } from "./helpers";
 
 let { common, me: copy, networks, person, profile, tour, visibility } = copyFor("es");
@@ -92,6 +93,8 @@ test.describe("my profile in mock mode", () => {
 
   test("an invalid link is flagged before saving @mock", async ({ page }) => {
     await page.goto("/onboarding/profile?from=me");
+    // Typing and leaving the field before hydration never reach React, so no error would show.
+    await waitForHydration(page, "form button[type=submit]");
     const x = page.getByLabel(networks.x, { exact: true });
     await x.fill("not a handle!!");
     // Leaving the field shows its error first; the save tap then lands on the button, not on the shifted layout.

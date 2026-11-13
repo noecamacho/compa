@@ -4,6 +4,7 @@ import { connectionList, eventDoor, ids, me, paola } from "../../lib/api/example
 import { copyFor } from "../../lib/copy";
 import { firstName, formatHour, formatPoints } from "../../lib/format";
 import { localeFromAcceptLanguage } from "../../lib/i18n";
+import { navigationsSettled } from "../fixtures";
 import { acceptedConnection, expect, expectErrorScreen, sendRequest, skipTours, test } from "../profiles/helpers";
 
 const bellLabel = (locale: string | undefined, count: number) => copyFor(localeFromAcceptLanguage(locale)).notifications.bellLabel(count);
@@ -46,10 +47,13 @@ test.describe("home in mock mode", () => {
       [bellLabel(testInfo.project.use.locale, 3), /\/notifications$/],
       [home.hello(firstName(me.name)), /\/me$/],
     ];
+    // The URL commits with the loading skeleton; the payload must finish before the next goto (navigationsSettled).
+    const settled = navigationsSettled(page);
     for (const [name, url] of targets) {
       await page.goto("/home");
       await page.getByRole("link", { name }).click();
       await expect(page).toHaveURL(url);
+      await settled();
     }
   });
 
