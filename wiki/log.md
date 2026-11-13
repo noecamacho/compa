@@ -273,3 +273,7 @@ Checked relative links in index, log and connections page; the updated page rema
 ## [2026-11-12] change | Demo mode routes and the visitor cookie (D2)
 
 - `API_MODE=demo` answers every API route from the D1 room plus one validated cookie per visitor: no account, database, Supabase or OpenAI. A scan is accepted 4 s later and moves the visitor's points, ranking and link on the big screen; two cast people send requests; voice notes get a prepared transcript and a summary without AI; `/admin` reads the room and refuses writes. Interface for D3 and D4: [demo-routes](../docs/contracts/demo-routes.md).
+
+## [2026-11-12] change | Simulated scan and voice note in demo mode (D4)
+
+- In demo mode "Escanear" finds the next person the visitor has not met without the camera, and voice notes record without the microphone and get the prepared transcript. Other modes are unchanged. Contract: [demo-routes](../docs/contracts/demo-routes.md).
