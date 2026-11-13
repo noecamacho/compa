@@ -19,6 +19,9 @@ import { apiGet, apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
 import type { Dictionary } from "@/lib/copy";
 import type { Locale } from "@/lib/i18n";
 import { adminCopy, requireAdminPage } from "@/lib/server/admin-page";
+import { pageTitle } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("adminEvent");
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<RawSearchParams> };
 

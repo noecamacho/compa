@@ -1007,6 +1007,37 @@ export const demoApi: typeof es.demoApi = {
   eventDescription: "A sample evening that replays every two minutes: 150 fictional attendees and a new connection every 3 seconds.",
 };
 
+// F6: browser tab titles (the root layout appends " · Compa") and the leaderboard title for the all-year scope.
+export const titles: typeof es.titles = {
+  tabs: {
+    home: "Home",
+    ranking: "Leaderboard",
+    invite: "Invite",
+    connections: "Connections",
+    me: "Your profile",
+    badges: "Badges",
+    connect: "Connect",
+    register: "Log a connection",
+    note: "Voice note",
+    done: "Connection saved",
+    notifications: "Notifications",
+    request: "Request",
+    person: "Profile",
+    onboardingProfile: "Create your profile",
+    onboardingMonito: "Your monito",
+    event: "Event",
+    join: "Join the event",
+    live: "Live",
+    adminEvents: "Events · Admin",
+    adminEvent: "Event · Admin",
+    adminNewEvent: "New event · Admin",
+    adminPoster: "QR poster · Admin",
+    adminPeople: "People · Admin",
+    adminTestUsers: "Test users · Admin",
+  },
+  rankingAllYear: "All-year leaderboard",
+};
+
 // F2: the live screen's own controls.
 export const liveScreen: typeof es.liveScreen = {
   fullscreen: "Full screen",

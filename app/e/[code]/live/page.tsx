@@ -5,12 +5,12 @@ import { LiveBoard } from "@/components/live/LiveBoard";
 import { codeFromSegment, joinUrl } from "@/lib/access-code";
 import { LiveSnapshot } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
-import { requestLocale } from "@/lib/server/locale";
+import { pageTitle, requestLocale } from "@/lib/server/locale";
 import { requestOrigin } from "@/lib/server/site";
 
 type Props = { params: Promise<{ code: string }>; searchParams: Promise<{ from?: string | string[] }> };
 
-export const metadata: Metadata = { title: "compa · live", robots: { index: false, follow: false } };
+export const generateMetadata = async (): Promise<Metadata> => ({ ...(await pageTitle("live")()), robots: { index: false, follow: false } });
 
 // /e/<code>/live: the projected dashboard. The QR on screen is the event's own door, so people can join from their seat.
 // `?from=home` (the Home card's link) adds a way back: an installed app has no back button, a projector needs none.

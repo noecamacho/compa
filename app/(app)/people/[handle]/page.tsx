@@ -12,9 +12,11 @@ import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel, Stat, StatGrid } from "@/components/ui/Text";
 import { UserProfile } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
-import { requestCopy } from "@/lib/server/locale";
+import { pageTitle, requestCopy } from "@/lib/server/locale";
 import { formatDate, formatPoints } from "@/lib/format";
 import { BADGE_IDS } from "@/lib/badges/catalog";
+
+export const generateMetadata = pageTitle("person");
 
 type Props = { params: Promise<{ handle: string }> };
 
