@@ -7,6 +7,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Added
 
 - Demo mode (`API_MODE=demo`): the whole app opens without an account on a synthetic event that never stops. Scans, requests, voice notes and profile changes are kept in a cookie per visitor and move their points, the ranking and the big screen; the organizer console shows the room read-only. No database, Supabase or OpenAI key is needed (`docs/contracts/demo-routes.md`).
+- The `/demo` page on a demo deployment: the big screen and the phone side by side with a six-step guide that plays on its own or by hand, the notice "Demo con datos de ejemplo", links to open the screen, the phone or the organizer console alone, and "Start over". The landing page of a demo deployment gets a "Ver la demo" button.
 - Demo mode scan and voice note: "Escanear" never asks for the camera and, after a short sweep, finds the next person the visitor has not met; the voice note on the register and note screens never asks for the microphone, counts like a recording and returns the demo's prepared transcript. Other modes are unchanged.
 - Demo foundation (D1): a pure, clock-driven demo scenario with 150 fictional people in `lib/demo/` (a 120-second cycle, a new connection every 3 s), the room that demo mode answers from ([contract](docs/contracts/demo-scenario.md)).
 - Connections outside an event: scanning someone who is at no running event sends a request that follows the same accept and notification flow but scores 0 points, earns no topics bonus, referral or badge and never reaches a live board. Migration `0014` makes `connections.event_id` nullable.
@@ -28,6 +29,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Invite screen: the QR is now the invite link itself (`/i/<code>`), shown on the page, so a friend who scans it counts as your invitee; the old "Mostrar mi QR de invitación" button opened your personal QR (`/u/<handle>`), which never counted. The Instagram button is gone: Instagram has no share link, so it only repeated "Más".
 - New-event form on Safari in Spanish: the live preview showed its hours with an a.m./p.m. marker that Safari writes differently from the server, so every load threw a React hydration error; the preview now uses 24-hour time like the events list.
 - Big screen and Home card: the Home card no longer shows view chips that looked tappable but only opened the live screen, and skips the race, whose names it cut. The big screen has a full screen button and, when opened from Home, a link back to Home; on a phone its view chips are 44 px tall on one row. At 1280×720 all five leaders fit, and the type view no longer cuts names at 1920.
 - Tabs, contrast and ranking title: every screen names its browser tab ("Ranking · Compa", "Eventos · Admin · Compa") in the visitor's language instead of always "Compa"; secondary grey text is darker (`#575266`) and clears WCAG AA 4.5:1 on paper and every soft tint; the ranking title follows the scope toggle ("Top del año" / "All-year leaderboard" for all year).

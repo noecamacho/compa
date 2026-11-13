@@ -451,10 +451,10 @@ export const invite = {
   copy: "Copiar",
   copied: "Copiado",
   whatsapp: "WhatsApp",
-  instagram: "Instagram",
   more: "Más",
   footer: ["Tu amigo entra con LinkedIn, igual que tú, y gana +50 en su primera conexión.", "Cuentan solo amigos nuevos en COMPA."],
-  showQr: "Mostrar mi QR de invitación",
+  qrLabel: "QR de tu código de invitación",
+  qrHint: "Quien lo escanee con la cámara entra como tu invitado.",
   shareText: (url: string, eventName: string | null) =>
     eventName ? `Vente a ${eventName} en Compa, conectamos en el evento y nos quedamos con las redes: ${url}` : `Vente a Compa, conectamos en los eventos y nos quedamos con las redes: ${url}`,
   pointsEach: "+100 pts",
@@ -1065,4 +1065,35 @@ export const liveScreen = {
 export const demoCapture = {
   scanning: "Demo · cámara simulada",
   everyoneMet: "Ya conociste a todos en la demo. Busca por nombre.",
+};
+
+// D3: the /demo page, the big screen and the phone side by side with a six-step guide.
+export const demo = {
+  tabTitle: "Demo en vivo",
+  notice: "Demo con datos de ejemplo",
+  title: "La tele y tu celular, lado a lado",
+  lead: "Un evento que siempre está en curso, con 150 asistentes ficticios. Tú entras sin cuenta: lo que hagas en el celular aparece en la tele.",
+  stepsLabel: "Pasos de la demo",
+  steps: [
+    { label: "Entras sin cuenta", text: "Abres la liga y ya estás adentro, en un evento que siempre está en curso. Sin LinkedIn y sin correo." },
+    { label: "Enseñas tu QR", text: "Conectar: tu QR o el escáner. Quien escanea tu código te manda una solicitud." },
+    { label: "Registras la conexión", text: "Nueva o reencuentro, hasta tres temas y una nota de voz opcional." },
+    { label: "Ganas puntos y la tele lo enseña", text: "Confirmas y en la tele de al lado aparece tu hilo, sube el contador y sales en «Ahora mismo»." },
+    { label: "Compa resume la nota", text: "Le cuentas a Compa de qué platicaron y te deja un resumen y el pendiente." },
+    { label: "Subes en el ranking", text: "Tu lugar y tus puntos cambian con lo que hiciste." },
+  ],
+  stepOf: (step: number, total: number) => `${step} de ${total}.`,
+  play: "Reproducir",
+  pause: "Pausar",
+  previous: "Anterior",
+  next: "Siguiente",
+  reducedMotion: "Tu sistema pide menos movimiento: la demo no avanza sola. Usa Siguiente.",
+  openScreen: "Abrir solo la tele",
+  openPhone: "Abrir solo el celular",
+  openConsole: "Consola del organizador",
+  startOver: "Empezar de nuevo",
+  screenTitle: "La pantalla en vivo del evento",
+  phoneTitle: "La app en el celular",
+  connectFailed: "No se pudo registrar la conexión. Inténtalo otra vez.",
+  landingCta: "Ver la demo",
 };

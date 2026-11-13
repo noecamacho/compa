@@ -895,10 +895,10 @@ export const invite: typeof es.invite = {
   copy: "Copy",
   copied: "Copied",
   whatsapp: "WhatsApp",
-  instagram: "Instagram",
   more: "More",
   footer: ["Your friend signs in with LinkedIn, just like you, and gets +50 at their first connection.", "Only friends new to COMPA count."],
-  showQr: "Show my invite QR",
+  qrLabel: "Your invite code QR",
+  qrHint: "Whoever scans it with their camera joins as your invitee.",
   shareText: (url, eventName) =>
     eventName ? `Come join me at ${eventName} on Compa: we connect at the event and keep each other's socials: ${url}` : `Come join me on Compa: we connect at events and keep each other's socials: ${url}`,
   pointsEach: "+100 pts",
@@ -1047,4 +1047,35 @@ export const liveScreen: typeof es.liveScreen = {
 export const demoCapture: typeof es.demoCapture = {
   scanning: "Demo · simulated camera",
   everyoneMet: "You met everyone in the demo. Search by name.",
+};
+
+// D3: the /demo page, the big screen and the phone side by side with a six-step guide.
+export const demo: typeof es.demo = {
+  tabTitle: "Live demo",
+  notice: "Demo with sample data",
+  title: "The big screen and your phone, side by side",
+  lead: "An event that is always running, with 150 fictional attendees. You get in without an account: what you do on the phone shows up on the screen.",
+  stepsLabel: "Demo steps",
+  steps: [
+    { label: "Get in without an account", text: "Open the link and you are in, at an event that is always running. No LinkedIn, no email." },
+    { label: "Show your QR", text: "Connect: your QR or the scanner. Whoever scans your code sends you a request." },
+    { label: "Log the connection", text: "New or a reconnection, up to three topics and an optional voice note." },
+    { label: "Earn points, see it on screen", text: "Confirm, and the screen next to you draws your thread, bumps the counter and lists you under “Just now”." },
+    { label: "Compa sums up the note", text: "Tell Compa what you talked about and it leaves you a summary and the next step." },
+    { label: "Climb the ranking", text: "Your place and your points change with what you did." },
+  ],
+  stepOf: (step, total) => `${step} of ${total}.`,
+  play: "Play",
+  pause: "Pause",
+  previous: "Previous",
+  next: "Next",
+  reducedMotion: "Your system asks for less motion: the demo does not advance on its own. Use Next.",
+  openScreen: "Open only the screen",
+  openPhone: "Open only the phone",
+  openConsole: "Organizer console",
+  startOver: "Start over",
+  screenTitle: "The event's live screen",
+  phoneTitle: "The app on the phone",
+  connectFailed: "The connection could not be logged. Try again.",
+  landingCta: "See the demo",
 };

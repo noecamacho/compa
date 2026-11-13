@@ -1,9 +1,9 @@
+import QRCode from "qrcode";
 import { Icon } from "@/components/icons";
 import { CapToggle } from "@/components/invite/CapToggle";
 import { InviteActions } from "@/components/invite/InviteActions";
 import { Avatar, avatarOf } from "@/components/monito/Avatar";
 import { Monito } from "@/components/monito/Monito";
-import { ButtonLink } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Header } from "@/components/ui/Header";
 import { Screen } from "@/components/ui/Screen";
@@ -65,6 +65,8 @@ export default async function InvitePage() {
   const { home, invite: copy } = (await requestCopy()).copy;
   const [invites, me] = await Promise.all([apiGet("/api/invites/me", Invites), apiGet("/api/me", Me)]);
   const { link } = invites;
+  // The QR carries the invite link itself, so whoever scans it lands as my invitee (P2), not on my profile.
+  const qrSvg = await QRCode.toString(link.url, { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#1E1B2E", light: "#FFFFFF" } });
   // Every friend who joined through the code counts toward the cap, inside an event or not.
   const slots = Array.from({ length: invites.target }, (_, index) => invites.invitees[index] ?? null);
   return (
@@ -131,6 +133,13 @@ export default async function InvitePage() {
       <Card className="flex flex-col gap-[10px] px-4 py-[14px]">
         <SectionLabel>{copy.link}</SectionLabel>
         <PointsNotice event={link.event} copy={copy} />
+        <div
+          role="img"
+          aria-label={copy.qrLabel}
+          className="mx-auto h-[180px] w-[180px] md:h-[200px] md:w-[200px] [&>svg]:h-full [&>svg]:w-full"
+          dangerouslySetInnerHTML={{ __html: qrSvg }}
+        />
+        <Muted className="text-center text-[12px] font-bold">{copy.qrHint}</Muted>
         <InviteActions url={link.url} eventName={link.event?.name ?? null} />
       </Card>
 
@@ -139,13 +148,6 @@ export default async function InvitePage() {
         <br />
         {copy.footer[1]}
       </Muted>
-
-      <div className="mt-auto md:mt-4">
-        <ButtonLink href="/connect" variant="primary">
-          <Icon name="qr" size={20} />
-          {copy.showQr}
-        </ButtonLink>
-      </div>
     </Screen>
   );
 }

@@ -1,8 +1,9 @@
-// 12 Invitar and the referral code (F-47, F-48): slots and link, copy with and without clipboard access, WhatsApp, the
-// share sheet and its fallback; in real mode: the code is the handle and works in or out of an event, a friend joining
-// pays +100 on the inviter's current event (none outside one) once, three friends unlock the golden cap, which is
-// worn on the monito and over the photo and can be hidden.
+// 12 Invitar and the referral code (F-47, F-48): slots and link, the QR of that same link, copy with and without
+// clipboard access, WhatsApp, the share sheet and its fallback, no Instagram button; in real mode: the code is the
+// handle and works in or out of an event, a friend joining pays +100 on the inviter's current event (none outside one)
+// once, three friends unlock the golden cap, which is worn on the monito and over the photo and can be hidden.
 import type { Page, TestInfo } from "@playwright/test";
+import QRCode from "qrcode";
 import { invites as invitesExample } from "../../lib/api/examples";
 import { CheckIn, ClaimedInvite, Invites, Leaderboard, Me } from "../../lib/api/schemas";
 import { copyFor } from "../../lib/copy";
@@ -10,7 +11,6 @@ import { firstName } from "../../lib/format";
 import { localeFromAcceptLanguage } from "../../lib/i18n";
 import { GOLDEN_CAP } from "../../lib/monito/look";
 import { GOLDEN_CAP_INVITES, INVITE_POINTS } from "../../lib/points";
-import { navigationsSettled } from "../fixtures";
 import type { SignedInUser } from "../fixtures/two-users";
 import { acceptedConnection, call, expect, expectApiError, expectErrorScreen, skipTours, test } from "../profiles/helpers";
 
@@ -21,6 +21,19 @@ const shownLink = (url: string) => url.replace(/^https?:\/\//, "");
 const mockLink = invitesExample.link;
 const mockEvent = mockLink.event;
 if (!mockEvent) throw new Error("the invites example has no event");
+
+// Same options as app/(app)/invite/page.tsx, so an identical SVG proves an identical payload.
+const QR_OPTIONS = { type: "svg", margin: 0, errorCorrectionLevel: "M", color: { dark: "#1E1B2E", light: "#FFFFFF" } } as const;
+
+async function qrEncodes(page: Page, label: string, url: string): Promise<boolean> {
+  const expected = await QRCode.toString(url, QR_OPTIONS);
+  // Compare after the browser's own serialization, so whitespace in the generated string does not matter.
+  return page.getByRole("img", { name: label }).evaluate((element, svg) => {
+    const probe = document.createElement("div");
+    probe.innerHTML = svg;
+    return probe.innerHTML === element.innerHTML;
+  }, expected);
+}
 
 const selectedText = (page: Page) => page.evaluate(() => window.getSelection()?.toString() ?? "");
 
@@ -58,8 +71,23 @@ test.describe("invite in mock mode", () => {
     await expect(page.getByRole("main").getByText(copy.cap, { exact: true })).toBeVisible();
     await expect(page.getByRole("main").getByText(shownLink(mockLink.url), { exact: true })).toBeVisible();
     await expect(page.getByRole("main").getByTestId("invite-points")).toContainText(copy.pointsAt(mockEvent.name));
-    await expect(page.getByRole("link", { name: copy.showQr })).toHaveAttribute("href", "/connect");
     await expect(page.getByRole("link", { name: common.close })).toHaveAttribute("href", "/home");
+  });
+
+  test("the QR encodes my invite link, not my profile @mock", async ({ page }, testInfo) => {
+    const copy = copyOf(testInfo).invite;
+    await page.goto("/invite");
+    await expect(page.getByRole("img", { name: copy.qrLabel })).toBeVisible();
+    await expect(page.getByRole("main").getByText(copy.qrHint)).toBeVisible();
+    expect(await qrEncodes(page, copy.qrLabel, mockLink.url)).toBe(true);
+  });
+
+  test("there is no Instagram button: only WhatsApp and Más @mock", async ({ page }, testInfo) => {
+    const copy = copyOf(testInfo).invite;
+    await page.goto("/invite");
+    await expect(page.getByRole("button", { name: copy.whatsapp })).toBeVisible();
+    await expect(page.getByRole("button", { name: copy.more, exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: /instagram/i })).toHaveCount(0);
   });
 
   test("Copiar puts the link on the clipboard and says so @mock", async ({ page, context, browserName }, testInfo) => {
@@ -98,15 +126,13 @@ test.describe("invite in mock mode", () => {
     await opened.close();
   });
 
-  for (const via of ["more", "instagram"] as const) {
-    test(`${via} opens the share sheet with the link @mock`, async ({ page }, testInfo) => {
-      const copy = copyOf(testInfo).invite;
-      await stubShare(page);
-      await page.goto("/invite");
-      await page.getByRole("button", { name: copy[via], exact: true }).click();
-      await expect.poll(() => page.locator("html").getAttribute("data-shared")).toBe(JSON.stringify({ text: copy.shareText(mockLink.url, mockEvent.name), url: mockLink.url }));
-    });
-  }
+  test("Más opens the share sheet with the link @mock", async ({ page }, testInfo) => {
+    const copy = copyOf(testInfo).invite;
+    await stubShare(page);
+    await page.goto("/invite");
+    await page.getByRole("button", { name: copy.more, exact: true }).click();
+    await expect.poll(() => page.locator("html").getAttribute("data-shared")).toBe(JSON.stringify({ text: copy.shareText(mockLink.url, mockEvent.name), url: mockLink.url }));
+  });
 
   test("without a share sheet Más falls back to copying @mock", async ({ page, context, browserName }, testInfo) => {
     test.skip(browserName !== "chromium", "clipboard permissions are a Chromium feature");
@@ -119,13 +145,8 @@ test.describe("invite in mock mode", () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(mockLink.url);
   });
 
-  test("the QR button and the close button navigate @mock", async ({ page }, testInfo) => {
-    const { invite: copy, common } = copyOf(testInfo);
-    const settled = navigationsSettled(page);
-    await page.goto("/invite");
-    await page.getByRole("link", { name: copy.showQr }).click();
-    await expect(page).toHaveURL(/\/connect$/);
-    await settled();
+  test("the close button goes home @mock", async ({ page }, testInfo) => {
+    const { common } = copyOf(testInfo);
     await page.goto("/invite");
     await page.getByRole("link", { name: common.close }).click();
     await expect(page).toHaveURL(/\/home$/);
@@ -165,6 +186,7 @@ test.describe("referral code in real mode", () => {
     expect(await invitesOf(ana)).toMatchObject({ link: { code: ana.user.handle, url, event: { code: testEvent.accessCode, name: testEvent.name } }, invitees: [], target: GOLDEN_CAP_INVITES, goldenCap: false });
     await ana.page.goto("/invite");
     await expect(ana.page.getByText(shownLink(url), { exact: true })).toBeVisible();
+    expect(await qrEncodes(ana.page, copy.qrLabel, url)).toBe(true);
     await expect(ana.page.getByRole("main").getByTestId("invite-points")).toContainText(copy.pointsAt(testEvent.name));
     await expect(ana.page.getByRole("main").getByText(copy.progress(0, GOLDEN_CAP_INVITES), { exact: true })).toBeVisible();
     for (const slot of [1, 2, 3]) await expect(ana.page.getByText(copy.friendSlot(slot), { exact: true })).toBeVisible();
