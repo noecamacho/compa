@@ -4,7 +4,8 @@
 @theme {
   --color-paper: #fff6e5;
   --color-ink: #1e1b2e;
-  --color-muted: #6f6a7e;
+  /* Darkened from #6f6a7e to clear WCAG AA 4.5:1 on paper and every soft tint (wiki/open-questions.md #60). */
+  --color-muted: #575266;
   --color-mint: #6be4a3;
   --color-sky: #6cc4ff;
   --color-gum: #ff8fab;

@@ -4,6 +4,9 @@ import { QrPoster } from "@/components/admin/QrPoster";
 import { AdminEventBody } from "@/lib/api/admin-schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
 import { adminCopy, requireAdminPage } from "@/lib/server/admin-page";
+import { pageTitle } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("adminPoster");
 
 type Props = { params: Promise<{ slug: string }> };
 

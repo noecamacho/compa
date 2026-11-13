@@ -12,7 +12,9 @@ import { copyFor } from "@/lib/copy";
 import { formatDateTime } from "@/lib/format";
 import type { Locale } from "@/lib/i18n";
 import { notificationHref, notificationText } from "@/lib/notifications/present";
-import { requestLocale } from "@/lib/server/locale";
+import { pageTitle, requestLocale } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("notifications");
 
 function NotificationIcon({ item }: { item: NotificationT }) {
   if (item.kind === "badge_earned") return <Icon name="trophy" size={24} />;

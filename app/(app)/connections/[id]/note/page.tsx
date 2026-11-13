@@ -6,8 +6,10 @@ import { Screen } from "@/components/ui/Screen";
 import { Muted } from "@/components/ui/Text";
 import { ConnectionDetail } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
-import { requestCopy } from "@/lib/server/locale";
+import { pageTitle, requestCopy } from "@/lib/server/locale";
 import { timeAgo } from "@/lib/format";
+
+export const generateMetadata = pageTitle("note");
 
 type Props = { params: Promise<{ id: string }> };
 
