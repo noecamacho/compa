@@ -1023,3 +1023,9 @@ export const demoApi = {
   nextStep: (name: string) => `Escribirle a ${name} para pedirle la guía`,
   eventDescription: "Una noche de ejemplo que se repite cada dos minutos: 150 asistentes ficticios y una conexión nueva cada 3 segundos.",
 };
+
+// D4: the simulated camera of the demo mode (no camera or microphone is asked for).
+export const demoCapture = {
+  scanning: "Demo · cámara simulada",
+  everyoneMet: "Ya conociste a todos en la demo. Busca por nombre.",
+};

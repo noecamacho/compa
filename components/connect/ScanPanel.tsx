@@ -23,6 +23,8 @@ const detectorConstructor = (): DetectorConstructor | null =>
 type Decode = (video: HTMLVideoElement) => Promise<string[]>;
 
 const SCAN_MS = 300;
+// Demo mode: how long the viewfinder sweeps before it "reads" the next person's QR.
+const DEMO_SCAN_MS = 1800;
 const RETRY_LOOKUP_MS = 3000;
 // jsQR works on a downscaled frame: fast on an old iPhone and still sharp enough for a QR filling the frame.
 const SCAN_WIDTH = 640;
@@ -66,15 +68,23 @@ async function jsDecoder(): Promise<Decode> {
 
 const errorName = (error: unknown): string => (error instanceof Error ? error.name : "");
 
+// Demo mode never asks for the camera: after a sweep it hands over the next person's handle (null: nobody left).
+function simulateScan(handle: string | null, onScan: (handle: string) => void): () => void {
+  if (!handle) return () => undefined;
+  const timer = setTimeout(() => onScan(handle), DEMO_SCAN_MS);
+  return () => clearTimeout(timer);
+}
+
 // onScan lives in a ref so a re-render (every keystroke in the search box) never restarts the camera.
-// It gets the handle of a personal QR, or null for a QR that is not one.
-function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onScan: (handle: string | null) => void): CameraStatus {
-  const [status, setStatus] = useState<CameraStatus>("starting");
+// It gets the handle of a personal QR, or null for a QR that is not one. `demoScan` is undefined outside demo mode.
+function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onScan: (handle: string | null) => void, demoScan: string | null | undefined): CameraStatus {
+  const [status, setStatus] = useState<CameraStatus>(demoScan === undefined ? "starting" : demoScan ? "scanning" : "no_camera");
   const scanRef = useRef(onScan);
   useEffect(() => {
     scanRef.current = onScan;
   });
   useEffect(() => {
+    if (demoScan !== undefined) return simulateScan(demoScan, (handle) => scanRef.current(handle));
     const video = videoRef.current;
     if (!video || !navigator.mediaDevices?.getUserMedia) return setStatus("unsupported");
     let active = true;
@@ -108,7 +118,7 @@ function useCamera(videoRef: React.RefObject<HTMLVideoElement | null>, onScan: (
       if (timer) clearTimeout(timer);
       stream?.getTracks().forEach((track) => track.stop());
     };
-  }, [videoRef]);
+  }, [videoRef, demoScan]);
   return status;
 }
 
@@ -136,7 +146,8 @@ function PersonRow({ card, className }: { card: CardT; className: string }) {
 
 // Camera viewfinder with mint corners; a detected person appears in the row at the bottom (V2Conectar "Escanear").
 // Searching by name lists the matching people under the field, each with its own Conectar.
-export function ScanPanel() {
+// In demo mode `demoScan` is the person the simulated camera finds (null once the visitor met everyone).
+export function ScanPanel({ demoScan }: { demoScan?: string | null }) {
   const all = useCopy();
   const copy = all.connect;
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -165,7 +176,7 @@ export function ScanPanel() {
     if (found || lastHandle.current === handle) return;
     lastHandle.current = handle;
     void lookUp(handle);
-  });
+  }, demoScan);
   const available = status === "starting" || status === "scanning";
 
   async function search(event: FormEvent<HTMLFormElement>) {
@@ -192,7 +203,7 @@ export function ScanPanel() {
         <video ref={videoRef} muted playsInline className="absolute inset-0 h-full w-full object-cover opacity-80" />
         {/* A camera problem is a sentence to read, not a label: no caps, so the longer hint stays legible. */}
         <span role="status" className={`absolute top-[14px] right-0 left-0 px-4 text-center font-extrabold text-paper ${available ? "text-[12px] tracking-[1.2px] uppercase" : "text-[13px] leading-[1.35]"}`}>
-          {copy.camera[status]}
+          {demoScan === undefined ? copy.camera[status] : demoScan ? all.demoCapture.scanning : all.demoCapture.everyoneMet}
         </span>
         {/* A fixed 205×220 frame, centered, so the corners stay square however wide the viewfinder gets. */}
         <span aria-hidden="true" className="absolute top-12 left-1/2 h-[220px] w-[205px] -translate-x-1/2">

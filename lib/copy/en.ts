@@ -1006,3 +1006,8 @@ export const demoApi: typeof es.demoApi = {
   nextStep: (name) => `Message ${name} to ask for the guide`,
   eventDescription: "A sample evening that replays every two minutes: 150 fictional attendees and a new connection every 3 seconds.",
 };
+
+export const demoCapture: typeof es.demoCapture = {
+  scanning: "Demo · simulated camera",
+  everyoneMet: "You met everyone in the demo. Search by name.",
+};

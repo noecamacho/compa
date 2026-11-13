@@ -5,6 +5,7 @@ import { Header } from "@/components/ui/Header";
 import { Screen } from "@/components/ui/Screen";
 import { Muted } from "@/components/ui/Text";
 import { ConnectionDetail } from "@/lib/api/schemas";
+import { isDemoMode } from "@/lib/demo/respond";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
 import { requestCopy } from "@/lib/server/locale";
 import { timeAgo } from "@/lib/format";
@@ -29,7 +30,7 @@ export default async function NotePage({ params }: Props) {
           <Muted className="text-[13px] font-bold">{copy.reconnectionAgo(kind, timeAgo(locale, detail.at))}</Muted>
         </span>
       </div>
-      <NoteEditor detail={detail} />
+      <NoteEditor detail={detail} demo={isDemoMode()} />
     </Screen>
   );
 }
