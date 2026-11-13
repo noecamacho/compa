@@ -286,6 +286,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - Open question 60 resolved: `--color-muted` is `#575266` (AA on paper and every soft tint). Every page sets a localized tab title through `pageTitle()` (`lib/server/locale.ts`, copy section `titles`) under the root template "%s · Compa"; admin tabs read "<page> · Admin · Compa". `/ranking` titles the all-year scope "Top del año". Pages updated: [open-questions](open-questions.md), [DESIGN.md](../DESIGN.md).
 
+## [2026-11-12] change | Big screen and Home card fit (F2)
+
+- The Home card drops the view chips and the race; the big screen gains full screen and, from the Home card, a way back; phone chips are 44 px; the five leaders fit at 1280×720; Type names fit at 1920. Page updated: [live-dashboard](live-dashboard.md).
+
 ## [2026-11-12] lint | Top-level documents after #61 to #84
 
 - `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `AGENTS.md` §6 and `CHANGELOG.md` no longer say that no code exists or that built screens are missing; the changelog now lists the live views, the QR poster, referral codes, connections outside an event, the admin redesign, the e2e work and the D1 demo scenario. The README's demo video stays unrecorded and its evidence table points to the [Codex evidence](../docs/evidence/codex/README.md). The PR's E2E run hit an intermittent Linux WebKit failure in `e2e/profiles/me.spec.ts`, now tracked in the [E2E stability audit](../docs/testing/e2e-stability.md#profile-invalid-link-on-linux-webkit).

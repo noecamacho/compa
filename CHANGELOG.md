@@ -27,6 +27,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Fixed
 
+- Big screen and Home card: the Home card no longer shows view chips that looked tappable but only opened the live screen, and skips the race, whose names it cut. The big screen has a full screen button and, when opened from Home, a link back to Home; on a phone its view chips are 44 px tall on one row. At 1280×720 all five leaders fit, and the type view no longer cuts names at 1920.
 - Tabs, contrast and ranking title: every screen names its browser tab ("Ranking · Compa", "Eventos · Admin · Compa") in the visitor's language instead of always "Compa"; secondary grey text is darker (`#575266`) and clears WCAG AA 4.5:1 on paper and every soft tint; the ranking title follows the scope toggle ("Top del año" / "All-year leaderboard" for all year).
 - Admin event dates that span two days read "Oct 29, 10:00 – Oct 30, 02:00" everywhere. On macOS (Bun, Safari) they read "Oct 29 at 10:00", because the system ICU joins date and time with "at"; the unit test failed on every Mac for the same reason.
 - Fixes found by the full e2e pass: padded event codes open their door, the door shows the opening time in the event's time zone, a 401 on check-in sends the person to sign in, only the addressee sees accept and decline, a half-typed time zone no longer crashes the event form, and "Copy" selects the link when the clipboard is refused.

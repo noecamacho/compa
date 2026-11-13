@@ -117,6 +117,8 @@ The full local matrix observed one WebKit Spanish `/admin/events/new` responsive
 
 The full local matrix also timed out in `e2e/live/live-board.spec.ts`, `thousands: 2,500 people and 4,000+ threads stay flat and responsive`, at `page.screenshot` after fonts loaded. This used unchanged main application code, not the live-monito change. The scenario's assertions and capture remain active and blocking, with an `unstable` annotation pointing here. This could reflect renderer load rather than a harmless test race; it is not cleared or changed into an expected failure. Measure the capture separately before changing either the load or its assertions.
 
+Seen again on 2026-11-12 (branch `fm/compa-tele-inicio`): a 60 s timeout in a six-project run of `e2e/live` and `e2e/home` with four workers; the single diagnostic rerun passed in 48 s. Still intermittent, not cleared.
+
 ## Overlapping searches
 
 A final repeat of the added punctuation check exposed a separate main behavior: an earlier valid lookup can overwrite a later lookup's empty/error state. The trace records the `valeria-ochoa` query starting at 02:46:23.749Z and taking 126.091 ms, while the later `¿?` query starts at 02:46:23.852Z and takes 15.513 ms. The newer empty response finishes first; the snapshot then shows the older people under `¿?`. Application code was unchanged main. This is a concurrency risk in `ScanPanel`, not evidence against one of today's changes.
