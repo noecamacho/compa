@@ -17,6 +17,8 @@ const SEGMENT_SAMPLES: Readonly<Record<string, string>> = {
 
 // The projector screen is laid out for 1920×1080 and has its own specs (e2e/live/**).
 export const NOT_AT_PHONE_SIZES = new Set(["/e/[code]/live"]);
+// Exists only with API_MODE=demo (404 in mock mode); e2e/demo/page.spec.ts covers it at every size.
+const DEMO_ONLY = new Set(["/demo"]);
 
 function pageFiles(dir: string): string[] {
   return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
@@ -43,7 +45,7 @@ export function urlOf(route: string): string {
 export const PAGE_ROUTES: readonly string[] = pageFiles(APP_DIR).map(routeOf).sort();
 
 // Screens a person reaches at phone, tablet and desktop sizes.
-export const SCREEN_ROUTES = PAGE_ROUTES.filter((route) => !NOT_AT_PHONE_SIZES.has(route));
+export const SCREEN_ROUTES = PAGE_ROUTES.filter((route) => !NOT_AT_PHONE_SIZES.has(route) && !DEMO_ONLY.has(route));
 
 // Browser errors and uncaught exceptions while a page is open.
 export function collectConsoleErrors(page: Page): string[] {
