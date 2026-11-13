@@ -10,9 +10,11 @@ import { Screen } from "@/components/ui/Screen";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { Invites, Me, type MeT } from "@/lib/api/schemas";
 import { apiGet } from "@/lib/api/server-fetch";
-import { requestCopy } from "@/lib/server/locale";
+import { pageTitle, requestCopy } from "@/lib/server/locale";
 import { firstName } from "@/lib/format";
 import { GOLDEN_CAP, withDefaults } from "@/lib/monito/look";
+
+export const generateMetadata = pageTitle("invite");
 
 const GOLDEN_LOOK = withDefaults({
   ...GOLDEN_CAP,
