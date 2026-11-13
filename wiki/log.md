@@ -270,6 +270,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - The live snapshot and the leaderboard rows now carry the person's monito (`avatar`) and which picture they chose (`avatarMode`), so the board, the race, the final podium and `/ranking` stop drawing the default monito for everyone. Only the first 8 people of the snapshot carry it (`LIVE_LOOK_ROWS`), the rows the board draws: measured on the 2,500-person scenario the snapshot goes from 454.1 KB to 456.1 KB, against 1,115.7 KB if everyone carried theirs. `/ranking` no longer reads `GET /api/connections` to find looks. Pages updated: [live-dashboard](live-dashboard.md), [conference-scale](conference-scale.md) (finding 9); API spec §5.
 
+## [2026-11-11] change | Connect and note details (F4)
+
+- The scan tab's name search has a visible search button, a fourth topic on the register screen says the limit is three, and a refused microphone on the note screen says so instead of a summary error. Flows: [catalog](../docs/flows/catalog.md) (connect and summaries).
+
 ## [2026-11-12] change | Keyless demo deployment (D5)
 
 - The demo is a separate Vercel project whose only variable is `API_MODE=demo`; `vercel.json` now runs `db:migrate:deploy` only for production builds whose `API_MODE` is neither `demo` nor `mock`, so the demo build never needs `DATABASE_URL`. Setup steps: `README.md` "Demo deployment (no keys)". Depends on the D2 demo routes for content.
@@ -285,6 +289,10 @@ Checked relative links in index, log and connections page; the updated page rema
 ## [2026-11-12] change | Big screen and Home card fit (F2)
 
 - The Home card drops the view chips and the race; the big screen gains full screen and, from the Home card, a way back; phone chips are 44 px; the five leaders fit at 1280×720; Type names fit at 1920. Page updated: [live-dashboard](live-dashboard.md).
+
+## [2026-11-12] lint | Top-level documents after #61 to #84
+
+- `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `AGENTS.md` §6 and `CHANGELOG.md` no longer say that no code exists or that built screens are missing; the changelog now lists the live views, the QR poster, referral codes, connections outside an event, the admin redesign, the e2e work and the D1 demo scenario. The README's demo video stays unrecorded and its evidence table points to the [Codex evidence](../docs/evidence/codex/README.md). The PR's E2E run hit an intermittent Linux WebKit failure in `e2e/profiles/me.spec.ts`, now tracked in the [E2E stability audit](../docs/testing/e2e-stability.md#profile-invalid-link-on-linux-webkit).
 
 ## [2026-11-12] change | Invite QR is the invite link; no Instagram button
 

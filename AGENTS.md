@@ -68,7 +68,7 @@ Product rules from the plan, binding once application code exists (`wiki/agent-c
 
 ## 6. Scope guard
 
-No application code, dependencies or CI exist yet; the Jira Epic tracks that build. Do not add them in unrelated PRs. Keep wiki pages factual and sourced rather than long.
+Do not add application code, dependencies or CI in unrelated PRs. Keep wiki pages factual and sourced rather than long.
 
 ## 7. Map of the repository
 
