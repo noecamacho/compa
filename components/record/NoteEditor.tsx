@@ -9,7 +9,7 @@ import { Tag } from "@/components/ui/Chip";
 import { Muted, SectionLabel } from "@/components/ui/Text";
 import { apiCall } from "@/lib/api/client";
 import { Approved, Draft, type ConnectionDetailT, type DraftT } from "@/lib/api/schemas";
-import { startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
+import { silentDeps, startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
 import { useCopy, useLocale } from "@/components/LocaleProvider";
 import { errorText } from "@/lib/api/error-text";
 import { formatClock } from "@/lib/format";
@@ -58,10 +58,11 @@ const fromDraft = (draft: DraftT, seconds: number | null): Summary => ({
   approved: false,
 });
 
-type Props = { detail: ConnectionDetailT };
+// `demo` records without the microphone.
+type Props = { detail: ConnectionDetailT; demo?: boolean };
 
 // 08b NotaVoz: record (or type), let Compa draft the summary, then save it to the connection (+15).
-export function NoteEditor({ detail }: Props) {
+export function NoteEditor({ detail, demo = false }: Props) {
   const all = useCopy();
   const copy = all.note;
   const outsideEvent = all.common.outsideEvent;
@@ -123,7 +124,7 @@ export function NoteEditor({ detail }: Props) {
           setPhase({ kind: "recording", seconds: elapsed });
         },
         onStop: (file) => transcribe({ file, seconds: elapsed }),
-      });
+      }, demo ? silentDeps : undefined);
       if (!mounted.current) return recording.current.cancel();
       setPhase({ kind: "recording", seconds: 0 });
     } catch {
