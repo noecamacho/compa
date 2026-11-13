@@ -7,6 +7,7 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 ### Added
 
 - Demo mode (`API_MODE=demo`): the whole app opens without an account on a synthetic event that never stops. Scans, requests, voice notes and profile changes are kept in a cookie per visitor and move their points, the ranking and the big screen; the organizer console shows the room read-only. No database, Supabase or OpenAI key is needed (`docs/contracts/demo-routes.md`).
+- The `/demo` page on a demo deployment: the big screen and the phone side by side with a six-step guide that plays on its own or by hand, the notice "Demo con datos de ejemplo", links to open the screen, the phone or the organizer console alone, and "Start over". The landing page of a demo deployment gets a "Ver la demo" button.
 - Observability for event day: root `app/error.tsx` and `app/global-error.tsx`, `instrumentation.ts` request-error logging, JSON error logs with request ids (and an `x-request-id` header on API errors), and `GET /api/health`. Runbook in `wiki/event-day-runbook.md`.
 
 ### Changed

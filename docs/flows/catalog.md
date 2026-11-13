@@ -102,8 +102,9 @@ Screen numbers (01–12) are the V2 screens in [DESIGN.md](../../DESIGN.md#scree
 | [F-72](#f-72) | Language detection | IP (landing only) | Ready | Ready | T-110, T-111 |
 | [F-73](#f-73) | Accessibility and reduced motion | Partial | — | — | T-113 |
 | [F-74](#f-74) | Responsive layouts (390, 834, 1440, 1920) | Partial | — | — | T-114, T-090 |
+| [F-75](#f-75) | Guided demo `/demo` (demo mode) | IP | IP | — | COMPA-<TBD> D3 |
 
-**Counts.** There are 74 flows. On the UI layer:
+**Counts.** There are 75 flows. On the UI layer:
 
 | UI status | Flows |
 | --- | --- |
@@ -111,7 +112,7 @@ Screen numbers (01–12) are the V2 screens in [DESIGN.md](../../DESIGN.md#scree
 | Partial | 30 |
 | Mock-only | 12 |
 | Missing | 19 |
-| IP | 10 |
+| IP | 11 |
 | No UI layer | 1 (F-60) |
 
 In the overview, a flow that shows a transition such as "Missing → IP" is counted by its `main` status. **E2E coverage:** every flow with a built UI or API has specs (2026-10-29); see [E2E coverage status](#e2e-coverage-status).
@@ -136,6 +137,7 @@ Updated 2026-10-29 (branch `fm/compa-e2e-coverage`). Specs run at 390, 834 and 1
 | Admin | F-55–F-57, F-60 | `e2e/admin/` access, api, events, people, test-users |
 | API contract | all 46 operations | `e2e/api/` contract-mock, contract-real, real-success, openapi |
 | System | F-66–F-68, F-72–F-74 | `e2e/system/` resilience, rate-limits, i18n, a11y, responsive |
+| Demo | F-75 | `e2e/demo/` flow, page (`@demo`, against a server with `API_MODE=demo`) |
 
 Not covered, because the feature is not built: withdraw (F-34), saved-summary edit and delete (F-38), seed toggle and moderation (F-58, F-59), delete, export and block (F-63–F-65), offline banner, security headers, axe scans (not installed), English copy on Spanish-only app screens (T-110, T-111), the 500-node load run (F-53). Not covered for other reasons: clicking a WebGL node on the big screen (no hooks; the board and API snapshot are asserted instead), a real transcription or draft (needs OpenAI), the 300-request and 5-draft caps in real mode (mock only).
 
@@ -1350,5 +1352,21 @@ Known gaps: `<html lang>` is always `es` (a `test.fixme` in `e2e/system/i18n.spe
 | Status | UI Partial · API — · DB — |
 | E2E coverage | `e2e/system/responsive.spec.ts`: every screen in the 390, 834 and 1440 projects, with no horizontal scroll and screenshot comparison |
 | Tickets | [T-114](backlog.md#t-114), [T-090](backlog.md#t-090) |
+
+<a id="f-75"></a>
+### F-75 · Guided demo `/demo` (demo mode)
+
+| Field | Detail |
+| --- | --- |
+| Actor | Anonymous visitor (a LinkedIn viewer) |
+| Entry | `/demo`, or "Ver la demo" on the landing page of a demo deployment |
+| Pre | Server started with `API_MODE=demo` ([demo routes](../contracts/demo-routes.md)); elsewhere `/demo` answers 404 and the landing has no demo button |
+| Happy path | The big screen (`/e/compademo2026/live` at 1920×1080) and the phone (390×844) side by side, scaled from their real viewports, under the notice "Demo con datos de ejemplo". A six-step guide plays on its own (6.5 s a step) or with the step buttons, Previous and Next: home, Connect, register, confirmation, note, ranking. Step 4 posts `POST /api/connections` to the first person the visitor has not met, so the board lists the visitor's link 4 s later |
+| Alternates | Open only the screen, only the phone or the organizer console in a new tab. "Start over" posts `POST /api/auth/signout` (clears the visitor cookie) and reloads |
+| Errors | The step 4 connection fails → `demo.connectFailed`, the guide stops |
+| Edge cases | Reduced motion: the guide does not play on its own. A hidden tab pauses it. The page marks the app's own tours as seen, since they would cover the small phone |
+| Status | UI IP · API IP · DB — |
+| E2E coverage | `e2e/demo/page.spec.ts`: notice and both frames, autoplay and pause, reduced motion with Previous wrapping, step 4 link on the board and the phone's confirmation, start over, the landing button (`@demo`); 404 outside demo mode (`@mock`) |
+| Tickets | COMPA-<TBD> D3 |
 
 Related: [README](README.md), [actors and permissions](actors-and-permissions.md), [edge cases and risks](edge-cases-and-risks.md), [backlog](backlog.md), [gap analysis](../backend-gap-analysis.md), [DESIGN.md](../../DESIGN.md).

@@ -273,3 +273,7 @@ Checked relative links in index, log and connections page; the updated page rema
 ## [2026-11-12] change | Demo mode routes and the visitor cookie (D2)
 
 - `API_MODE=demo` answers every API route from the D1 room plus one validated cookie per visitor: no account, database, Supabase or OpenAI. A scan is accepted 4 s later and moves the visitor's points, ranking and link on the big screen; two cast people send requests; voice notes get a prepared transcript and a summary without AI; `/admin` reads the room and refuses writes. Interface for D3 and D4: [demo-routes](../docs/contracts/demo-routes.md).
+
+## [2026-11-12] change | The /demo page (D3)
+
+- `/demo` (demo mode only) shows the big screen and the phone side by side with a six-step guide; step 4 connects the visitor so the board shows their link. Flow [F-75](../docs/flows/catalog.md#f-75); interface in [demo-routes](../docs/contracts/demo-routes.md).
