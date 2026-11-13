@@ -306,6 +306,11 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - `/demo` (demo mode only) shows the big screen and the phone side by side with a six-step guide; step 4 connects the visitor so the board shows their link. Flow [F-75](../docs/flows/catalog.md#f-75); interface in [demo-routes](../docs/contracts/demo-routes.md).
 
+## [2026-11-12] change | Seven e2e flakes on main fixed; Safari hydration error on the new-event preview
+
+- big-screen card, home, other-profile and invite navigation (WebKit), profile link error, admin taken slug and console slug were test races (random stage view, Next's hard-navigation fallback on a cancelled RSC fetch, pre-hydration typing). Causes and reproductions: [e2e stability](../docs/testing/e2e-stability.md#main-flakes-2026-11-12).
+- The `/admin/events/new` preview wrote its hours with ICU's a.m./p.m. marker, which differs between Node and macOS Safari, so Spanish Safari loads hit React hydration error 418; it now uses 24-hour time like the events list.
+
 ## [2026-11-12] change | Demo video director (D6)
 
 - `e2e/demo/record.spec.ts` records the `/demo` guide and the organizer console to a git-ignored `recordings/` video when run with `DEMO_RECORD=1`; how to run it is in the README, "Record the demo video". Flow [F-75](../docs/flows/catalog.md#f-75).

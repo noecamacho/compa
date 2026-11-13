@@ -10,10 +10,7 @@ test.describe("responsive layouts", () => {
   });
 
   for (const route of SCREEN_ROUTES) {
-    test(`${route} fits the viewport with no browser errors @mock`, async ({ page, browserName }) => {
-      if (route === "/admin/events/new" && browserName === "webkit") {
-        test.info().annotations.push({ type: "unstable", description: "Intermittent React hydration error; docs/testing/e2e-stability.md#admin-form-hydration" });
-      }
+    test(`${route} fits the viewport with no browser errors @mock`, async ({ page }) => {
       const errors = collectConsoleErrors(page);
       const response = await page.goto(urlOf(route));
       expect(response?.status() ?? 0).toBeLessThan(400);
