@@ -1044,6 +1044,11 @@ export const liveScreen: typeof es.liveScreen = {
   back: "Back",
 };
 
+export const demoCapture: typeof es.demoCapture = {
+  scanning: "Demo · simulated camera",
+  everyoneMet: "You met everyone in the demo. Search by name.",
+};
+
 // D3: the /demo page, the big screen and the phone side by side with a six-step guide.
 export const demo: typeof es.demo = {
   tabTitle: "Live demo",

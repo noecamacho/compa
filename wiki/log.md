@@ -294,6 +294,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `AGENTS.md` §6 and `CHANGELOG.md` no longer say that no code exists or that built screens are missing; the changelog now lists the live views, the QR poster, referral codes, connections outside an event, the admin redesign, the e2e work and the D1 demo scenario. The README's demo video stays unrecorded and its evidence table points to the [Codex evidence](../docs/evidence/codex/README.md). The PR's E2E run hit an intermittent Linux WebKit failure in `e2e/profiles/me.spec.ts`, now tracked in the [E2E stability audit](../docs/testing/e2e-stability.md#profile-invalid-link-on-linux-webkit).
 
+## [2026-11-12] change | Simulated scan and voice note in demo mode (D4)
+
+- In demo mode "Escanear" finds the next person the visitor has not met without the camera, and voice notes record without the microphone and get the prepared transcript. Other modes are unchanged. Contract: [demo-routes](../docs/contracts/demo-routes.md).
+
 ## [2026-11-12] change | The /demo page (D3)
 
 - `/demo` (demo mode only) shows the big screen and the phone side by side with a six-step guide; step 4 connects the visitor so the board shows their link. Flow [F-75](../docs/flows/catalog.md#f-75); interface in [demo-routes](../docs/contracts/demo-routes.md).

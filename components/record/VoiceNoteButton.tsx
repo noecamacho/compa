@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Icon } from "@/components/icons";
 import { HIT_AREA } from "@/components/ui/hit-area";
 import { Muted } from "@/components/ui/Text";
-import { startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
+import { silentDeps, startRecording, uploadForTranscript, type Recording } from "@/lib/audio/recorder";
 import { useCopy, useLocale } from "@/components/LocaleProvider";
 import { errorText } from "@/lib/api/error-text";
 import { formatClock } from "@/lib/format";
@@ -17,13 +17,13 @@ export type NoteState =
 
 const WAVE = [10, 18, 22, 14, 20, 12, 18, 22];
 
-// `scores: false` outside an event, where the note pays nothing.
-type Props = { state: NoteState; onChange: (state: NoteState) => void; scores?: boolean };
+// `scores: false` outside an event, where the note pays nothing. `demo` records without the microphone.
+type Props = { state: NoteState; onChange: (state: NoteState) => void; scores?: boolean; demo?: boolean };
 
 type Audio = { file: File; seconds: number };
 
 // The three note states of V2Registrar: not recorded / recording / saved. Audio goes to /api/transcribe.
-export function VoiceNoteButton({ state, onChange, scores = true }: Props) {
+export function VoiceNoteButton({ state, onChange, scores = true, demo = false }: Props) {
   const all = useCopy();
   const copy = all.register;
   const locale = useLocale();
@@ -64,7 +64,7 @@ export function VoiceNoteButton({ state, onChange, scores = true }: Props) {
           onChange({ status: "recording", seconds: elapsed });
         },
         onStop: (file) => transcribe({ file, seconds: elapsed }),
-      });
+      }, demo ? silentDeps : undefined);
       if (!mounted.current) return recording.current.cancel();
       onChange({ status: "recording", seconds: 0 });
     } catch {

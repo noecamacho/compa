@@ -1061,6 +1061,12 @@ export const liveScreen = {
   back: "Volver",
 };
 
+// D4: the simulated camera of the demo mode (no camera or microphone is asked for).
+export const demoCapture = {
+  scanning: "Demo · cámara simulada",
+  everyoneMet: "Ya conociste a todos en la demo. Busca por nombre.",
+};
+
 // D3: the /demo page, the big screen and the phone side by side with a six-step guide.
 export const demo = {
   tabTitle: "Demo en vivo",

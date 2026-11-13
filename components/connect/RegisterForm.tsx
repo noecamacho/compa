@@ -30,10 +30,10 @@ const KIND: Record<Kind, { points: number; color: string; icon: IconName }> = {
 
 const MAX_TOPICS = 3;
 
-type Props = { profile: UserProfileT };
+type Props = { profile: UserProfileT; demo?: boolean };
 
 // 05 Registrar: kind, topics (+5), optional voice note (+15), then the request is sent (two-step connection).
-export function RegisterForm({ profile }: Props) {
+export function RegisterForm({ profile, demo = false }: Props) {
   const all = useCopy();
   const { register: copy, tour, common } = all;
   const router = useRouter();
@@ -147,7 +147,7 @@ export function RegisterForm({ profile }: Props) {
       </div>
 
       <div data-tour="note">
-        <VoiceNoteButton state={note} onChange={setNote} scores={!outside} />
+        <VoiceNoteButton state={note} onChange={setNote} scores={!outside} demo={demo} />
       </div>
 
       <div className="mt-auto flex flex-col gap-[10px] md:mt-4">
