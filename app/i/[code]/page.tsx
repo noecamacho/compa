@@ -1,6 +1,8 @@
 import { notFound, redirect } from "next/navigation";
 import { eventPath } from "@/lib/access-code";
 import { accessCode } from "@/lib/api/examples";
+import { isDemoMode } from "@/lib/demo/respond";
+import { DEMO_EVENT_CODE } from "@/lib/demo/scenario";
 import { referralDoor } from "@/lib/server/invites";
 
 type Props = { params: Promise<{ code: string }> };
@@ -14,6 +16,7 @@ const onboardingSignIn = (code: string) => `/auth/linkedin?next=${encodeURICompo
 export default async function InviteLinkPage({ params }: Props) {
   const { code } = await params;
   if (process.env.API_MODE === "mock") redirect(`${eventPath(accessCode)}?invite=${code}`);
+  if (isDemoMode()) redirect(`${eventPath(DEMO_EVENT_CODE)}?invite=${code}`);
   const door = INVITE_CODE.test(code) ? await referralDoor(code) : undefined;
   if (door === undefined) notFound();
   redirect(door ? `${eventPath(door)}?invite=${code}` : onboardingSignIn(code));

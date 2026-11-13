@@ -274,6 +274,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - The demo is a separate Vercel project whose only variable is `API_MODE=demo`; `vercel.json` now runs `db:migrate:deploy` only for production builds whose `API_MODE` is neither `demo` nor `mock`, so the demo build never needs `DATABASE_URL`. Setup steps: `README.md` "Demo deployment (no keys)". Depends on the D2 demo routes for content.
 
+## [2026-11-12] change | Demo mode routes and the visitor cookie (D2)
+
+- `API_MODE=demo` answers every API route from the D1 room plus one validated cookie per visitor: no account, database, Supabase or OpenAI. A scan is accepted 4 s later and moves the visitor's points, ranking and link on the big screen; two cast people send requests; voice notes get a prepared transcript and a summary without AI; `/admin` reads the room and refuses writes. Interface for D3 and D4: [demo-routes](../docs/contracts/demo-routes.md).
+
 ## [2026-11-12] change | Tab titles, muted contrast and the all-year ranking title
 
 - Open question 60 resolved: `--color-muted` is `#575266` (AA on paper and every soft tint). Every page sets a localized tab title through `pageTitle()` (`lib/server/locale.ts`, copy section `titles`) under the root template "%s · Compa"; admin tabs read "<page> · Admin · Compa". `/ranking` titles the all-year scope "Top del año". Pages updated: [open-questions](open-questions.md), [DESIGN.md](../DESIGN.md).

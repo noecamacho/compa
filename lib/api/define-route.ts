@@ -1,8 +1,9 @@
-// One wrapper for every route handler: mock mode, input validation, auth and error mapping.
+// One wrapper for every route handler: mock mode, demo mode, input validation, auth and error mapping.
 import { z } from "zod";
 import type { UserRow } from "../../db/schema";
 import { ApiError, E, errorResponse, toApiError } from "./errors";
 import { isMockRequest, mockResponse } from "./mock";
+import { demoHandler, isDemoMode } from "../demo/respond";
 import { automationFrom } from "./automation";
 import { logError, pathOnly, requestIdFrom } from "../server/log";
 import { isAdminAuth, type Auth, type Handler, type HandlerResult, type ObjectSchema, type RouteRateLimit, type RouteSpec } from "./route-spec";
@@ -84,18 +85,20 @@ export function defineRoute<
 >(spec: RouteSpec<P, Q, B, R, A>, handler?: Handler<P, Q, B, R, A>): RouteHandler {
   return async (req, ctx) => {
     if (servesMock(spec, req)) return mockResponse(spec, req);
-    if (!handler) return errorResponse(toApiError(E.notImplemented));
+    // A demo deployment answers every route from its seeded room as a public route: no session or database (lib/demo/respond.ts).
+    const [auth, run] = isDemoMode() ? (["public", demoHandler(spec)] as const) : ([spec.auth, handler] as const);
+    if (!run) return errorResponse(toApiError(E.notImplemented));
     try {
       // Auth first: a stranger's malformed admin path meets the same 404 as any other, so the route stays undiscoverable.
-      const user = await resolveUser(spec.auth, req);
+      const user = await resolveUser(auth, req);
       // Next.js passes no params for static paths.
       const params = parse(spec.params, (await ctx?.params) ?? {}, "path");
       const query = parse(spec.query, Object.fromEntries(new URL(req.url).searchParams), "query");
       // Multipart handlers validate the request themselves so they can read its File fields.
       const body = spec.bodyKind === "multipart" ? {} : parse(spec.body, await readBody(spec, req), "body");
-      const input = { req, params, query, body, user } as Parameters<typeof handler>[0];
+      const input = { req, params, query, body, user } as Parameters<typeof run>[0];
       await enforceLimits(spec.rateLimit, user, input.body);
-      return toResponse(await handler(input), spec.success.status);
+      return toResponse(await run(input), spec.success.status);
     } catch (error) {
       return errorToResponse(error, req);
     }
