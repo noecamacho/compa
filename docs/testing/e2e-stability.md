@@ -117,6 +117,8 @@ The full local matrix observed one WebKit Spanish `/admin/events/new` responsive
 
 The full local matrix also timed out in `e2e/live/live-board.spec.ts`, `thousands: 2,500 people and 4,000+ threads stay flat and responsive`, at `page.screenshot` after fonts loaded. This used unchanged main application code, not the live-monito change. The scenario's assertions and capture remain active and blocking, with an `unstable` annotation pointing here. This could reflect renderer load rather than a harmless test race; it is not cleared or changed into an expected failure. Measure the capture separately before changing either the load or its assertions.
 
+Seen again on 2026-11-12, still open: across four local full mock runs (three on `a9ec4d1`, one on `020e304`, 6 workers, no retries, machine load average 21–35 from other sessions), it timed out once (60 s, `live-1920-en`) in the fourth run. One rerun for diagnosis passed in 13.5 s. That makes it an intermittent, not a clean green.
+
 Seen again on 2026-11-12 (branch `fm/compa-tele-inicio`): a 60 s timeout in a six-project run of `e2e/live` and `e2e/home` with four workers; the single diagnostic rerun passed in 48 s. Still intermittent, not cleared.
 
 ## Overlapping searches
