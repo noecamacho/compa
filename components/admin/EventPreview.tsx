@@ -13,10 +13,14 @@ const format = (locale: Locale, local: string, options: Intl.DateTimeFormatOptio
   return Number.isNaN(date.getTime()) ? "" : new Intl.DateTimeFormat(locale === "es" ? "es-MX" : "en-US", { ...options, timeZone: "UTC" }).format(date);
 };
 
+// 24-hour, as in the events list: the a.m./p.m. marker is ICU data ("2:00 a.m." in Node, "2:00 am" in macOS Safari), and
+// the server's text must match the browser's or hydration fails.
+const TIME: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", hourCycle: "h23" };
+
 // Live preview of the event as the form is filled, so the desktop layout reads as form | result.
 export function EventPreview({ locale, copy, state }: Props) {
   const day = format(locale, state.startsAt, { weekday: "short", day: "numeric", month: "short", year: "numeric" });
-  const hours = [format(locale, state.startsAt, { hour: "numeric", minute: "2-digit" }), format(locale, state.endsAt, { hour: "numeric", minute: "2-digit" })].filter(Boolean).join("–");
+  const hours = [format(locale, state.startsAt, TIME), format(locale, state.endsAt, TIME)].filter(Boolean).join("–");
   const place = [state.details.venueName, state.details.city].map((part) => part.trim()).filter(Boolean).join(", ");
   return (
     <Card tone="sky-soft" className="flex flex-col gap-3 px-5 py-5" ariaLabel={copy.ui.form.previewTitle}>

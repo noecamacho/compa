@@ -111,7 +111,7 @@ Holding the entire navigation RSC response also holds the streamed fallback. Mai
 
 ## Admin form hydration
 
-The full local matrix observed one WebKit Spanish `/admin/events/new` responsive check fail on React hydration error 418 while serving unchanged main application code. Its console-error assertion remains blocking and unchanged. This case carries an `unstable` annotation pointing here, rather than an expected-failure exemption: a hydration error could expose a real regression. The exact server/browser text mismatch still needs a development-mode trace; do not dismiss subsequent errors as harmless or clear a PR based on this annotation.
+The full local matrix observed one WebKit Spanish `/admin/events/new` responsive check fail on React hydration error 418 while serving unchanged main application code. It was not intermittent: on macOS WebKit it failed 15/15 (es only; Chromium and English passed). The event preview formatted its hours with `{ hour: "numeric" }`. Node wrote `2:00 a.m.`, while macOS Safari's ICU writes `2:00 am`, so the server's text never matched the browser's; Linux CI WebKit happens to match Node. Fixed 2026-11-12: the preview uses the events list's 24-hour format, which has no day-period marker, and the `unstable` annotation was removed. The console-error assertion is unchanged and blocking.
 
 ## Large board capture
 
