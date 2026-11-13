@@ -4,6 +4,9 @@ import { IncomingRequests } from "@/components/home/IncomingRequests";
 import { Screen } from "@/components/ui/Screen";
 import { ConnectionList, HandleSchema, Me, UserProfile } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
+import { pageTitle } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("connections");
 
 type Props = { searchParams: Promise<{ demo?: string; mutual?: string }> };
 

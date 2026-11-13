@@ -1,6 +1,9 @@
 import { ProfileForm } from "@/components/profile/ProfileForm";
 import { Me } from "@/lib/api/schemas";
 import { apiGet, apiPostQuietly } from "@/lib/api/server-fetch";
+import { pageTitle } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("onboardingProfile");
 
 type Props = { searchParams: Promise<{ from?: string; invite?: string }> };
 

@@ -5,7 +5,9 @@ import { Muted, ProgressBar } from "@/components/ui/Text";
 import { BadgeList, UserProfile, type BadgeListT } from "@/lib/api/schemas";
 import { apiGetOrNull, apiGetSafe } from "@/lib/api/server-fetch";
 import { BADGE_IDS, isSecret } from "@/lib/badges/catalog";
-import { requestCopy } from "@/lib/server/locale";
+import { pageTitle, requestCopy } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("badges");
 
 type Props = { searchParams: Promise<{ of?: string }> };
 
