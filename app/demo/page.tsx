@@ -6,9 +6,9 @@ import { demoCast } from "@/lib/demo/cast";
 import { isDemoMode } from "@/lib/demo/respond";
 import { DEMO_EVENT_CODE, DEMO_EVENT_SLUG } from "@/lib/demo/scenario";
 import { demoConnectionId, nextScanTarget, readVisitor } from "@/lib/demo/visitor";
-import { requestLocale } from "@/lib/server/locale";
+import { requestCopy, requestLocale } from "@/lib/server/locale";
 
-export const metadata: Metadata = { title: "compa · demo", robots: { index: false, follow: false } };
+export const generateMetadata = async (): Promise<Metadata> => ({ title: (await requestCopy()).copy.demo.tabTitle, robots: { index: false, follow: false } });
 
 // The guide connects the visitor with the first person they have not met, so "Start over" or a new visitor replays it.
 async function demoLinks(): Promise<DemoLinks> {

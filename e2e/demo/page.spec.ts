@@ -41,6 +41,7 @@ test.describe("demo page: the big screen and the phone side by side", () => {
     await openDemo(page);
     await expect(page.getByRole("heading", { level: 1, name: copy.demo.title })).toBeVisible();
     await expect(page.getByText(copy.demo.notice)).toBeVisible();
+    await expect(page).toHaveTitle(`${copy.demo.tabTitle} · Compa`);
     await expect(page.locator(`iframe[title="${copy.demo.screenTitle}"]`)).toBeVisible();
     await expect(page.locator(`iframe[title="${copy.demo.phoneTitle}"]`)).toBeVisible();
     await expect(step(page, 0)).toHaveAttribute("aria-current", "step");

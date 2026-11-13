@@ -1040,6 +1040,7 @@ export const titles: typeof es.titles = {
 
 // D3: the /demo page, the big screen and the phone side by side with a six-step guide.
 export const demo: typeof es.demo = {
+  tabTitle: "Live demo",
   notice: "Demo with sample data",
   title: "The big screen and your phone, side by side",
   lead: "An event that is always running, with 150 fictional attendees. You get in without an account: what you do on the phone shows up on the screen.",

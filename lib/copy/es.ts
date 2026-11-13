@@ -1057,6 +1057,7 @@ export const titles = {
 
 // D3: the /demo page, the big screen and the phone side by side with a six-step guide.
 export const demo = {
+  tabTitle: "Demo en vivo",
   notice: "Demo con datos de ejemplo",
   title: "La tele y tu celular, lado a lado",
   lead: "Un evento que siempre está en curso, con 150 asistentes ficticios. Tú entras sin cuenta: lo que hagas en el celular aparece en la tele.",
