@@ -17,7 +17,7 @@ export const PALETTE = {
   ink: "#1E1B2E",
   paper: "#FFF6E5",
   white: "#FFFFFF",
-  muted: "#6F6A7E",
+  muted: "#575266",
   new: "#6BE4A3",
   reconnection: "#FF8FAB",
   sun: "#FFD93D",

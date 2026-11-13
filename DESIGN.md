@@ -72,7 +72,7 @@ All tokens are defined once in `app/globals.css` (`@theme`) and come from README
 | --- | --- | --- |
 | `--color-paper` | `#FFF6E5` | Page background (`paper-dots` adds dots `rgba(30,27,46,0.07)` every 22 px) |
 | `--color-ink` | `#1E1B2E` | Text, borders, shadows |
-| `--color-muted` | `#6F6A7E` | Secondary text, inactive dock icons |
+| `--color-muted` | `#575266` | Secondary text, inactive dock icons (AA 4.5:1 on paper and every soft tint) |
 | `--color-mint` / `-soft` | `#6BE4A3` / `#DDF8EA` | Primary button, "new" kind, Conectar tab |
 | `--color-sky` / `-soft` | `#6CC4FF` / `#DDF1FF` | "Reconnection" kind, Inicio tab |
 | `--color-gum` / `-soft` | `#FF8FAB` / `#FFE3EA` | "Amigo" kind, Conexiones tab |

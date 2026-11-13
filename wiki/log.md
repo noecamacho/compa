@@ -282,6 +282,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - `API_MODE=demo` answers every API route from the D1 room plus one validated cookie per visitor: no account, database, Supabase or OpenAI. A scan is accepted 4 s later and moves the visitor's points, ranking and link on the big screen; two cast people send requests; voice notes get a prepared transcript and a summary without AI; `/admin` reads the room and refuses writes. Interface for D3 and D4: [demo-routes](../docs/contracts/demo-routes.md).
 
+## [2026-11-12] change | Tab titles, muted contrast and the all-year ranking title
+
+- Open question 60 resolved: `--color-muted` is `#575266` (AA on paper and every soft tint). Every page sets a localized tab title through `pageTitle()` (`lib/server/locale.ts`, copy section `titles`) under the root template "%s · Compa"; admin tabs read "<page> · Admin · Compa". `/ranking` titles the all-year scope "Top del año". Pages updated: [open-questions](open-questions.md), [DESIGN.md](../DESIGN.md).
+
 ## [2026-11-12] lint | Top-level documents after #61 to #84
 
 - `README.md`, `ARCHITECTURE.md`, `DESIGN.md`, `AGENTS.md` §6 and `CHANGELOG.md` no longer say that no code exists or that built screens are missing; the changelog now lists the live views, the QR poster, referral codes, connections outside an event, the admin redesign, the e2e work and the D1 demo scenario. The README's demo video stays unrecorded and its evidence table points to the [Codex evidence](../docs/evidence/codex/README.md). The PR's E2E run hit an intermittent Linux WebKit failure in `e2e/profiles/me.spec.ts`, now tracked in the [E2E stability audit](../docs/testing/e2e-stability.md#profile-invalid-link-on-linux-webkit).

@@ -6,7 +6,9 @@ import { eventPath } from "@/lib/access-code";
 import { apiPostQuietly } from "@/lib/api/server-fetch";
 import { currentMe } from "@/lib/server/current-event";
 import { loadEventDoor } from "@/lib/server/event-door";
-import { requestLocale } from "@/lib/server/locale";
+import { pageTitle, requestLocale } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("join");
 
 type Props = { params: Promise<{ code: string }>; searchParams: Promise<{ invite?: string }> };
 

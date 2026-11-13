@@ -13,8 +13,10 @@ import { Muted, SectionLabel } from "@/components/ui/Text";
 import { ConnectionDetail, Me } from "@/lib/api/schemas";
 import { apiGet, apiGetOrNull } from "@/lib/api/server-fetch";
 import type { Dictionary } from "@/lib/copy";
-import { requestCopy } from "@/lib/server/locale";
+import { pageTitle, requestCopy } from "@/lib/server/locale";
 import { formatClock } from "@/lib/format";
+
+export const generateMetadata = pageTitle("done");
 
 type Props = { params: Promise<{ id: string }> };
 
