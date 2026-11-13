@@ -3,6 +3,9 @@ import { RegisterForm } from "@/components/connect/RegisterForm";
 import { UserProfile } from "@/lib/api/schemas";
 import { apiGetOrNull } from "@/lib/api/server-fetch";
 import { isDemoMode } from "@/lib/demo/respond";
+import { pageTitle } from "@/lib/server/locale";
+
+export const generateMetadata = pageTitle("register");
 
 type Props = { params: Promise<{ handle: string }> };
 
