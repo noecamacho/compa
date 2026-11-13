@@ -1054,3 +1054,9 @@ export const titles = {
   },
   rankingAllYear: "Top del año",
 };
+
+// F2: the live screen's own controls.
+export const liveScreen = {
+  fullscreen: "Pantalla completa",
+  back: "Volver",
+};

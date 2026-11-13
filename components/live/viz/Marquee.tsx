@@ -2,6 +2,8 @@
 
 // Marquee: kinetic typography, brutalist black and paper. Columns of names scroll at their own pace (ranking with
 // points, the newest pairs); the counters stand as giant figures. An event slams across the stage in huge type.
+// Columns and name sizes follow the stage (container units), not the window: the Home card stays narrow on a wide
+// window, and at 1920 the window-based sizes cut "XIMENA SALC…".
 import { useMemo } from "react";
 import { boardRows } from "@/lib/live/live-model";
 import { feed } from "@/lib/live/live-model";
@@ -41,8 +43,8 @@ export default function Marquee({ snapshot, reducedMotion, label, selectedId, on
   const lit = new Set(batch.fresh.map((event) => event.id));
   const empty = rows.length === 0;
   return (
-    <div className="absolute inset-0 overflow-hidden rounded-[22px] border-ink text-paper" data-viz="marquee" role="img" aria-label={label} style={{ background: PALETTE.ink, fontFamily: "var(--font-display)" }} onClick={() => onSelect(null)}>
-      <div className="grid h-full grid-cols-[1fr] gap-[2%] p-[3%] sm:grid-cols-[1.7fr_1fr_0.8fr]">
+    <div className="@container absolute inset-0 overflow-hidden rounded-[22px] border-ink text-paper" data-viz="marquee" role="img" aria-label={label} style={{ background: PALETTE.ink, fontFamily: "var(--font-display)" }} onClick={() => onSelect(null)}>
+      <div className="grid h-full grid-cols-[1fr] gap-[2%] p-[3%] @2xl:grid-cols-[1.7fr_1fr_0.8fr]">
         <Column seconds={Math.max(20, rows.length * 2.2)} reduced={reducedMotion} className="h-full">
           {(empty ? [{ id: "ghost", rank: 1, name: snapshot.event.name, points: 0 }] : rows).map((row) => (
             <button
@@ -54,7 +56,7 @@ export default function Marquee({ snapshot, reducedMotion, label, selectedId, on
                 onSelect(empty ? null : row.id);
               }}
               className={`flex items-baseline gap-[0.4em] truncate py-[0.05em] text-left leading-none font-bold uppercase ${row.id === selectedId ? "text-sun" : lit.has(row.id) ? "text-mint" : ""}`}
-              style={{ fontSize: "clamp(22px, 3vw, 72px)", color: row.rank <= 3 ? PALETTE.sun : undefined, transition: "color 400ms" }}
+              style={{ fontSize: "clamp(22px, 3.3cqw, 72px)", color: row.rank <= 3 ? PALETTE.sun : undefined, transition: "color 400ms" }}
             >
               <span className="shrink-0 font-body text-[0.4em] font-extrabold tabular-nums opacity-60">{row.rank}</span>
               <span className="truncate">{row.name}</span>
@@ -62,14 +64,18 @@ export default function Marquee({ snapshot, reducedMotion, label, selectedId, on
             </button>
           ))}
         </Column>
-        <Column seconds={Math.max(18, pairs.length * 2.5)} reduced={reducedMotion} className="hidden h-full sm:block">
+        <Column seconds={Math.max(18, pairs.length * 2.5)} reduced={reducedMotion} className="hidden h-full @2xl:block">
           {(pairs.length === 0 ? [{ id: "none", a: copy.legendNew, b: copy.legendReconnection, kind: "new" as const }] : pairs).map((pair) => (
-            <div key={pair.id} className="truncate py-[0.15em] leading-none font-bold" style={{ fontSize: "clamp(18px, 2.2vw, 52px)", color: KIND_COLOR[pair.kind] }}>
-              {pair.a} <span className="text-paper">⇄</span> {pair.b}
+            // One name per line: "Ximena Salcedo ⇄ Carlos Ibarra" on one line lost the second name.
+            <div key={pair.id} className="py-[0.2em] leading-[1.05] font-bold" style={{ fontSize: "clamp(18px, 3cqw, 52px)", color: KIND_COLOR[pair.kind] }}>
+              <div className="truncate">{pair.a}</div>
+              <div className="truncate">
+                <span className="text-paper">⇄</span> {pair.b}
+              </div>
             </div>
           ))}
         </Column>
-        <div className="hidden min-w-0 flex-col justify-between sm:flex">
+        <div className="hidden min-w-0 flex-col justify-between @2xl:flex">
           {COUNTERS.map((key) => (
             <div key={key} className="min-w-0 border-t-4 border-paper/30 pt-[0.1em]">
               <div className="truncate leading-none font-bold tabular-nums" style={{ fontSize: "clamp(40px, 7vw, 150px)", animation: reducedMotion ? undefined : `breathe ${6 + COUNTERS.indexOf(key)}s ease-in-out infinite`, transformOrigin: "left center" }}>
