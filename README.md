@@ -125,11 +125,12 @@ Everything in this repository was built for the event, starting 2026-10-28 (see 
 - Live notifications (Realtime) and Web Push
 - Live big screen with nine rotating views, super-admin console, animated QR poster, test users and a seeded demo event
 - Referral codes with the golden cap, and connections outside an event (no points)
+- Demo mode (`API_MODE=demo`): every route answers from a fictional, always-running room without sign-in or keys ([routes contract](docs/contracts/demo-routes.md))
 - Full OpenAPI reference, Playwright e2e specs, unit tests, bilingual UI
 
 **Not built or still open**
 
-- The sign-in-free `/demo` page: its clock-driven scenario and fictional cast exist in `lib/demo/` ([contract](docs/contracts/demo-scenario.md)); the routes and the page do not yet
+- The `/demo` page that shows the phone and the big screen side by side; demo mode works without it
 - Organizer "ask your event" analyst (stretch goal) and recording with the other person's consent are out of the MVP cut order ([wiki/mvp-scope.md](wiki/mvp-scope.md))
 - Open product questions and known gaps are tracked in [wiki/open-questions.md](wiki/open-questions.md)
 

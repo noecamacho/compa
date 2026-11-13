@@ -6,7 +6,8 @@ All notable changes to COMPA are documented here. The format follows [Keep a Cha
 
 ### Added
 
-- Demo foundation (D1): a pure, clock-driven demo scenario with 150 fictional people in `lib/demo/` (a 120-second cycle, a new connection every 3 s), the base for a demo without sign-in. No route or page uses it yet ([contract](docs/contracts/demo-scenario.md)).
+- Demo mode (`API_MODE=demo`): the whole app opens without an account on a synthetic event that never stops. Scans, requests, voice notes and profile changes are kept in a cookie per visitor and move their points, the ranking and the big screen; the organizer console shows the room read-only. No database, Supabase or OpenAI key is needed (`docs/contracts/demo-routes.md`).
+- Demo foundation (D1): a pure, clock-driven demo scenario with 150 fictional people in `lib/demo/` (a 120-second cycle, a new connection every 3 s), the room that demo mode answers from ([contract](docs/contracts/demo-scenario.md)).
 - Connections outside an event: scanning someone who is at no running event sends a request that follows the same accept and notification flow but scores 0 points, earns no topics bonus, referral or badge and never reaches a live board. Migration `0014` makes `connections.event_id` nullable.
 - Referral codes and the golden cap: every person invites with their handle, inside or outside an event; a friend who joins pays the inviter +100 on the event the inviter is checked in to, and nothing outside one. Three friends unlock the golden cap, drawn over the monito and the photo at render time, and the person can hide it. Invites belong to the inviter's event (migrations `0012` and `0013`).
 - Animated QR poster per event: "Show QR poster" on the admin event page opens `/admin/events/<slug>/poster`, a full-screen bilingual call to action with confetti and a monito ticker around a large QR that never moves; reduced motion stops everything.

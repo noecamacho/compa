@@ -64,7 +64,7 @@ Each entry: context, decision, consequences, source.
 
 ### ADR-009 Seed data and a simulator keep the demo alive
 - Decision: about 150 `is_seed` attendees, about 300 connections, about 80 summaries, optional simulator, hide toggle (p. 3, p. 13, p. 18).
-- As built: `SEED_DEMO` seeds a demo event (`db/seed.ts`), and `lib/demo/` holds a pure, clock-driven scenario with 150 fictional people for a sign-in-free demo; its routes and page are not built yet ([demo scenario contract](docs/contracts/demo-scenario.md)).
+- As built: `SEED_DEMO` seeds a demo event (`db/seed.ts`), and `lib/demo/` holds a pure, clock-driven scenario with 150 fictional people for a sign-in-free demo ([demo scenario contract](docs/contracts/demo-scenario.md)); with `API_MODE=demo` every route answers from it plus one cookie per visitor ([demo routes contract](docs/contracts/demo-routes.md)). The `/demo` page is not built yet.
 
 ## Decided versus open
 
