@@ -1060,3 +1060,9 @@ export const liveScreen = {
   fullscreen: "Pantalla completa",
   back: "Volver",
 };
+
+// D4: the simulated camera of the demo mode (no camera or microphone is asked for).
+export const demoCapture = {
+  scanning: "Demo · cámara simulada",
+  everyoneMet: "Ya conociste a todos en la demo. Busca por nombre.",
+};

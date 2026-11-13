@@ -3,6 +3,7 @@ import {
   ApiError,
   pickMimeType,
   RecorderError,
+  silentDeps,
   startRecording,
   uploadForTranscript,
   type Interval,
@@ -152,6 +153,24 @@ describe("startRecording", () => {
 
   test("no MediaRecorder in this runtime rejects as unsupported", async () => {
     await expect(startRecording({ onStop: () => {} })).rejects.toMatchObject({ reason: "unsupported" });
+  });
+});
+
+describe("silentDeps (demo mode)", () => {
+  test("records without a microphone and hands over an empty webm file on stop", async () => {
+    const files: File[] = [];
+    const recording = await startRecording({ onStop: (f) => files.push(f) }, silentDeps);
+    expect(files).toHaveLength(0);
+    recording.stop();
+    expect(files[0]?.name).toBe("audio.webm");
+    expect(files[0]?.size).toBe(0);
+  });
+
+  test("cancel delivers no file", async () => {
+    const files: File[] = [];
+    const recording = await startRecording({ onStop: (f) => files.push(f) }, silentDeps);
+    recording.cancel();
+    expect(files).toHaveLength(0);
   });
 });
 

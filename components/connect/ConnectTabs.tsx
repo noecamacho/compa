@@ -17,10 +17,11 @@ import { ScanPanel } from "./ScanPanel";
 
 type Tab = "qr" | "scan";
 
-type Props = { me: MeT; qrSvg: string };
+// `demoScan`: the person a simulated scan finds in demo mode (see ScanPanel).
+type Props = { me: MeT; qrSvg: string; demoScan?: string | null };
 
 // 04 Conectar: "Mi QR" (show it) and "Escanear" (camera plus search by name). The dock stays at the bottom.
-export function ConnectTabs({ me, qrSvg }: Props) {
+export function ConnectTabs({ me, qrSvg, demoScan }: Props) {
   const { connect: copy, tour } = useCopy();
   const router = useRouter();
   const params = useSearchParams();
@@ -80,7 +81,7 @@ export function ConnectTabs({ me, qrSvg }: Props) {
         </div>
       ) : (
         <div key="scan" className="animate-fade-in">
-          <ScanPanel />
+          <ScanPanel demoScan={demoScan} />
         </div>
       )}
       <Tour id="connect" steps={tour.connect} />

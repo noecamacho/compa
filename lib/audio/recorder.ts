@@ -71,6 +71,30 @@ function browserDeps(): RecorderDeps | null {
   };
 }
 
+// Demo mode (docs/contracts/demo-routes.md): no microphone. The clock ticks as usual and stop hands over an empty file,
+// which the demo /api/transcribe answers with a prepared transcript.
+class SilentRecorder {
+  static isTypeSupported = (type: string) => type === "audio/webm";
+  readonly mimeType = "audio/webm";
+  state: RecordingState = "inactive";
+  ondataavailable: ((event: BlobEvent) => void) | null = null;
+  onstop: ((event: Event) => void) | null = null;
+  start() {
+    this.state = "recording";
+  }
+  stop() {
+    if (this.state === "inactive") return;
+    this.state = "inactive";
+    this.onstop?.(new Event("stop"));
+  }
+}
+
+export const silentDeps: RecorderDeps<StreamLike> = {
+  getUserMedia: async () => ({ getTracks: () => [] }),
+  Recorder: SilentRecorder,
+  interval: realInterval,
+};
+
 export function pickMimeType(
   isSupported: (type: string) => boolean = (type) => MediaRecorder.isTypeSupported(type),
 ): string {

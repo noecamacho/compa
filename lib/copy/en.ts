@@ -1043,3 +1043,8 @@ export const liveScreen: typeof es.liveScreen = {
   fullscreen: "Full screen",
   back: "Back",
 };
+
+export const demoCapture: typeof es.demoCapture = {
+  scanning: "Demo · simulated camera",
+  everyoneMet: "You met everyone in the demo. Search by name.",
+};
