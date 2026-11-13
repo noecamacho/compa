@@ -46,6 +46,7 @@ Connection ids are `demoConnectionId(castIndex)` and note ids `demoInteractionId
 
 - Scan target: in a server component, `nextScanTarget(readVisitor(cookieHeader), demoCast())` returns the first cast person the visitor has not met (or null), whose `handle` opens `/connect/<handle>`. Pass it to `ScanPanel` as a prop when `isDemoMode()`.
 - Voice note: skip the microphone and post any small file to `/api/transcribe`, or fill the transcript text directly; draft and approve work as above.
+- Built: `demoScanTarget()` (`lib/demo/capture.ts`) gives `/connect` the handle; `ScanPanel` sweeps 1.8 s, then shows that person's row (or "you met everyone" when null). `silentDeps` (`lib/audio/recorder.ts`) records without a microphone for `VoiceNoteButton` and `NoteEditor`, whose pages pass `demo={isDemoMode()}`. Tests: `e2e/demo/capture.spec.ts`, `lib/audio/recorder.test.ts`.
 
 ## Known limits
 
