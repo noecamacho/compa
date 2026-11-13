@@ -6,7 +6,7 @@ export const MOCK_ERROR_COOKIE = "compa-mock-error";
 
 const ERROR_CODE = /^[a-z][a-z0-9_]{0,63}$/;
 
-function cookieValue(cookieHeader: string, name: string): string | undefined {
+export function cookieValue(cookieHeader: string, name: string): string | undefined {
   const pair = cookieHeader
     .split(";")
     .map((part) => part.trim())

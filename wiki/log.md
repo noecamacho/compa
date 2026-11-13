@@ -274,6 +274,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - The demo is a separate Vercel project whose only variable is `API_MODE=demo`; `vercel.json` now runs `db:migrate:deploy` only for production builds whose `API_MODE` is neither `demo` nor `mock`, so the demo build never needs `DATABASE_URL`. Setup steps: `README.md` "Demo deployment (no keys)". Depends on the D2 demo routes for content.
 
+## [2026-11-12] change | Demo mode routes and the visitor cookie (D2)
+
+- `API_MODE=demo` answers every API route from the D1 room plus one validated cookie per visitor: no account, database, Supabase or OpenAI. A scan is accepted 4 s later and moves the visitor's points, ranking and link on the big screen; two cast people send requests; voice notes get a prepared transcript and a summary without AI; `/admin` reads the room and refuses writes. Interface for D3 and D4: [demo-routes](../docs/contracts/demo-routes.md).
+
 ## [2026-11-12] change | Invite QR is the invite link; no Instagram button
 
 - `/invite` shows a QR of `/i/<code>` (P2: the old button led to the personal `/u/<handle>` QR, which never counted as a referral) and drops the Instagram share button, which only repeated Más (P12). Pages updated: `DESIGN.md` row 12, `docs/flows/catalog.md` F-47.
