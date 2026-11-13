@@ -297,3 +297,7 @@ Checked relative links in index, log and connections page; the updated page rema
 ## [2026-11-12] change | Simulated scan and voice note in demo mode (D4)
 
 - In demo mode "Escanear" finds the next person the visitor has not met without the camera, and voice notes record without the microphone and get the prepared transcript. Other modes are unchanged. Contract: [demo-routes](../docs/contracts/demo-routes.md).
+
+## [2026-11-12] change | Invite QR is the invite link; no Instagram button
+
+- `/invite` shows a QR of `/i/<code>` (P2: the old button led to the personal `/u/<handle>` QR, which never counted as a referral) and drops the Instagram share button, which only repeated Más (P12). Pages updated: `DESIGN.md` row 12, `docs/flows/catalog.md` F-47.

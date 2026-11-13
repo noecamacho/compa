@@ -451,10 +451,10 @@ export const invite = {
   copy: "Copiar",
   copied: "Copiado",
   whatsapp: "WhatsApp",
-  instagram: "Instagram",
   more: "Más",
   footer: ["Tu amigo entra con LinkedIn, igual que tú, y gana +50 en su primera conexión.", "Cuentan solo amigos nuevos en COMPA."],
-  showQr: "Mostrar mi QR de invitación",
+  qrLabel: "QR de tu código de invitación",
+  qrHint: "Quien lo escanee con la cámara entra como tu invitado.",
   shareText: (url: string, eventName: string | null) =>
     eventName ? `Vente a ${eventName} en Compa, conectamos en el evento y nos quedamos con las redes: ${url}` : `Vente a Compa, conectamos en los eventos y nos quedamos con las redes: ${url}`,
   pointsEach: "+100 pts",
