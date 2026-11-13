@@ -1016,6 +1016,14 @@ export const datesAndPeople = {
   noMutual: "Todavía no tienen conexiones en común.",
 };
 
+// D2: what the demo mode's API answers in place of the AI (no OpenAI key on a demo deployment).
+export const demoApi = {
+  transcript: "Platicamos de cómo usan agentes para revisar código antes de cada entrega. Quedamos en que me comparte su guía de pruebas la próxima semana.",
+  noteTitle: (name: string) => `Plática con ${name}`,
+  nextStep: (name: string) => `Escribirle a ${name} para pedirle la guía`,
+  eventDescription: "Una noche de ejemplo que se repite cada dos minutos: 150 asistentes ficticios y una conexión nueva cada 3 segundos.",
+};
+
 // F2: the live screen's own controls.
 export const liveScreen = {
   fullscreen: "Pantalla completa",

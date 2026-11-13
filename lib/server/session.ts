@@ -4,10 +4,11 @@ import { PATHNAME_HEADER } from "../pathname-header";
 import { safeNext } from "../safe-next";
 import { authUserId } from "./supabase";
 
-// Whether the request belongs to a signed-in person. Mock mode has no sessions: everyone is Diego (lib/api/examples.ts).
+// Whether the request belongs to a signed-in person. Mock mode has no sessions: everyone is Diego (lib/api/examples.ts);
+// demo mode neither: everyone is the demo visitor of their own cookie (lib/demo/visitor.ts).
 // Throws (503) when Supabase Auth cannot answer, so a layout shows an error instead of sending a signed-in person to sign-in.
 export async function hasSession(): Promise<boolean> {
-  if (process.env.API_MODE === "mock") return true;
+  if (process.env.API_MODE === "mock" || process.env.API_MODE === "demo") return true;
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return false;
   return (await authUserId()) !== null;
 }

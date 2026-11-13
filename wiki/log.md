@@ -274,6 +274,10 @@ Checked relative links in index, log and connections page; the updated page rema
 
 - The demo is a separate Vercel project whose only variable is `API_MODE=demo`; `vercel.json` now runs `db:migrate:deploy` only for production builds whose `API_MODE` is neither `demo` nor `mock`, so the demo build never needs `DATABASE_URL`. Setup steps: `README.md` "Demo deployment (no keys)". Depends on the D2 demo routes for content.
 
+## [2026-11-12] change | Demo mode routes and the visitor cookie (D2)
+
+- `API_MODE=demo` answers every API route from the D1 room plus one validated cookie per visitor: no account, database, Supabase or OpenAI. A scan is accepted 4 s later and moves the visitor's points, ranking and link on the big screen; two cast people send requests; voice notes get a prepared transcript and a summary without AI; `/admin` reads the room and refuses writes. Interface for D3 and D4: [demo-routes](../docs/contracts/demo-routes.md).
+
 ## [2026-11-12] change | Big screen and Home card fit (F2)
 
 - The Home card drops the view chips and the race; the big screen gains full screen and, from the Home card, a way back; phone chips are 44 px; the five leaders fit at 1280×720; Type names fit at 1920. Page updated: [live-dashboard](live-dashboard.md).

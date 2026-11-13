@@ -999,6 +999,14 @@ export const datesAndPeople: typeof es.datesAndPeople = {
   noMutual: "You have no mutual connections yet.",
 };
 
+// D2: what the demo mode's API answers in place of the AI (no OpenAI key on a demo deployment).
+export const demoApi: typeof es.demoApi = {
+  transcript: "We talked about how they use agents to review code before every release. They will share their testing guide with me next week.",
+  noteTitle: (name) => `Chat with ${name}`,
+  nextStep: (name) => `Message ${name} to ask for the guide`,
+  eventDescription: "A sample evening that replays every two minutes: 150 fictional attendees and a new connection every 3 seconds.",
+};
+
 // F2: the live screen's own controls.
 export const liveScreen: typeof es.liveScreen = {
   fullscreen: "Full screen",

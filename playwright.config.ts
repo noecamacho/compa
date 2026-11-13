@@ -6,6 +6,7 @@ const LOCAL_URL = "http://localhost:3000";
 const baseURL = process.env.E2E_BASE_URL ?? LOCAL_URL;
 const isProduction = isProductionUrl(baseURL);
 const isMockServer = process.env.API_MODE === "mock";
+const isDemoServer = process.env.API_MODE === "demo";
 
 const LOCALES = [
   { id: "es", locale: "es-MX", timezoneId: "America/Mexico_City" },
@@ -38,11 +39,13 @@ const reducedMotion: Project = {
   use: { ...chrome, ...mobile, locale: "es-MX", extraHTTPHeaders: { "Accept-Language": "es-MX" }, reducedMotion: "reduce" },
 };
 
-// Production only runs read-only @prod specs; a mock-mode server cannot serve real-mode (@real) specs.
+// Production only runs read-only @prod specs; a mock-mode server cannot serve real-mode (@real) specs; a demo server
+// answers from its seeded room (lib/demo/respond.ts), so it runs the @demo specs and nothing else.
 function tagFilter(): Pick<Parameters<typeof defineConfig>[0], "grep" | "grepInvert"> {
   if (isProduction) return { grep: /@prod/ };
-  if (isMockServer) return { grepInvert: /@real/ };
-  return { grepInvert: /@mock/ };
+  if (isDemoServer) return { grep: /@demo/ };
+  if (isMockServer) return { grepInvert: /@real|@demo/ };
+  return { grepInvert: /@mock|@demo/ };
 }
 
 export default defineConfig({
@@ -64,8 +67,8 @@ export default defineConfig({
         // CI serves a production build: `next dev` compiles each route on its first hit, too slow for the full matrix.
         command: process.env.CI ? "bun run build && bun run start" : "bun run dev",
         url: LOCAL_URL,
-        // A running dev server may lack API_MODE=mock, so mock runs always start their own.
-        reuseExistingServer: !process.env.CI && !isMockServer,
+        // A running dev server may lack API_MODE=mock or demo, so those runs always start their own.
+        reuseExistingServer: !process.env.CI && !isMockServer && !isDemoServer,
         timeout: 600_000,
         env: { API_MODE: process.env.API_MODE ?? "" },
       },
